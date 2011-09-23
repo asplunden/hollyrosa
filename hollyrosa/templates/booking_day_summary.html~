@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Booking Summary</title>
+  
+  <script type="text/javascript" src="${tg.url('/public/scripts/std.js')}" />
+</head>
+
+<body>
+
+    <h2>Booking Summary</h2>
+  
+  
+  <table>
+
+    <tr py:for="slot_row in slot_rows" class="tr_booking_day_overview_slot_row" style="background: ${slot_row.activity.bg_color};">
+        <td class="td_booking_day_overview_activity"><a href="${tg.url('view_activity', activity_id=slot_row.activity.id)}">${slot_row.activity.title}</a></td>
+        <td class="td_booking_day_overview_slots">${len(bookings.get(slot_row.id, list()))}</td>
+     
+	</tr>
+
+</table>  
+
+<p>Totals: ${totals}</p>
+</body>
+</html>

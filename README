@@ -1,0 +1,17 @@
+paster serve --reload production_master.ini
+
+ * You may skip --reload
+
+ * Change  managepass
+
+ * you need to install python-mysql and libmysql-dev
+
+ * Plus tw.dynforms and a few more. Thats about it.
+
+ * Oh, validators.py needs to be copied to the correct place
+
+TODO:
+ * remove deug=true
+ * generate days for 2011
+ * remove authentication tab
+

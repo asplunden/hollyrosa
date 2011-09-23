@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright 2010, 2011 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - ${activity_group} ${booking_day.date.strftime("%A %d %B %Y")}</title>
+  
+  <script type="text/javascript" src="${tg.url('/public/scripts/std.js')}" />
+</head>
+
+<body>
+
+
+    
+    <h2>${activity_group} ${booking_day.date.strftime("%A %d %B %Y")}</h2>
+    
+    
+
+  
+  
+  <table>
+  <tr class="tr_booking_day_overview_slot_row"><td class="td_booking_day_overview_activity">Aktivitet</td><td class="td_booking_day_overview_activity">FM</td><td class="td_booking_day_overview_activity">EM</td><td class="td_booking_day_overview_activity">Kväll</td><td class="td_booking_day_overview_activity">After Hours</td></tr>
+    
+    <tr py:for="slot_row in slot_rows" class="tr_booking_day_overview_slot_row" style="background: ${slot_row.activity.bg_color};">
+        <td class="td_booking_day_overview_activity"><a href="${tg.url('view_activity', activity_id=slot_row.activity.id)}">${slot_row.activity.title}</a> <span py:if="0 != slot_row.activity.capacity">[${str(slot_row.activity.capacity)}]</span></td>
+        <td py:for="slot_position in slot_row.slot_row_position" class="td_booking_day_overview_slots ${['','slot_row_position_blocked'][blockings_map.has_key(slot_position.id)]}">
+        
+            <!-- we may have several slot bookings-->
+            <div py:if="bookings.has_key(slot_position.id)">
+            
+            
+                <div py:for="b in bookings[slot_position.id]" style="border-bottom:1px dashed #ccc;">
+                <span class="workflow_state_${b.booking_state}"><img src="${tg.url('/images/'+workflow_img_mapping[str(b.booking_state)])}" alt="workflow_state_${b.booking_state}" class="fladan_day_printout_img" /><a href="${tg.url('/visiting_group/view_bookings_of_name', name=b.visiting_group_name)}">${b.visiting_group_name}</a></span><br/><a href="${tg.url('view_booked_booking', id=b.id, return_to_day_id=booking_day.id)}" style="padding-left:2em;">${b.cache_content}</a>
+                
+                
+                </div>
+            </div>
+            
+            <div py:if="blockings_map.has_key(slot_position.id)">&nbsp;</div>
+            
+            
+            
+        </td>
+    </tr> 
+
+
+</table>  
+
+</body>
+</html>

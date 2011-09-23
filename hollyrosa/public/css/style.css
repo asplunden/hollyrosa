@@ -1,0 +1,704 @@
+/**
+ * Copyright 2010, 2011 Martin Eliasson
+ *
+ * This file is part of Hollyrosa
+ *
+ * Hollyrosa is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Hollyrosa is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+ **/
+
+html {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	text-align: left;
+	margin: 0 auto;
+	padding: 0;
+	font-size: 12px;
+	font-family:"Lucida Grande","Lucida Sans Unicode",geneva,verdana,sans-serif;
+}
+
+a {
+	color: #286571;
+    text-decoration: None
+}
+
+a:hover {
+    text-decoration: underline;
+    }
+
+#header {
+	margin: 0px 0px 0px 0px;
+	background: #286571;
+}
+
+#header h1 {
+	padding: 0;
+	margin: 0;
+	padding-top: 5px;
+	padding-left: 5px;
+	color: #fff;
+	position: relative;
+	font-size: 22px;
+}
+
+#header h1 .subtitle {
+	font-size: 60%;
+	position: absolute;
+	left: 240px;
+	top: 70px;
+}
+
+ul#mainmenu {
+	margin: 0;
+	padding: 0 5px;
+	background: #286571;
+    border-bottom: 4px solid #286571;
+    border-top: 4px solid #286571;
+	height: 16px; 
+}
+
+ul#mainmenu li {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	display: inline;
+	float: left;
+}
+
+ul#mainmenu li a {
+	color: #ccc;
+	float: left;
+	height: 20px;
+	display: block;
+	line-height: 16px;
+	vertical-align: middle;
+	padding: 0 10px;
+	font-size: 11px;
+	 text-decoration: none; 
+    
+}
+
+
+ul#mainmenu li span {
+	color: #ccc;
+	float: left;
+	height: 20px;
+	display: block;
+	line-height: 16px;
+	vertical-align: middle;
+	padding: 0 10px;
+	font-size: 11px;
+	 text-decoration: none; 
+    
+}
+
+ul#mainmenu li a:hover, ul#mainmenu li a.active, ul#mainmenu li span:hover {
+	background: #fff;
+    color: #286571;
+}
+
+
+ul#mainmenu li.first a:hover, ul#mainmenu li.first a.active {
+}
+
+
+ul#mainmenu li.loginlogout
+{
+    float: right;
+    right: 10px;
+}
+
+
+#content {
+	/* background: #fff url('../images/contentbg.png') left bottom no-repeat; */
+	margin : 0 10px 10px 10px;
+	padding: 0 10px;
+	overflow: hidden;
+}
+
+#content a {
+	color: #286571;
+    text-decoration: None
+}
+
+#content a:hover {
+    text-decoration: underline;
+    }
+
+
+#content .currentpage {
+	margin-top: 0;
+}
+
+/* Login form*/
+
+#loginform
+{
+    text-align: center;
+}
+
+form.loginfields
+{
+    text-align: left;
+    width: 270px;
+    background: url('../images/loginbg.png') top left no-repeat;
+    padding: 0;
+    margin: 0 auto;
+    border: 0;
+}
+
+form.loginfields h2
+{
+    font-size: 16px;
+    float: left;
+    padding: 0;
+    margin: 5px;
+    margin-top: 0;
+    background: url('../images/loginheader-left.png') top left no-repeat;
+}
+
+* html form.loginfields h2
+{
+    margin-left: 3px;
+    width: 80px;
+    text-align: center;
+}
+
+form.loginfields h2 span
+{
+    background: url('../images/loginheader-right.png') right top no-repeat;
+    height: 30px;
+    line-height: 30px;
+    display: block;
+    font-size: 100%;
+    font-weight: normal;
+    color: #fff;
+    padding: 0 10px;
+}
+
+*+html form.loginfields h2 span
+{
+    padding: 0 20px;
+}
+
+form.loginfields label
+{
+    clear: left;
+    float: left;
+    margin-top: 5px;
+    margin-left: 10px;
+    width: 65px;
+    line-height: 31px;
+    vertical-align: middle;
+}
+
+form.loginfields input.text
+{
+    float: left;
+    margin-left: 10px;
+    margin-top: 5px;
+    width: 165px;
+    height: 21px;
+    padding: 5px;
+    border: 0;
+    background: url('../images/inputbg.png') top left no-repeat;
+    color: #fff;
+}
+
+form.loginfields input#submit
+{
+    background: url('../images/loginbottombg.png') bottom left no-repeat;
+    width: 270px;
+    height: 61px;
+    border: 0;
+    margin-top: 10px;
+    color: #fff;
+    padding: 10px 140px 20px 10px;
+}
+
+* html form.loginfields input#submit
+{
+    clear: both;
+    margin-left: -10px;
+}
+
+/* Sidebar */
+.sidebar {
+  border: 1px solid #cce;
+  background-color: #eee;
+  margin: 0.5em;
+  margin-left: 1.5em;
+  padding: 1em;
+  float: right;
+  width: 200px;
+  font-size: 88%;
+}
+
+.sidebar h2 {
+  margin-top: 0;
+  color: black;
+}
+
+.sidebar ul {
+  margin-left: 1.5em;
+  padding-left: 0;
+}
+
+
+
+#sb_top {
+  clear: right;
+}
+
+#sb_bottom {
+  clear: right;
+}
+
+#getting_started {
+  margin-left: 20px;
+}
+
+#getting_started_steps a {
+  text-decoration: none;
+}
+
+#getting_started_steps a:hover {
+  text-decoration: underline;
+}
+
+#getting_started_steps li {
+  margin-bottom: 0.5em;
+}
+
+/* Other and footer */
+#footer {
+	background: #fff;
+	padding: 10px;
+	color:#888888;
+	font-size:90%;
+}
+.flogo {
+	float:left;
+	margin-bottom:0px;
+	padding-left:20px;
+	padding-right:20px;
+	padding-top:0px;
+}
+.foottext p {
+	margin: 0; padding: 0;
+}
+.code {
+font-family:monospace;
+font-size:127%;
+}
+span.code {
+background:#EEEEEE none repeat scroll 0% 0%;
+font-weight:bold;
+}
+#flash, .notice {
+font-size:120%;
+font-weight:bolder;
+margin:0pt auto 0.5em;
+width:680px;
+}
+#flash div, .notice {
+padding:20px 15px 20px 65px;
+}
+#flash .ok {
+background:#d8ecd8 url('../images/ok.png') no-repeat scroll 10px center;
+}
+#flash .warning {
+background:#fff483 url('../images/warning.png') no-repeat scroll 10px center;
+}
+#flash .error {
+background:#f9c5c1 url('../images/error.png') no-repeat scroll 10px center;
+}
+#flash .alert,
+#flash .info {
+background:#EEEEFF url('../images/info.png') no-repeat scroll 10px center;
+}
+.notice {
+background:#EEEEFF url('../images/info.png') no-repeat scroll 10px center;
+}
+.fielderror {
+color:red;
+font-weight:bold;
+}
+div.clearingdiv {
+clear:both;
+}
+
+
+
+div.booking_day_overview {
+    background: #eee;
+    padding: 2px;
+}
+
+
+div.booking_day_overview_slot_row {
+    display: block;
+    padding:0.2em;
+    margin:0em;
+    border-bottom: 1px solid #ccc;
+}
+
+tr.tr_booking_day_overview_slot_row {
+    
+    padding:0.2em;
+    margin:0em;
+    border: 1px solid #000;
+}
+
+
+div.booking_day_overview_activity {
+    display: inline-block;
+    width: 12%;
+    padding:0em;
+    top: 0%;
+    border-right: 1px solid #ccc;
+    
+}
+
+td.td_booking_day_overview_activity {
+    
+    
+    padding:0em;
+    top:0px;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+}
+
+
+div.booking_day_overview_slots {
+    display: inline-block;
+    width: 21%;
+    padding: 0.1em;
+    top:0px;
+    border-right: 1px solid #ccc;
+}
+
+td.td_booking_day_overview_slots {
+    padding: 0.1em;
+    top:0px;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+}
+
+div.slot_row_position_blocked {
+    background: #eee;
+    background-image:url('../images/padlock.png');
+    background-repeat:no-repeat;
+}
+
+
+td.sunday {
+background: #f00;
+}
+
+div.note {
+    background: #ffe;
+    padding:1em;
+    width:40em;
+    border-top: 1px solid #eee;
+    border-left: 1px solid #eee;
+    border-bottom:1px solid #ccc;
+    border-right: 1px solid #ccc;
+    margin-top:1em;
+    margin-bottom: 1em;
+}
+
+/*** HISTORY TABLE ***/
+
+table.data {
+    font-size: 90%;
+}
+
+table.data th {
+    padding:.2em;
+    font-weight: bold;
+    background: #ddd;
+}
+
+table.data  tr:hover {
+    background:#ffd;
+}
+
+td.data  {
+    padding:.2em;
+    border-bottom: 1px solid #ddd;
+}
+
+td.info {
+    color:#666;
+}
+
+td.info a {
+    text-decoration:None;
+    color:inherit;
+}
+
+td.info a:hover {
+    text-decoration:underline;
+    color:inherit;
+}
+
+td.timestamp  {
+    color: #666;
+    font-size:80%;
+}
+
+
+
+/*** mapping of op_class of change record into different colors ***/
+.change_op_1  { color: #448; }
+.change_op_2  { color: #288; }
+.change_op_3 { color: #448; }
+.change_op_4 { color: #060; }
+.change_op_5 { color: #666; }
+.change_op_6 { color: #500; }
+.change_op_7 { color: #666; }
+.change_op_8 { color: #666; }
+.change_op_9 { color: #860; }
+.change_op_10  { color: #860; }
+.change_op_11  { color: #620; }
+.change_op_12  { color: #860; }
+
+
+/*** Workflow state CSS ***/
+
+.workflow_state_0  { 
+    color: #884; 
+    background-image:url('../images/sheep.png');
+    background-repeat:no-repeat;
+    padding-left: 2em;
+    font-weight:bold;
+    }
+.workflow_state_10  {
+    color: #448; 
+    background-image:url('../images/paper_to_sign.png');
+    background-repeat:no-repeat;
+    padding-left: 2em;
+    font-weight:bold;
+    }
+
+.workflow_state_20  {
+    color: #484; 
+    background-image:url('../images/check_mark.png');
+    background-repeat:no-repeat;
+    padding-left: 2em;
+    font-weight:bold;
+    }
+
+.workflow_state_-10  {
+    color: #844; 
+    font-weight:bold;
+    background-image:url('../images/alert.png');
+    background-repeat:no-repeat;
+    padding-left: 2em;
+    }
+    
+.workflow_state_unscheduled  {
+    color: #666; 
+    font-weight:bold;
+    background-image:url('../images/alert.png');
+    background-repeat:no-repeat;
+    padding-left: 2em;
+    }
+
+
+/*** GENERAL MENU ****/
+ul.any_menu {
+    list-style-type: circle;   
+    
+    margin: 0px;
+    padding: 0.2em;
+}
+
+ul.any_menu li {
+    display:inline;
+    /* background-image:url('http://media.disqus.com/images/embed/email.png');
+    background-repeat:no-repeat; */
+    padding-left: 10px;
+}
+
+
+ul.any_menu li a{
+    text-decoration:inherit;
+}
+
+
+
+
+/*** MINI MENU ***/
+
+ul.context_inline_menu {
+    padding: 0px;
+    font-size:90%;
+    
+}
+
+ul.context_inline_menu li {
+    visibility: hidden;
+}
+
+ul.context_inline_menu:hover li {
+    visibility: visible;
+}
+
+ul.context_inline_menu ul {
+    visibility: hidden;
+}
+
+ul.context_inline_menu:hover ul {
+    visibility: visible;
+}
+
+/*** dropdown of minimenu ***/
+ul.context_dropdown_menu {
+    background-color: transparent;
+}
+
+ul.context_dropdown_menu li{
+    visibility:hidden;
+}
+
+ul.context_dropdown_menu:hover li{
+    visibility:visible;
+}
+
+
+/*** DROPDOWN MENU***/
+
+ul.context_dropdown_menu {
+    margin-left: 1em;
+    font-size:90%;
+    position:absolute;
+    background:#fff;
+    display: inline;
+}
+
+ul.context_dropdown_menu:hover {
+}
+
+ul.context_dropdown_menu li {
+    visibility: hidden;
+    display:none;
+    position:relative;
+    background: #eee;
+    z-index:10;
+    border-left: 4px solid #bbb;
+    top:-10px;
+    padding-left:1em;
+    padding-top:0.2em;
+    padding-bottom:0.2em;
+    }
+
+ul.context_dropdown_menu:hover li {
+    visibility: visible;
+    display:block;
+}
+
+ul.context_dropdown_menu li:hover { 
+    background: #f8f8f0;
+}
+
+.edit_name {
+    font-size: 150%;
+}
+
+
+#booking_day_hide_slot_rows_control {
+    float:right;
+    display: inline;
+}
+
+
+
+ul.booking_day_hide_slot_rows_control {
+    list-style-type: none;   
+    margin: 0px;
+    padding: 0.2em;
+}
+
+ul.booking_day_hide_slot_rows_control li{
+    display:none;
+    visibility: hidden;
+}
+
+form.bday_hide_form:hover ul li {
+    display:block;
+    visibility: visible;
+}
+
+#bday_hide_form {
+    background: #f8f8f8;
+}
+
+
+a.ag_anchor {
+    position: relative;
+    top: -10em;
+}
+
+#navigation_calendar {
+    }
+
+/* fix fladan day printout */
+img.fladan_day_printout_img {
+    visibility: hidden;
+    display:none;
+    }
+    
+/* booking day uncheduled bookings */
+    
+li.unscheduled_booking {
+    color: #888;
+}
+
+li.unscheduled_booking:hover {
+    color: #000;
+    background: #f8f8f8;
+}
+
+li.unscheduled_booking span.group_info {
+    font-weight: bold;
+}
+
+li.unscheduled_booking span.date_info {
+}
+
+li.unscheduled_booking span.requested_date {
+    
+}
+
+
+/*** PROBLEM SEVERITY COLORING ***/
+
+tr.problem_severity_1 {
+  color: #999;
+  background-color: #ffe;
+}
+
+tr.problem_severity_0 {
+  color: #999;
+  background-color: #fff;
+}
+
+tr.problem_severity_10 {
+  background-color: #fee;
+}

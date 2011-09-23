@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright 2010, 2011 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Viewing All Bookings for ${name}</title>
+</head>
+
+<body>
+    <h2>Viewing all bookings for ${name}</h2>
+    
+    <ul py:if="visiting_group_id!=None" class="any_menu context_inline_menu" style="padding-left:2em;">
+        <li><a href="${tg.url('/visiting_group/show_visiting_group', id=visiting_group_id)}">show</a></li>
+        <li><a href="${tg.url('/visiting_group/edit_visiting_group', id=visiting_group_id)}">edit</a></li>
+        <li><a href="${tg.url('/booking/edit_booking', visiting_group_id=visiting_group_id)}">new booking request</a></li>
+    </ul>
+                
+                
+                
+        <div py:for="cb in clustered_bookings">
+          <h3><a href="${tg.url('/booking/view_activity', activity_id=cb[0].activity.id)}">${cb[0].activity.title}</a></h3>
+                <ul py:if="'pl' in request.identity['groups']" class="any_menu context_inline_menu" style="padding-left:2em;">
+                    <li><a href="${tg.url('/workflow/set_state', booking_id=cb[0].id, state=10, all=1)}">booked ALL</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', booking_id=cb[0].id, state=20, all=1)}">approve ALL</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', booking_id=cb[0].id, state=-10, all=1)}">disapprove ALL</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', booking_id=cb[0].id, state=0, all=1)}">preliminary ALL</a></li>
+                    <!--<li><a href="${tg.url('/booking/edit_booked_booking', return_to_day_id=cb[0].booking_day_id, id=cb[0].id)}">edit</a></li>
+                    <li><a href="${tg.url('/booking/view_booked_booking', return_to_day_id=cb[0].booking_day_id, id=cb[0].id)}">view</a></li>
+                    <li><a href="${tg.url('/booking/unschedule_booking', booking_day_id=cb[0].booking_day_id, booking_id=cb[0].id)}">unschedule</a></li> -->
+                </ul>
+
+            <div style="margin-left:2em;">
+                <div class="note"> ${getRenderContent(cb[0])}</div>
+           </div>
+
+
+          <div py:for="b in cb">            
+            <div py:if="None != b.booking_day">
+                
+                </div>
+        
+        
+            <div py:if="None != b.booking_day" style="margin-left:2em;">
+                <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day',day_id=b.booking_day.id)}">${b.booking_day.date.strftime('%A %d %B')}</a> <b py:if="b.slot_row_position !=None">${b.slot_row_position.time_from}</b> to <b py:if="b.slot_row_position !=None">${b.slot_row_position.time_to}</b>  ${workflow_map[b.booking_state]}</span>
+                
+                <ul class="any_menu context_inline_menu" style="padding-left:2em;">
+                    <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=10)}">booked</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=20)}">approve</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=-10)}">disapprove</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=0)}">preliminary</a></li>
+                    <li><a href="${tg.url('/booking/edit_booked_booking', return_to_day_id=b.booking_day_id, id=b.id)}">edit</a></li>
+                    <li><a href="${tg.url('/booking/view_booked_booking', return_to_day_id=b.booking_day_id, id=b.id)}">view</a></li>
+                    <li><a href="${tg.url('/booking/unschedule_booking', booking_day_id=b.booking_day_id, booking_id=b.id)}">unschedule</a></li>
+                </ul>
+                
+                
+            </div>
+            <div py:if="None == b.booking_day" style="margin-left:2em;">
+                <span class="workflow_state_unscheduled">unscheduled</span>
+                <ul class="any_menu context_inline_menu" style="padding-left:2em;">
+                    
+                    <li><a href="${tg.url('/booking/edit_booking', id=b.id)}">edit</a></li>
+                    <li><a href="${tg.url('/booking/view_booked_booking', id=b.id)}">view</a></li>
+                    
+                </ul>
+            </div>
+       
+        </div>
+	</div>
+    
+</body>
+</html>

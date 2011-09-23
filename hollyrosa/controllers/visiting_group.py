@@ -1,0 +1,381 @@
+# -*- coding: utf-8 -*-
+"""
+Copyright 2010, 2011 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+"""
+
+from tg import expose, flash, require, url, request, redirect,  validate
+from repoze.what.predicates import Any, is_user, has_permission
+from formencode import validators
+
+from hollyrosa.lib.base import BaseController
+from hollyrosa.model import DBSession, metadata,  booking
+from sqlalchemy import and_
+import datetime
+
+#...this can later be moved to the VisitingGroup module whenever it is broken out
+from tg import tmpl_context
+
+
+
+from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
+from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
+from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
+from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
+from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
+from hollyrosa.controllers.common import workflow_map,  DataContainer,  getRenderContent, computeCacheContent
+
+__all__ = ['VisitingGroup']
+
+
+class VisitingGroup(BaseController):
+
+    @expose('hollyrosa.templates.visiting_group_view_all')
+    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def view(self, url):
+        visiting_groups = DBSession.query(booking.VisitingGroup).order_by('fromdate').all()
+        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
+        v_group_map = self.makeVGroupMap(visiting_group_names)        
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
+        
+        
+
+    def makeVGroupMap(self, visiting_group_names):
+        v_group_map = dict()
+        for b in DBSession.query(booking.Booking.visiting_group_name).all():
+            if b not in visiting_group_names:
+                v_group_map[b] = 1
+
+        return v_group_map
+        
+        
+    @expose('hollyrosa.templates.visiting_group_view_all')
+    @validate(validators={'fromdate':validators.DateValidator(not_empty=False), 'todate':validators.DateValidator(not_empty=False)})
+    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def view_date_range(self,  fromdate=None,  todate=None):
+        visiting_groups = DBSession.query(booking.VisitingGroup).filter(and_('todate <= \''+todate+'\'', 'fromdate >= \''+fromdate+'\'')).order_by('fromdate').all()        
+        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
+        v_group_map = self.makeVGroupMap(visiting_group_names)        
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
+
+        
+    @expose('hollyrosa.templates.visiting_group_view_all')
+    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def view_all(self):
+        visiting_groups = DBSession.query(booking.VisitingGroup).order_by('fromdate').all()
+        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
+        v_group_map = self.makeVGroupMap(visiting_group_names)        
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
+
+
+    @expose('hollyrosa.templates.visiting_group_view_all')
+    @validate(validators={'boknstatus':validators.String(not_empty=False)})
+    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def view_boknstatus(self,  boknstatus=None):
+        boknstatus=boknstatus[:4] # amateurish quick sanitation
+        visiting_groups = DBSession.query(booking.VisitingGroup).join(booking.VistingGroupProperty).filter(and_('property=\'boknstatus\'', 'value=\''+boknstatus+'\'')).order_by('visiting_group_fromdate').all()
+                
+        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
+        v_group_map = self.makeVGroupMap(visiting_group_names)        
+        
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
+
+        
+    @expose('hollyrosa.templates.visiting_group_view_all')
+    @validate(validators={'period':validators.String(not_empty=False)})
+    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def view_period(self,  period=None):
+
+        if period == '1an':
+            visiting_groups = DBSession.query(booking.VisitingGroup).filter('fromdate < \'2011-07-17\'').order_by('fromdate').all()
+        elif period == '2an':
+            visiting_groups = DBSession.query(booking.VisitingGroup).filter('todate > \'2011-07-16\'', ).order_by('fromdate').all()
+
+        else:
+            visiting_groups = DBSession.query(booking.VisitingGroup).order_by('fromdate').all()
+        
+        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
+        v_group_map = self.makeVGroupMap(visiting_group_names)        
+        
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
+
+
+    @expose('hollyrosa.templates.visiting_group_view_all')
+    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group and their properties properties'))
+    def view_today(self):
+        at_date = datetime.datetime.today().strftime('%Y-%m-%d')
+        visiting_groups = DBSession.query(booking.VisitingGroup).filter(and_('todate >= \''+at_date+'\'', 'fromdate <= \''+at_date+'\'')).order_by('fromdate').all()
+        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
+        v_group_map = self.makeVGroupMap(visiting_group_names)        
+        
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
+
+
+    @expose('hollyrosa.templates.visiting_group_view_all')
+    @validate(validators={'at_date':validators.DateValidator(not_empty=False)})
+    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group and their properties properties'))
+    def view_at_date(self,  at_date=None):
+        visiting_groups = DBSession.query(booking.VisitingGroup).filter(and_('todate >= \''+at_date+'\'', 'fromdate <= \''+at_date+'\'')).order_by('fromdate').all()
+        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
+        v_group_map = self.makeVGroupMap(visiting_group_names)        
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
+
+
+    @expose("json")
+    @validate(validators={'id':validators.Int})
+    def show_visiting_group_data(self,  id=None,  **kw):
+        
+        properties=[]
+        if None == id:
+            visiting_group = DataContainer(name='',  id=None,  info='')
+            bookings=[]
+        elif id=='':
+            visiting_group = DataContainer(name='',  id=None,  info='')
+            bookingS=[]
+        else:
+            visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+str(id)).one()
+        
+            properties=[p for p in visiting_group.visiting_group_property]
+            
+        #visiting_group.properties=properties
+        return dict(visiting_group=visiting_group, properties=properties)
+
+
+    @expose('hollyrosa.templates.show_visiting_group')
+    @validate(validators={'id':validators.Int})
+    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def show_visiting_group(self,  id=None,  **kw):
+        
+        if None == id:
+            visiting_group = DataContainer(name='',  id=None,  info='')
+            bookings=[]
+        elif id=='':
+            visiting_group = DataContainer(name='',  id=None,  info='')
+            bookingS=[]
+        else:
+            visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+str(id)).one()
+
+            bookings = DBSession.query(booking.Booking).filter('visiting_group_name=\'' + visiting_group.name + '\'').all()
+        return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent)
+
+
+    @expose('hollyrosa.templates.edit_visiting_group')
+    @validate(validators={'id':validators.Int})
+    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change visiting group properties'))
+    def edit_visiting_group(self,  id=None,  **kw):
+        tmpl_context.form = create_edit_visiting_group_form
+        
+        new_empty_visiting_group_property = [DataContainer(property='spar',  value='0',  unit=u'spår',  description=u'antal deltagare 8 till 9 år'), 
+                                             DataContainer(property='uppt',  value='0',  unit=u'uppt',  description=u'antal deltagare 10 till 11 år'), 
+                                             DataContainer(property='aven',  value='0',  unit=u'aven',  description=u'antal deltagare 12 till 15 år'), 
+                                             DataContainer(property='utm',  value='0',  unit=u'utm',  description=u'antal deltagare 16 till 18 år'),
+                                             DataContainer(property='refnr',  value='',  unit=u'',  description=u'referensnummer'),
+                                             DataContainer(property='boknstatus',  value='ny',  unit=u'',  description=u'bokningsstatus')]
+ 
+ 
+        if None == id:
+            visiting_group = DataContainer(name='',  id=None,  info='',  visiting_group_property=new_empty_visiting_group_property)
+        elif id=='':
+            visiting_group = DataContainer(name='',  id=None,  info='')
+        else:
+            visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+str(id)).one()
+        return dict(visiting_group=visiting_group)
+        
+        
+
+    @expose()
+    @validate(create_edit_visiting_group_form, error_handler=edit_visiting_group)
+    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change visiting group properties'))
+    def save_visiting_group_properties(self,  id=None,  name='', info='',  fromdate=None,  todate=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_property=None, camping_location='', boknr='', boknstatus=0):
+
+        if len(info)>8192:
+            raise IOError, "I appologize for this dirty method of blocking the db from getting a too big text chunk, but I cannot let this propagate to the db."
+
+        if None == id:
+            visiting_group = booking.VisitingGroup()
+            is_new = True
+        else:
+            visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+ str(id)).one()
+            is_new= False
+            
+        visiting_group.name = name
+        visiting_group.info = info
+        visiting_group.fromdate = fromdate
+        visiting_group.todate = todate
+        visiting_group.contact_person = contact_person
+        visiting_group.contact_person_email = contact_person_email
+        visiting_group.contact_person_phone = contact_person_phone
+        visiting_group.boknr = boknr
+        visiting_group.boknstatus = boknstatus
+        visiting_group.camping_location = camping_location
+        
+        
+        if is_new:
+            DBSession.add(visiting_group)
+            
+        #...remove non-used params !!!! Make a dict and see which are used, remove the rest
+        unused_params = {}
+        for k in visiting_group.visiting_group_property:
+            unused_params[str(k.id)] = k
+        
+        
+        for param in visiting_group_property:
+            is_new_param = False
+            if param['property'] != '' and param['property'] != None:
+                if param['id'] == '':
+                    raise IOError
+                    is_new_param = True
+                    new_param = booking.VistingGroupProperty()
+                
+                elif param['id'] == None:
+                    is_new_param = True
+                    new_param = booking.VistingGroupProperty()
+                
+                else:
+                    new_param = DBSession.query(booking.VistingGroupProperty).filter('id='+ str(param['id'])).one()
+                    
+                    del unused_params[param['id']]
+                    
+                
+                new_param.property = param['property']
+                new_param.value = param.get('value','')
+                new_param.description = param.get('description','')
+                new_param.unit = param.get('unit','')
+                new_param.fromdate = param['fromdate']
+                new_param.todate = param['todate']
+                
+                #...how to add param to visiting group?
+                new_param.visiting_group = visiting_group
+                
+                if is_new_param:
+                    DBSession.add(new_param)
+                
+        for unused in unused_params.values():
+            DBSession.delete(unused)
+        
+        
+        #...now we have to update all cached content, so we need all bookings that belong to this visiting group
+        bookings = DBSession.query(booking.Booking).filter('visiting_group_name=\'' + name + '\'').all()
+        for tmp_booking in bookings:
+            tmp_booking.cache_content = computeCacheContent(DBSession, tmp_booking.content, tmp_booking.visiting_group.id)
+            
+        raise redirect('/visiting_group/view_all')
+
+
+    
+    @expose()
+    @validate(validators={'id':validators.Int})
+    @require(Any(is_user('root'), has_permission('pl'), msg='Only staff members may change visiting group properties'))
+    def delete_visiting_group(self,  id=None):
+        if None == id:
+            pass
+            #visiting_group = booking.VisitingGroup()
+            
+        else:
+            visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+ str(id)).one()
+            
+            
+        #...WARNING: bookings will remain. Perhaps a non-destructive delete instead?
+        DBSession.delete(visiting_group)
+        raise redirect('/visiting_group/view_all')
+        
+        
+    @expose('hollyrosa.templates.view_bookings_of_name')
+    @validate(validators={"name":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def view_bookings_of_name_old(self,  name=None):
+        bookings = DBSession.query(booking.Booking).filter(and_('visiting_group_name=\'' + name + '\'', 'booking_state > -100')).all()
+
+        #...the bookings should be ordered by booking day or requested date or nothing. In that order.
+        
+        
+
+        visiting_group_id = None
+        visiting_group = DBSession.query(booking.VisitingGroup).filter('name=\'' + name + '\'').all()
+        if len(visiting_group) == 1:
+            visiting_group_id = visiting_group[0].id
+            
+        return dict(bookings=bookings,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent)
+        
+    def fn_cmp_booking_date_list(self, a, b):
+        if a[0].booking_day == None:
+            if b[0].booking_day == None:
+                return 0
+            else:
+                return -1
+
+        elif b[0].booking_day == None:
+            return 1
+
+        return cmp(a[0].booking_day.date, b[0].booking_day.date)
+
+    def fn_cmp_booking_timestamps(self, a, b):
+        if a.booking_day == None:
+            if b.booking_day == None:
+                return 0
+            else:
+                return -1
+
+        elif b.booking_day == None:
+            return 1
+      
+        elif a.booking_day.date > b.booking_day.date:
+            return 1
+        elif a.booking_day.date < b.booking_day.date:
+            return -1
+        else:
+            return cmp(a.slot_row_position.time_from, b.slot_row_position.time_from)
+
+    @expose('hollyrosa.templates.view_bookings_of_name')
+    @validate(validators={"name":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def view_bookings_of_name(self,  name=None):
+        bookings = DBSession.query(booking.Booking).filter(and_('visiting_group_name=\'' + name + '\'', 'booking_state > -100')).all()
+
+        #...the bookings should be ordered by booking day or requested date or nothing. In that order.
+        
+        
+
+        visiting_group_id = None
+        visiting_group = DBSession.query(booking.VisitingGroup).filter('name=\'' + name + '\'').all()
+        if len(visiting_group) == 1:
+            visiting_group_id = visiting_group[0].id
+            
+
+        #...now group all bookings in a dict mapping activity_id:content
+        clustered_bookings = {}
+        for b in bookings:
+            key = str(b.activity_id)+':'+b.content
+            if None == b.booking_day_id:
+                key = 'N'+key
+
+            if clustered_bookings.has_key(key):
+                bl = clustered_bookings[key]
+                bl.append(b)
+            else:
+                bl = list()
+                bl.append(b)
+                clustered_bookings[key] = bl 
+
+        clustered_bookings_list = clustered_bookings.values()
+        clustered_bookings_list.sort(self.fn_cmp_booking_date_list)
+        for bl in clustered_bookings_list:
+            bl.sort(self.fn_cmp_booking_timestamps)
+
+        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent)
+        

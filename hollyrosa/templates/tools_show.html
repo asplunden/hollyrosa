@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright 2010, 2011 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Tools</title>
+  
+  
+</head>
+
+<body>
+    <h2>Tools for $show_day</h2>
+    <ul>
+        <li py:if="request.identity"><a href="${tg.url('/history/show')}">History</a></li>
+        <li py:if="request.identity"><a href="${tg.url('/workflow/overview')}">Workflow</a></li>
+
+    </ul>
+    <h3>Daily overview per activity group</h3>
+    <ul>
+        <li py:for="ag in activity_groups"><a href="${tg.url('/booking/fladan_day', day=show_day, ag=ag.title)}">$ag.title</a></li>
+    </ul>
+    
+    <h3>Statistics</h3>
+    <ul>
+        <li><a href="${tg.url('booking_statistics')}">Booking Statistics</a></li>
+        <li><a href="${tg.url('visitor_statistics')}">Visitor Statistics</a></li>
+    </ul>
+    <h3>Export Treeware for $show_day</h3>
+    <h3>Push-to-Google Calendar</h3>
+    <h3>Visiting Group Attributes out-of-range</h3>
+    <a href="${tg.url('sanity_check_property_usage')}">Check</a>
+    <h3>Transfer to booking treeware template</h3>
+    <form name="create_program_day" action="${tg.url('make_program_day_doc')}" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" id="file"/>
+        <input type="text" name="day" value="$show_day"/>
+        <input type="submit" value="generate program day doc"/>
+        
+    </form>
+    
+</body>
+</html>

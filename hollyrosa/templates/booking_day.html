@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright 2010, 2011 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:hollyrosa="http://asplunden.org/guldkant/hollyrosa" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - ${booking_day.date.strftime("%A %d %B %Y")}</title>
+  
+  <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.5.0/dijit/themes/tundra/tundra.css')}" />
+<style type="text/css">
+            .tundra table.dijitCalendarContainer { margin: 25px auto; } #formatted
+            { text-align: center; }
+        </style>
+        
+  <script type="text/javascript" src="${tg.url('/scripts/std.js')}" />
+  <script type="text/javascript" src="${tg.url('/scripts/dojo-release-1.5.0/dojo/dojo.js')}" ></script>
+  <script type="text/javascript">
+
+var jdata = {};
+  
+dojo.require("dojo.cookie");
+dojo.require("dojo.date");
+dojo.require("dijit.dijit");
+dojo.require("dijit.Calendar");
+
+
+
+ 
+ 
+function update_activity_group_visible_rows() {
+    var odata = dojo.formToObject('bday_hide_form');
+    var show_these_activity_group_ids = Object();
+    for (var param_name in odata) {
+        param_value = odata[param_name];
+        show_these_activity_group_ids[param_value] = 1;
+    }
+    
+    //...we now have a list of agc ids to show, all other should be hidden
+    var elems = dojo.query("[hollyrosa:acgid]");
+    dojo.forEach(elems, function(elem) {
+        var agc_val = dojo.attr(elem, 'hollyrosa:acgid');
+        if (show_these_activity_group_ids[agc_val]) {
+            dojo.style(elem, {display: 'block'});
+        }
+        else {
+            dojo.style(elem, {display: 'none'});
+        }
+    });
+ }
+ 
+
+function save_visible_ag() {
+    var cdata = dojo.formToJson('bday_hide_form');
+    dojo.cookie('visible_ag', cdata, {expires:5});    
+    update_activity_group_visible_rows();
+}
+  
+
+
+function set_visible_ag_checkboxes(g){
+    var checkbox_element_value = dojo.attr(g, 'value');
+    var checkbox_element_id = "show_activity_group_checkbox_" + checkbox_element_value;
+    visible_data_from_cookie = jdata[checkbox_element_id];
+    if (visible_data_from_cookie) {
+        g.checked='checked';
+    }
+    else {
+        g.checked='';
+    }
+    update_activity_group_visible_rows();
+}
+
+  
+function recall_visible_ag() {
+    var cdata = dojo.cookie('visible_ag');
+    if (cdata == undefined) {
+      jdata = {};
+    } else {
+      jdata = dojo.fromJson(cdata);
+      var visible_ag_checkboxes = dojo.query('[hollyrosa:show_ag]');
+      dojo.forEach(visible_ag_checkboxes, set_visible_ag_checkboxes );  
+    }
+}
+
+
+  
+ 
+ function set_save_visible_handlers() {
+    dojo.forEach(dojo.query('[hollyrosa:show_ag]'), function(h) { dojo.connect(h, "onclick", null, save_visible_ag);  });
+}
+
+
+
+
+dojo.addOnLoad(recall_visible_ag);
+dojo.addOnLoad(set_save_visible_handlers);
+
+
+//...functions for showing the nevigation calendar
+
+function navigation_calendar_clicked(x) {
+    var selected_date = dojo.date.locale.format(x, {datePattern: "yyyy-MM-dd", selector: "date"});
+    if ("${booking_day.date.strftime('%Y-%m-%d')}" != selected_date) {
+        window.location.assign('day?day=' + selected_date);
+    }
+}
+
+
+dojo.addOnLoad(function() {
+    var e = dojo.byId('navigation_calendar'); 
+    dojo.attr(e, 'dojoType', 'dijit.Calendar'); 
+    dojo.attr(e, 'onChange', 'navigation_calendar_clicked'); 
+    dojo.attr(e, 'isDisabledDate','navigation_calendar_is_disabled');
+    dojo.parser.parse(e.parentNode);
+});
+
+
+//...fix tools link
+dojo.addOnLoad(function() {
+    var tools_link_elem = dojo.byId('toolslink');
+    var href = dojo.attr(tools_link_elem, "href");
+    dojo.attr(tools_link_elem, "href", href + "?day=" + "${booking_day.date.strftime('%Y-%m-%d')}" );
+});
+
+
+
+  </script>
+</head>
+
+<body class="tundra">   
+    <div id="booking_day_hide_slot_rows_control">
+        <ul style="display:inline; list-style-type: none;   position:relative;">
+        <li>
+            <div dojoType="dijit.Calendar" id="navigation_calendar" value="${booking_day.date.strftime('%Y-%m-%d')}">Calendar widget if dijit works</div>
+        </li>
+        <li>
+        <form id="bday_hide_form" name="bday_hide_form" method="get" class="bday_hide_form">
+        <fieldset>
+            <legend>view activity groups</legend>
+            <ul class="booking_day_hide_slot_rows_control">
+                <li py:for="agc in activity_groups"><input type="checkbox" name="show_activity_group_checkbox_$agc.id" value="$agc.id" hollyrosa:show_ag="show_activity_group_checkbox_$agc.id" />$agc.title</li>
+            </ul>
+            </fieldset>    
+        </form>
+        </li>
+        </ul>
+    </div>
+    
+    
+
+    <h2>${booking_day.date.strftime("%A %d %B %Y")}</h2>
+
+    <div class="note">${HTML(booking_day.note)}
+    <br/>
+    <a href="${tg.url('/calendar/edit_booking_day',id=booking_day.id)}">edit</a>
+    </div>
+
+  
+    <h3>Unscheduled bookings</h3>
+    <ul class="any_menu">
+        <li><a href="${tg.url('edit_booking',booking_day_id=booking_day.id)}">new booking request</a></li>
+    </ul>
+    
+    <ul>
+        <li py:for="booking in unscheduled_bookings" hollyrosa:acgid="${booking.activity.activity_group.id}" class="unscheduled_booking">${booking.activity.title} <span class="group_info">${booking.visiting_group_name}</span>  ${getRenderContent(booking)}, <span class="requested_date">requested date ${booking.requested_date}</span> <span class="date_info">  [${booking.valid_from}  - ${booking.valid_to}]</span> 
+       <ul class="any_menu context_inline_menu">
+            <li><a href="${tg.url('edit_booking', booking_day_id=booking_day.id, id=booking.id)}">edit</a></li>
+            <li><a href="${tg.url('view_booked_booking', return_to_day_id=booking_day.id, id=booking.id)}">view</a></li>
+           <li><a href="${tg.url('delete_booking', booking_day_id=booking_day.id, booking_id=booking.id)}">delete</a></li>
+                
+            <li py:for="tt in [t for t in activity_slot_position_map[booking.activity_id]  if not blockings_map.has_key(t.id)]">
+        <a href="${tg.url('schedule_booking', booking_id=booking.id, booking_day_id=booking_day.id, slot_row_position_id=tt.id)}">[${tt.time_from.strftime('%H:%M')} - ${tt.time_to.strftime('%H:%M')}]</a></li>
+    </ul>
+    </li></ul>
+    
+    <h3>Scheduled bookings and daily overview</h3>
+  <div class="booking_day_overview">
+  
+  <!-- hack for 2011 for showing FM EM evening and after hours -->
+  <div class="booking_day_overview_slot_row">
+    <div class="booking_day_overview_activity">Slot time</div>
+    <div class="booking_day_overview_slots">Morning</div>
+    <div class="booking_day_overview_slots">Afternoon</div>
+    <div class="booking_day_overview_slots">Evening</div>
+    <div class="booking_day_overview_slots">After hours</div>
+  </div>
+
+
+    <div py:for="slot_row in slot_rows" hollyrosa:acgid="${slot_row.activity.activity_group_id}"  class="booking_day_overview_slot_row" style="background: ${slot_row.activity.bg_color};">
+        <div class="booking_day_overview_activity"><a href="${tg.url('view_activity', activity_id=slot_row.activity.id)}">${slot_row.activity.title}</a><a name="activity_row_id_${slot_row.activity.id}" class="ag_anchor">&nbsp;</a><span py:if="0 != slot_row.activity.capacity">[${str(slot_row.activity.capacity)}]</span></div>
+        <div py:for="slot_position in slot_row.slot_row_position" hollyrosa:w="$slot_position.time_from - $slot_position.time_to" class="booking_day_overview_slots ${['','slot_row_position_blocked'][blockings_map.has_key(slot_position.id)]}">
+        
+            <!-- we may have several slot bookings-->
+            <div py:if="bookings.has_key(slot_position.id)">
+            
+            
+                <div py:for="b in bookings[slot_position.id]" style="border-bottom:1px dashed #ccc;">
+                <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/visiting_group/view_bookings_of_name', name=b.visiting_group_name)}">${b.visiting_group_name}</a></span><br/><a href="${tg.url('view_booked_booking', id=b.id, return_to_day_id=booking_day.id)}" style="padding-left:2em;">${getRenderContent(b)}</a>
+                
+                    <ul class="any_menu context_inline_menu">
+                        <li><a href="${tg.url('edit_booked_booking', return_to_day_id=booking_day.id, id=b.id)}">edit</a></li>
+                        <li><a href="${tg.url('view_booked_booking', return_to_day_id=booking_day.id, id=b.id)}">view</a></li>
+                        <li><a href="${tg.url('unschedule_booking', booking_day_id=booking_day.id, booking_id=b.id)}">unschedule</a></li>
+                        
+                        <li><ul style="background-color:transparent; padding:0px;" class="any_menu context_dropdown_menu">more...
+                            <li><a href="${tg.url('prolong', id=b.id)}">prolong</a></li>
+                            <li><a href="${tg.url('move_booking', return_to_day_id=booking_day.id, id=b.id, )}">move</a></li>
+                            <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=0)}">>preliminary</a></li>
+                            <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=10)}">>booked</a></li>
+                            <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=20)}">>approve</a></li>
+                            <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=-10)}">>disapprove</a></li>
+                            <li><a href="${tg.url('multi_book', booking_id=b.id)}">multi-book</a></li>
+                            <li><a href="${tg.url('delete_booking', booking_day_id=booking_day.id, booking_id=b.id)}">delete</a></li>
+                        </ul></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div py:if="blockings_map.has_key(slot_position.id)">&nbsp;</div>
+            
+            <ul id="minimenu_${slot_position.id}" class="context_inline_menu any_menu">
+                <li><a  py:if="not blockings_map.has_key(slot_position.id)" href="${tg.url('book_slot', booking_day_id=booking_day.id, slot_position_id=slot_position.id)}">book</a></li>
+                <li><a py:if="not blockings_map.has_key(slot_position.id)" href="${tg.url('block_slot', booking_day_id=booking_day.id, slot_row_position_id=slot_position.id)}">block slot</a></li>
+                <li><a py:if="blockings_map.has_key(slot_position.id)" href="${tg.url('unblock_slot', booking_day_id=booking_day.id, slot_row_position_id=slot_position.id)}">unblock slot</a></li>
+            </ul>
+            
+        </div>
+    </div> 
+  </div>
+</body>
+</html>
