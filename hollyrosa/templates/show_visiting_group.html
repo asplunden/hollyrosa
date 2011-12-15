@@ -38,7 +38,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
        <li><a href="${tg.url('delete_visiting_group', id=visiting_group.id)}">delete</a></li>
     </ul>
     
-    <p>${visiting_group.fromdate.strftime('%A %d %B')} to ${visiting_group.todate.strftime('%A %d %B')}</p>
+    <!-- <p>${visiting_group.fromdate.strftime('%A %d %B')} to ${visiting_group.todate.strftime('%A %d %B')}</p> -->
+    <p>${visiting_group.fromdate} to ${visiting_group.todate}</p>
     <div class="note">${HTML(visiting_group.info)}</div>
     <p>${visiting_group.contact_person}<br/>$visiting_group.contact_person_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.contact_person_email</a><br/>
     boknr: ${visiting_group.boknr} <br/>
@@ -49,7 +50,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         <tr>
             <th>Property = Value Unit</th><th>Description</th><th>From date</th><th>To date</th>
         </tr>
-        <tr py:for="prop in visiting_group.visiting_group_property">
+        <tr py:for="prop in visiting_group.visiting_group_property.values()">
             <td class="info">$$$prop.property = $prop.value $prop.unit</td><td class="info">$prop.description</td><td class="info">$prop.fromdate</td><td class="info">$prop.todate</td>
         </tr>
     </table>

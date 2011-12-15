@@ -61,3 +61,8 @@ def init_model(engine):
 # Import your model modules here.
 from hollyrosa.model.auth import User, Group, Permission
 from hollyrosa.model.booking import DaySchema, BookingDay, SlotRow, Booking, VisitingGroup, BookingHistory, Activity, ActivityGroup, SlotRowPosition,  SlotRowPositionState
+
+import booking_couch
+from booking_couch import genUID
+
+holly_couch = booking_couch.holly_couch

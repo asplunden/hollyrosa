@@ -24,7 +24,7 @@ from repoze.what.predicates import Any, is_user, has_permission
 from formencode import validators
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID
 from sqlalchemy import and_
 import datetime
 
@@ -39,6 +39,7 @@ from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_
 from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
 from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
 from hollyrosa.controllers.common import workflow_map,  DataContainer,  getRenderContent, computeCacheContent
+
 
 __all__ = ['VisitingGroup']
 
@@ -169,8 +170,26 @@ class VisitingGroup(BaseController):
             bookingS=[]
         else:
             visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+str(id)).one()
-
+            
             bookings = DBSession.query(booking.Booking).filter('visiting_group_name=\'' + visiting_group.name + '\'').all()
+        return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent)
+        
+        
+    @expose('hollyrosa.templates.show_visiting_group')
+    @validate(validators={'id':validators.Int})
+    #@require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def show_visiting_group_c(self,  id=None,  **kw):
+        
+        if None == id:
+            visiting_group = DataContainer(name='',  id=None,  info='')
+            bookings=[]
+        elif id=='':
+            visiting_group = DataContainer(name='',  id=None,  info='')
+            bookingS=[]
+        else:
+            visiting_group = holly_couch[str(id)]
+
+            bookings = [] #DBSession.query(booking.Booking).filter('visiting_group_name=\'' + visiting_group.name + '\'').all()
         return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent)
 
 
@@ -209,8 +228,14 @@ class VisitingGroup(BaseController):
         if None == id:
             visiting_group = booking.VisitingGroup()
             is_new = True
+            visiting_group_c = dict(type='visiting_group')
+            id_c = genUID()
         else:
             visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+ str(id)).one()
+            id_c = str(id)
+            visiting_group_c = holly_couch[id_c] #dict(type='visiting_group') # fix by lookup
+            
+            
             is_new= False
             
         visiting_group.name = name
@@ -224,6 +249,19 @@ class VisitingGroup(BaseController):
         visiting_group.boknstatus = boknstatus
         visiting_group.camping_location = camping_location
         
+        visiting_group_c['type'] = 'visiting_group'
+        visiting_group_c['name'] = name
+        visiting_group_c['info'] = info
+        visiting_group_c['fromdate'] = str(fromdate)
+        visiting_group_c['todate'] = str(todate)
+        visiting_group_c['contact_person'] = contact_person
+        visiting_group_c['contact_person_email'] = contact_person_email
+        visiting_group_c['contact_person_phone'] = contact_person_phone
+        visiting_group_c['boknr'] = boknr
+        visiting_group_c['boknstatus'] = boknstatus
+        visiting_group_c['camping_location'] = camping_location
+        
+        visiting_group_property_c = dict()
         
         if is_new:
             DBSession.add(visiting_group)
@@ -251,6 +289,7 @@ class VisitingGroup(BaseController):
                     
                     del unused_params[param['id']]
                     
+                visiting_group_property_c[param['id']] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  fromdate=str(param['fromdate']),  todate=str(param['todate']))
                 
                 new_param.property = param['property']
                 new_param.value = param.get('value','')
@@ -273,7 +312,16 @@ class VisitingGroup(BaseController):
         bookings = DBSession.query(booking.Booking).filter('visiting_group_name=\'' + name + '\'').all()
         for tmp_booking in bookings:
             tmp_booking.cache_content = computeCacheContent(DBSession, tmp_booking.content, tmp_booking.visiting_group.id)
-            
+        
+        #...add visiting group properties
+        #...differ between save and new! Visiting group properties should be something like a dict in the dict.
+        #holly_couch.save({'type':'visiting_group',  'name':name}) # we need a better way to come up with unique ids!
+        
+        
+        #holly_couch.save(visiting_group_c) # we need a better way to come up with unique ids!
+        visiting_group_c['visiting_group_property'] = visiting_group_property_c
+        holly_couch[id_c] = visiting_group_c
+        
         raise redirect('/visiting_group/view_all')
 
 
