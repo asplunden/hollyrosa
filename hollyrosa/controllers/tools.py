@@ -23,7 +23,7 @@ import pylons
 from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID
 from sqlalchemy import and_
 from sqlalchemy.orm import eagerload,  eagerload_all
 
@@ -304,3 +304,53 @@ class Tools(BaseController):
 
 
         return dict(slot_rows=slot_rows_n,  bookings=activity_totals, totals=totals)
+    
+    @expose()
+    def transfer_activity_groups(self):
+        activity_groups = DBSession.query(booking.ActivityGroup).all()
+        for acg in activity_groups:
+            acg_c = dict(title=acg.title,  description=acg.description, zorder=acg.id,  type='activity_group')
+            holly_couch['activity_group.'+str(acg.id)] = acg_c
+        raise redirect('tools')
+    
+    @expose()
+    def transfer_activity(self):
+        activity = DBSession.query(booking.Activity).all()
+        for ac in activity:
+            print ac
+            ac_c = dict(type='activity',  bg_color=ac.bg_color,  guides_per_slot=ac.guides_per_slot,  guides_per_day=ac.guides_per_day,  equipment_needed=ac.equipment_needed, education_needed=ac.education_needed,  certificate_needed = ac.certificate_needed, 
+                        tags = '', title=ac.title, description = ac.description,  external_link = ac.external_link,  internal_link = ac.internal_link,  print_on_demand_link = ac.print_on_demand_link,  capacity = ac.capacity,  default_booking_state = ac.default_booking_state, 
+                        activity_group_id = 'activity_group.'+str(ac.activity_group_id))
+                        
+            holly_couch['activity.'+str(ac.id)] = ac_c
+        raise redirect('/')
+        
+    @expose()
+    def update_schema(self):
+        s = holly_couch['day_schema.1']
+        pos = 1
+        activity = DBSession.query(booking.Activity).all()
+        sch = dict()
+        for ac in activity:
+            tmp = [ac.title]
+            slrp = dict(timefrom='09:00:00',  timeto='12:00:00',  duration='03:00:00' ,  id=pos)
+            pos += 1
+            tmp.append(slrp)
+            
+            slrp = dict(timefrom='13:00:00',  timeto='17:00:00',  duration='03:00:00' ,  id=pos)
+            pos += 1
+            tmp.append(slrp)
+            
+            slrp = dict(timefrom='19:00:00',  timeto='21:00:00',  duration='02:00:00' ,  id=pos)
+            pos += 1
+            tmp.append(slrp)
+
+            slrp = dict(timefrom='21:00:00',  timeto='23:00:00',  duration='02:00:00' ,  id=pos)
+            pos += 1
+            tmp.append(slrp)
+
+            sch['activity.'+str(ac.id)] = tmp
+        s['schema'] = sch
+        s = holly_couch['day_schema.1'] = s
+        raise redirect('/')
+        
