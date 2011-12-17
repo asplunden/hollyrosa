@@ -38,7 +38,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import eagerload,  eagerload_all
 import datetime
@@ -65,10 +65,11 @@ __all__ = ['BookingDay',  'Calendar']
     
 
 def getBookingDay(booking_day_id):
-    return DBSession.query(booking.BookingDay).filter('id='+str(booking_day_id)).one()
-  
+    return holly_couch[booking_day_id] #DBSession.query(booking.BookingDay).filter('id='+str(booking_day_id)).one()
+
+
 def getBooking(id):
-    return DBSession.query(booking.Booking).filter('id='+str(id)).one()
+    return holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
     
 
 
@@ -76,38 +77,109 @@ def deleteBooking(booking_o):
     booking_o.booking_state = -100
     booking_o.booking_day_id = None
     booking_o.slot_row_position_id = None
-
+    holly_couch[bookingo._id] = booking_o
 
 def make_booking_day_activity_anchor(tmp_activity):
     return '#activity_row_id_' + str(tmp_activity.id)
-
-
 
 
 def getNextBookingDayId(o_booking):
     booking_day_o = DBSession.query(booking.BookingDay).filter('date=\''+(o_booking.booking_day.date + datetime.timedelta(1)
 ).strftime('%Y-%m-%d')+'\'').one()
     return booking_day_o.id
-    
+
+
+class BookingDayC(object):
+    """Assumes a lot when loading from Couch. Make an even better wrapper"""
+    def __init__(self, m):
+        for k, v in m.value.items():
+            if k=='date':
+                self.__dict__[k] = datetime.date.fromordinal(datetime.datetime.strptime(v, '%Y-%m-%d').toordinal())
+            elif k == '_id':
+                self.__dict__['id'] = v
+            else:
+                self.__dict__[k] = v
+        
     
 class Calendar(BaseController):
     def view(self, url):
         """Abort the request with a 404 HTTP status code."""
         abort(404)
-    
-    
+
+    def get_visiting_groups(self, from_date='',  to_date=''):
+        """Helper function to get visiting groups from CouchDB"""
+        if from_date=='':
+            map_fun = '''function(doc) {
+            if (doc.type == 'visiting_group')
+                emit(doc.from_date, doc);
+                }'''
+        else:
+            from_date='2011-08-10'
+            
+            if to_date=='':
+                map_fun = """function(doc) {
+                if ((doc.type == 'visiting_group') && (doc.from_date >= '"""+ from_date+"""' ))
+                    emit(doc.from_date, doc);
+                    }"""
+            else:
+                to_date='2011-08-15'
+                map_fun = """function(doc) {
+                if ((doc.type == 'visiting_group') && (doc.from_date >= '"""+ from_date+"""' ) && (doc.to_date <= '""" + to_date+"""'))
+                    emit(doc.from_date, doc);
+                    }"""
+        visiting_groups_c = holly_couch.query(map_fun)
+        
+        #...conversion 
+        visiting_groups = []
+        for vgc in visiting_groups_c:
+            #o = BookingDayC(bdc)
+            visiting_groups.append(vgc.value)
+        return visiting_groups
+        
+        
+    def get_booking_days(self,  from_date='',  to_date=''):
+        """Helper function to get booking days from CouchDB"""
+        if from_date=='':
+            map_fun = '''function(doc) {
+            if (doc.type == 'booking_day')
+                emit(doc.date, doc);
+                }'''
+        else:
+            from_date='2011-08-10'
+            
+            if to_date=='':
+                map_fun = """function(doc) {
+                if ((doc.type == 'booking_day') && (doc.date >= '"""+ from_date+"""' ))
+                    emit(doc.date, doc);
+                    }"""
+            else:
+                to_date='2011-08-15'
+                map_fun = """function(doc) {
+                if ((doc.type == 'booking_day') && (doc.date >= '"""+ from_date+"""' ) && (doc.date <= '""" + to_date+"""'))
+                    emit(doc.date, doc);
+                    }"""
+        booking_days_c = holly_couch.query(map_fun)
+        
+        #...conversion to booking  days so the template looks like old SQL Alchemy
+        booking_days = []
+        for bdc in booking_days_c:
+            o = BookingDayC(bdc)
+            booking_days.append(o)
+        return booking_days
+        
+
     @expose('hollyrosa.templates.calendar_overview')
     def overview_all(self):
         """Show an overview of all booking days"""
-        booking_days = DBSession.query(booking.BookingDay).all()
-        return dict(booking_days=booking_days)
+        #booking_days = DBSession.query(booking.BookingDay).all()
+        return dict(booking_days=self.get_booking_days())
 
 
     @expose('hollyrosa.templates.calendar_overview')
     def overview(self):
         """Show an overview of all booking days"""
-        booking_days = DBSession.query(booking.BookingDay).filter('date >=\''+datetime.date.today().strftime('%Y-%m-%d')+'\'').all()
-        return dict(booking_days=booking_days)
+        ##booking_days = DBSession.query(booking.BookingDay).filter('date >=\''+datetime.date.today().strftime('%Y-%m-%d')+'\'').all()
+        return dict(booking_days=self.get_booking_days(from_date=datetime.date.today().strftime('%Y-%m-%d')))
     
 
     @expose('hollyrosa.templates.calendar_upcoming')
@@ -115,43 +187,43 @@ class Calendar(BaseController):
         """Show an overview of all booking days"""
         today_date_str = datetime.date.today().strftime('%Y-%m-%d')
         end_date_str = (datetime.date.today()+datetime.timedelta(5)).strftime('%Y-%m-%d')
-        booking_days = DBSession.query(booking.BookingDay).filter(and_('date >=\'' + today_date_str +'\'','date < \'' + end_date_str +'\'')).order_by(booking.BookingDay.date).all()
+        booking_days = self.get_booking_days(from_date=today_date_str,  to_date=end_date_str) #DBSession.query(booking.BookingDay).filter(and_('date >=\'' + today_date_str +'\'','date < \'' + end_date_str +'\'')).order_by(booking.BookingDay.date).all()
 
-        vgroups = DBSession.query(booking.VisitingGroup).filter(or_('todate >= \''+ today_date_str +'\'','fromdate <= \''+ end_date_str  +'\'')).all()
+        vgroups = self.get_visiting_groups(from_date=today_date_str,  to_date=end_date_str) #DBSession.query(booking.VisitingGroup).filter(or_('todate >= \''+ today_date_str +'\'','fromdate <= \''+ end_date_str  +'\'')).all()
 
         group_info = dict()
         for b_day in booking_days:
-             tmp_date_today_str = b_day.date #.strftime('%Y-%m-%d')             
+             tmp_date_today_str = b_day.date.strftime('%Y-%m-%d')             
 
-             group_info[tmp_date_today_str] = dict(arrives=[v for v in vgroups if v.fromdate == b_day.date], leaves=[v for v in vgroups if v.todate == b_day.date], stays=[v for v in vgroups if v.todate > b_day.date and v.fromdate < b_day.date])
+             group_info[tmp_date_today_str] = dict(arrives=[v for v in vgroups if v['from_date'] == tmp_date_today_str], leaves=[v for v in vgroups if v['to_date'] == tmp_date_today_str], stays=[v for v in vgroups if v['to_date'] > tmp_date_today_str and v['from_date'] < tmp_date_today_str])
 
         return dict(booking_days=booking_days, group_info=group_info)
         
         
     @expose('hollyrosa.templates.booking_day_properties')
     @validate(validators={'id':validators.Int(not_empty=True)})
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change booking day properties'))
+    #@require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change booking day properties'))
     def edit_booking_day(self,  id=None,  **kw):
-        booking_day = getBookingDay(id)
+        booking_day = holly_couch[id] #getBookingDay(id)
         tmpl_context.form = create_edit_booking_day_form
         return dict(booking_day=booking_day,  usage='edit')
         
     @validate(create_edit_booking_day_form, error_handler=edit_booking_day)      
     @expose()
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change booking day properties'))
-    def save_booking_day_properties(self,  id=None,  note='', num_program_crew_members=0,  num_fladan_crew_members=0):
+    #@require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change booking day properties'))
+    def save_booking_day_properties(self,  _id=None,  note='', num_program_crew_members=0,  num_fladan_crew_members=0):
         
         # important: if note is too big, dont try to store it in database because that will give all kinds of HTML rendering errors later
-        if len(note) > 1024:
-            raise IOError, "note too big. I appologize for this improvised failure mode but we cannot allow this to propagate to the db"
-        booking_day = getBookingDay(id)
-        booking_day.note = note
-
+        #if len(note) > 1024:
+        #    raise IOError, "note too big. I appologize for this improvised failure mode but we cannot allow this to propagate to the db"
+        booking_day_c = holly_couch[_id]#getBookingDay(id)
+        booking_day_c['note'] = note
+        booking_day_c['num_program_crew_members'] = num_program_crew_members
+        booking_day_c['num_fladan_crew_members'] = num_fladan_crew_members
+        print 'HOLLY',_id
+        holly_couch[_id]=booking_day_c
         
-        
-        booking_day.num_program_crew_members = num_program_crew_members
-        booking_day.num_fladan_crew_members = num_fladan_crew_members
-        raise redirect('/booking/day?day_id='+str(id))
+        raise redirect('/booking/day?day_id='+str(_id))
         
 
         

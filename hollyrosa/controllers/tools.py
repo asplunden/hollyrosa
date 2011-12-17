@@ -333,19 +333,19 @@ class Tools(BaseController):
         sch = dict()
         for ac in activity:
             tmp = [ac.title]
-            slrp = dict(timefrom='09:00:00',  timeto='12:00:00',  duration='03:00:00' ,  id=pos)
+            slrp = dict(time_from='09:00:00',  time_to='12:00:00',  duration='03:00:00' ,  id=pos)
             pos += 1
             tmp.append(slrp)
             
-            slrp = dict(timefrom='13:00:00',  timeto='17:00:00',  duration='03:00:00' ,  id=pos)
+            slrp = dict(time_from='13:00:00',  time_to='17:00:00',  duration='03:00:00' ,  id=pos)
             pos += 1
             tmp.append(slrp)
             
-            slrp = dict(timefrom='19:00:00',  timeto='21:00:00',  duration='02:00:00' ,  id=pos)
+            slrp = dict(time_from='19:00:00',  time_to='21:00:00',  duration='02:00:00' ,  id=pos)
             pos += 1
             tmp.append(slrp)
 
-            slrp = dict(timefrom='21:00:00',  timeto='23:00:00',  duration='02:00:00' ,  id=pos)
+            slrp = dict(time_from='21:00:00',  time_to='23:00:00',  duration='02:00:00' ,  id=pos)
             pos += 1
             tmp.append(slrp)
 
@@ -354,3 +354,34 @@ class Tools(BaseController):
         s = holly_couch['day_schema.1'] = s
         raise redirect('/')
         
+    @expose()
+    def update_booking_days(self):
+        booking_days = DBSession.query(booking.BookingDay).all()
+        pos = 1
+        for bd in booking_days:
+            bd_c = holly_couch['booking_day.'+str(bd.id)]
+            #bd_c = dict(type='booking_day',  date=str(bd.date),  note=bd.note, num_program_crew_members=bd.num_program_crew_members,  num_fladan_crew_members=bd.num_fladan_crew_members,  day_schema_id='day_schema.'+str(bd.day_schema_id),  zorder=pos )
+            bd_c['zorder'] = pos
+            holly_couch['booking_day.'+str(bd.id)] = bd_c
+            pos += 1
+            
+        raise redirect('/')
+        
+        
+    @expose()
+    def transfer_visiting_groups(self):
+        visiting_groups = DBSession.query(booking.VisitingGroup).all()
+        for vg in visiting_groups:
+            vg_c = dict(type='visiting_group', name=vg.name,  from_date=str(vg.fromdate),  to_date = str(vg.todate),  info = vg.info,  contact_person = vg.contact_person,  contact_person_phone = vg.contact_person_phone,
+                        contact_person_email = vg.contact_person_email,  calendar_id=vg.calendar_id,  boknr=vg.boknr, boknstatus=vg.boknstatus,  camping_location = vg.camping_location)        
+                        
+            #...now transfer properties
+            vgp_c = dict()
+            for vgp in vg.visiting_group_property:
+                vgp_c[vgp.id] = dict(property=vgp.property,  value=vgp.value,  unit=vgp.unit,  description=vgp.description,  from_date=str(vgp.fromdate),  to_date=str(vgp.todate),  id=vgp.id)
+            vg_c['visiting_group_properties'] = vgp_c
+
+
+
+            holly_couch['visiting_group.'+str(vg.id)] = vg_c
+        raise redirect('/')

@@ -263,6 +263,9 @@ class VisitingGroup(BaseController):
         
         visiting_group_property_c = dict()
         
+        
+        
+        
         if is_new:
             DBSession.add(visiting_group)
             

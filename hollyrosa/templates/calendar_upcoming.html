@@ -47,17 +47,17 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
               <div style="padding:1em; border: 1px dashed #ccc; float:right;"> 
               <h3>arrives:</h3>
               <ul> 
-                <li py:for="g in group_info[booking_day.date]['arrives']"><a href="${tg.url('/visiting_group/show_visiting_group', id=g.id)}">${g.name}</a></li>
+                <li py:for="g in group_info[str(booking_day.date)]['arrives']"><a href="${tg.url('/visiting_group/show_visiting_group', id=g._id)}">${g.name}</a></li>
               </ul> 
 
               <h3>leaves:</h3> 
               <ul> 
-                <li py:for="g in group_info[booking_day.date]['leaves']"><a href="${tg.url('/visiting_group/show_visiting_group', id=g.id)}">${g.name}</a></li>
+                <li py:for="g in group_info[str(booking_day.date)]['leaves']"><a href="${tg.url('/visiting_group/show_visiting_group', id=g._id)}">${g.name}</a></li>
               </ul>
 
               <h3>stays:</h3>
               <ul> 
-                <li py:for="g in group_info[booking_day.date]['stays']"  py:if="g.name not in ['N/A','Program I','Program II','Fladan I','Fladan II','Konf I','Konf II']"><a href="${tg.url('/visiting_group/show_visiting_group', id=g.id)}">${g.name}</a></li>
+                <li py:for="g in group_info[str(booking_day.date)]['stays']"  py:if="g.name not in ['N/A','Program I','Program II','Fladan I','Fladan II','Konf I','Konf II']"><a href="${tg.url('/visiting_group/show_visiting_group', id=g._id)}">${g.name}</a></li>
               </ul> 
               </div>
             </td>
