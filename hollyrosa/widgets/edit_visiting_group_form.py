@@ -35,16 +35,16 @@ class ParamsGrowingTableFieldSet(GrowingTableFieldSet):
         TextField('value',  size=4),
         TextField('unit',  size=8), 
         TextField('description'), 
-        CalendarDatePicker('fromdate', validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d'), 
-        CalendarDatePicker('todate', validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')]
-
+        CalendarDatePicker('from_date', validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d'), 
+        CalendarDatePicker('to_date', validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')]
+        
 
 #class EditVisitingGroupForm(CustomisedForm):
 class EditVisitingGroupForm(TableForm):
     show_errors = True
     
     class fields(WidgetsList):
-        id = HiddenField(validator=Int)
+        id = HiddenField(validator=UnicodeString())
         name = TextField(validator=UnicodeString(min=1),  css_class="edit_name",  size=40)
         info = TinyMCE(validator=MarkupConverter, mce_options = dict(theme='advanced',  
                                                                    theme_advanced_toolbar_align ="left",  
@@ -54,8 +54,8 @@ class EditVisitingGroupForm(TableForm):
 ))
         #broken: fromdate = CalendarDatePicker(date_format="%Y-%m-%d", validator=DateConverter(month_style='dd/mm/yyyy'))
         #broken: todate = CalendarDatePicker(date_format="%Y-%m-%d", validator=DateConverter(month_style='yyyy/mm/dd'))
-        fromdate = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
-        todate = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
+        from_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
+        to_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
         contact_person = TextField(validator=UnicodeString(),  label_text="contact person:")
         contact_person_email = TextField(validator=Email(resolve_domain=False))
         contact_person_phone = TextField(validator=UnicodeString())
@@ -63,6 +63,6 @@ class EditVisitingGroupForm(TableForm):
         boknstatus = TextField(validator=Int)
         camping_location = TextField(validator=UnicodeString())
         
-        visiting_group_property = ParamsGrowingTableFieldSet()
+        visiting_group_properties = ParamsGrowingTableFieldSet()
 
 create_edit_visiting_group_form = EditVisitingGroupForm("create_edit_visiting_group_form")

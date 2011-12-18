@@ -39,7 +39,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
     </ul>
     
     <!-- <p>${visiting_group.fromdate.strftime('%A %d %B')} to ${visiting_group.todate.strftime('%A %d %B')}</p> -->
-    <p>${visiting_group.fromdate} to ${visiting_group.todate}</p>
+    <p>${visiting_group.from_date} to ${visiting_group.to_date}</p>
     <div class="note">${HTML(visiting_group.info)}</div>
     <p>${visiting_group.contact_person}<br/>$visiting_group.contact_person_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.contact_person_email</a><br/>
     boknr: ${visiting_group.boknr} <br/>
@@ -50,8 +50,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         <tr>
             <th>Property = Value Unit</th><th>Description</th><th>From date</th><th>To date</th>
         </tr>
-        <tr py:for="prop in visiting_group.visiting_group_property.values()">
-            <td class="info">$$$prop.property = $prop.value $prop.unit</td><td class="info">$prop.description</td><td class="info">$prop.fromdate</td><td class="info">$prop.todate</td>
+        <tr py:for="prop in visiting_group.visiting_group_properties.values()">
+            <td class="info">$$$prop.property = $prop.value $prop.unit</td><td class="info">$prop.description</td><td class="info">$prop.from_date</td><td class="info">$prop.to_date</td>
         </tr>
     </table>
 
@@ -69,13 +69,13 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
                 <!--<span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day',day_id=b.booking_day.id)}">${b.booking_day.date.strftime('%A %d %B')}</a> <b>${b.slot_row_position.time_from}</b> to <b>${b.slot_row_position.time_to}</b>  ${workflow_map[b.booking_state]}</span>-->
                 
                 <ul class="any_menu context_inline_menu" style="padding-left:2em;">
-                    <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=10)}">booked</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=20)}">approve</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=-10)}">disapprove</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=0)}">preliminary</a></li>
-                    <li><a href="${tg.url('/booking/edit_booked_booking', return_to_day_id=b.booking_day_id, id=b.id)}">edit</a></li>
-                    <li><a href="${tg.url('/booking/view_booked_booking', return_to_day_id=b.booking_day_id, id=b.id)}">view</a></li>
-                    <li><a href="${tg.url('/booking/unschedule_booking', booking_day_id=b.booking_day_id, booking_id=b.id)}">unschedule</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', booking_id=b._id, state=10)}">booked</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', booking_id=b._id, state=20)}">approve</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', booking_id=b._id, state=-10)}">disapprove</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', booking_id=b._id, state=0)}">preliminary</a></li>
+                    <li><a href="${tg.url('/booking/edit_booked_booking', return_to_day_id=b.booking_day_id, id=b._id)}">edit</a></li>
+                    <li><a href="${tg.url('/booking/view_booked_booking', return_to_day_id=b.booking_day_id, id=b._id)}">view</a></li>
+                    <li><a href="${tg.url('/booking/unschedule_booking', booking_day_id=b.booking_day_id, booking_id=b._id)}">unschedule</a></li>
                 </ul>
                 
                 
@@ -84,8 +84,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
                 <span class="workflow_state_unscheduled">unscheduled</span>
                 <ul class="any_menu context_inline_menu" style="padding-left:2em;">
                     
-                    <li><a href="${tg.url('/booking/edit_booked_booking', id=b.id)}">edit</a></li>
-                    <li><a href="${tg.url('/booking/view_booked_booking', id=b.id)}">view</a></li>
+                    <li><a href="${tg.url('/booking/edit_booked_booking', id=b._id)}">edit</a></li>
+                    <li><a href="${tg.url('/booking/view_booked_booking', id=b._id)}">view</a></li>
                     
                 </ul>
             </div>

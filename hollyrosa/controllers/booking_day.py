@@ -38,7 +38,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import eagerload,  eagerload_all
 import datetime
@@ -106,35 +106,7 @@ class Calendar(BaseController):
         """Abort the request with a 404 HTTP status code."""
         abort(404)
 
-    def get_visiting_groups(self, from_date='',  to_date=''):
-        """Helper function to get visiting groups from CouchDB"""
-        if from_date=='':
-            map_fun = '''function(doc) {
-            if (doc.type == 'visiting_group')
-                emit(doc.from_date, doc);
-                }'''
-        else:
-            from_date='2011-08-10'
-            
-            if to_date=='':
-                map_fun = """function(doc) {
-                if ((doc.type == 'visiting_group') && (doc.from_date >= '"""+ from_date+"""' ))
-                    emit(doc.from_date, doc);
-                    }"""
-            else:
-                to_date='2011-08-15'
-                map_fun = """function(doc) {
-                if ((doc.type == 'visiting_group') && (doc.from_date >= '"""+ from_date+"""' ) && (doc.to_date <= '""" + to_date+"""'))
-                    emit(doc.from_date, doc);
-                    }"""
-        visiting_groups_c = holly_couch.query(map_fun)
-        
-        #...conversion 
-        visiting_groups = []
-        for vgc in visiting_groups_c:
-            #o = BookingDayC(bdc)
-            visiting_groups.append(vgc.value)
-        return visiting_groups
+    
         
         
     def get_booking_days(self,  from_date='',  to_date=''):
@@ -189,7 +161,7 @@ class Calendar(BaseController):
         end_date_str = (datetime.date.today()+datetime.timedelta(5)).strftime('%Y-%m-%d')
         booking_days = self.get_booking_days(from_date=today_date_str,  to_date=end_date_str) #DBSession.query(booking.BookingDay).filter(and_('date >=\'' + today_date_str +'\'','date < \'' + end_date_str +'\'')).order_by(booking.BookingDay.date).all()
 
-        vgroups = self.get_visiting_groups(from_date=today_date_str,  to_date=end_date_str) #DBSession.query(booking.VisitingGroup).filter(or_('todate >= \''+ today_date_str +'\'','fromdate <= \''+ end_date_str  +'\'')).all()
+        vgroups = get_visiting_groups(from_date=today_date_str,  to_date=end_date_str) #DBSession.query(booking.VisitingGroup).filter(or_('todate >= \''+ today_date_str +'\'','fromdate <= \''+ end_date_str  +'\'')).all()
 
         group_info = dict()
         for b_day in booking_days:

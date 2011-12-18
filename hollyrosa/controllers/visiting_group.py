@@ -24,7 +24,7 @@ from repoze.what.predicates import Any, is_user, has_permission
 from formencode import validators
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID
+from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  get_visiting_groups,  get_visiting_groups_at_date,  get_visiting_groups_in_date_period,  get_visiting_groups_with_boknstatus,  get_visiting_group_names
 from sqlalchemy import and_
 import datetime
 
@@ -43,14 +43,25 @@ from hollyrosa.controllers.common import workflow_map,  DataContainer,  getRende
 
 __all__ = ['VisitingGroup']
 
-
+class VisitingGroupPropertyRow(object):
+    def __init__(self,  id,  property_row):
+        self.id= id
+        self.property = property_row['property']
+        self.unit =property_row['unit']
+        self.value = property_row['value']
+        self.description = property_row['description']
+        self.from_date = property_row['from_date']
+        self.to_date = property_row['to_date']
+        #self._sa_instance_state = 0
+    
+    
 class VisitingGroup(BaseController):
 
     @expose('hollyrosa.templates.visiting_group_view_all')
-    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
+    #@require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view(self, url):
-        visiting_groups = DBSession.query(booking.VisitingGroup).order_by('fromdate').all()
-        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
+        visiting_groups = get_visiting_groups() #DBSession.query(booking.VisitingGroup).order_by('fromdate').all()
+        visiting_group_names = [x['name'] for x in visiting_groups] #DBSession.query(booking.VisitingGroup.name).all()
         v_group_map = self.makeVGroupMap(visiting_group_names)        
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
         
@@ -58,9 +69,12 @@ class VisitingGroup(BaseController):
 
     def makeVGroupMap(self, visiting_group_names):
         v_group_map = dict()
-        for b in DBSession.query(booking.Booking.visiting_group_name).all():
-            if b not in visiting_group_names:
-                v_group_map[b] = 1
+        
+        visiting_group_names = get_visiting_group_names()
+        
+###        for b in DBSession.query(booking.Booking.visiting_group_name).all():
+###            if b not in visiting_group_names:
+###                v_group_map[b] = 1
 
         return v_group_map
         
@@ -69,18 +83,16 @@ class VisitingGroup(BaseController):
     @validate(validators={'fromdate':validators.DateValidator(not_empty=False), 'todate':validators.DateValidator(not_empty=False)})
     @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_date_range(self,  fromdate=None,  todate=None):
-        visiting_groups = DBSession.query(booking.VisitingGroup).filter(and_('todate <= \''+todate+'\'', 'fromdate >= \''+fromdate+'\'')).order_by('fromdate').all()        
-        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
-        v_group_map = self.makeVGroupMap(visiting_group_names)        
+        visiting_groups = get_visiting_groups_in_date_period(fromdate,  todate) #DBSession.query(booking.VisitingGroup).filter(and_('todate <= \''+todate+'\'', 'fromdate >= \''+fromdate+'\'')).order_by('fromdate').all()        
+        v_group_map = self.makeVGroupMap(None)        
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
 
         
     @expose('hollyrosa.templates.visiting_group_view_all')
     @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_all(self):
-        visiting_groups = DBSession.query(booking.VisitingGroup).order_by('fromdate').all()
-        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
-        v_group_map = self.makeVGroupMap(visiting_group_names)        
+        visiting_groups = get_visiting_groups() #DBSession.query(booking.VisitingGroup).order_by('fromdate').all()
+        v_group_map = self.makeVGroupMap(None)        
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
 
 
@@ -89,9 +101,9 @@ class VisitingGroup(BaseController):
     @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_boknstatus(self,  boknstatus=None):
         boknstatus=boknstatus[:4] # amateurish quick sanitation
-        visiting_groups = DBSession.query(booking.VisitingGroup).join(booking.VistingGroupProperty).filter(and_('property=\'boknstatus\'', 'value=\''+boknstatus+'\'')).order_by('visiting_group_fromdate').all()
+        visiting_groups = get_visiting_groups_with_boknstatus(boknstatus) #DBSession.query(booking.VisitingGroup).join(booking.VistingGroupProperty).filter(and_('property=\'boknstatus\'', 'value=\''+boknstatus+'\'')).order_by('visiting_group_fromdate').all()
                 
-        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
+        visiting_group_names = [] #DBSession.query(booking.VisitingGroup.name).all()
         v_group_map = self.makeVGroupMap(visiting_group_names)        
         
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
@@ -103,14 +115,14 @@ class VisitingGroup(BaseController):
     def view_period(self,  period=None):
 
         if period == '1an':
-            visiting_groups = DBSession.query(booking.VisitingGroup).filter('fromdate < \'2011-07-17\'').order_by('fromdate').all()
+            visiting_groups = get_visiting_groups(from_date='2011-01-01',  to_date='2011-07-16') #DBSession.query(booking.VisitingGroup).filter('fromdate < \'2011-07-17\'').order_by('fromdate').all()
         elif period == '2an':
-            visiting_groups = DBSession.query(booking.VisitingGroup).filter('todate > \'2011-07-16\'', ).order_by('fromdate').all()
+            visiting_groups = get_visiting_groups(from_date='2011-07-17',  to_date='2011-08-24') #DBSession.query(booking.VisitingGroup).filter('todate > \'2011-07-16\'', ).order_by('fromdate').all()
 
         else:
-            visiting_groups = DBSession.query(booking.VisitingGroup).order_by('fromdate').all()
+            visiting_groups = get_visiting_groups()# DBSession.query(booking.VisitingGroup).order_by('fromdate').all()
         
-        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
+        visiting_group_names = visiting_group_names = [x['name'] for x in visiting_groups]  #DBSession.query(booking.VisitingGroup.name).all()
         v_group_map = self.makeVGroupMap(visiting_group_names)        
         
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
@@ -120,8 +132,8 @@ class VisitingGroup(BaseController):
     @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group and their properties properties'))
     def view_today(self):
         at_date = datetime.datetime.today().strftime('%Y-%m-%d')
-        visiting_groups = DBSession.query(booking.VisitingGroup).filter(and_('todate >= \''+at_date+'\'', 'fromdate <= \''+at_date+'\'')).order_by('fromdate').all()
-        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
+        visiting_groups = get_visiting_groups_at_date(at_date) #DBSession.query(booking.VisitingGroup).filter(and_('todate >= \''+at_date+'\'', 'fromdate <= \''+at_date+'\'')).order_by('fromdate').all()
+        visiting_group_names = [x['name'] for x in visiting_groups]  #isiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
         v_group_map = self.makeVGroupMap(visiting_group_names)        
         
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
@@ -131,8 +143,8 @@ class VisitingGroup(BaseController):
     @validate(validators={'at_date':validators.DateValidator(not_empty=False)})
     @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group and their properties properties'))
     def view_at_date(self,  at_date=None):
-        visiting_groups = DBSession.query(booking.VisitingGroup).filter(and_('todate >= \''+at_date+'\'', 'fromdate <= \''+at_date+'\'')).order_by('fromdate').all()
-        visiting_group_names = DBSession.query(booking.VisitingGroup.name).all()
+        visiting_groups = get_visiting_groups_at_date(at_date) #DBSession.query(booking.VisitingGroup).filter(and_('todate >= \''+at_date+'\'', 'fromdate <= \''+at_date+'\'')).order_by('fromdate').all()
+        visiting_group_names = [x['name'] for x in visiting_groups] #DBSession.query(booking.VisitingGroup.name).all()
         v_group_map = self.makeVGroupMap(visiting_group_names)        
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
 
@@ -149,18 +161,17 @@ class VisitingGroup(BaseController):
             visiting_group = DataContainer(name='',  id=None,  info='')
             bookingS=[]
         else:
-            visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+str(id)).one()
+            visiting_group = holly_couch[id] #DBSession.query(booking.VisitingGroup).filter('id='+str(id)).one()
         
-            properties=[p for p in visiting_group.visiting_group_property]
+            properties=[p for p in visiting_group.visiting_group_properties]
             
-        #visiting_group.properties=properties
         return dict(visiting_group=visiting_group, properties=properties)
 
 
     @expose('hollyrosa.templates.show_visiting_group')
     @validate(validators={'id':validators.Int})
     @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def show_visiting_group(self,  id=None,  **kw):
+    def show_visiting_group_old(self,  id=None,  **kw):
         
         if None == id:
             visiting_group = DataContainer(name='',  id=None,  info='')
@@ -178,7 +189,7 @@ class VisitingGroup(BaseController):
     @expose('hollyrosa.templates.show_visiting_group')
     @validate(validators={'id':validators.Int})
     #@require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def show_visiting_group_c(self,  id=None,  **kw):
+    def show_visiting_group(self,  id=None,  **kw):
         
         if None == id:
             visiting_group = DataContainer(name='',  id=None,  info='')
@@ -208,11 +219,23 @@ class VisitingGroup(BaseController):
  
  
         if None == id:
-            visiting_group = DataContainer(name='',  id=None,  info='',  visiting_group_property=new_empty_visiting_group_property)
+            visiting_group = DataContainer(name='',  id=None,  info='',  visiting_group_properties=new_empty_visiting_group_property)
         elif id=='':
             visiting_group = DataContainer(name='',  id=None,  info='')
         else:
-            visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+str(id)).one()
+            visiting_group_c = holly_couch[id] #DBSession.query(booking.VisitingGroup).filter('id='+str(id)).one()
+            #cheat = DBSession.query(booking.VisitingGroup).filter('id=10').one()
+            
+            #...HERE MAKE OBJECT OF DICTIONARY OR IT WONT WORK WITH THE FORMS
+            vgps = []
+            for id,  vgp in visiting_group_c['visiting_group_properties'].items():
+                vgpx = DataContainer(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=vgp['from_date'],  to_date=vgp['to_date'])
+                vgps.append(vgpx)
+                
+            visiting_group = DataContainer(name=visiting_group_c['name'],  id=visiting_group_c['_id'],  info=visiting_group_c['info'],  visiting_group_properties=vgps
+                                           ,  contact_person=visiting_group_c['contact_person'],  contact_person_email=visiting_group_c['contact_person_email'],  contact_person_phone=visiting_group_c['contact_person_phone'], 
+                                           boknr=visiting_group_c['boknr'],  boknstatus=visiting_group_c['boknstatus'],  camping_location=visiting_group_c['camping_location'],  from_date=visiting_group_c['from_date'], to_date=visiting_group_c['to_date'])
+            
         return dict(visiting_group=visiting_group)
         
         
@@ -220,40 +243,40 @@ class VisitingGroup(BaseController):
     @expose()
     @validate(create_edit_visiting_group_form, error_handler=edit_visiting_group)
     @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change visiting group properties'))
-    def save_visiting_group_properties(self,  id=None,  name='', info='',  fromdate=None,  todate=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_property=None, camping_location='', boknr='', boknstatus=0):
+    def save_visiting_group_properties(self,  id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr='', boknstatus=0):
 
         if len(info)>8192:
             raise IOError, "I appologize for this dirty method of blocking the db from getting a too big text chunk, but I cannot let this propagate to the db."
 
         if None == id:
-            visiting_group = booking.VisitingGroup()
+            #visiting_group = booking.VisitingGroup()
             is_new = True
             visiting_group_c = dict(type='visiting_group')
             id_c = genUID()
         else:
-            visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+ str(id)).one()
+            #visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+ str(id)).one()
             id_c = str(id)
             visiting_group_c = holly_couch[id_c] #dict(type='visiting_group') # fix by lookup
             
             
             is_new= False
             
-        visiting_group.name = name
-        visiting_group.info = info
-        visiting_group.fromdate = fromdate
-        visiting_group.todate = todate
-        visiting_group.contact_person = contact_person
-        visiting_group.contact_person_email = contact_person_email
-        visiting_group.contact_person_phone = contact_person_phone
-        visiting_group.boknr = boknr
-        visiting_group.boknstatus = boknstatus
-        visiting_group.camping_location = camping_location
-        
+#        visiting_group.name = name
+#        visiting_group.info = info
+#        visiting_group.fromdate = fromdate
+#        visiting_group.todate = todate
+#        visiting_group.contact_person = contact_person
+#        visiting_group.contact_person_email = contact_person_email
+#        visiting_group.contact_person_phone = contact_person_phone
+#        visiting_group.boknr = boknr
+#        visiting_group.boknstatus = boknstatus
+#        visiting_group.camping_location = camping_location
+#        
         visiting_group_c['type'] = 'visiting_group'
         visiting_group_c['name'] = name
         visiting_group_c['info'] = info
-        visiting_group_c['fromdate'] = str(fromdate)
-        visiting_group_c['todate'] = str(todate)
+        visiting_group_c['from_date'] = str(from_date)
+        visiting_group_c['to_date'] = str(to_date)
         visiting_group_c['contact_person'] = contact_person
         visiting_group_c['contact_person_email'] = contact_person_email
         visiting_group_c['contact_person_phone'] = contact_person_phone
@@ -266,16 +289,16 @@ class VisitingGroup(BaseController):
         
         
         
-        if is_new:
-            DBSession.add(visiting_group)
-            
+#        if is_new:
+#            DBSession.add(visiting_group)
+#            
         #...remove non-used params !!!! Make a dict and see which are used, remove the rest
         unused_params = {}
-        for k in visiting_group.visiting_group_property:
-            unused_params[str(k.id)] = k
+#        for k in visiting_group.visiting_group_property:
+#            unused_params[str(k.id)] = k
         
         
-        for param in visiting_group_property:
+        for param in visiting_group_properties:
             is_new_param = False
             if param['property'] != '' and param['property'] != None:
                 if param['id'] == '':
@@ -292,30 +315,32 @@ class VisitingGroup(BaseController):
                     
                     del unused_params[param['id']]
                     
-                visiting_group_property_c[param['id']] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  fromdate=str(param['fromdate']),  todate=str(param['todate']))
+                visiting_group_property_c[param['id']] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
                 
-                new_param.property = param['property']
-                new_param.value = param.get('value','')
-                new_param.description = param.get('description','')
-                new_param.unit = param.get('unit','')
-                new_param.fromdate = param['fromdate']
-                new_param.todate = param['todate']
+#                new_param.property = param['property']
+#                new_param.value = param.get('value','')
+#                new_param.description = param.get('description','')
+#                new_param.unit = param.get('unit','')
+#                new_param.fromdate = param['fromdate']
+#                new_param.todate = param['todate']
+#                
+#                #...how to add param to visiting group?
+#                new_param.visiting_group = visiting_group
+#                
+#                if is_new_param:
+#                    DBSession.add(new_param)
                 
-                #...how to add param to visiting group?
-                new_param.visiting_group = visiting_group
-                
-                if is_new_param:
-                    DBSession.add(new_param)
-                
-        for unused in unused_params.values():
-            DBSession.delete(unused)
+#        for unused in unused_params.values():
+#            DBSession.delete(unused)
         
         
         #...now we have to update all cached content, so we need all bookings that belong to this visiting group
-        bookings = DBSession.query(booking.Booking).filter('visiting_group_name=\'' + name + '\'').all()
-        for tmp_booking in bookings:
-            tmp_booking.cache_content = computeCacheContent(DBSession, tmp_booking.content, tmp_booking.visiting_group.id)
         
+        # IMPORTANT TO FIX LATER
+#######        bookings = DBSession.query(booking.Booking).filter('visiting_group_name=\'' + name + '\'').all()
+#######        for tmp_booking in bookings:
+#######            tmp_booking.cache_content = computeCacheContent(DBSession, tmp_booking.content, tmp_booking.visiting_group.id)
+#######        
         #...add visiting group properties
         #...differ between save and new! Visiting group properties should be something like a dict in the dict.
         #holly_couch.save({'type':'visiting_group',  'name':name}) # we need a better way to come up with unique ids!
@@ -337,12 +362,12 @@ class VisitingGroup(BaseController):
             pass
             #visiting_group = booking.VisitingGroup()
             
-        else:
-            visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+ str(id)).one()
-            
-            
-        #...WARNING: bookings will remain. Perhaps a non-destructive delete instead?
-        DBSession.delete(visiting_group)
+#        else:
+#            visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+ str(id)).one()
+#            
+#            
+#        #...WARNING: bookings will remain. Perhaps a non-destructive delete instead?
+#        DBSession.delete(visiting_group)
         raise redirect('/visiting_group/view_all')
         
         
