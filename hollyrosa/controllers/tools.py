@@ -333,19 +333,19 @@ class Tools(BaseController):
         sch = dict()
         for ac in activity:
             tmp = [ac.title]
-            slrp = dict(time_from='09:00:00',  time_to='12:00:00',  duration='03:00:00' ,  id=pos)
+            slrp = dict(time_from='09:00:00',  time_to='12:00:00',  duration='03:00:00' ,  slot_id=pos)
             pos += 1
             tmp.append(slrp)
             
-            slrp = dict(time_from='13:00:00',  time_to='17:00:00',  duration='03:00:00' ,  id=pos)
+            slrp = dict(time_from='13:00:00',  time_to='17:00:00',  duration='03:00:00' ,  slot_id=pos)
             pos += 1
             tmp.append(slrp)
             
-            slrp = dict(time_from='19:00:00',  time_to='21:00:00',  duration='02:00:00' ,  id=pos)
+            slrp = dict(time_from='19:00:00',  time_to='21:00:00',  duration='02:00:00' ,  slot_id=pos)
             pos += 1
             tmp.append(slrp)
 
-            slrp = dict(time_from='21:00:00',  time_to='23:00:00',  duration='02:00:00' ,  id=pos)
+            slrp = dict(time_from='21:00:00',  time_to='23:00:00',  duration='02:00:00' ,  slot_id=pos)
             pos += 1
             tmp.append(slrp)
 
@@ -353,6 +353,7 @@ class Tools(BaseController):
         s['schema'] = sch
         s = holly_couch['day_schema.1'] = s
         raise redirect('/')
+        
         
     @expose()
     def update_booking_days(self):
@@ -385,3 +386,49 @@ class Tools(BaseController):
 
             holly_couch['visiting_group.'+str(vg.id)] = vg_c
         raise redirect('/')
+        
+        #...need to move all bookings into couch !
+        
+        
+    @expose()
+    def transfer_bookings(self):
+        bookings = DBSession.query(booking.Booking).all()
+        
+        for b in bookings:
+            bc = holly_couch['booking.'+str(b.id)]
+            #bc = dict(type='booking')
+            bc['type'] = 'booking'
+            bc['content'] = b.content
+            bc['visiting_group_name'] = b.visiting_group_name
+            bc['requested_date'] = str(b.requested_date)
+            bc['valid_from'] = str(b.valid_from)
+            bc['valid_to'] = str(b.valid_to)
+            bc['booking_state']  = b.booking_state
+            bc['activity_id'] = 'activity.' + str(b.activity_id)
+            bc['last_changed_by_id'] = 'user.'+str(b.last_changed_by_id)
+            bc['approved_by_id'] = 'user.'+str(b.last_changed_by_id)
+            bc['visiting_group_id'] = 'visiting_group.' + str(b.visiting_group_id) 
+            bc['slot_id'] = 'slot_id.'+str(b.slot_row_position_id)
+            bc['booking_day_id'] = 'booking_day.' + str(b.booking_day_id)
+            bc['misc'] = b.misc
+            bc['cache_content'] = b.cache_content
+            
+        
+            holly_couch['booking.'+str(b.id)] = bc
+        raise redirect('/')
+        
+    @expose()
+    def transfer_slot_state(self):
+        sts = DBSession.query(booking.SlotRowPositionState).all()
+        
+        for st in sts:
+            #s = dict(type='slot_state')
+            s = holly_couch['slot_state.'+str(id)]
+            s['type'] = 'slot_state'
+            s['level'] = st.level
+            s['slot_id'] = 'slot.'+str(st.slot_row_position_id)
+            s['booking_day_id'] = 'booking_day.'+str(st.booking_day_id)
+            holly_couch['slot_state.'+str(id)] = s
+        
+        raise redirect('/')
+

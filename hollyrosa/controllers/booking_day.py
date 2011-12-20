@@ -254,16 +254,64 @@ class BookingDay(BaseController):
         return tmp
         
         
-    def getActivitySlotPositionsMap(self,  slot_rows):
-        try:
-            tmp = self._activity_slot_position_map
-        except AttributeError:
-            self._activity_slot_position_map = dict()
-            for slr in slot_rows:
-                self._activity_slot_position_map[slr.activity_id] = [slrp for slrp in slr.slot_row_position]
-            tmp = self._activity_slot_position_map
+    def getActivitySlotPositionsMap(self,  day_schema):
+        """what do we map?"""
+        #print slot_rows
+        
+        
+        # disable caching for now
+        #try:
+        #    tmp = self._activity_slot_position_map
+        #except AttributeError:
+        
+        slot_row_schema = day_schema['schema']
+        
+        return slot_row_schema
             
+            
+        # think this can be removed    
+        self._activity_slot_position_map = dict()
+        for tmp_activity_id, tmp_slots in slot_row_schema.items():
+            tmp_activity = activities[tmp_activity_id]
+            tmp_row = DataContainer(activity_id=tmp_activity_id,  name=tmp_activity['title'],  bgcolor=tmp_activity['bgcolor'],  slots=tmp_slots)
+            
+            self._activity_slot_position_map[  tmp_activity_id  ] = tmp_row #[slrp for slrp in slr[1].values()]
+        
+        tmp = self._activity_slot_position_map
         return tmp
+        
+
+    def fn_cmp_slot_row(self,  a,  b):
+        return cmp(a.activity_id,  b.activity_id)
+        
+        
+    def make_slot_rows__of_day_schema(self,  day_schema):
+        
+        map_fun = '''function(doc) {
+        if (doc.type == 'activity')
+        emit(doc._id, doc);
+        }'''
+        
+        activities = holly_couch.query(map_fun)
+        
+        activities_map = dict()
+        for a in activities:
+            activities_map[a.key] = a.value
+        
+        slot_row_schema = day_schema['schema']
+        
+        slot_rows = list()
+        
+        for tmp_activity_id, tmp_slots in slot_row_schema.items():
+            tmp_activity = activities_map[tmp_activity_id]
+            
+            tmp_row = DataContainer(activity_id=tmp_activity_id,  title=tmp_activity['title'],  bg_color=tmp_activity['bg_color'],  capacity=tmp_activity['capacity'],  slot_row_position=[ DataContainer(id=s['slot_id'],  time_from=s['time_from'],  time_to=s['time_to'],  duration=s['duration']) for s in tmp_slots[1:]])
+            
+            slot_rows.append(tmp_row)
+        
+        slot_rows.sort(self.fn_cmp_slot_row)
+        return slot_rows
+        
         
         
     def view(self, url):
@@ -302,12 +350,18 @@ class BookingDay(BaseController):
         """Show a complete booking day"""
         
         # TODO: we really need to get only the slot rows related to our booking day schema or things will go wrong at some point when we have more than one schema to work with.
-        slot_rows=self.getAllSlotRows() # DBSession.query(booking.SlotRow).options(eagerload('activity'))
+        ###slot_rows=self.getAllSlotRows()
         
         today_sql_date = datetime.datetime.today().date().strftime("%Y-%m-%d")
         if day_id != None:
-            booking_day_o = DBSession.query(booking.BookingDay).filter('id='+str(day_id)).one()
-        
+            #booking_day_o = DBSession.query(booking.BookingDay).filter('id=61').one() #+str(day_id)).one()
+            booking_day_o = holly_couch[day_id]
+            day_schema_id = booking_day_o['day_schema_id']
+            day_schema = holly_couch[day_schema_id]
+            slot_rows = []
+            
+            slot_rows = self.make_slot_rows__of_day_schema(day_schema)
+                
         elif day=='today':
             
             #...we need to get all slots for 'today'
@@ -316,10 +370,10 @@ class BookingDay(BaseController):
         
         else: # we're guessing day is a date options(eagerload_all('')).
             booking_day_o = DBSession.query(booking.BookingDay).filter('date=\''+str(day)+'\'').one()
-        
+            
         #...first, get booking_day for today
-        bookings = DBSession.query(booking.Booking).filter(and_('booking_day_id='+str(booking_day_o.id), 'booking_state > -100' )).all()
-        
+        #######bookings = DBSession.query(booking.Booking).filter(and_('booking_day_id='+str(61), 'booking_state > -100' )).all()
+        bookings = []
         
         new_bookings = dict()
         for s in bookings:
@@ -328,22 +382,35 @@ class BookingDay(BaseController):
             new_bookings[s.slot_row_position_id] = ns
             
         #...find all unscheduled bookings
-        showing_sql_date = booking_day_o.date.strftime("%Y-%m-%d")
+        showing_sql_date = str(booking_day_o['date']) #.strftime("%Y-%m-%d")
         unscheduled_bookings = DBSession.query(booking.Booking).options(eagerload('slot_row_position')).filter(or_(and_('booking_day_id is null',  'valid_to >= \'' +showing_sql_date + '\'',  'valid_from <= \''+showing_sql_date + '\'', 'booking_state > -100'), and_('booking_day_id is null',  'valid_to is null', 'booking_state > -100')  )).all()
+        unscheduled_bookings = []
         
         #...we need a mapping from activity to a list / tupple slot_row_position
-        activity_slot_position_map = self.getActivitySlotPositionsMap(slot_rows) #dict()
+        #
+        #   the new version should be a list of rows. Each row is either a DataContainer or a dict (basically the same...)
+        #    We need to know activity name, color, id and group (which we get from the activities) and we need a list of slot positions
+        activity_slot_position_map = self.getActivitySlotPositionsMap(day_schema) 
         #for slr in slot_rows:
         #    activity_slot_position_map[slr.activity_id] = [slrp for slrp in slr.slot_row_position]
         
         #...compute all blockings, create a dict mapping slot_row_position_id to actual state
-        blockings = DBSession.query(booking.SlotRowPositionState).filter('booking_day_id='+str(booking_day_o.id)).all()
+        #####blockings = DBSession.query(booking.SlotRowPositionState).filter('booking_day_id='+str(61)).all()
+        blockings = []
+        
         blockings_map = dict()
         for b in blockings:
             blockings_map[b.slot_row_position_id] = b
             
         days = self.getAllDays()
-        activity_groups = self.getAllActivityGroups() #DBSession.query(booking.ActivityGroup.id,  booking.ActivityGroup.title).all()
+        activity_groups = self.getAllActivityGroups() 
+            
+        for k, x in new_bookings.items():
+            print 'x', k,  x
+            for xx in x:
+                print 'XXXX',xx.activity_id
+                if xx.activity_id[:9] != 'activity.':
+                    print 'ERROR',  xx 
             
         return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups)
         
@@ -553,7 +620,7 @@ class BookingDay(BaseController):
     @expose('hollyrosa.templates.view_activity')
     @validate(validators={'activity_id':validators.Int(not_empty=True)})
     def view_activity(self,  activity_id=None):
-        return dict(activity=DBSession.query(booking.Activity).filter('id=' + str(activity_id)).one())
+        return dict(activity=holly_couch[activity_id])
         
     
     @expose('hollyrosa.templates.edit_activity')

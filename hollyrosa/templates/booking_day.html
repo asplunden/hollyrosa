@@ -27,7 +27,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa - ${booking_day.date.strftime("%A %d %B %Y")}</title>
+  <!-- <title>Hollyrosa - ${booking_day.date.strftime("%A %d %B %Y")}</title> -->
+  <title>Hollyrosa - ${booking_day.date}</title>
   
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.5.0/dijit/themes/tundra/tundra.css')}" />
 <style type="text/css">
@@ -123,7 +124,7 @@ dojo.addOnLoad(set_save_visible_handlers);
 
 function navigation_calendar_clicked(x) {
     var selected_date = dojo.date.locale.format(x, {datePattern: "yyyy-MM-dd", selector: "date"});
-    if ("${booking_day.date.strftime('%Y-%m-%d')}" != selected_date) {
+    if ("${booking_day.date}" != selected_date) {
         window.location.assign('day?day=' + selected_date);
     }
 }
@@ -142,7 +143,7 @@ dojo.addOnLoad(function() {
 dojo.addOnLoad(function() {
     var tools_link_elem = dojo.byId('toolslink');
     var href = dojo.attr(tools_link_elem, "href");
-    dojo.attr(tools_link_elem, "href", href + "?day=" + "${booking_day.date.strftime('%Y-%m-%d')}" );
+    dojo.attr(tools_link_elem, "href", href + "?day=" + "${booking_day.date}" );
 });
 
 
@@ -154,7 +155,7 @@ dojo.addOnLoad(function() {
     <div id="booking_day_hide_slot_rows_control">
         <ul style="display:inline; list-style-type: none;   position:relative;">
         <li>
-            <div dojoType="dijit.Calendar" id="navigation_calendar" value="${booking_day.date.strftime('%Y-%m-%d')}">Calendar widget if dijit works</div>
+            <div dojoType="dijit.Calendar" id="navigation_calendar" value="${booking_day.date}">Calendar widget if dijit works</div>
         </li>
         <li>
         <form id="bday_hide_form" name="bday_hide_form" method="get" class="bday_hide_form">
@@ -171,7 +172,8 @@ dojo.addOnLoad(function() {
     
     
 
-    <h2>${booking_day.date.strftime("%A %d %B %Y")}</h2>
+    <!--<h2>${booking_day.date.strftime("%A %d %B %Y")}</h2>-->
+    <h2>${booking_day.date}</h2>
 
     <div class="note">${HTML(booking_day.note)}
     <br/>
@@ -190,7 +192,8 @@ dojo.addOnLoad(function() {
             <li><a href="${tg.url('edit_booking', booking_day_id=booking_day.id, id=booking.id)}">edit</a></li>
             <li><a href="${tg.url('view_booked_booking', return_to_day_id=booking_day.id, id=booking.id)}">view</a></li>
            <li><a href="${tg.url('delete_booking', booking_day_id=booking_day.id, booking_id=booking.id)}">delete</a></li>
-                
+            
+            
             <li py:for="tt in [t for t in activity_slot_position_map[booking.activity_id]  if not blockings_map.has_key(t.id)]">
         <a href="${tg.url('schedule_booking', booking_id=booking.id, booking_day_id=booking_day.id, slot_row_position_id=tt.id)}">[${tt.time_from.strftime('%H:%M')} - ${tt.time_to.strftime('%H:%M')}]</a></li>
     </ul>
@@ -208,9 +211,9 @@ dojo.addOnLoad(function() {
     <div class="booking_day_overview_slots">After hours</div>
   </div>
 
-
-    <div py:for="slot_row in slot_rows" hollyrosa:acgid="${slot_row.activity.activity_group_id}"  class="booking_day_overview_slot_row" style="background: ${slot_row.activity.bg_color};">
-        <div class="booking_day_overview_activity"><a href="${tg.url('view_activity', activity_id=slot_row.activity.id)}">${slot_row.activity.title}</a><a name="activity_row_id_${slot_row.activity.id}" class="ag_anchor">&nbsp;</a><span py:if="0 != slot_row.activity.capacity">[${str(slot_row.activity.capacity)}]</span></div>
+    <!-- <div py:for="slot_row in slot_rows" hollyrosa:acgid="${slot_row.activity.activity_group_id}"  class="booking_day_overview_slot_row" style="background: ${slot_row.activity.bg_color};"> -->
+    <div py:for="slot_row in slot_rows" hollyrosa:acgid="${slot_row.activity_id}"  class="booking_day_overview_slot_row" style="background: ${slot_row.bg_color};">
+        <div class="booking_day_overview_activity"><a href="${tg.url('view_activity', activity_id=slot_row.activity_id)}">${slot_row.title}</a><a name="activity_row_id_${slot_row.activity_id}" class="ag_anchor">&nbsp;</a><span py:if="0 != slot_row.capacity">[${str(slot_row.capacity)}]</span></div>
         <div py:for="slot_position in slot_row.slot_row_position" hollyrosa:w="$slot_position.time_from - $slot_position.time_to" class="booking_day_overview_slots ${['','slot_row_position_blocked'][blockings_map.has_key(slot_position.id)]}">
         
             <!-- we may have several slot bookings-->
