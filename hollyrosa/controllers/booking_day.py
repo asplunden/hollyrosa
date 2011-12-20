@@ -331,9 +331,26 @@ class BookingDay(BaseController):
             ns = bookings.get(new_booking.slot_id, list())
             ns.append(new_booking)
             bookings[new_booking.slot_id] = ns
-        
-        
+            
         return bookings
+        
+        
+    def get_slot_blockings_for_booking_day(self,  day_id):
+        map_fun = """function(doc) {
+        if (doc.type == 'slot_state') {
+            if (doc.booking_day_id == '""" + day_id+  """')  {
+                emit(doc._id, doc);
+                }
+            }
+        }"""
+        
+        blockings_map = dict()
+        for x in holly_couch.query(map_fun):
+            b = x.value
+            # fix replace hack later. slot_id. and slot. 
+            blockings_map[b['slot_id'].replace('slot','slot_id')] = DataContainer(level=b['level'],  booking_day_id=b['booking_day_id'],  slot_id=b['slot_id'])
+            
+        return blockings_map
         
         
     def view(self, url):
@@ -411,12 +428,12 @@ class BookingDay(BaseController):
         
         #...compute all blockings, create a dict mapping slot_row_position_id to actual state
         #####blockings = DBSession.query(booking.SlotRowPositionState).filter('booking_day_id='+str(61)).all()
-        blockings = []
+        blockings_map = self.get_slot_blockings_for_booking_day(day_id)
         
-        blockings_map = dict()
-        for b in blockings:
-            blockings_map[b.slot_row_position_id] = b
-            
+        #blockings_map = dict()
+        #for b in blockings:
+        #    blockings_map[b.slot_row_position_id] = b
+        print blockings_map
         days = self.getAllDays()
         activity_groups = self.getAllActivityGroups() 
             

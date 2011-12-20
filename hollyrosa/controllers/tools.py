@@ -422,13 +422,13 @@ class Tools(BaseController):
         sts = DBSession.query(booking.SlotRowPositionState).all()
         
         for st in sts:
-            #s = dict(type='slot_state')
-            s = holly_couch['slot_state.'+str(id)]
+            s = dict(type='slot_state')
+            #s = holly_couch['slot_state.'+str(st.id)]
             s['type'] = 'slot_state'
             s['level'] = st.level
             s['slot_id'] = 'slot.'+str(st.slot_row_position_id)
             s['booking_day_id'] = 'booking_day.'+str(st.booking_day_id)
-            holly_couch['slot_state.'+str(id)] = s
+            holly_couch['slot_state.'+str(st.id)] = s
         
         raise redirect('/')
 
