@@ -305,13 +305,35 @@ class BookingDay(BaseController):
         for tmp_activity_id, tmp_slots in slot_row_schema.items():
             tmp_activity = activities_map[tmp_activity_id]
             
-            tmp_row = DataContainer(activity_id=tmp_activity_id,  title=tmp_activity['title'],  bg_color=tmp_activity['bg_color'],  capacity=tmp_activity['capacity'],  slot_row_position=[ DataContainer(id=s['slot_id'],  time_from=s['time_from'],  time_to=s['time_to'],  duration=s['duration']) for s in tmp_slots[1:]])
+            tmp_row = DataContainer(activity_id=tmp_activity_id,  title=tmp_activity['title'],  bg_color=tmp_activity['bg_color'],  capacity=tmp_activity['capacity'],  slot_row_position=[ DataContainer(id='slot_id.'+str(s['slot_id']),  time_from=s['time_from'],  time_to=s['time_to'],  duration=s['duration']) for s in tmp_slots[1:]])
             
             slot_rows.append(tmp_row)
         
         slot_rows.sort(self.fn_cmp_slot_row)
         return slot_rows
         
+    def get_non_deleted_bookings_for_booking_day(self,  day_id):
+        map_fun = """function(doc) {
+        if (doc.type == 'booking') {
+            if ((doc.booking_day_id == '""" + day_id+  """') && (doc.booking_state > -100)) {
+                emit(doc._id, doc);
+                }
+            }
+        }"""
+        bookings_c = holly_couch.query(map_fun)
+        
+        bookings = dict()
+        for x in bookings_c:
+            b = x.value
+            new_booking = DataContainer(id=b['_id'],  content=b['content'],  cache_content=b['cache_content'],  
+                                        booking_state=b['booking_state'],  visiting_group_id=b['visiting_group_id'],  
+                                        visiting_group_name=b['visiting_group_name'],  valid_from=b['valid_from'],  valid_to=b['valid_to'],  requested_date=b['requested_date'],  last_changed_by_id=b['last_changed_by_id'],  slot_id=b['slot_id'])
+            ns = bookings.get(new_booking.slot_id, list())
+            ns.append(new_booking)
+            bookings[new_booking.slot_id] = ns
+        
+        
+        return bookings
         
         
     def view(self, url):
@@ -350,7 +372,6 @@ class BookingDay(BaseController):
         """Show a complete booking day"""
         
         # TODO: we really need to get only the slot rows related to our booking day schema or things will go wrong at some point when we have more than one schema to work with.
-        ###slot_rows=self.getAllSlotRows()
         
         today_sql_date = datetime.datetime.today().date().strftime("%Y-%m-%d")
         if day_id != None:
@@ -358,10 +379,9 @@ class BookingDay(BaseController):
             booking_day_o = holly_couch[day_id]
             day_schema_id = booking_day_o['day_schema_id']
             day_schema = holly_couch[day_schema_id]
-            slot_rows = []
             
             slot_rows = self.make_slot_rows__of_day_schema(day_schema)
-                
+            
         elif day=='today':
             
             #...we need to get all slots for 'today'
@@ -373,13 +393,8 @@ class BookingDay(BaseController):
             
         #...first, get booking_day for today
         #######bookings = DBSession.query(booking.Booking).filter(and_('booking_day_id='+str(61), 'booking_state > -100' )).all()
-        bookings = []
+        new_bookings = self.get_non_deleted_bookings_for_booking_day(day_id)
         
-        new_bookings = dict()
-        for s in bookings:
-            ns = new_bookings.get(s.slot_row_position_id, list())
-            ns.append(s)
-            new_bookings[s.slot_row_position_id] = ns
             
         #...find all unscheduled bookings
         showing_sql_date = str(booking_day_o['date']) #.strftime("%Y-%m-%d")
@@ -405,12 +420,7 @@ class BookingDay(BaseController):
         days = self.getAllDays()
         activity_groups = self.getAllActivityGroups() 
             
-        for k, x in new_bookings.items():
-            print 'x', k,  x
-            for xx in x:
-                print 'XXXX',xx.activity_id
-                if xx.activity_id[:9] != 'activity.':
-                    print 'ERROR',  xx 
+       
             
         return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups)
         
