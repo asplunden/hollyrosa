@@ -408,8 +408,10 @@ class Tools(BaseController):
             bc['last_changed_by_id'] = 'user.'+str(b.last_changed_by_id)
             bc['approved_by_id'] = 'user.'+str(b.last_changed_by_id)
             bc['visiting_group_id'] = 'visiting_group.' + str(b.visiting_group_id) 
-            bc['slot_id'] = 'slot_id.'+str(b.slot_row_position_id)
+            bc['slot_id'] = 'slot.'+str(b.slot_row_position_id)
             bc['booking_day_id'] = 'booking_day.' + str(b.booking_day_id)
+            if None == b.booking_day_id:
+                bc['booking_day_id'] = ''
             bc['misc'] = b.misc
             bc['cache_content'] = b.cache_content
             

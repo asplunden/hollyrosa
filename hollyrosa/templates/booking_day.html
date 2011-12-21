@@ -187,15 +187,15 @@ dojo.addOnLoad(function() {
     </ul>
     
     <ul>
-        <li py:for="booking in unscheduled_bookings" hollyrosa:acgid="${booking.activity.activity_group.id}" class="unscheduled_booking">${booking.activity.title} <span class="group_info">${booking.visiting_group_name}</span>  ${getRenderContent(booking)}, <span class="requested_date">requested date ${booking.requested_date}</span> <span class="date_info">  [${booking.valid_from}  - ${booking.valid_to}]</span> 
+        <li py:for="booking in unscheduled_bookings" hollyrosa:acgid="${booking.activity_group_id}" class="unscheduled_booking">${booking.activity_title} <span class="group_info">${booking.visiting_group_name}</span>  ${getRenderContent(booking)}, <span class="requested_date">requested date ${booking.requested_date}</span> <span class="date_info">  [${booking.valid_from}  - ${booking.valid_to}]</span> 
        <ul class="any_menu context_inline_menu">
             <li><a href="${tg.url('edit_booking', booking_day_id=booking_day.id, id=booking.id)}">edit</a></li>
             <li><a href="${tg.url('view_booked_booking', return_to_day_id=booking_day.id, id=booking.id)}">view</a></li>
            <li><a href="${tg.url('delete_booking', booking_day_id=booking_day.id, booking_id=booking.id)}">delete</a></li>
             
             
-            <li py:for="tt in [t for t in activity_slot_position_map[booking.activity_id]  if not blockings_map.has_key(t.id)]">
-        <a href="${tg.url('schedule_booking', booking_id=booking.id, booking_day_id=booking_day.id, slot_row_position_id=tt.id)}">[${tt.time_from.strftime('%H:%M')} - ${tt.time_to.strftime('%H:%M')}]</a></li>
+            <li py:for="tt in [t for t in activity_slot_position_map[booking.activity_id][1:]  if not blockings_map.has_key(t['slot_id'])]">
+        <a href="${tg.url('schedule_booking', booking_id=booking.id, booking_day_id=booking_day.id, slot_row_position_id=tt.slot_id)}">[${tt.time_from} - ${tt.time_to}]</a></li>
     </ul>
     </li></ul>
     
