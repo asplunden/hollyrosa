@@ -65,11 +65,11 @@ __all__ = ['BookingDay',  'Calendar']
     
 
 def getBookingDay(booking_day_id):
-    return holly_couch[booking_day_id] #DBSession.query(booking.BookingDay).filter('id='+str(booking_day_id)).one()
+    return holly_couch[booking_day_id] 
 
 
 def getBooking(id):
-    return holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
+    return holly_couch[id]
     
 
 
@@ -228,26 +228,36 @@ class BookingDay(BaseController):
         try:
             tmp = self._all_days
         except AttributeError:
-            self._all_days = DBSession.query(booking.BookingDay.id,  booking.BookingDay.date).all()
+            map_fun = '''function(doc) {
+            if (doc.type == 'booking_day')
+                emit(doc._id, doc.date);
+            }'''
+            all_days_c = holly_couch.query(map_fun) #DBSession.query(booking.BookingDay.id,  booking.BookingDay.date).all()
+            self._all_days = [DataContainer(id=d.key,  date=d.value) for d in all_days_c]
+            
             tmp = self._all_days
+        
+        print 'ALL DAYS',  tmp
         return tmp
         
-        
-#    def getAllSlotRows(self):
-#        try:
-#            tmp = self._slot_rows
-#        except AttributeError:
-#            self._slot_rows = DBSession.query(booking.SlotRow).order_by(booking.SlotRow.id).options(eagerload('activity'), eagerload('slot_row_position')).all()
-#            tmp = self._slot_rows
-#        return tmp
         
     
     def getAllActivityGroups(self):
         try:
             tmp = self._activity_groups
         except AttributeError:
-            self._activity_groups = DBSession.query(booking.ActivityGroup.id,  booking.ActivityGroup.title).all()
+            #self._activity_groups = DBSession.query(booking.ActivityGroup.id,  booking.ActivityGroup.title).all()
+            map_fun = '''function(doc) {
+            if (doc.type == 'activity_group')
+                emit(doc._id, doc.title);
+            }'''
+            all_groups_c = holly_couch.query(map_fun) #DBSession.query(booking.BookingDay.id,  booking.BookingDay.date).all()
+            self._activity_groups = [DataContainer(id=d.key,  title=d.value) for d in all_groups_c]
+            
+            
             tmp = self._activity_groups
+        
+        print 'ACG', tmp
         return tmp
         
         
@@ -279,7 +289,8 @@ class BookingDay(BaseController):
         
     
     def fn_cmp_slot_row(self,  a,  b):
-        return cmp(a.activity_id,  b.activity_id)
+        return cmp(a.zorder,  b.zorder)
+        
         
     def get_activities_map(self):
         map_fun = '''function(doc) {
@@ -303,7 +314,7 @@ class BookingDay(BaseController):
         for tmp_activity_id, tmp_slots in slot_row_schema.items():
             tmp_activity = activities_map[tmp_activity_id]
             
-            tmp_row = DataContainer(activity_id=tmp_activity_id,  title=tmp_activity['title'],  bg_color=tmp_activity['bg_color'],  capacity=tmp_activity['capacity'],  slot_row_position=[ DataContainer(id='slot.'+str(s['slot_id']),  time_from=s['time_from'],  time_to=s['time_to'],  duration=s['duration']) for s in tmp_slots[1:]])
+            tmp_row = DataContainer(activity_id=tmp_activity_id,  zorder=tmp_slots[0]['zorder'] , title=tmp_activity['title'],  activity_group_id=tmp_activity['activity_group_id'],  bg_color=tmp_activity['bg_color'],  capacity=tmp_activity['capacity'],  slot_row_position=[ DataContainer(id=str(s['slot_id']),  time_from=s['time_from'],  time_to=s['time_to'],  duration=s['duration']) for s in tmp_slots[1:]])
             
             slot_rows.append(tmp_row)
         
@@ -374,7 +385,7 @@ class BookingDay(BaseController):
                                         visiting_group_name=b['visiting_group_name'],  valid_from=b['valid_from'],  valid_to=b['valid_to'],  requested_date=b['requested_date'],  last_changed_by_id=b['last_changed_by_id'],  slot_id=b['slot_id'],  activity_title=a['title'],  activity_group_id=a['activity_group_id'],  activity_id=a_id)
             unscheduled_bookings.append(new_booking)
         #DBSession.query(booking.Booking).options(eagerload('slot_row_position')).filter(or_(and_('booking_day_id is null',  'valid_to >= \'' +showing_sql_date + '\'',  'valid_from <= \''+showing_sql_date + '\'', 'booking_state > -100'), and_('booking_day_id is null',  'valid_to is null', 'booking_state > -100')  )).all()
-        print unscheduled_bookings
+        #print unscheduled_bookings
         return unscheduled_bookings
         
         
@@ -450,8 +461,6 @@ class BookingDay(BaseController):
         unscheduled_bookings = self.get_unscheduled_bookings_for_today(showing_sql_date,  activities_map)
         
         
-        
-        
         #...compute all blockings, create a dict mapping slot_row_position_id to actual state
         #####blockings = DBSession.query(booking.SlotRowPositionState).filter('booking_day_id='+str(61)).all()
         blockings_map = self.get_slot_blockings_for_booking_day(day_id)
@@ -463,7 +472,6 @@ class BookingDay(BaseController):
         days = self.getAllDays()
         activity_groups = self.getAllActivityGroups() 
             
-       
             
         return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups)
         
@@ -595,11 +603,11 @@ class BookingDay(BaseController):
     def view_booked_booking(self,  return_to_day_id=None,  id=None):
        
         #...find booking day and booking row
-        booking_o = DBSession.query(booking.Booking).filter('id='+str(id)).one()
+        booking_o = holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
         booking_o.return_to_day_id = return_to_day_id
-        booking_day = booking_o.booking_day
-        slot_position = booking_o.slot_row_position
-        history = booking_o.booking_history
+        booking_day = holly_couch[booking_o['booking_day_id']] #booking_o.booking_day
+        slot_position = booking_o['slot_id'] #slot_row_position
+        history = []#booking_o.booking_history
         history.reverse()
         return dict(booking_day=booking_day,  slot_position=slot_position, booking=booking_o,  workflow_map=workflow_map,  history=history,  change_op_map=change_op_map,  getRenderContent=getRenderContent)
         
@@ -611,7 +619,7 @@ class BookingDay(BaseController):
         tmpl_context.form = create_edit_book_slot_form
         
         #...find booking day and booking row
-        booking_o = DBSession.query(booking.Booking).filter('id='+str(id)).one()
+        booking_o = holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
         booking_o.return_to_day_id = return_to_day_id
         booking_day = booking_o.booking_day
         slot_position = booking_o.slot_row_position
@@ -681,13 +689,13 @@ class BookingDay(BaseController):
     @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change activity information'))
     def edit_activity(self, activity_id=None,  **kw):
         tmpl_context.form = create_edit_activity_form
-        activity_groups = DBSession.query(booking.ActivityGroup.id, booking.ActivityGroup.title).all() # in the future filter on from and to dates
+        activity_groups = self.get_activity_groups() #DBSession.query(booking.ActivityGroup.id, booking.ActivityGroup.title).all() # in the future filter on from and to dates
         if None == activity_id:
             activity = DataContainer(id=None,  title='',  info='')
         elif id=='':
             activity = DataContainer(id=None,  title='', info='')
         else:
-            activity = DBSession.query(booking.Activity).filter('id=' + str(activity_id)).one()
+            activity = holly_couch[activity_id] #DBSession.query(booking.Activity).filter('id=' + str(activity_id)).one()
         return dict(activity=activity,  activity_group=activity_groups,  activity_groups=activity_groups)
         
         
@@ -764,7 +772,7 @@ class BookingDay(BaseController):
     @expose()
     @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change activity properties'))
     def save_move_booking(self,  id=None,  activity_id=None,  return_to_day_id=None,  **kw):
-        new_booking = DBSession.query(booking.Booking).filter('id='+str(id)).one()
+        new_booking = holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
         
         #...slot row position must be changed, so we need to find slot row of activity and then slot row position with aproximately the same time span
         old_slot_row_position = new_booking.slot_row_position
@@ -927,7 +935,7 @@ class BookingDay(BaseController):
     @validate(validators={'booking_id':validators.Int(not_empty=True)})
     @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may use multibook functionality'))
     def multi_book(self,  booking_id=None,  **kw):
-        booking_o = DBSession.query(booking.Booking).filter('id='+str(booking_id)).one()
+        booking_o = holly_couch[booking_id] #DBSession.query(booking.Booking).filter('id='+str(booking_id)).one()
         booking_days = DBSession.query(booking.BookingDay).all()
         slot_row = DBSession.query(booking.SlotRow).filter('activity_id='+str(booking_o.activity.id)).one()
         

@@ -186,6 +186,7 @@ dojo.addOnLoad(function() {
         <li><a href="${tg.url('edit_booking',booking_day_id=booking_day.id)}">new booking request</a></li>
     </ul>
     
+    
     <ul>
         <li py:for="booking in unscheduled_bookings" hollyrosa:acgid="${booking.activity_group_id}" class="unscheduled_booking">${booking.activity_title} <span class="group_info">${booking.visiting_group_name}</span>  ${getRenderContent(booking)}, <span class="requested_date">requested date ${booking.requested_date}</span> <span class="date_info">  [${booking.valid_from}  - ${booking.valid_to}]</span> 
        <ul class="any_menu context_inline_menu">
@@ -212,7 +213,7 @@ dojo.addOnLoad(function() {
   </div>
 
     <!-- <div py:for="slot_row in slot_rows" hollyrosa:acgid="${slot_row.activity.activity_group_id}"  class="booking_day_overview_slot_row" style="background: ${slot_row.activity.bg_color};"> -->
-    <div py:for="slot_row in slot_rows" hollyrosa:acgid="${slot_row.activity_id}"  class="booking_day_overview_slot_row" style="background: ${slot_row.bg_color};">
+    <div py:for="slot_row in slot_rows" hollyrosa:acgid="${slot_row.activity_group_id}"  class="booking_day_overview_slot_row" style="background: ${slot_row.bg_color};">
         <div class="booking_day_overview_activity"><a href="${tg.url('view_activity', activity_id=slot_row.activity_id)}">${slot_row.title}</a><a name="activity_row_id_${slot_row.activity_id}" class="ag_anchor">&nbsp;</a><span py:if="0 != slot_row.capacity">[${str(slot_row.capacity)}]</span></div>
         <div py:for="slot_position in slot_row.slot_row_position" hollyrosa:w="$slot_position.time_from - $slot_position.time_to" class="booking_day_overview_slots ${['','slot_row_position_blocked'][blockings_map.has_key(slot_position.id)]}">
         

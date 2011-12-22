@@ -329,23 +329,31 @@ class Tools(BaseController):
     def update_schema(self):
         s = holly_couch['day_schema.1']
         pos = 1
-        activity = DBSession.query(booking.Activity).all()
+        activity = DBSession.query(booking.Activity).all() # use slot_rows instead , the pos counter screws things up...
+        slot_rows = DBSession.query(booking.SlotRow).all()
+        
+        zorder = 1
         sch = dict()
-        for ac in activity:
-            tmp = [ac.title]
-            slrp = dict(time_from='09:00:00',  time_to='12:00:00',  duration='03:00:00' ,  slot_id=pos)
+        for sl in slot_rows:
+            #for ac in activity:
+            ac = sl.activity
+            
+            tmp = [dict(id='activity.'+str(ac.id),  zorder=zorder)]
+            zorder += 1
+            
+            slrp = dict(time_from='09:00:00',  time_to='12:00:00',  duration='03:00:00' ,  slot_id='slot.'+str(pos),  title='FM')
             pos += 1
             tmp.append(slrp)
             
-            slrp = dict(time_from='13:00:00',  time_to='17:00:00',  duration='03:00:00' ,  slot_id=pos)
+            slrp = dict(time_from='13:30:00',  time_to='17:00:00',  duration='03:30:00' ,  slot_id='slot.'+str(pos),  title='EM')
             pos += 1
             tmp.append(slrp)
             
-            slrp = dict(time_from='19:00:00',  time_to='21:00:00',  duration='02:00:00' ,  slot_id=pos)
+            slrp = dict(time_from='19:00:00',  time_to='21:00:00',  duration='02:00:00' ,  slot_id='slot.'+str(pos),  title=u'Kväll')
             pos += 1
             tmp.append(slrp)
 
-            slrp = dict(time_from='21:00:00',  time_to='23:00:00',  duration='02:00:00' ,  slot_id=pos)
+            slrp = dict(time_from='21:00:00',  time_to='23:59:00',  duration='03:00:00' ,  slot_id='slot.'+str(pos),  title='After hours')
             pos += 1
             tmp.append(slrp)
 
@@ -405,6 +413,11 @@ class Tools(BaseController):
             bc['valid_to'] = str(b.valid_to)
             bc['booking_state']  = b.booking_state
             bc['activity_id'] = 'activity.' + str(b.activity_id)
+            
+            if b.slot_row_position != None:
+                if b.activity_id != b.slot_row_position.slot_row.activity_id:
+                    raise IOError
+                
             bc['last_changed_by_id'] = 'user.'+str(b.last_changed_by_id)
             bc['approved_by_id'] = 'user.'+str(b.last_changed_by_id)
             bc['visiting_group_id'] = 'visiting_group.' + str(b.visiting_group_id) 
@@ -424,8 +437,8 @@ class Tools(BaseController):
         sts = DBSession.query(booking.SlotRowPositionState).all()
         
         for st in sts:
-            s = dict(type='slot_state')
-            #s = holly_couch['slot_state.'+str(st.id)]
+            #s = dict(type='slot_state')
+            s = holly_couch['slot_state.'+str(st.id)]
             s['type'] = 'slot_state'
             s['level'] = st.level
             s['slot_id'] = 'slot.'+str(st.slot_row_position_id)
