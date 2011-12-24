@@ -98,7 +98,7 @@ def get_visiting_groups(from_date='',  to_date=''):
         visiting_groups.append(vgc.value)
     return visiting_groups
 
-couch_server = couchdb.Server()
+couch_server = couchdb.Server(url='http://localhost:5989')
 try:
     holly_couch = couch_server['hollyrosa1']
     print 'opened hollyrosa1'

@@ -48,6 +48,12 @@ def getRenderContent(booking):
         return booking.content
     else:
         return booking.cache_content
+        
+def getRenderContentDict(booking):
+    if booking['cache_content']=='' or booking['cache_content'] == None:
+        return booking['content']
+    else:
+        return booking['cache_content']
 
 class DataContainer(object):
     def __init__(self, **kwds):
