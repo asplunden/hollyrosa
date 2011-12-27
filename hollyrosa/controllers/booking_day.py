@@ -38,7 +38,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import eagerload,  eagerload_all
 import datetime
@@ -248,7 +248,7 @@ class BookingDay(BaseController):
             
             tmp = self._all_days
         
-        print 'ALL DAYS',  tmp
+       
         return tmp
         
         
@@ -265,10 +265,7 @@ class BookingDay(BaseController):
             all_groups_c = holly_couch.query(map_fun) #DBSession.query(booking.BookingDay.id,  booking.BookingDay.date).all()
             self._activity_groups = [DataContainer(id=d.key,  title=d.value) for d in all_groups_c]
             
-            
             tmp = self._activity_groups
-        
-        print 'ACG', tmp
         return tmp
         
         
@@ -596,6 +593,8 @@ class BookingDay(BaseController):
         booking_day_id = booking_o['booking_day_id']
         booking_day = holly_couch[booking_day_id] #booking_o.booking_day
         activity_id = booking_o['activity_id']
+        
+        #REFACTOR OUT
         tmp_day_schema = holly_couch[booking_day['day_schema_id']] 
         tmp_schema = tmp_day_schema['schema'] 
     
@@ -621,16 +620,34 @@ class BookingDay(BaseController):
         tmpl_context.form = create_edit_book_slot_form
         
         #...find booking day and booking row
-        booking_o = holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
+        booking_o = holly_couch[id] 
         booking_o.return_to_day_id = return_to_day_id
-        booking_day = booking_o.booking_day
-        print booking_o['slot_id']
-        slot_position = holly_couch[booking_o['slot_id']]
-
-        tmp_visiting_groups = DBSession.query(booking.VisitingGroup.id, booking.VisitingGroup.name,  booking.VisitingGroup.todate,  booking.VisitingGroup.fromdate ).filter(and_('visiting_group.fromdate <= \''+str(booking_day.date) + '\'', 'visiting_group.todate >= \''+str(booking_day.date) + '\''   )   ).all()
-        visiting_groups = [(e[0],  e[1]) for e in tmp_visiting_groups] 
+        booking_day_id = booking_o['booking_day_id']
+        booking_day = holly_couch[booking_day_id]
+        slot_id = booking_o['slot_id']
         
-        return dict(booking_day=booking_day,  slot_position=slot_position, booking=booking_o,  visiting_groups=visiting_groups, edit_this_visiting_group=booking_o.visiting_group.id)
+        #REFACTOR OUT
+        tmp_day_schema = holly_couch[booking_day['day_schema_id']] 
+        tmp_schema = tmp_day_schema['schema'] 
+    
+        #...we know the slot position: booking_o['slot_id'] we just need to find it in the schema.
+        slot_id = booking_o['slot_id']
+        for tmp_row in tmp_schema.values():
+            print tmp_row
+            for tmp_slot in tmp_row[1:]:
+                if tmp_slot['slot_id'] == slot_id:
+                    slot_position = tmp_slot
+        #...refactor - make booking from booking_couch transfering to DataContainer
+        activity_id = booking_o['activity_id']
+        activity = holly_couch[activity_id]
+        booking_ = DataContainer(activity_id=activity_id, activity=activity,  id=booking_o['_id'],  visiting_group_name=booking_o['visiting_group_name'],  visiting_group_id=booking_o['visiting_group_id'],  content=booking_o['content'])
+        
+        tmp_visiting_groups = get_visiting_groups_at_date(booking_day['date']) #DBSession.query(booking.VisitingGroup.id, booking.VisitingGroup.name,  booking.VisitingGroup.todate,  booking.VisitingGroup.fromdate ).filter(and_('visiting_group.fromdate <= \''+str(booking_day.date) + '\'', 'visiting_group.todate >= \''+str(booking_day.date) + '\''   )   ).all()
+        visiting_groups = [(e['_id'],  e['name']) for e in tmp_visiting_groups] 
+        
+ 
+        
+        return dict(booking_day=booking_day,  slot_position=slot_position, booking=booking_,  visiting_groups=visiting_groups, edit_this_visiting_group=booking_o['visiting_group_id'],  activity=activity)
         
         
     @validate(create_edit_book_slot_form, error_handler=edit_booked_booking)      
@@ -743,7 +760,7 @@ class BookingDay(BaseController):
     def edit_booking(self,  booking_day_id=None,  id=None, visiting_group_id='', **kw):
         tmpl_context.form = create_edit_new_booking_request_form
         
-        activities = DBSession.query(booking.Activity.id, booking.Activity.title).all()
+        activities = self.getAllActivities()#DBSession.query(booking.Activity.id, booking.Activity.title).all()
         visiting_groups = DBSession.query(booking.VisitingGroup.id, booking.VisitingGroup.name).all() # in the future filter on from and to dates
         
         #...patch since this is the way we will be called if validator for new will fail

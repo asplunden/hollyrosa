@@ -150,20 +150,23 @@ class VisitingGroup(BaseController):
 
 
     @expose("json")
-    @validate(validators={'id':validators.Int})
+    @validate(validators={'id':validators.UnicodeString})
     def show_visiting_group_data(self,  id=None,  **kw):
         
         properties=[]
         if None == id:
             visiting_group = DataContainer(name='',  id=None,  info='')
-            bookings=[]
+            
         elif id=='':
             visiting_group = DataContainer(name='',  id=None,  info='')
-            bookingS=[]
+            
         else:
+            
             visiting_group = holly_couch[id] #DBSession.query(booking.VisitingGroup).filter('id='+str(id)).one()
-        
-            properties=[p for p in visiting_group.visiting_group_properties]
+            
+            #...refactor make DataContainer from visiting group
+            
+            properties=[p for p in visiting_group['visiting_group_properties'].values()]
             
         return dict(visiting_group=visiting_group, properties=properties)
 

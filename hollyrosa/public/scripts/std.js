@@ -45,8 +45,8 @@ function navigation_calendar_is_disabled(x) {
 function set_visiting_group_form_values(visiting_group) {
     dojo.byId("visiting_group_data_name").innerHTML = visiting_group['name'];
     dojo.byId("visiting_group_data_info").innerHTML = visiting_group['info'];
-    dojo.byId("visiting_group_data_fromdate").innerHTML = visiting_group['fromdate'];
-    dojo.byId("visiting_group_data_todate").innerHTML = visiting_group['todate'];
+    dojo.byId("visiting_group_data_fromdate").innerHTML = visiting_group['from_date'];
+    dojo.byId("visiting_group_data_todate").innerHTML = visiting_group['to_date'];
     dojo.byId("visiting_group_data_contact").innerHTML = visiting_group['contact_person'];
     dojo.byId("visiting_group_data_phone").innerHTML = visiting_group['contact_person_phone'];
     dojo.byId("visiting_group_data_email").innerHTML = visiting_group['contact_person_email'];
@@ -114,8 +114,8 @@ function transfer_to_booking_request_todate() {
         td = dojo.create("td", { innerHTML: g['value'] }, table);
         td = dojo.create("td", { innerHTML: g['unit'] }, table);
         td = dojo.create("td", { innerHTML: g['description'] }, table);
-        td = dojo.create("td", { innerHTML: g['fromdate'] }, table);
-        td = dojo.create("td", { innerHTML: g['todate'] }, table);
+        td = dojo.create("td", { innerHTML: g['from_date'] }, table);
+        td = dojo.create("td", { innerHTML: g['to_date'] }, table);
     });
 }
 

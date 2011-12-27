@@ -37,7 +37,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   
 function get_visiting_group_data_from_XHR_helper(visiting_group_id, value) {
     dojo.xhrGet({
-    url: "/hollyrosa/visiting_group/show_visiting_group_data?id="+value,
+    url: "/visiting_group/show_visiting_group_data?id="+value,
     handleAs:"json",
     load: on_update_visiting_group_data
     });
@@ -60,8 +60,8 @@ function attach_local_event_handlers() {
     dojo.connect(dojo.byId('create_edit_book_slot_form_visiting_group_id'), "onchange", null, propagate_selected_value);
     dojo.connect(dojo.byId('create_edit_book_slot_form_visiting_group_id'), "onchange", null, get_visiting_group_data_from_XHR);
 
-    if ( ${edit_this_visiting_group} ) {
-      get_visiting_group_data_from_XHR_helper(${edit_this_visiting_group}, ${edit_this_visiting_group});
+    if ( '${edit_this_visiting_group}' ) {
+      get_visiting_group_data_from_XHR_helper('${edit_this_visiting_group}', '${edit_this_visiting_group}');
     }
 }
 
@@ -113,7 +113,7 @@ function transfer_to_content(text) {
         </table>
     </div>
     <p>
-    <span py:if="None != booking_day">${booking_day.date.strftime('%A %B %d')} </span><span py:if="None != slot_position"><b> ${slot_position.time_from} to ${slot_position.time_to} </b> </span><span py:if="None != booking_day"><a py:if="booking.id != None " href="${tg.url('unschedule_booking', booking_id=booking.id, booking_day_id=booking_day.id)}">unschedule</a></span>
+    <span py:if="None != booking_day">${booking_day.date} </span><span py:if="None != slot_position"><b> ${slot_position.time_from} to ${slot_position.time_to} </b> </span><span py:if="None != booking_day"><a py:if="booking.id != None " href="${tg.url('unschedule_booking', booking_id=booking.id, booking_day_id=booking_day.id)}">unschedule</a></span>
     </p>
     
     <div py:replace="tmpl_context.form(booking, action='save_booked_booking_properties', child_args=dict(visiting_group_id=dict(options=visiting_groups)))">Input Form</div>
