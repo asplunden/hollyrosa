@@ -71,3 +71,5 @@ get_visiting_groups_at_date = booking_couch.get_visiting_groups_at_date
 get_visiting_groups_in_date_period = booking_couch.get_visiting_groups_in_date_period
 get_visiting_groups_with_boknstatus = booking_couch.get_visiting_groups_with_boknstatus 
 get_visiting_group_names = booking_couch.get_visiting_group_names
+getBookingDays = booking_couch.getBookingDays
+getAllActivities = booking_couch.getAllActivities

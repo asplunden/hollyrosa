@@ -38,7 +38,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import eagerload,  eagerload_all
 import datetime
@@ -100,69 +100,27 @@ def getNextBookingDayId(o_booking):
     return booking_day_o.id
 
 
-class BookingDayC(object):
-    """Assumes a lot when loading from Couch. Make an even better wrapper"""
-    def __init__(self, m):
-        for k, v in m.value.items():
-            if k=='date':
-                self.__dict__[k] = datetime.date.fromordinal(datetime.datetime.strptime(v, '%Y-%m-%d').toordinal())
-            elif k == '_id':
-                self.__dict__['id'] = v
-            else:
-                self.__dict__[k] = v
+
         
     
 class Calendar(BaseController):
     def view(self, url):
         """Abort the request with a 404 HTTP status code."""
         abort(404)
-
-    
-        
-        
-    def get_booking_days(self,  from_date='',  to_date=''):
-        """Helper function to get booking days from CouchDB"""
-        if from_date=='':
-            map_fun = '''function(doc) {
-            if (doc.type == 'booking_day')
-                emit(doc.date, doc);
-                }'''
-        else:
-            from_date='2011-08-10'
-            
-            if to_date=='':
-                map_fun = """function(doc) {
-                if ((doc.type == 'booking_day') && (doc.date >= '"""+ from_date+"""' ))
-                    emit(doc.date, doc);
-                    }"""
-            else:
-                to_date='2011-08-15'
-                map_fun = """function(doc) {
-                if ((doc.type == 'booking_day') && (doc.date >= '"""+ from_date+"""' ) && (doc.date <= '""" + to_date+"""'))
-                    emit(doc.date, doc);
-                    }"""
-        booking_days_c = holly_couch.query(map_fun)
-        
-        #...conversion to booking  days so the template looks like old SQL Alchemy
-        booking_days = []
-        for bdc in booking_days_c:
-            o = BookingDayC(bdc)
-            booking_days.append(o)
-        return booking_days
         
 
     @expose('hollyrosa.templates.calendar_overview')
     def overview_all(self):
         """Show an overview of all booking days"""
         #booking_days = DBSession.query(booking.BookingDay).all()
-        return dict(booking_days=self.get_booking_days())
+        return dict(booking_days=getBookingDays())
 
 
     @expose('hollyrosa.templates.calendar_overview')
     def overview(self):
         """Show an overview of all booking days"""
         ##booking_days = DBSession.query(booking.BookingDay).filter('date >=\''+datetime.date.today().strftime('%Y-%m-%d')+'\'').all()
-        return dict(booking_days=self.get_booking_days(from_date=datetime.date.today().strftime('%Y-%m-%d')))
+        return dict(booking_days=getBookingDays(from_date=datetime.date.today().strftime('%Y-%m-%d')))
     
 
     @expose('hollyrosa.templates.calendar_upcoming')
@@ -170,7 +128,7 @@ class Calendar(BaseController):
         """Show an overview of all booking days"""
         today_date_str = datetime.date.today().strftime('%Y-%m-%d')
         end_date_str = (datetime.date.today()+datetime.timedelta(5)).strftime('%Y-%m-%d')
-        booking_days = self.get_booking_days(from_date=today_date_str,  to_date=end_date_str) #DBSession.query(booking.BookingDay).filter(and_('date >=\'' + today_date_str +'\'','date < \'' + end_date_str +'\'')).order_by(booking.BookingDay.date).all()
+        booking_days = getBookingDays(from_date=today_date_str,  to_date=end_date_str) #DBSession.query(booking.BookingDay).filter(and_('date >=\'' + today_date_str +'\'','date < \'' + end_date_str +'\'')).order_by(booking.BookingDay.date).all()
 
         vgroups = get_visiting_groups(from_date=today_date_str,  to_date=end_date_str) #DBSession.query(booking.VisitingGroup).filter(or_('todate >= \''+ today_date_str +'\'','fromdate <= \''+ end_date_str  +'\'')).all()
 

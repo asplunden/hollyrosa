@@ -5,6 +5,8 @@
 #...ME
 import couchdb
 from uuid import uuid4
+import datetime
+
 
 def genUID():
     return uuid4().hex
@@ -25,6 +27,67 @@ def get_visiting_group_names():
         visiting_group_names.append(vgn.value)
     return visiting_group_names
     
+    
+class BookingDayC(object):
+    """Assumes a lot when loading from Couch. Make an even better wrapper"""
+    def __init__(self, m):
+        for k, v in m.value.items():
+            if k=='date':
+                self.__dict__[k] = datetime.date.fromordinal(datetime.datetime.strptime(v, '%Y-%m-%d').toordinal())
+            elif k == '_id':
+                self.__dict__['id'] = v
+            else:
+                self.__dict__[k] = v
+                
+                
+                
+def getAllActivities():
+    """Helper function to get all activities from CouchDB"""
+    map_fun = '''function(doc) {
+    if (doc.type == 'activity') {
+        emit(doc._id, doc);
+    }}'''
+    
+    activities = holly_couch.query(map_fun)
+    return activities
+            
+            
+def getBookingDays(from_date='',  to_date='',  return_map=False):
+    """Helper function to get booking days from CouchDB"""
+    if from_date=='':
+        map_fun = '''function(doc) {
+        if (doc.type == 'booking_day')
+            emit(doc.date, doc);
+            }'''
+    else:
+        from_date='2011-08-10'
+        
+        if to_date=='':
+            map_fun = """function(doc) {
+            if ((doc.type == 'booking_day') && (doc.date >= '"""+ from_date+"""' ))
+                emit(doc.date, doc);
+                }"""
+        else:
+            to_date='2011-08-15'
+            map_fun = """function(doc) {
+            if ((doc.type == 'booking_day') && (doc.date >= '"""+ from_date+"""' ) && (doc.date <= '""" + to_date+"""'))
+                emit(doc.date, doc);
+                }"""
+    booking_days_c = holly_couch.query(map_fun)
+    
+    #...conversion to booking  days so the template looks like old SQL Alchemy
+    if not return_map:
+        booking_days = []
+        for bdc in booking_days_c:
+            o = BookingDayC(bdc)
+            booking_days.append(o)
+        return booking_days
+    else:
+        booking_days = dict()
+        for bdc in booking_days_c:
+            o = BookingDayC(bdc)
+            booking_days[o.id] = o
+        return booking_days
     
 def get_visiting_groups_with_boknstatus(boknstatus):
     map_fun = """function(doc) {

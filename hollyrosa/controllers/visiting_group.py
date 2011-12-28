@@ -24,7 +24,7 @@ from repoze.what.predicates import Any, is_user, has_permission
 from formencode import validators
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  get_visiting_groups,  get_visiting_groups_at_date,  get_visiting_groups_in_date_period,  get_visiting_groups_with_boknstatus,  get_visiting_group_names
+from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  get_visiting_groups,  get_visiting_groups_at_date,  get_visiting_groups_in_date_period,  get_visiting_groups_with_boknstatus,  get_visiting_group_names,  getBookingDays, getAllActivities
 from sqlalchemy import and_
 import datetime
 
@@ -169,24 +169,6 @@ class VisitingGroup(BaseController):
             properties=[p for p in visiting_group['visiting_group_properties'].values()]
             
         return dict(visiting_group=visiting_group, properties=properties)
-
-
-    @expose('hollyrosa.templates.show_visiting_group')
-    @validate(validators={'id':validators.Int})
-    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def show_visiting_group_old(self,  id=None,  **kw):
-        
-        if None == id:
-            visiting_group = DataContainer(name='',  id=None,  info='')
-            bookings=[]
-        elif id=='':
-            visiting_group = DataContainer(name='',  id=None,  info='')
-            bookingS=[]
-        else:
-            visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+str(id)).one()
-            
-            bookings = DBSession.query(booking.Booking).filter('visiting_group_name=\'' + visiting_group.name + '\'').all()
-        return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent)
         
         
     @expose('hollyrosa.templates.show_visiting_group')
@@ -418,43 +400,96 @@ class VisitingGroup(BaseController):
         elif a.booking_day.date < b.booking_day.date:
             return -1
         else:
-            return cmp(a.slot_row_position.time_from, b.slot_row_position.time_from)
+            return cmp(a.slot['time_from'], b.slot['time_from'])
+
+
+    def getVisitingGroupOfVisitingGroupName(self,  name):
+        map_fun = """function(doc) {
+        if (doc.type == 'visiting_group') {
+            if (doc.name == '""" + name+  """')  {
+                emit(doc._id, doc);
+                }
+            }
+        }"""
+        
+        vgroups = []
+        for x in holly_couch.query(map_fun):
+            b = x.value
+            vgroups.append(b)
+        return vgroups
+        
 
     @expose('hollyrosa.templates.view_bookings_of_name')
     @validate(validators={"name":validators.UnicodeString()})
     @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_bookings_of_name(self,  name=None):
-        bookings = DBSession.query(booking.Booking).filter(and_('visiting_group_name=\'' + name + '\'', 'booking_state > -100')).all()
+        #bookings = DBSession.query(booking.Booking).filter(and_('visiting_group_name=\'' + name + '\'', 'booking_state > -100')).all()
 
         #...the bookings should be ordered by booking day or requested date or nothing. In that order.
+        # todo: refactor
+        map_fun = """function(doc) {
+        if (doc.type == 'booking') {
+            if (doc.visiting_group_name == '""" + name+  """')  {
+                if (doc.booking_state > -100) {
+                    emit(doc._id, doc);
+                    }
+                }
+            }
+        }"""
         
+        bookings = []
+        for x in holly_couch.query(map_fun):
+            b = x.value
+            bookings.append(b)
         
 
         visiting_group_id = None
-        visiting_group = DBSession.query(booking.VisitingGroup).filter('name=\'' + name + '\'').all()
+        #visiting_group = DBSession.query(booking.VisitingGroup).filter('name=\'' + name + '\'').all()
+        visiting_group = self.getVisitingGroupOfVisitingGroupName(name)
         if len(visiting_group) == 1:
-            visiting_group_id = visiting_group[0].id
+            visiting_group_id = visiting_group[0]['_id']
             
 
         #...now group all bookings in a dict mapping activity_id:content
         clustered_bookings = {}
+        booking_days = getBookingDays(return_map=True)
+        activities = dict()
+        for x in getAllActivities():
+            activities[x.key] = x.value
+        
+        
         for b in bookings:
-            key = str(b.activity_id)+':'+b.content
-            if None == b.booking_day_id:
+            key = str(b['activity_id'])+':'+b['content']
+            if None == b['booking_day_id']:
                 key = 'N'+key
 
+            #...we need to do this transfer because we need to add booking_day.date and slot time.
+            #...HERE WE MUST NOW ONCE AGAIN GET SLOT FROM BOOKING DAY ID AND SLOT ID...
+            tmp_booking_day = booking_days[b['booking_day_id']]
+            tmp_schema = holly_couch[tmp_booking_day.day_schema_id]
+            slot_o = None
+            for tmp_activity,  tmp_slot_row in tmp_schema['schema'].items():
+                for t in tmp_slot_row[1:]:
+                    if t['slot_id'] == b['slot_id']:
+                        slot_o = t
+                        break
+            
+            
+            
+            b2 = DataContainer(booking_state=b['booking_state'],  cache_content=b['cache_content'],  content=b['content'] ,  activity=activities[b['activity_id']],  id=b['_id'],  booking_day=tmp_booking_day ,  slot_id=b['slot_id'] ,  slot=slot_o,  booking_day_id=b['booking_day_id'])
             if clustered_bookings.has_key(key):
                 bl = clustered_bookings[key]
-                bl.append(b)
+                bl.append(b2)
             else:
                 bl = list()
-                bl.append(b)
+                bl.append(b2)
                 clustered_bookings[key] = bl 
 
         clustered_bookings_list = clustered_bookings.values()
         clustered_bookings_list.sort(self.fn_cmp_booking_date_list)
         for bl in clustered_bookings_list:
             bl.sort(self.fn_cmp_booking_timestamps)
-
+            
+            
         return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent)
         
