@@ -499,7 +499,7 @@ class BookingDay(BaseController):
 
         
     @expose()
-    @require(Any(is_user('root'), has_permission('pl'), msg='Only PL may delete a booking request'))
+    #@require(Any(is_user('root'), has_permission('pl'), msg='Only PL may delete a booking request'))
     @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'booking_id':validators.Int(not_empty=True)})
     def delete_booking(self,  booking_day_id,  booking_id):
         ###booking_o = DBSession.query(booking.Booking).filter('id='+str(booking_id)).one()        
@@ -516,29 +516,31 @@ class BookingDay(BaseController):
 
     @validate(create_validate_unschedule_booking)
     @expose()
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may unschedule booking request'))
+    #@require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may unschedule booking request'))
     def unschedule_booking(self,  booking_day_id,  booking_id):
-        b = DBSession.query(booking.Booking).filter('id='+booking_id).one()
-        b.last_changed_by_id = getLoggedInUser(request).user_id
+        b = holly_couch[booking_id] #DBSession.query(booking.Booking).filter('id='+booking_id).one()
+        b['last_changed_by_id'] = getLoggedInUser(request).user_id
         
-        remember_unschedule_booking(booking=b, slot_row_position=b.slot_row_position, booking_day=b.booking_day,  changed_by='')
+        #####remember_unschedule_booking(booking=b, slot_row_position=b.slot_row_position, booking_day=b.booking_day,  changed_by='')
 
-        b.booking_state = 0
-        b.booking_day_id = None
-        b.slot_row_position_id = None
-        raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(b.activity.id))
+        b['booking_state'] = 0
+        b['booking_day_id'] = ''
+        b['slot_id'] = ''
+        holly_couch[b['_id']] = b
+        raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(b['activity_id']))
         
     @validate(create_validate_schedule_booking)
     @expose()
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may schedule booking request'))
+    #@require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may schedule booking request'))
     def schedule_booking(self,  booking_day_id,  booking_id,  slot_row_position_id):
-        b = DBSession.query(booking.Booking).filter('id='+booking_id).one()
-        b.last_changed_by_id = getLoggedInUser(request).user_id
-        remember_schedule_booking(booking=b, slot_row_position=DBSession.query(booking.SlotRowPosition).filter('id='+slot_row_position_id).one(), booking_day=DBSession.query(booking.BookingDay).filter('id='+booking_day_id).one(),  changed_by='')
+        b = holly_couch[booking_id] 
+        b['last_changed_by_id'] = getLoggedInUser(request).user_id
+        ####remember_schedule_booking(booking=b, slot_row_position=DBSession.query(booking.SlotRowPosition).filter('id='+slot_row_position_id).one(), booking_day=DBSession.query(booking.BookingDay).filter('id='+booking_day_id).one(),  changed_by='')
         
-        b.booking_day_id = booking_day_id
-        b.slot_row_position_id = slot_row_position_id
-        raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(b.activity.id))
+        b['booking_day_id'] = booking_day_id
+        b['slot_id'] = slot_row_position_id
+        holly_couch[b['_id']] = b
+        raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(b['activity_id']))
         
         
     @expose('hollyrosa.templates.edit_booked_booking')
