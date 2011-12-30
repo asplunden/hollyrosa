@@ -460,23 +460,31 @@ class VisitingGroup(BaseController):
         
         for b in bookings:
             key = str(b['activity_id'])+':'+b['content']
-            if None == b['booking_day_id']:
+            if None == b.get('booking_day_id',  None):
                 key = 'N'+key
 
             #...we need to do this transfer because we need to add booking_day.date and slot time.
             #...HERE WE MUST NOW ONCE AGAIN GET SLOT FROM BOOKING DAY ID AND SLOT ID...
-            tmp_booking_day = booking_days[b['booking_day_id']]
-            tmp_schema = holly_couch[tmp_booking_day.day_schema_id]
+            booking_day_id = None
+            slot_id = ''
             slot_o = None
-            for tmp_activity,  tmp_slot_row in tmp_schema['schema'].items():
-                for t in tmp_slot_row[1:]:
-                    if t['slot_id'] == b['slot_id']:
-                        slot_o = t
-                        break
+            tmp_booking_day = None
+                
+            if b.has_key('booking_day_id'):
+                booking_day_id = b['booking_day_id']
+                if '' != booking_day_id:
+                    tmp_booking_day = booking_days[booking_day_id]
+                    tmp_schema = holly_couch[tmp_booking_day.day_schema_id]
+                    slot_o = None
+                    for tmp_activity,  tmp_slot_row in tmp_schema['schema'].items():
+                        for t in tmp_slot_row[1:]:
+                            if t['slot_id'] == b['slot_id']:
+                                slot_o = t
+                                break
+                    slot_id = b['slot_id']
+
             
-            
-            
-            b2 = DataContainer(booking_state=b['booking_state'],  cache_content=b['cache_content'],  content=b['content'] ,  activity=activities[b['activity_id']],  id=b['_id'],  booking_day=tmp_booking_day ,  slot_id=b['slot_id'] ,  slot=slot_o,  booking_day_id=b['booking_day_id'])
+            b2 = DataContainer(booking_state=b['booking_state'],  cache_content=b['cache_content'],  content=b['content'] ,  activity=activities[b['activity_id']],  id=b['_id'],  booking_day=tmp_booking_day ,  slot_id=slot_id ,  slot=slot_o,  booking_day_id=booking_day_id)
             if clustered_bookings.has_key(key):
                 bl = clustered_bookings[key]
                 bl.append(b2)

@@ -85,18 +85,18 @@ def computeCacheContent(dbsession, content,  visiting_group_id):
     """
     if visiting_group_id != None:
         cache_content = content
-        the_visiting_group = dbsession.query(booking.VisitingGroup).filter('id='+str(visiting_group_id)).one()
-        for tmp_property in the_visiting_group.visiting_group_property:
-            tmp_unit = tmp_property.unit
+        the_visiting_group = dbsession[visiting_group_id] #dbsession.query(booking.VisitingGroup).filter('id='+str(visiting_group_id)).one()
+        for tmp_property in the_visiting_group['visiting_group_properties'].values():
+            tmp_unit = tmp_property['unit']
             if tmp_unit == None:
                 tmp_unit = '' 
-            tmp_value = tmp_property.value
+            tmp_value = tmp_property['value']
             if tmp_value == None:
                 tmp_value = ''
-            cache_content = cache_content.replace('$$'+tmp_property.property,  tmp_value + " " + tmp_unit)
-            cache_content = cache_content.replace('$#'+tmp_property.property,  tmp_value + " " + tmp_unit)
-            cache_content = cache_content.replace('$'+tmp_property.property,  tmp_value)
-            cache_content = cache_content.replace('#'+tmp_property.property,  tmp_unit)
+            cache_content = cache_content.replace('$$'+tmp_property['property'],  tmp_value + " " + tmp_unit)
+            cache_content = cache_content.replace('$#'+tmp_property['property'],  tmp_value + " " + tmp_unit)
+            cache_content = cache_content.replace('$'+tmp_property['property'],  tmp_value)
+            cache_content = cache_content.replace('#'+tmp_property['property'],  tmp_unit)
     else:
         cache_content = content
             

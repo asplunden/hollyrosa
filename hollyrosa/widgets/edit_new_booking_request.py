@@ -30,13 +30,13 @@ class EditNewBookingRequestForm(TableForm):
 
     class fields(WidgetsList):
         
-        id = HiddenField(validator=Int)
+        id = HiddenField(validator=UnicodeString)
         #booking_day_id = HiddenField()
         return_to_day_id = HiddenField()
         visiting_group_name =  TextField(validator=UnicodeString(min=1),  css_class="edit_name",  size=40)
-        visiting_group_id = SingleSelectField(validator=Int)
+        visiting_group_id = SingleSelectField(validator=UnicodeString)
         content = TextArea(validator=UnicodeString)
-        activity_id = SingleSelectField(validator=Int)
+        activity_id = SingleSelectField(validator=UnicodeString)
         requested_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
         valid_from = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')              #date_format='%Y-%m-%d')
         valid_to = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')                        #date_format='%Y-%m-%d')

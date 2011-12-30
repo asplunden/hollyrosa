@@ -38,7 +38,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays,  getAllActivities
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import eagerload,  eagerload_all
 import datetime
@@ -85,10 +85,10 @@ def getBooking(id):
 
 
 def deleteBooking(booking_o):
-    booking_o.booking_state = -100
-    booking_o.booking_day_id = None
-    booking_o.slot_row_position_id = None
-    holly_couch[bookingo._id] = booking_o
+    booking_o['booking_state'] = -100
+    booking_o['booking_day_id'] = ''
+    booking_o['slot_id'] = ''
+    holly_couch[booking_o['_id']] = booking_o
 
 def make_booking_day_activity_anchor(tmp_activity_id):
     return '#activity_row_id_' + str(tmp_activity_id)
@@ -502,14 +502,16 @@ class BookingDay(BaseController):
     @require(Any(is_user('root'), has_permission('pl'), msg='Only PL may delete a booking request'))
     @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'booking_id':validators.Int(not_empty=True)})
     def delete_booking(self,  booking_day_id,  booking_id):
-        booking_o = DBSession.query(booking.Booking).filter('id='+str(booking_id)).one()        
-        tmp_activity = booking_o.activity
+        ###booking_o = DBSession.query(booking.Booking).filter('id='+str(booking_id)).one()        
+        ###tmp_activity = booking_o.activity
         
-        remember_delete_booking_request(booking_o, changed_by='')
+        ###remember_delete_booking_request(booking_o, changed_by='')
         # cant do any more, foreign key problem: DBSession.delete(booking_o)
-        deleteBooking(booking_o)
+        tmp_booking = holly_couch[booking_id]
+        tmp_activity_id = tmp_booking['activity_id']
+        deleteBooking(tmp_booking)
 
-        raise redirect('/booking/day?day_id='+str(booking_day_id) + make_booking_day_activity_anchor(tmp_activity.id)) 
+        raise redirect('/booking/day?day_id='+str(booking_day_id) + make_booking_day_activity_anchor(tmp_activity_id)) 
         
 
     @validate(create_validate_unschedule_booking)
@@ -564,24 +566,34 @@ class BookingDay(BaseController):
     def view_booked_booking(self,  return_to_day_id=None,  id=None):
        
         #...find booking day and booking row
-        booking_o = holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
+        booking_o = holly_couch[id] 
         booking_o.return_to_day_id = return_to_day_id
-        booking_day_id = booking_o['booking_day_id']
-        booking_day = holly_couch[booking_day_id] #booking_o.booking_day
         activity_id = booking_o['activity_id']
         
-        #REFACTOR OUT
-        tmp_day_schema = holly_couch[booking_day['day_schema_id']] 
-        tmp_schema = tmp_day_schema['schema'] 
+        booking_day_id = None
+        booking_day = None
+        if booking_o.has_key('booking_day_id'):
+            booking_day_id = booking_o['booking_day_id']
+            if '' != booking_day_id:
+                booking_day = holly_couch[booking_day_id] #booking_o.booking_day
+            
+            
+            
+                #REFACTOR OUT
+                tmp_day_schema = holly_couch[booking_day['day_schema_id']] 
+                tmp_schema = tmp_day_schema['schema'] 
     
         #...we know the slot position: booking_o['slot_id'] we just need to find it in the schema.
-        slot_id = booking_o['slot_id']
-        for tmp_row in tmp_schema.values():
-            print tmp_row
-            for tmp_slot in tmp_row[1:]:
-                if tmp_slot['slot_id'] == slot_id:
-                    slot_position = tmp_slot
-        
+        slot_position = None
+        if booking_o.has_key('slot_id'):
+            slot_id = booking_o['slot_id']
+            if ''!=slot_id:
+                for tmp_row in tmp_schema.values():
+                    print tmp_row
+                    for tmp_slot in tmp_row[1:]:
+                        if tmp_slot['slot_id'] == slot_id:
+                            slot_position = tmp_slot
+                            break
         
         activity = holly_couch[activity_id] 
         history = []#booking_o.booking_history
@@ -619,7 +631,7 @@ class BookingDay(BaseController):
         booking_ = DataContainer(activity_id=activity_id, activity=activity,  id=booking_o['_id'],  visiting_group_name=booking_o['visiting_group_name'],  visiting_group_id=booking_o['visiting_group_id'],  content=booking_o['content'])
         
         tmp_visiting_groups = get_visiting_groups_at_date(booking_day['date']) #DBSession.query(booking.VisitingGroup.id, booking.VisitingGroup.name,  booking.VisitingGroup.todate,  booking.VisitingGroup.fromdate ).filter(and_('visiting_group.fromdate <= \''+str(booking_day.date) + '\'', 'visiting_group.todate >= \''+str(booking_day.date) + '\''   )   ).all()
-        visiting_groups = [(e['_id'],  e['name']) for e in tmp_visiting_groups] 
+        visiting_groups = [(e['_id'],  e['name']) for e in tmp_visiting_groups]  # REFACTOR
         
  
         
@@ -729,24 +741,33 @@ class BookingDay(BaseController):
             DBSession.add(activity)
         raise redirect('/booking/view_activity',  activity_id=id)
      
-     
+    def fnSortOnThirdItem(self, a , b):
+        return cmp(a[2], b[2])
+        
+        
     @expose('hollyrosa.templates.request_new_booking')
-    @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'id':validators.Int(not_empty=False), 'visiting_group_id':validators.Int(not_empty=False)})
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change a booking'))
+    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'id':validators.UnicodeString(not_empty=False), 'visiting_group_id':validators.UnicodeString(not_empty=False)})
+    #@require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change a booking'))
     def edit_booking(self,  booking_day_id=None,  id=None, visiting_group_id='', **kw):
         tmpl_context.form = create_edit_new_booking_request_form
         
-        activities = self.getAllActivities()#DBSession.query(booking.Activity.id, booking.Activity.title).all()
-        visiting_groups = DBSession.query(booking.VisitingGroup.id, booking.VisitingGroup.name).all() # in the future filter on from and to dates
+        # We still need to add some reasonable sorting on the activities abd the visiting groups
+        
+        activities_tmp = self.get_activities_map() #DBSession.query(booking.Activity.id, booking.Activity.title).all()
+        activities = [(e['_id'],  e['title'],  e.get('zorder', '')) for e in activities_tmp.values()] 
+        activities.sort(self.fnSortOnThirdItem)
+        tmp_visiting_groups = get_visiting_groups() 
+        visiting_groups = [(e['_id'],  e['name']) for e in tmp_visiting_groups] 
+        
+        tmp_visiting_group = holly_couch[visiting_group_id]
         
         #...patch since this is the way we will be called if validator for new will fail
         if (visiting_group_id != '') and (visiting_group_id != None):
-            #raise IOError, visiting_group_id
-            booking_o = DataContainer(id='', content='', visiting_group_id = visiting_group_id, visiting_group_name=DBSession.query(booking.VisitingGroup.name).filter('id='+str(visiting_group_id)).one()[0])
+            booking_o = DataContainer(id='', content='', visiting_group_id = visiting_group_id, visiting_group_name=tmp_visiting_group['name'])
         elif id=='' or id==None:
             booking_o = DataContainer(id='', content='')
         else:
-            booking_o = DBSession.query(booking.Booking).filter('id='+str(id)).one()
+            booking_o = holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
         booking_o.return_to_day_id = booking_day_id
         return dict(visiting_groups=visiting_groups,  activities=activities, booking=booking_o)
         
@@ -791,46 +812,46 @@ class BookingDay(BaseController):
     @expose()
     def save_new_booking_request(self, content='',  activity_id=None,  visiting_group_name='',  visiting_group_select=None,  valid_from=None,  valid_to=None,  requested_date=None,  visiting_group_id=None,  id=None,  return_to_day_id=None):
         is_new=False
-        if id ==None:
-            new_booking = booking.Booking()
+        if id ==None or id=='':
+            new_booking = dict(type='booking',  booking_day_id='', slot_id='') #booking.Booking()
             is_new = True
         else:
-            new_booking = DBSession.query(booking.Booking).filter('id='+str(id)).one()
+            new_booking = holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
             old_booking = DataContainer(activity=new_booking.activity,  visiting_group_name=new_booking.visiting_group_name,  valid_from=new_booking.valid_from,  valid_to=new_booking.valid_to,  requested_date=new_booking.requested_date,  content=new_booking.content,  id=new_booking.id)
             
         if is_new:
-            new_booking.booking_state = 0
+            print 'setting booking state=0'
+            new_booking['booking_state'] = 0
         else:
            # DEPENDS ON WHAT HAS CHANGED. Maybe content change isnt enough to change state?
-           new_booking.booking_state = 0
+           new_booking['booking_state'] = 0
             
-        new_booking.content = content
+        new_booking['content'] = content
         
-        vgroup = DBSession.query(booking.VisitingGroup).filter('id='+str(visiting_group_id)).one()
-        new_booking.visiting_group = vgroup
-        new_booking.cache_content = computeCacheContent(DBSession, content, visiting_group_id)
-        
-        
-        
-        
-        new_booking.activity = DBSession.query(booking.Activity).filter('id='+str(activity_id)).one()
-        new_booking.visiting_group_name = visiting_group_name
-        new_booking.last_changed_by_id = getLoggedInUser(request).user_id
+        ##vgroup = DBSession.query(booking.VisitingGroup).filter('id='+str(visiting_group_id)).one()
+        new_booking['visiting_group_id'] = visiting_group_id
+        print 'compute cache content'
+        new_booking['cache_content'] = computeCacheContent(holly_couch, content, visiting_group_id)
         
         
+        new_booking['activity_id'] = activity_id
+        new_booking['visiting_group_name'] = visiting_group_name
+        new_booking['last_changed_by_id'] = getLoggedInUser(request).user_id
         
+
         #...todo add dates, but only after form validation
-        new_booking.requested_date = requested_date
-        new_booking.valid_from = valid_from
-        new_booking.valid_to = valid_to
-        
+        new_booking['requested_date'] = str(requested_date)
+        new_booking['valid_from'] = str(valid_from)
+        new_booking['valid_to'] = str(valid_to)
+        #new_booking['timestamp'] = 
         #raise IOError,  "%s %s %s" % (str(requested_date),  str(valid_from),  str(valid_to))
-        
+        print 'saving to db'
         if is_new:
-            DBSession.add(new_booking)
-            remember_new_booking_request(new_booking)
+            holly_couch['booking.'+genUID()] = new_booking
+            #####remember_new_booking_request(new_booking)
         else:
-            remember_booking_request_change(old_booking=old_booking,  new_booking=new_booking)
+            pass
+            #####remember_booking_request_change(old_booking=old_booking,  new_booking=new_booking)
         
         if return_to_day_id != None:
             if return_to_day_id != '':
