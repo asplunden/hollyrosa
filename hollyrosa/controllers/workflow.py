@@ -22,7 +22,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking
+from hollyrosa.model import DBSession, metadata,  booking,  genUID,  holly_couch
 from sqlalchemy import and_
 import datetime
 
@@ -100,10 +100,11 @@ class Workflow(BaseController):
         unscheduled_bookings = DBSession.query(booking.Booking).filter(and_('booking_day_id is NULL','booking_state > -100')).all()
         return dict(unscheduled_bookings=unscheduled_bookings,  workflow_map=workflow_map, result_title='Unscheduled bookings', workflow_submenu=workflow_submenu)
     
-    def do_set_state(self, booking_o,  state):
+    def do_set_state(self, booking_id,  booking_o,  state):
         
         #...only PL can set state=20 (approved) or -10 (disapproved)
-        if state=='20' or state=='-10' or booking_o.booking_state == 20 or booking_o.booking_state==-10:
+        print booking_o
+        if state=='20' or state=='-10' or booking_o['booking_state'] == 20 or booking_o['booking_state']==-10:
             ok = False
             for group in getLoggedInUser(request).groups:
                 if group.group_name == 'pl':
@@ -112,36 +113,27 @@ class Workflow(BaseController):
                 flash('Only PL can do that. %s' % request.referrer, 'warning')
                 raise redirect(request.referrer)
             
-        remember_workflow_state_change(booking=booking_o,  state=state)
-        booking_o.booking_state = state
-        booking_o.last_changed_by_id = getLoggedInUser(request).user_id
-    
+        ####remember_workflow_state_change(booking=booking_o,  state=state)
+        booking_o['booking_state'] = state
+        booking_o['ast_changed_by_id'] = getLoggedInUser(request).user_id
+        holly_couch[booking_id] = booking_o
 
     @expose()
-    @validate(validators={'booking_id':validators.Int(not_empty=True), 'state':validators.Int(not_empty=True), 'all':validators.Int(not_empty=False)})    
-    @require(Any(is_user('root'), has_permission('staff'), has_permission('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
+    @validate(validators={'booking_id':validators.UnicodeString(not_empty=True), 'state':validators.Int(not_empty=True), 'all':validators.Int(not_empty=False)})    
+    #@require(Any(is_user('root'), has_permission('staff'), has_permission('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def set_state(self,  booking_id=None,  state=0, all=0):
         if all == 0 or all==None:
-            #raise IOError, 'MX'
-            booking_o = DBSession.query(booking.Booking).filter('id='+str(booking_id)).one()
-            self.do_set_state(booking_o, state)
+            booking_o = holly_couch[booking_id] #DBSession.query(booking.Booking).filter('id='+str(booking_id)).one()
+            self.do_set_state(booking_id,  booking_o, state)
         elif all == '1': # look for all bookings with same group
-           #raise IOError, 'Y'
-           booking_o = DBSession.query(booking.Booking).filter('id='+str(booking_id)).one()
-           bookings = DBSession.query(booking.Booking).filter(and_('visiting_group_id='+str(booking_o.visiting_group_id), 'activity_id='+str(booking_o.activity_id), 'booking_state > -100')).all()
+           booking_o = holly_couch[booking_id] #DBSession.query(booking.Booking).filter('id='+str(booking_id)).one()
+           bookings = [ ] # Fix later DBSession.query(booking.Booking).filter(and_('visiting_group_id='+str(booking_o.visiting_group_id), 'activity_id='+str(booking_o.activity_id), 'booking_state > -100')).all()
            for new_b in bookings:
-               #raise IOError, 'X'
                if (new_b.content.strip() == booking_o.content.strip()) and (new_b.booking_day_id != None):
-                   #raise IOError, str(new_b)
-                   self.do_set_state(new_b, state)
+                   self.do_set_state(new_b._id,  new_b, state)
         else:
             pass        
         raise redirect(request.referrer)
-#        if int(state) == 0:
-#            redirect('/workflow/overview')
-#        elif int(state) == -10:
-#            redirect('/workflow/overview')
-#        else:
-#             redirect('/workflow/view_nonapproved')
+
        
     

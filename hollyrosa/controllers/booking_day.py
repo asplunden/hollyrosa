@@ -551,16 +551,27 @@ class BookingDay(BaseController):
          
         #...find booking day and booking row
         booking_day = getBookingDay(str(booking_day_id))
-        slot_position = DBSession.query(booking.SlotRowPosition).filter('id='+str(slot_position_id)).one() 
+        #slot_position = DBSession.query(booking.SlotRowPosition).filter('id='+str(slot_position_id)).one() 
         
         
-        tmp_visiting_groups = DBSession.query(booking.VisitingGroup.id, booking.VisitingGroup.name,  booking.VisitingGroup.todate,  booking.VisitingGroup.fromdate ).filter(and_('visiting_group.fromdate <= \''+str(booking_day.date) + '\'', 'visiting_group.todate >= \''+str(booking_day.date) + '\''   )   ).all()
-        visiting_groups = [(e[0],  e[1]) for e in tmp_visiting_groups] 
+        tmp_visiting_groups = get_visiting_groups_at_date(booking_day['date']) #DBSession.query(booking.VisitingGroup.id, booking.VisitingGroup.name,  booking.VisitingGroup.todate,  booking.VisitingGroup.fromdate ).filter(and_('visiting_group.fromdate <= \''+str(booking_day.date) + '\'', 'visiting_group.todate >= \''+str(booking_day.date) + '\''   )   ).all()
+        visiting_groups = [(e['_id'],  e['name']) for e in tmp_visiting_groups] 
         
-        activity = DBSession.query(booking.Activity).filter('id='+str(slot_position.slot_row.activity.id)).one()
-        booking_o = DataContainer(content='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot_position.slot_row.activity.id, id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_row_position_id=slot_position_id)
+        #...find out activity of slot_id for booking_day
+        schema = holly_couch[booking_day['day_schema_id']]
         
-        return dict(booking_day=booking_day,  slot_position=slot_position,  booking=booking_o,  visiting_groups=visiting_groups, edit_this_visiting_group=0)
+        activity_id = None
+        for tmp_activity_id,  tmp_slot_row in schema['schema'].items():
+            for tmp_slot in tmp_slot_row[1:]:
+                if tmp_slot['slot_id'] == slot_position_id:
+                    activity_id = tmp_activity_id
+                    slot = tmp_slot
+                    break
+        
+        activity = holly_couch[activity_id] #  #DBSession.query(booking.Activity).filter('id='+str(slot_position.slot_row.activity.id)).one()
+        booking_o = DataContainer(content='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=activity_id, id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_row_position_id=slot_position_id)
+        
+        return dict(booking_day=booking_day,    booking=booking_o,  visiting_groups=visiting_groups, edit_this_visiting_group=0,  slot_position=slot)
         
 
     @expose('hollyrosa.templates.show_booking')
