@@ -94,11 +94,24 @@ def make_booking_day_activity_anchor(tmp_activity_id):
     return '#activity_row_id_' + str(tmp_activity_id)
 
 
-def getNextBookingDayId(o_booking):
-    booking_day_o = DBSession.query(booking.BookingDay).filter('date=\''+(o_booking.booking_day.date + datetime.timedelta(1)
-).strftime('%Y-%m-%d')+'\'').one()
-    return booking_day_o.id
+def getNextBookingDayId(booking_day):
+    #booking_day_o = [ ]  DBSession.query(booking.BookingDay).filter('date=\''+(o_booking.booking_day.date + datetime.timedelta(1)
+#).strftime('%Y-%m-%d')+'\'').one()
+#    return booking_day_o.id
+    this_date = booking_day['date'] # make date from string, but HOW?
+    next_date = (datetime.datetime.strptime(this_date,'%Y-%m-%d') +  datetime.timedelta(1)).strftime('%Y-%m-%d')
+    print 'next date',  next_date
+    
+    map_fun = """function(doc) {
+            if (doc.type == 'booking_day') {
+                if (doc.date == '"""+str(next_date)+"""') {
+            emit(doc._id, doc);
+        }}}"""
+    
+    booking_day_c =  holly_couch.query(map_fun)
 
+    booking_days = [b for b in booking_day_c]
+    return (booking_days[0].value)['_id']
 
 
         
@@ -911,58 +924,85 @@ class BookingDay(BaseController):
         
     
     @expose()
-    @validate(validators={'id':validators.Int(not_empty=True)})
+    @validate(validators={'id':validators.UnicodeString(not_empty=True)})
     @require(Any(is_user('root'), has_permission('pl'), msg='Only PL can block or unblock slots'))
     def prolong(self,  id):
+        # TODO: one of the problems with prolong that just must be sloved is what do we do if the day shema is different for the day after?
+        
         #...first, find the slot to prolong to
-        old_booking = getBooking(id) # move into model
-        slot_row_positions = old_booking.slot_row_position.slot_row.slot_row_position
-        if slot_row_positions[-1].id == old_booking.slot_row_position_id:
-            flash('last slot')
-            new_booking_booking_day_id = getNextBookingDayId(old_booking)
-            new_booking_slot_row_position_id = slot_row_positions[0].id
-        else:
-            new_booking_booking_day_id = old_booking.booking_day_id
-            i = 0
-            last_slrp = None
-            for slrp in slot_row_positions:
-                if last_slrp ==  old_booking.slot_row_position_id:
+        old_booking = holly_couch[id] # move into model
+        booking_day_id = old_booking['booking_day_id']
+        booking_day = holly_couch[booking_day_id]
+        day_schema_id = booking_day['day_schema_id']
+        day_schema = holly_couch[day_schema_id]
+        old_slot_id = old_booking['slot_id']
+        schema = day_schema['schema']
+
+        #... TODO: find the slot and slot index. FACTOR OUT COMPARE MOVE BOOKING
+        for tmp_activity_id,  tmp_activity_row in schema.items():
+            tmp_slot_index = 1
+            for tmp_slot in tmp_activity_row[1:]:
+                if tmp_slot['slot_id'] == old_slot_id:
+                    old_activity_id = tmp_activity_id
+                    old_slot = tmp_slot
+                    old_slot_index = tmp_slot_index
+                    old_slot_row = tmp_activity_row
                     break
-                last_slrp = slrp.id 
-            new_booking_slot_row_position_id = slrp.id 
+                tmp_slot_index += 1
+        
+        activity = holly_couch[old_activity_id]
+        
+        if (old_slot_index+1) >= len(old_slot_row):
+            flash('last slot')
+            
+            new_booking_day_id = getNextBookingDayId(booking_day)
+            #new_booking_slot_row_position_id = slot_row_positions[0].id
+            new_slot_id = old_slot_row[1]['slot_id']
+        else:
+            
+#            i = 0
+#            last_slrp = None
+#            for slrp in slot_row_positions:
+#                if last_slrp ==  old_booking.slot_row_position_id:
+#                    break
+#                last_slrp = slrp.id 
+#            new_booking_slot_row_position_id = slrp.id
+            new_slot_id = old_slot_row[old_slot_index+1]['slot_id']
+            new_booking_day_id = booking_day_id
         
         #...then figure out if the slot to prolong to is blocked
-        new_booking_slot_row_position_state = DBSession.query(booking.SlotRowPositionState).filter(and_('slot_row_position_id='+str(new_booking_slot_row_position_id), 'booking_day_id='+str(new_booking_booking_day_id))) .all()
+        
+        #todo: figure out if slot is blocked
+        
+        #new_booking_slot_row_position_state = DBSession.query(booking.SlotRowPositionState).filter(and_('slot_row_position_id='+str(new_booking_slot_row_position_id), 'booking_day_id='+str(new_booking_booking_day_id))) .all()
+        new_booking_slot_row_position_states = self.getSlotStateOfBookingDayIdAndSlotId(new_booking_day_id,  new_slot_id)
         
         #...if it isn't blocked, then book that slot.
-        if len(new_booking_slot_row_position_state) == 0:
+        if len(new_booking_slot_row_position_states) == 0:
 
             #...find the booking
         
-            new_booking = booking.Booking()
-            new_booking.booking_state = old_booking.activity.default_booking_state
-            new_booking.content = old_booking.content
-            new_booking.cache_content = old_booking.cache_content
-            new_booking.activity = old_booking.activity
-            new_booking.visiting_group_name = old_booking.visiting_group_name
-            new_booking.last_changed_by_id = getLoggedInUser(request).user_id
-            new_booking.visiting_group = old_booking.visiting_group
-        
-            #...todo add dates, but only after form validation
-            new_booking.requested_date = old_booking.requested_date
-            new_booking.valid_from = old_booking.valid_from
-            new_booking.valid_to = old_booking.valid_to
+            new_booking = dict(type='booking')
+            for k, v in old_booking.items():
+                new_booking[k] = v
             
-            new_booking.booking_day_id = new_booking_booking_day_id
-            new_booking.slot_row_position_id = new_booking_slot_row_position_id
+            new_booking['last_changed_by_id'] = getLoggedInUser(request).user_id
+            new_booking['slot_id'] = new_slot_id
+            new_booking['booking_day_id'] = new_booking_day_id
+                               
+                               #content=old_booking['content'],  cache_content=old_booking['cache_content'], activity_id=old_booking['activity_id'],  visiting_group_name=old_booking['visiting_group_name'] , 
+                              # =, visiting_group_id=old_booking['visiting_group_id'] ,  requested_date=old_booking.get()['requested_date'], valid_from=old_booking['valid_from'], 
+                             #  valid_to=old_booking['valid_to'] , booking_day_id=new_booking_day_id,  slot_id=new_slot_id )
+            new_booking['booking_state'] = activity['default_booking_state']
             
-            DBSession.add(new_booking)
-            remember_new_booking_request(new_booking)
+            
+            holly_couch['booking.'+genUID()] = new_booking
+            #remember_new_booking_request(new_booking)
         else:
             flash('wont prolong since next slot is blocked',  'warning')
-            redirect('/booking/day?day_id='+str(old_booking.booking_day_id)) 
+            redirect('/booking/day?day_id='+str(booking_day_id)) 
             
-        raise redirect('/booking/day?day_id='+str(new_booking.booking_day_id) + make_booking_day_activity_anchor(new_booking.activity.id)) 
+        raise redirect('/booking/day?day_id='+str(new_booking['booking_day_id']) + make_booking_day_activity_anchor(new_booking['activity_id'])) 
 
 
     def getActivityIdOfBooking(self,  booking_day_id,  slot_id):
