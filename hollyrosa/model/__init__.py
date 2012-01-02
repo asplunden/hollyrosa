@@ -73,3 +73,5 @@ get_visiting_groups_with_boknstatus = booking_couch.get_visiting_groups_with_bok
 get_visiting_group_names = booking_couch.get_visiting_group_names
 getBookingDays = booking_couch.getBookingDays
 getAllActivities = booking_couch.getAllActivities
+getAllVisitingGroupsNameAmongBookings = booking_couch.getAllVisitingGroupsNameAmongBookings
+getSlotAndActivityIdOfBooking = booking_couch.getSlotAndActivityIdOfBooking

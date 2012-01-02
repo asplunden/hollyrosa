@@ -119,9 +119,11 @@ def get_visiting_groups_at_date(at_date):
 
 def get_visiting_groups_in_date_period(from_date,  to_date):
     map_fun = """function(doc) {
-    if ((doc.type == 'visiting_group') && (doc.from_date <= '"""+ to_date+"""' ) && (doc.to_date >= '""" + from_date + """'))
-        emit(doc.from_date, doc);
-        }"""
+    if (doc.type == 'visiting_group') {
+        if ((doc.from_date <= '"""+ to_date+"""' ) && (doc.to_date >= '""" + from_date + """')) {
+            emit(doc.from_date, doc);
+        }}}"""
+    
     visiting_groups_c = holly_couch.query(map_fun)
     
     #...conversion 
@@ -169,5 +171,44 @@ try:
 except couchdb.ResourceNotFound, e:
     holly_couch = couch_server.create('hollyrosa1')
     
+def getAllVisitingGroupsNameAmongBookings(from_date='',  to_date=''):
+    """find all bookings in date range and look for the visiting_group_names.
+        perhaps this can be done with reduce in the future."""
+    
+    if from_date == '':
+        map_fun = '''function(doc) {
+        if (doc.type == 'booking')
+            emit(doc._id, doc.visiting_group_name);
+            }'''
+    else:
+        #...this is harder NEED TO LOOK AT BOOKING DAY ID; THEN BOOKING DAY AND THEN DATE. TRICKY
+        map_fun = """function(doc) {
+        if (doc.type == 'booking') {
+                emit(doc._id, doc.visiting_group_name);
+            }}"""
+    #...add map fun for from_date and to_date
+        
+    visiting_groups_names = holly_couch.query(map_fun)
+    
+    #...conversion 
+    visiting_group_names_result = dict()
+    for vgn in visiting_groups_names:
+        visiting_group_names_result[vgn.key] = vgn.value
+        
+        
+    #print  visiting_group_names_result.values()
+    return visiting_group_names_result.values()
     
     
+def getSlotAndActivityIdOfBooking(booking):
+    booking_day_id = booking['booking_day_id']
+    booking_day_o = holly_couch[booking_day_id]
+    schema_o = holly_couch[booking_day_o['day_schema_id']]
+    slot_id = booking['slot_id']
+    
+    #...iterate thrue the schema
+    for tmp_activity_id,  tmp_activity_row in schema_o['schema'].items():
+        for tmp_slot in tmp_activity_row[1:]:
+            if tmp_slot['slot_id'] == slot_id:
+                return (tmp_activity_id,  tmp_slot)
+    return (None,  None)

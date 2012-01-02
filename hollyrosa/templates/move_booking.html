@@ -26,19 +26,19 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa - Move Booking ${booking.activity.title} for ${booking.visiting_group_name}</title>
+  <title>Hollyrosa - Move Booking ${activity.title} for ${booking.visiting_group_name}</title>
 </head>
 
 <body>
-    <h2>Move booking ${booking.activity.title} for ${booking.visiting_group_name}</h2>
+    <h2>Move booking ${activity.title} for ${booking.visiting_group_name}</h2>
     <table>
         <tr><td>visiting group:</td><td>${booking.visiting_group_name}</td></tr>
-        <tr><td>activity:</td><td>${booking.activity.title}</td></tr>
-        <tr><td>date:</td><td>${booking.booking_day.date} at ${booking.slot_row_position.time_from} to ${booking.slot_row_position.time_to}</td></tr>
+        <tr><td>activity:</td><td>${activity.title}</td></tr>
+        <tr><td>date:</td><td>${booking_day.date} at ${slot.time_from} to ${slot.time_to}</td></tr>
         <tr><td>content:</td><td>${getRenderContent(booking)}</td></tr>
         
     </table>
     <h4>Change activity below</h4>
-    <div py:replace="tmpl_context.form(booking, action='save_move_booking', child_args=dict(activity_id=dict(options=activities)))">Input Form</div> <!--, action='save_move_booking'"  -->
+    <div py:replace="tmpl_context.form(booking, action='save_move_booking', child_args=dict(activity_id=dict(options=activities)))">Input Form</div> 
 </body>
 </html>

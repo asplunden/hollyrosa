@@ -32,13 +32,13 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <body>
     <h2>${activity.title} booking</h2>
     <h3>${booking.visiting_group_name}</h3> 
-    <p py:if="booking['slot_id'] != ''">
+    <p py:if="booking['slot_id'] != '' and booking['slot_id'] != None and booking_day != None">
     <a href="${tg.url('day', day_id=booking_day.id)}">${booking_day.date}</a> <b py:if="booking.slot_id !=None"> ${slot_position.time_from} to ${slot_position.time_to} </b>  <b py:if="booking.slot_id ==None">booking has no slot row position </b>
     <p py:if="None !=booking_day"><span class="workflow_state_${str(booking.booking_state)}">${workflow_map[booking.booking_state]}</span></p>
     </p>
-    <p py:if="booking.has_key('slot_id')">
+    <p py:if="'' == booking.get('slot_id','')">
         <span class="workflow_state_unscheduled">unscheduled</span>
-        requested from $booking.valid_from to $booking.valid_to requested date $booking.requested_date
+        requested from ${booking.get('valid_from','-')} to ${booking.get('valid_to','-')} requested date ${booking.get('requested_date','-')}
     </p>
     
     <ul class="any_menu context_inline_menu">
@@ -56,7 +56,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
     
     <!-- .strftime('%A %d %B') -->
     <p>
-    <span py:if="booking.valid_from!=None and booking.valid_to!=None">Valid in range <em>${booking.valid_from} to ${booking.valid_to}</em>, </span><span py:if="None != booking.requested_date">Requested date <em>${booking.requested_date}</em></span>
+    <span py:if="booking.get('valid_from','') !='' and booking.get('valid_to','') != ''">Valid in range <em>${booking.valid_from} to ${booking.valid_to}</em>, </span><span py:if="'' != booking.get('requested_date','')">Requested date <em>${booking.requested_date}</em></span>
     </p>
     <p>Last changed by user having user id ${booking.last_changed_by_id}</p>
     

@@ -38,7 +38,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays,  getAllActivities
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays,  getAllActivities,  getSlotAndActivityIdOfBooking
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import eagerload,  eagerload_all
 import datetime
@@ -287,7 +287,7 @@ class BookingDay(BaseController):
             b = x.value
             new_booking = DataContainer(id=b['_id'],  content=b['content'],  cache_content=b['cache_content'],  
                                         booking_state=b['booking_state'],  visiting_group_id=b['visiting_group_id'],  
-                                        visiting_group_name=b['visiting_group_name'],  valid_from=b['valid_from'],  valid_to=b['valid_to'],  requested_date=b['requested_date'],  last_changed_by_id=b['last_changed_by_id'],  slot_id=b['slot_id'])
+                                        visiting_group_name=b['visiting_group_name'],  valid_from=b.get('valid_from', ''),  valid_to=b.get('valid_to', ''),  requested_date=b.get('requested_date', ''),  last_changed_by_id=b['last_changed_by_id'],  slot_id=b['slot_id'])
             ns = bookings.get(new_booking.slot_id, list())
             ns.append(new_booking)
             bookings[new_booking.slot_id] = ns
@@ -585,6 +585,8 @@ class BookingDay(BaseController):
         
         booking_day_id = None
         booking_day = None
+        slot_position = None
+        
         if booking_o.has_key('booking_day_id'):
             booking_day_id = booking_o['booking_day_id']
             if '' != booking_day_id:
@@ -596,17 +598,17 @@ class BookingDay(BaseController):
                 tmp_day_schema = holly_couch[booking_day['day_schema_id']] 
                 tmp_schema = tmp_day_schema['schema'] 
     
-        #...we know the slot position: booking_o['slot_id'] we just need to find it in the schema.
-        slot_position = None
-        if booking_o.has_key('slot_id'):
-            slot_id = booking_o['slot_id']
-            if ''!=slot_id:
-                for tmp_row in tmp_schema.values():
-                    print tmp_row
-                    for tmp_slot in tmp_row[1:]:
-                        if tmp_slot['slot_id'] == slot_id:
-                            slot_position = tmp_slot
-                            break
+                #...we know the slot position: booking_o['slot_id'] we just need to find it in the schema.
+                
+                if booking_o.has_key('slot_id'):
+                    slot_id = booking_o['slot_id']
+                    if ''!=slot_id:
+                        for tmp_row in tmp_schema.values():
+                            print tmp_row
+                            for tmp_slot in tmp_row[1:]:
+                                if tmp_slot['slot_id'] == slot_id:
+                                    slot_position = tmp_slot
+                                    break
         
         activity = holly_couch[activity_id] 
         history = []#booking_o.booking_history
@@ -615,14 +617,16 @@ class BookingDay(BaseController):
         
         
     @expose('hollyrosa.templates.edit_booked_booking')
-    @validate(validators={'id':validators.Int(not_empty=True), 'return_to_day':validators.Int(not_empty=False)})
+    @validate(validators={'id':validators.UnicodeString(not_empty=True), 'return_to_day':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change booked booking properties'))
     def edit_booked_booking(self,  return_to_day_id=None,  id=None,  **kw):
         tmpl_context.form = create_edit_book_slot_form
+        print 'ID',  str(return_to_day_id)
         
         #...find booking day and booking row
         booking_o = holly_couch[id] 
-        booking_o.return_to_day_id = return_to_day_id
+        booking_o['return_to_day_id'] = return_to_day_id
+        
         booking_day_id = booking_o['booking_day_id']
         booking_day = holly_couch[booking_day_id]
         slot_id = booking_o['slot_id']
@@ -641,7 +645,7 @@ class BookingDay(BaseController):
         #...refactor - make booking from booking_couch transfering to DataContainer
         activity_id = booking_o['activity_id']
         activity = holly_couch[activity_id]
-        booking_ = DataContainer(activity_id=activity_id, activity=activity,  id=booking_o['_id'],  visiting_group_name=booking_o['visiting_group_name'],  visiting_group_id=booking_o['visiting_group_id'],  content=booking_o['content'])
+        booking_ = DataContainer(activity_id=activity_id, activity=activity,  id=booking_o['_id'],  visiting_group_name=booking_o['visiting_group_name'],  visiting_group_id=booking_o['visiting_group_id'],  content=booking_o['content'], return_to_day_id=return_to_day_id )
         
         tmp_visiting_groups = get_visiting_groups_at_date(booking_day['date']) #DBSession.query(booking.VisitingGroup.id, booking.VisitingGroup.name,  booking.VisitingGroup.todate,  booking.VisitingGroup.fromdate ).filter(and_('visiting_group.fromdate <= \''+str(booking_day.date) + '\'', 'visiting_group.todate >= \''+str(booking_day.date) + '\''   )   ).all()
         visiting_groups = [(e['_id'],  e['name']) for e in tmp_visiting_groups]  # REFACTOR
@@ -655,48 +659,54 @@ class BookingDay(BaseController):
     @expose()
     @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change booked booking properties'))
     def save_booked_booking_properties(self,  id=None,  content=None,  visiting_group_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_row_position_id=None,  booking_day_id=None,  block_after_book=False ):
-        
+       
         #...id can be None if a new slot is booked
-        if None == id:
+        if None == id or '' == id:
             is_new = True
-            old_booking = booking.Booking()
-            old_booking.slot_row_position_id = slot_row_position_id
-            old_booking.booking_day_id = booking_day_id
+            old_booking = dict(type='booking',  valid_from='',  valid_to='',  requested_date='')#booking.Booking()
+            old_booking['slot_id'] = slot_row_position_id
+            old_booking['booking_day_id'] = booking_day_id
         else:
             is_new = False
-            old_booking = DBSession.query(booking.Booking).filter('id='+str(id)).one()
+            old_booking = holly_couch[id]
         
-        old_visiting_group_name = old_booking.visiting_group_name
-        old_booking.visiting_group_name = visiting_group_name
-        old_booking.visiting_group_id = visiting_group_id
-        old_booking.last_changed_by_id = getLoggedInUser(request).user_id
+        old_visiting_group_name = old_booking.get('visiting_group_name', '')
+        old_booking['visiting_group_name'] = visiting_group_name
+        old_booking['visiting_group_id'] = visiting_group_id
+        old_booking['last_changed_by_id'] = getLoggedInUser(request).user_id
         
-        old_booking.content = content
+        old_booking['content'] = content
         
-        old_booking.cache_content = computeCacheContent(DBSession, content, visiting_group_id)
+        old_booking['cache_content'] = computeCacheContent(holly_couch, content, visiting_group_id)
         
             
         #...make sure activity is set
-        if None != activity_id:
-            old_booking.activity = DBSession.query(booking.Activity).filter('id='+str(activity_id)).one()
+        if (None != activity_id) or (''==activity_id):
+            tmp_activity_id = activity_id
+            old_booking['activity_id'] = activity_id
         else:
-            old_booking.activity = old_booking.slot_row_position.slot_row.activity
+            old_booking['activity'] = old_booking['slot_id'].activity_id # again we need to lookup activity
+            tmp_activity_id = None
+            
+        activity = holly_couch[tmp_activity_id]
         
-        old_booking.booking_state = old_booking.activity.default_booking_state
+        #...again we need to look up activity
+        old_booking['booking_state'] = activity['default_booking_state']
         
         if is_new:
-            remember_book_slot(booking=old_booking, slot_row_position=DBSession.query(booking.SlotRowPosition).filter('id='+str(slot_row_position_id)).one(), booking_day=DBSession.query(booking.BookingDay).filter('id='+str(booking_day_id)).one(),  changed_by='')
-            DBSession.add(old_booking)
-            
+            #remember_book_slot(booking=old_booking, slot_row_position=DBSession.query(booking.SlotRowPosition).filter('id='+str(slot_row_position_id)).one(), booking_day=DBSession.query(booking.BookingDay).filter('id='+str(booking_day_id)).one(),  changed_by='')
+            #DBSession.add(old_booking)
+            holly_couch['booking.'+genUID()] = old_booking
         else:
-            remember_booking_properties_change(booking=old_booking, slot_row_position=old_booking.slot_row_position, booking_day=old_booking.booking_day,  old_visiting_group_name=old_visiting_group_name,  new_visiting_group_name=visiting_group_name, new_content='', changed_by='')
-        
+            #remember_booking_properties_change(booking=old_booking, slot_row_position=old_booking.slot_row_position, booking_day=old_booking.booking_day,  old_visiting_group_name=old_visiting_group_name,  new_visiting_group_name=visiting_group_name, new_content='', changed_by='')
+            
+            holly_couch[old_booking['_id']] = old_booking
         
         #...block after book?
         if block_after_book:
             self.block_slot_helper(booking_day_id,  slot_row_position_id)
         
-        raise redirect('day?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(old_booking.activity.id))
+        raise redirect('day?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id))
     
         
     @expose('hollyrosa.templates.view_activity')
@@ -787,36 +797,62 @@ class BookingDay(BaseController):
         
     @expose('hollyrosa.templates.move_booking')
     @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change a booking'))
-    @validate(validators={'return_to_day_id':validators.Int(not_empty=False), 'id':validators.Int(not_empty=False)})
+    @validate(validators={'return_to_day_id':validators.UnicodeString(not_empty=False), 'id':validators.UnicodeString(not_empty=False)})
     def move_booking(self,  return_to_day_id=None,  id=None,  **kw):
         tmpl_context.form = create_move_booking_form
-        activities = DBSession.query(booking.Activity.id, booking.Activity.title).all()
+        activities_tmp = self.get_activities_map() #DBSession.query(booking.Activity.id, booking.Activity.title).all()
+        activities = [(e['_id'],  e['title'],  e.get('zorder', '')) for e in activities_tmp.values()] 
         
         #...patch since this is the way we will be called if validator for new will fail
-        booking_o = DBSession.query(booking.Booking).filter('id='+str(id)).one()
+        booking_o = holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
         booking_o.return_to_day_id = return_to_day_id
-        return dict(activities=activities, booking=booking_o,  getRenderContent=getRenderContent)
+        activity_id,  slot_o = getSlotAndActivityIdOfBooking(booking_o)
+        activity_o = holly_couch[booking_o['activity_id']]
+        booking_day = holly_couch[booking_o['booking_day_id']]
+        booking_ = DataContainer(activity_id=activity_id,  content=booking_o['content'],  cache_content=booking_o['cache_content'],  visiting_group_name=booking_o['visiting_group_name'],  id=booking_o['_id'],  return_to_day_id=return_to_day_id)
+        return dict(activities=activities, booking=booking_,  activity=activity_o,  booking_day=booking_day,  slot=slot_o,  getRenderContent=getRenderContent)
         
         
     @validate(create_move_booking_form, error_handler=move_booking)      
     @expose()
     @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change activity properties'))
     def save_move_booking(self,  id=None,  activity_id=None,  return_to_day_id=None,  **kw):
-        new_booking = holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
+        new_booking = holly_couch[id] 
+        print 'id',id,'new', new_booking.items()
         
         #...slot row position must be changed, so we need to find slot row of activity and then slot row position with aproximately the same time span
-        old_slot_row_position = new_booking.slot_row_position
-        old_slot_row = old_slot_row_position.slot_row
+        old_slot_id = new_booking['slot_id']
+        #old_activity_id,  old_slot = getSlotAndActivityIdOfBooking(new_booking)
+        booking_day_id = new_booking['booking_day_id']
+        booking_day_o = holly_couch[booking_day_id]
+        schema_o = holly_couch[booking_day_o['day_schema_id']]
         
-        new_slot_row = DBSession.query(booking.SlotRow).filter('activity_id='+str(activity_id)).one()
-        for tmp_slot_row_position in new_slot_row.slot_row_position:
-            
-            # TODO: too hackish below
-            if tmp_slot_row_position.time_from == old_slot_row_position.time_from:
-                new_booking.slot_row_position = tmp_slot_row_position
+        #...iterate thrue the schema first time looking for slot_id_position and activity
+        the_schema = schema_o['schema']
+        for tmp_activity_id,  tmp_activity_row in the_schema.items():
+            tmp_slot_index = 1
+            for tmp_slot in tmp_activity_row[1:]:
+                if tmp_slot['slot_id'] == old_slot_id:
+                    old_activity_id = tmp_activity_id
+                    old_slot = tmp_slot
+                    old_slot_index = tmp_slot_index
+                    break
+                tmp_slot_index += 1
+        
+        tmp_new_slot_row = the_schema[activity_id]
+        new_slot = tmp_new_slot_row[old_slot_index]
+        new_slot_id = new_slot['slot_id']
+        #new_slot_row = DBSession.query(booking.SlotRow).filter('activity_id='+str(activity_id)).one()
+        #for tmp_slot_row_position in new_slot_row.slot_row_position:
+         #   
+         #   # TODO: too hackish below
+         #   if tmp_slot_row_position.time_from == old_slot_row_position.time_from:
+         #       new_booking.slot_row_position = tmp_slot_row_position
         
         #...it's not perfectly normalized that we also need to change activity id
-        new_booking.activity_id = activity_id
+        new_booking['activity_id'] = activity_id
+        new_booking['slot_id'] = new_slot_id
+        holly_couch[new_booking['_id']] = new_booking
         
         raise redirect('/booking/day?day_id='+str(return_to_day_id)) 
         
@@ -964,10 +1000,7 @@ class BookingDay(BaseController):
     #@require(Any(is_user('root'), has_permission('pl'), msg='Only PL can block or unblock slots'))
     def block_slot(self, booking_day_id,  slot_row_position_id,  level = 1):
         self.block_slot_helper(booking_day_id, slot_row_position_id, level=level)
-        ###slot_row_position = DBSession.query(booking.SlotRowPosition).filter('id='+str(slot_row_position_id)).one()
-        
         activity_id = self.getActivityIdOfBooking(booking_day_id,  slot_row_position_id)
-        
         raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(activity_id))
         
 
@@ -975,13 +1008,10 @@ class BookingDay(BaseController):
     @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'slot_row_position_id':validators.Int(not_empty=True)})
     #@require(Any(is_user('root'), has_permission('pl'), msg='Only PL can block or unblock slots'))
     def unblock_slot(self, booking_day_id,  slot_row_position_id):
-        ###slot_row_position_state = DBSession.query(booking.SlotRowPositionState).filter(and_('booking_day_id='+str(booking_day_id), 'slot_row_position_id='+str(slot_row_position_id))).first()
         #### todo: reintroduced    remember_unblock_slot(slot_row_position=slot_row_position_state.slot_row_position, booking_day=slot_row_position_state.booking_day,  changed_by='',  level=slot_row_position_state.level)
-        #####DBSession.delete(slot_row_position_state)
-        ##slot_row_position = DBSession.query(booking.SlotRowPosition).filter('id='+str(slot_row_position_id)).one()
+
         # todo: set state variable when it has been introduced
         tmp_slot_states = self.getSlotStateOfBookingDayIdAndSlotId( booking_day_id,  slot_row_position_id)
-        print 'tmp slot state: ',  tmp_slot_states
         for sl in tmp_slot_states:
             holly_couch.delete(sl)
         activity_id = self.getActivityIdOfBooking(booking_day_id,  slot_row_position_id)

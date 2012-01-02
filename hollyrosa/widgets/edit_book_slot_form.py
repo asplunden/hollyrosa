@@ -30,13 +30,13 @@ class EditBookSlotForm(TableForm):
     show_errors = True
 
     class fields(WidgetsList):
-        id = HiddenField(validator=Int)
-        booking_day_id = HiddenField(validator=Int)
-        slot_row_position_id = HiddenField(validator=Int)
-        activity_id = HiddenField(validator=Int)
-        return_to_day_id = HiddenField(validator=Int)
+        id = HiddenField(validator=UnicodeString)
+        booking_day_id = HiddenField(validator=UnicodeString)
+        slot_row_position_id = HiddenField(validator=UnicodeString)
+        activity_id = HiddenField(validator=UnicodeString)
+        return_to_day_id = HiddenField(validator=UnicodeString)
         visiting_group_name = TextField(validator=UnicodeString(min=1),  css_class="edit_name",  size=40)
-        visiting_group_id = SingleSelectField(validator=Int)
+        visiting_group_id = SingleSelectField(validator=UnicodeString)
         content = TextArea(validator=UnicodeString)
         block_after_book = CheckBox()
         

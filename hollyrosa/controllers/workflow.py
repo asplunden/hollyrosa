@@ -22,7 +22,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  genUID,  holly_couch
+from hollyrosa.model import genUID,  holly_couch
 from sqlalchemy import and_
 import datetime
 

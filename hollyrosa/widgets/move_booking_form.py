@@ -30,8 +30,8 @@ class MoveBookingForm(TableForm):
     show_errors = True
     
     class fields(WidgetsList):
-        id = HiddenField(validator=Int)
-        return_to_day_id = HiddenField(validator=Int)
-        activity_id = SingleSelectField(validator=Int)
+        id = HiddenField(validator=UnicodeString)
+        return_to_day_id = HiddenField(validator=UnicodeString)
+        activity_id = SingleSelectField(validator=UnicodeString)
 
 create_move_booking_form = MoveBookingForm("create_move_booking_form")
