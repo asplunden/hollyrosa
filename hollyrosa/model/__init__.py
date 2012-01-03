@@ -75,3 +75,4 @@ getBookingDays = booking_couch.getBookingDays
 getAllActivities = booking_couch.getAllActivities
 getAllVisitingGroupsNameAmongBookings = booking_couch.getAllVisitingGroupsNameAmongBookings
 getSlotAndActivityIdOfBooking = booking_couch.getSlotAndActivityIdOfBooking
+getBookingHistory = booking_couch.getBookingHistory

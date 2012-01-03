@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010, 2011, 2012 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -38,7 +38,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays,  getAllActivities,  getSlotAndActivityIdOfBooking
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays,  getAllActivities,  getSlotAndActivityIdOfBooking,  getBookingHistory
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import eagerload,  eagerload_all
 import datetime
@@ -624,8 +624,8 @@ class BookingDay(BaseController):
                                     break
         
         activity = holly_couch[activity_id] 
-        history = []#booking_o.booking_history
-        history.reverse()
+        history = getBookingHistory(id)
+        #history.reverse()
         return dict(booking_day=booking_day,  slot_position=slot_position, booking=booking_o,  workflow_map=workflow_map,  history=history,  change_op_map=change_op_map,  getRenderContent=getRenderContentDict,  activity=activity)
         
         

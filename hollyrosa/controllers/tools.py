@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010, 2011, 2012 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -443,7 +443,34 @@ class Tools(BaseController):
             s['level'] = st.level
             s['slot_id'] = 'slot.'+str(st.slot_row_position_id)
             s['booking_day_id'] = 'booking_day.'+str(st.booking_day_id)
+            
+            
+            
+            
+            
+            
+            
             holly_couch['slot_state.'+str(st.id)] = s
         
         raise redirect('/')
 
+
+    @expose()
+    def transfer_history(self):
+        sts = DBSession.query(booking.BookingHistory).all()
+        
+        for st in sts:
+            #s = dict(type='booking_history')
+            s = holly_couch['booking_history.'+str(st.id)]
+            
+            s['change_op'] = st.change_op
+            s['booking_content'] = st.booking_content
+            s['change'] = st.change
+            s['changed_by'] = st.changed_by
+            s['timestamp'] = str(st.timestamp)
+            s['booking_id'] = 'booking.'+str(st.booking_id)
+            s['booking_day_id'] = 'booking_day.'+str(st.booking_day_id)
+            holly_couch['booking_history.'+str(st.id)] = s
+            
+        
+        raise redirect('/')

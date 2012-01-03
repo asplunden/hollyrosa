@@ -1,6 +1,23 @@
 # -*- coding: utf-8 -*-
+"""
+Copyright 2010, 2011, 2012 Martin Eliasson
 
-"""Couch db"""
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+""" 
 
 #...ME
 import couchdb
@@ -50,6 +67,22 @@ def getAllActivities():
     
     activities = holly_couch.query(map_fun)
     return activities
+    
+
+def cmpKeyReverse(a, b):
+    return cmp(b.key,  a.key)
+    
+def getBookingHistory(booking_id):
+    map_fun = """function(doc) {
+    if (doc.type == 'booking_history') {
+        if (doc.booking_id == '"""+booking_id+"""') {
+            emit(doc.timestamp, doc);
+    }}}"""
+    
+    history= [h for h in holly_couch.query(map_fun)]
+    history.sort(cmpKeyReverse)
+    return [h.value for h in history]
+
             
             
 def getBookingDays(from_date='',  to_date='',  return_map=False):

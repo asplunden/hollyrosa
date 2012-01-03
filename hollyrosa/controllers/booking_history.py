@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010, 2011, 2012 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -24,7 +24,7 @@ from repoze.what.predicates import Any, is_user, has_permission
 from formencode import validators
 from tg import expose, flash, require, url, request, redirect,  validate
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch
 from sqlalchemy import and_
 import datetime,  types
 from hollyrosa.controllers.common import workflow_map,  getFormatedDate,  getLoggedInDisplayName,  change_op_map,  change_op_lookup
@@ -149,7 +149,21 @@ class History(BaseController):
         """Abort the request with a 404 HTTP status code."""
         abort(404)
 
+    def fnCmpTimestamp(self,  a,  b):
+        return cmp(b.key,  a.key)
+        
+        
+    def getBookingHistory(self,  limit=25):
+        map_fun = '''function(doc) {
+        if (doc.type == 'booking_history') {
+            emit(doc.timestamp, doc);
+        }}'''
     
+        booking_history = holly_couch.query(map_fun)
+        all = [h for h in booking_history]
+        all.sort(self.fnCmpTimestamp)
+        return [a.value for a in all][:25]
+        
     @expose('hollyrosa.templates.history_show')
     @validate(validators={'visiting_group_id':validators.Int(not_empty=False), 'user_id':validators.Int(not_empty=False)})
     @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view history'))
@@ -166,7 +180,7 @@ class History(BaseController):
             for_group_name = 'for user ' + str(user_id)
 
         else:
-            history = DBSession.query(booking.BookingHistory).order_by('timestamp desc').limit(25)
+            history = self.getBookingHistory(limit=25) #DBSession.query(booking.BookingHistory).order_by('timestamp desc').limit(25)
         return dict(history=history,  change_op_map=change_op_map, for_group_name=for_group_name)
         
 
