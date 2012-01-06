@@ -38,7 +38,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays,  getAllActivities,  getSlotAndActivityIdOfBooking,  getBookingHistory
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays,  getAllActivities,  getSlotAndActivityIdOfBooking,  getBookingHistory,  getAllActivityGroups
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import eagerload,  eagerload_all
 import datetime
@@ -59,7 +59,7 @@ from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedu
 
 from hollyrosa.controllers.booking_history import remember_booking_change,  remember_schedule_booking,  remember_unschedule_booking,  remember_book_slot,  remember_booking_properties_change,  remember_new_booking_request,  remember_booking_request_change,  remember_delete_booking_request,  remember_block_slot, remember_unblock_slot
 
-from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUser,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent
+from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUser,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level
 
 __all__ = ['BookingDay',  'Calendar']
     
@@ -132,7 +132,7 @@ class Calendar(BaseController):
     @expose('hollyrosa.templates.calendar_overview')
     def overview(self):
         """Show an overview of all booking days"""
-        ##booking_days = DBSession.query(booking.BookingDay).filter('date >=\''+datetime.date.today().strftime('%Y-%m-%d')+'\'').all()
+        
         return dict(booking_days=getBookingDays(from_date=datetime.date.today().strftime('%Y-%m-%d')))
     
 
@@ -156,7 +156,7 @@ class Calendar(BaseController):
         
     @expose('hollyrosa.templates.booking_day_properties')
     @validate(validators={'id':validators.Int(not_empty=True)})
-    #@require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change booking day properties'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booking day properties'))
     def edit_booking_day(self,  id=None,  **kw):
         booking_day = holly_couch[id] #getBookingDay(id)
         tmpl_context.form = create_edit_booking_day_form
@@ -164,7 +164,7 @@ class Calendar(BaseController):
         
     @validate(create_edit_booking_day_form, error_handler=edit_booking_day)      
     @expose()
-    #@require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change booking day properties'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booking day properties'))
     def save_booking_day_properties(self,  _id=None,  note='', num_program_crew_members=0,  num_fladan_crew_members=0):
         
         # important: if note is too big, dont try to store it in database because that will give all kinds of HTML rendering errors later
@@ -214,7 +214,7 @@ class BookingDay(BaseController):
             if (doc.type == 'booking_day')
                 emit(doc._id, doc.date);
             }'''
-            all_days_c = holly_couch.query(map_fun) #DBSession.query(booking.BookingDay.id,  booking.BookingDay.date).all()
+            all_days_c = holly_couch.query(map_fun) 
             self._all_days = [DataContainer(id=d.key,  date=d.value) for d in all_days_c]
             
             tmp = self._all_days
@@ -224,20 +224,7 @@ class BookingDay(BaseController):
         
         
     
-    def getAllActivityGroups(self):
-        try:
-            tmp = self._activity_groups
-        except AttributeError:
-            #self._activity_groups = DBSession.query(booking.ActivityGroup.id,  booking.ActivityGroup.title).all()
-            map_fun = '''function(doc) {
-            if (doc.type == 'activity_group')
-                emit(doc._id, doc.title);
-            }'''
-            all_groups_c = holly_couch.query(map_fun) #DBSession.query(booking.BookingDay.id,  booking.BookingDay.date).all()
-            self._activity_groups = [DataContainer(id=d.key,  title=d.value) for d in all_groups_c]
-            
-            tmp = self._activity_groups
-        return tmp
+
         
         
     def getActivitySlotPositionsMap(self,  day_schema):
@@ -365,8 +352,7 @@ class BookingDay(BaseController):
                                         booking_state=b['booking_state'],  visiting_group_id=b['visiting_group_id'],  
                                         visiting_group_name=b['visiting_group_name'],  valid_from=b['valid_from'],  valid_to=b['valid_to'],  requested_date=b['requested_date'],  last_changed_by_id=b['last_changed_by_id'],  slot_id=b['slot_id'],  activity_title=a['title'],  activity_group_id=a['activity_group_id'],  activity_id=a_id)
             unscheduled_bookings.append(new_booking)
-        #DBSession.query(booking.Booking).options(eagerload('slot_row_position')).filter(or_(and_('booking_day_id is null',  'valid_to >= \'' +showing_sql_date + '\'',  'valid_from <= \''+showing_sql_date + '\'', 'booking_state > -100'), and_('booking_day_id is null',  'valid_to is null', 'booking_state > -100')  )).all()
-        #print unscheduled_bookings
+        
         return unscheduled_bookings
         
         
@@ -447,13 +433,15 @@ class BookingDay(BaseController):
         #...compute all blockings, create a dict mapping slot_row_position_id to actual state
         blockings_map = self.get_slot_blockings_for_booking_day(day_id)
         days = self.getAllDays()
-        activity_groups = self.getAllActivityGroups() 
+        
+        #reintroduce caching
+        activity_groups = getAllActivityGroups() 
             
         return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups)
         
         
     @expose('hollyrosa.templates.booking_day_fladan')
-    @validate(validators={'day_id':validators.Int(not_empty=False), 'day':validators.DateValidator(not_empty=False), 'ag':validators.String(not_empty=False)})
+    @validate(validators={'day_id':validators.UnicodeString(not_empty=False), 'day':validators.DateValidator(not_empty=False), 'ag':validators.UnicodeString(not_empty=False)})
     def fladan_day(self,  day=None,  day_id=None, ag=''):
         """Show a complete booking day"""
         
@@ -512,7 +500,7 @@ class BookingDay(BaseController):
 
         
     @expose()
-    #@require(Any(is_user('root'), has_permission('pl'), msg='Only PL may delete a booking request'))
+    @require(Any(is_user('root'), has_level('pl'), msg='Only PL may delete a booking request'))
     @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'booking_id':validators.Int(not_empty=True)})
     def delete_booking(self,  booking_day_id,  booking_id):
         ###booking_o = DBSession.query(booking.Booking).filter('id='+str(booking_id)).one()        
@@ -529,7 +517,7 @@ class BookingDay(BaseController):
 
     @validate(create_validate_unschedule_booking)
     @expose()
-    #@require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may unschedule booking request'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may unschedule booking request'))
     def unschedule_booking(self,  booking_day_id,  booking_id):
         b = holly_couch[booking_id] #DBSession.query(booking.Booking).filter('id='+booking_id).one()
         b['last_changed_by_id'] = getLoggedInUser(request).user_id
@@ -544,7 +532,7 @@ class BookingDay(BaseController):
         
     @validate(create_validate_schedule_booking)
     @expose()
-    #@require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may schedule booking request'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may schedule booking request'))
     def schedule_booking(self,  booking_day_id,  booking_id,  slot_row_position_id):
         b = holly_couch[booking_id] 
         b['last_changed_by_id'] = getLoggedInUser(request).user_id
@@ -558,13 +546,12 @@ class BookingDay(BaseController):
         
     @expose('hollyrosa.templates.edit_booked_booking')
     @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'slot_position_id':validators.Int(not_empty=True)})
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may book a slot'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may book a slot'))
     def book_slot(self,  booking_day_id=None,  slot_position_id=None):
         tmpl_context.form = create_edit_book_slot_form
          
         #...find booking day and booking row
         booking_day = getBookingDay(str(booking_day_id))
-        #slot_position = DBSession.query(booking.SlotRowPosition).filter('id='+str(slot_position_id)).one() 
         
         
         tmp_visiting_groups = get_visiting_groups_at_date(booking_day['date']) #DBSession.query(booking.VisitingGroup.id, booking.VisitingGroup.name,  booking.VisitingGroup.todate,  booking.VisitingGroup.fromdate ).filter(and_('visiting_group.fromdate <= \''+str(booking_day.date) + '\'', 'visiting_group.todate >= \''+str(booking_day.date) + '\''   )   ).all()
@@ -631,7 +618,7 @@ class BookingDay(BaseController):
         
     @expose('hollyrosa.templates.edit_booked_booking')
     @validate(validators={'id':validators.UnicodeString(not_empty=True), 'return_to_day':validators.UnicodeString(not_empty=False)})
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change booked booking properties'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def edit_booked_booking(self,  return_to_day_id=None,  id=None,  **kw):
         tmpl_context.form = create_edit_book_slot_form
         print 'ID',  str(return_to_day_id)
@@ -670,7 +657,7 @@ class BookingDay(BaseController):
         
     @validate(create_edit_book_slot_form, error_handler=edit_booked_booking)      
     @expose()
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change booked booking properties'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def save_booked_booking_properties(self,  id=None,  content=None,  visiting_group_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_row_position_id=None,  booking_day_id=None,  block_after_book=False ):
        
         #...id can be None if a new slot is booked
@@ -708,7 +695,6 @@ class BookingDay(BaseController):
         
         if is_new:
             #remember_book_slot(booking=old_booking, slot_row_position=DBSession.query(booking.SlotRowPosition).filter('id='+str(slot_row_position_id)).one(), booking_day=DBSession.query(booking.BookingDay).filter('id='+str(booking_day_id)).one(),  changed_by='')
-            #DBSession.add(old_booking)
             holly_couch['booking.'+genUID()] = old_booking
         else:
             #remember_booking_properties_change(booking=old_booking, slot_row_position=old_booking.slot_row_position, booking_day=old_booking.booking_day,  old_visiting_group_name=old_visiting_group_name,  new_visiting_group_name=visiting_group_name, new_content='', changed_by='')
@@ -730,7 +716,7 @@ class BookingDay(BaseController):
     
     @expose('hollyrosa.templates.edit_activity')
     @validate(validators={'activity_id':validators.Int(not_empty=True)})
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change activity information'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change activity information'))
     def edit_activity(self, activity_id=None,  **kw):
         tmpl_context.form = create_edit_activity_form
         activity_groups = self.get_activity_groups() #DBSession.query(booking.ActivityGroup.id, booking.ActivityGroup.title).all() # in the future filter on from and to dates
@@ -745,7 +731,7 @@ class BookingDay(BaseController):
         
     @validate(create_edit_activity_form, error_handler=edit_activity)      
     @expose()
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change activity properties'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change activity properties'))
     def save_activity_properties(self,  id=None,  title=None,  external_link='', internal_link='',  print_on_demand_link='',  description='', tags='', capacity=0,  default_booking_state=0,  activity_group_id=1,  gps_lat=0,  gps_long=0,  equipment_needed=False, education_needed=False,  certificate_needed=False,  bg_color='', guides_per_slot=0,  guides_per_day=0 ):
         if None == id:
             acticity = booking.Activity()
@@ -783,7 +769,7 @@ class BookingDay(BaseController):
         
     @expose('hollyrosa.templates.request_new_booking')
     @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'id':validators.UnicodeString(not_empty=False), 'visiting_group_id':validators.UnicodeString(not_empty=False)})
-    #@require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change a booking'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change a booking'))
     def edit_booking(self,  booking_day_id=None,  id=None, visiting_group_id='', **kw):
         tmpl_context.form = create_edit_new_booking_request_form
         
@@ -809,7 +795,7 @@ class BookingDay(BaseController):
         
         
     @expose('hollyrosa.templates.move_booking')
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change a booking'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change a booking'))
     @validate(validators={'return_to_day_id':validators.UnicodeString(not_empty=False), 'id':validators.UnicodeString(not_empty=False)})
     def move_booking(self,  return_to_day_id=None,  id=None,  **kw):
         tmpl_context.form = create_move_booking_form
@@ -828,7 +814,7 @@ class BookingDay(BaseController):
         
     @validate(create_move_booking_form, error_handler=move_booking)      
     @expose()
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change activity properties'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change activity properties'))
     def save_move_booking(self,  id=None,  activity_id=None,  return_to_day_id=None,  **kw):
         new_booking = holly_couch[id] 
         print 'id',id,'new', new_booking.items()
@@ -870,15 +856,16 @@ class BookingDay(BaseController):
         raise redirect('/booking/day?day_id='+str(return_to_day_id)) 
         
         
-    @validate(create_edit_new_booking_request_form, error_handler=edit_booking)   
+    @validate(create_edit_new_booking_request_form, error_handler=edit_booking) 
+    @require(Any(is_user('root'), has_level('view'), has_level('staff'), has_level('pl'),  msg='Only viewers, staff and PL can submitt a new booking request'))
     @expose()
     def save_new_booking_request(self, content='',  activity_id=None,  visiting_group_name='',  visiting_group_select=None,  valid_from=None,  valid_to=None,  requested_date=None,  visiting_group_id=None,  id=None,  return_to_day_id=None):
         is_new=False
         if id ==None or id=='':
-            new_booking = dict(type='booking',  booking_day_id='', slot_id='') #booking.Booking()
+            new_booking = dict(type='booking',  booking_day_id='', slot_id='') 
             is_new = True
         else:
-            new_booking = holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
+            new_booking = holly_couch[id] 
             old_booking = DataContainer(activity=new_booking.activity,  visiting_group_name=new_booking.visiting_group_name,  valid_from=new_booking.valid_from,  valid_to=new_booking.valid_to,  requested_date=new_booking.requested_date,  content=new_booking.content,  id=new_booking.id)
             
         if is_new:
@@ -892,7 +879,7 @@ class BookingDay(BaseController):
         
         ##vgroup = DBSession.query(booking.VisitingGroup).filter('id='+str(visiting_group_id)).one()
         new_booking['visiting_group_id'] = visiting_group_id
-        print 'compute cache content'
+        
         new_booking['cache_content'] = computeCacheContent(holly_couch, content, visiting_group_id)
         
         
@@ -907,7 +894,7 @@ class BookingDay(BaseController):
         new_booking['valid_to'] = str(valid_to)
         #new_booking['timestamp'] = 
         #raise IOError,  "%s %s %s" % (str(requested_date),  str(valid_from),  str(valid_to))
-        print 'saving to db'
+        
         if is_new:
             holly_couch['booking.'+genUID()] = new_booking
             #####remember_new_booking_request(new_booking)
@@ -925,7 +912,7 @@ class BookingDay(BaseController):
     
     @expose()
     @validate(validators={'id':validators.UnicodeString(not_empty=True)})
-    @require(Any(is_user('root'), has_permission('pl'), msg='Only PL can block or unblock slots'))
+    @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
     def prolong(self,  id):
         # TODO: one of the problems with prolong that just must be sloved is what do we do if the day shema is different for the day after?
         
@@ -1037,7 +1024,7 @@ class BookingDay(BaseController):
         
     @expose()
     @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'slot_row_position_id':validators.Int(not_empty=True), 'level':validators.Int(not_empty=True)})
-    #@require(Any(is_user('root'), has_permission('pl'), msg='Only PL can block or unblock slots'))
+    @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
     def block_slot(self, booking_day_id,  slot_row_position_id,  level = 1):
         self.block_slot_helper(booking_day_id, slot_row_position_id, level=level)
         activity_id = self.getActivityIdOfBooking(booking_day_id,  slot_row_position_id)
@@ -1046,7 +1033,7 @@ class BookingDay(BaseController):
 
     @expose()
     @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'slot_row_position_id':validators.Int(not_empty=True)})
-    #@require(Any(is_user('root'), has_permission('pl'), msg='Only PL can block or unblock slots'))
+    @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
     def unblock_slot(self, booking_day_id,  slot_row_position_id):
         #### todo: reintroduced    remember_unblock_slot(slot_row_position=slot_row_position_state.slot_row_position, booking_day=slot_row_position_state.booking_day,  changed_by='',  level=slot_row_position_state.level)
 
@@ -1060,7 +1047,7 @@ class BookingDay(BaseController):
 
     @expose('hollyrosa.templates.edit_multi_book')
     @validate(validators={'booking_id':validators.Int(not_empty=True)})
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may use multibook functionality'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may use multibook functionality'))
     def multi_book(self,  booking_id=None,  **kw):
         booking_o = holly_couch[booking_id] #DBSession.query(booking.Booking).filter('id='+str(booking_id)).one()
         booking_days = DBSession.query(booking.BookingDay).all()
@@ -1100,7 +1087,7 @@ class BookingDay(BaseController):
         
     @expose("json")
     @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'slot_row_position_id':validators.Int(not_empty=True), 'activity_id':validators.Int(not_empty=True), 'content':validators.UnicodeString(not_empty=False), 'visiting_group_id_id':validators.Int(not_empty=True), 'block_after_book':validators.Bool(not_empty=False)})
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change booked booking properties'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def create_booking_async(self,  booking_day_id=0,  slot_row_position_id=0,  activity_id=0,  content='', block_after_book=False,  visiting_group_id=None):
                 
         #...TODO refactor to isBlocked
@@ -1153,7 +1140,7 @@ class BookingDay(BaseController):
         
     @expose("json")
     @validate(validators={'delete_req_booking_id':validators.Int(not_empty=True), 'activity_id':validators.Int(not_empty=True), 'visiting_group_id_id':validators.Int(not_empty=True)})
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change booked booking properties'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def delete_booking_async(self,  delete_req_booking_id=0,  activity_id=0,  visiting_group_id=None):
         vgroup = DBSession.query(booking.VisitingGroup).filter('visiting_group.id='+visiting_group_id).one()
         booking_o = DBSession.query(booking.Booking).filter('id='+str(delete_req_booking_id)).one()
@@ -1165,7 +1152,7 @@ class BookingDay(BaseController):
         
     @expose("json")
     @validate(validators={'delete_req_booking_id':validators.Int(not_empty=True), 'activity_id':validators.Int(not_empty=True), 'visiting_group_id_id':validators.Int(not_empty=True)})
-    @require(Any(is_user('root'), has_permission('staff'), msg='Only staff members may change booked booking properties'))
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def unschedule_booking_async(self,  delete_req_booking_id=0,  activity_id=0,  visiting_group_id=None):
         vgroup = DBSession.query(booking.VisitingGroup).filter('visiting_group.id='+visiting_group_id).one()
         booking_o = DBSession.query(booking.Booking).filter('id='+str(delete_req_booking_id)).one()

@@ -22,6 +22,9 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 from hollyrosa.model import booking
 
+from repoze.what.predicates import Predicate
+
+
 workflow_map = dict()
 workflow_map[10] ='booked'
 workflow_map[20] ='approved'
@@ -68,10 +71,16 @@ dummy_identity = DummyIdentity()
 
 
 def getLoggedInDisplayName(request):
-    return request.identity.get('user', dummy_identity).display_name
+    return request.identity.get('user', dummy_identity)['display_name']
+    
     
 def getLoggedInUser(request):
     return request.identity.get('user', None)
+    
+    
+def getLoggedInUserId(request):
+    return request.identity.get('user', None)['_id']
+    
     
 def computeCacheContent(dbsession, content,  visiting_group_id):
     """
@@ -101,3 +110,45 @@ def computeCacheContent(dbsession, content,  visiting_group_id):
         cache_content = content
             
     return cache_content
+
+
+
+
+
+
+class has_level(Predicate):
+    message = 'Only for users with level %level'
+
+    def __init__(self, level, **kwargs):
+        super(has_level, self).__init__(**kwargs)
+        self.level = level
+
+
+    def evaluate(self, environ, credentials):
+        # Checking if it's the author
+        
+        #print 'cred', dir(environ),  environ.keys(),  environ['repoze.who.identity'],  environ['repoze.who.identity']['user_level']
+        
+        if not environ.has_key('repoze.who.identity'):
+            self.unmet(level = self.level)
+            
+        if self.level not in environ['repoze.who.identity']['user_level']:
+            #self.unmet(post_id=post_id, author=post.author_userid)
+            self.unmet(level = self.level)
+        
+
+#class has_level_staff(Predicate):
+#    message = 'Only for users with level staff'
+#
+#    def evaluate(self, environ, credentials):
+#        if 'staff' not in environ['repoze.who.identity']['user_level']:
+#            self.unmet()
+#
+#
+#class has_level_pl(Predicate):
+#    message = 'Only for users with level pl'
+#
+#    def evaluate(self, environ, credentials):
+#        if 'pl' not in environ['repoze.who.identity']['user_level']:
+#            self.unmet()
+

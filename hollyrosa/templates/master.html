@@ -51,8 +51,7 @@ from genshi import HTML, XML
     <span py:if="tg.auth_stack_enabled" py:strip="True">
         <li><a href="${tg.url('/about')}" class="${('', 'active')[defined('page') and page==page=='about']}">About</a></li>
         <li py:if="not request.identity" id="login" class="loginlogout"><a href="${tg.url('/login')}">Login</a></li>
-        <li py:if="request.identity" id="login" class="loginlogout"><a href="${tg.url('/logout_handler')}">Logout <em>${request.identity['user']}</em></a></li>
-        <li py:if="request.identity" id="admin" class="loginlogout"><a href="${tg.url('/admin')}">Admin</a></li>
+        <li py:if="request.identity" id="login" class="loginlogout"><a href="${tg.url('/logout_handler')}">Logout <em>${request.identity['user']['display_name']}</em></a></li>
     </span>
   </ul>
   <div id="content">

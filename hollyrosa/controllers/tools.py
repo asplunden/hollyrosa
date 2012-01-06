@@ -23,7 +23,7 @@ import pylons
 from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID
+from hollyrosa.model import holly_couch,  genUID
 from sqlalchemy import and_
 from sqlalchemy.orm import eagerload,  eagerload_all
 
@@ -41,7 +41,9 @@ from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
 from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
 
 from booking_history import  remember_workflow_state_change
-from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent
+from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level
+
+from hollyrosa.model import getAllActivityGroups
 
 __all__ = ['tools']
 
@@ -65,7 +67,7 @@ class Tools(BaseController):
         if day == None:
             day = datetime.datetime.today().date().strftime("%Y-%m-%d")
             
-        activity_groups = DBSession.query(booking.ActivityGroup).all()
+        activity_groups = getAllActivityGroups()
         return dict(show_day=day,  activity_groups=activity_groups)
         
     
@@ -161,7 +163,7 @@ class Tools(BaseController):
         return cmp(b['severity'], a['severity'])
 
     @expose('hollyrosa.templates.view_sanity_check_property_usage')
-    @require(Any(is_user('root'), has_permission('staff'), has_permission('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
+    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def sanity_check_property_usage(self):
         
         #...iterate through all bookings
@@ -217,7 +219,7 @@ class Tools(BaseController):
         return dict (problems=problems)
         
     @expose('hollyrosa.templates.visitor_statistics')
-    @require(Any(is_user('root'), has_permission('staff'), has_permission('pl'),  msg='Only PL or staff members can take a look at people statistics'))
+    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can take a look at people statistics'))
     def visitor_statistics(self):
         
         booking_days = DBSession.query(booking.BookingDay).all()
@@ -262,7 +264,7 @@ class Tools(BaseController):
 
 
     @expose('hollyrosa.templates.booking_day_summary')
-    @require(Any(is_user('root'), has_permission('staff'), has_permission('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
+    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def booking_statistics(self):
         """Show a complete booking day"""
         
@@ -306,6 +308,7 @@ class Tools(BaseController):
         return dict(slot_rows=slot_rows_n,  bookings=activity_totals, totals=totals)
     
     @expose()
+    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def transfer_activity_groups(self):
         activity_groups = DBSession.query(booking.ActivityGroup).all()
         for acg in activity_groups:
@@ -314,6 +317,7 @@ class Tools(BaseController):
         raise redirect('tools')
     
     @expose()
+    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def transfer_activity(self):
         activity = DBSession.query(booking.Activity).all()
         for ac in activity:
@@ -326,6 +330,7 @@ class Tools(BaseController):
         raise redirect('/')
         
     @expose()
+    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def update_schema(self):
         s = holly_couch['day_schema.1']
         pos = 1
@@ -364,6 +369,7 @@ class Tools(BaseController):
         
         
     @expose()
+    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def update_booking_days(self):
         booking_days = DBSession.query(booking.BookingDay).all()
         pos = 1
@@ -378,6 +384,7 @@ class Tools(BaseController):
         
         
     @expose()
+    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def transfer_visiting_groups(self):
         visiting_groups = DBSession.query(booking.VisitingGroup).all()
         for vg in visiting_groups:
@@ -399,6 +406,7 @@ class Tools(BaseController):
         
         
     @expose()
+    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def transfer_bookings(self):
         bookings = DBSession.query(booking.Booking).all()
         
@@ -433,6 +441,7 @@ class Tools(BaseController):
         raise redirect('/')
         
     @expose()
+    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def transfer_slot_state(self):
         sts = DBSession.query(booking.SlotRowPositionState).all()
         
@@ -456,6 +465,7 @@ class Tools(BaseController):
 
 
     @expose()
+    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def transfer_history(self):
         sts = DBSession.query(booking.BookingHistory).all()
         

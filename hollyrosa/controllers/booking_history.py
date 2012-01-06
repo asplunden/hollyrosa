@@ -27,7 +27,7 @@ from hollyrosa.lib.base import BaseController
 from hollyrosa.model import DBSession, metadata,  booking,  holly_couch
 from sqlalchemy import and_
 import datetime,  types
-from hollyrosa.controllers.common import workflow_map,  getFormatedDate,  getLoggedInDisplayName,  change_op_map,  change_op_lookup
+from hollyrosa.controllers.common import workflow_map,  getFormatedDate,  getLoggedInDisplayName,  change_op_map,  change_op_lookup,  has_level
 
 __all__ = ['History']
 
@@ -166,7 +166,7 @@ class History(BaseController):
         
     @expose('hollyrosa.templates.history_show')
     @validate(validators={'visiting_group_id':validators.Int(not_empty=False), 'user_id':validators.Int(not_empty=False)})
-    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view history'))
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view history'))
     def show(self, visiting_group_id=None, user_id=None):
         for_group_name = ''
         if visiting_group_id != None:

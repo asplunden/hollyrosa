@@ -76,3 +76,4 @@ getAllActivities = booking_couch.getAllActivities
 getAllVisitingGroupsNameAmongBookings = booking_couch.getAllVisitingGroupsNameAmongBookings
 getSlotAndActivityIdOfBooking = booking_couch.getSlotAndActivityIdOfBooking
 getBookingHistory = booking_couch.getBookingHistory
+getAllActivityGroups = booking_couch.getAllActivityGroups

@@ -23,7 +23,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 import couchdb
 from uuid import uuid4
 import datetime
-
+from hollyrosa.controllers.common import DataContainer
 
 def genUID():
     return uuid4().hex
@@ -68,6 +68,21 @@ def getAllActivities():
     activities = holly_couch.query(map_fun)
     return activities
     
+    
+def getAllActivityGroups():
+    #try:
+    #    tmp = _activity_groups
+    #except AttributeError:
+    map_fun = '''function(doc) {
+    if (doc.type == 'activity_group')
+        emit(doc._id, doc.title);
+    }'''
+    all_groups_c = holly_couch.query(map_fun)
+    _activity_groups = [DataContainer(id=d.key,  title=d.value) for d in all_groups_c]
+    
+    tmp = _activity_groups
+    return tmp
+        
 
 def cmpKeyReverse(a, b):
     return cmp(b.key,  a.key)

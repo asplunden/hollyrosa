@@ -43,7 +43,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
                 
         <div py:for="cb in clustered_bookings">
           <h3><a href="${tg.url('/booking/view_activity', activity_id=cb[0].activity['_id'])}">${cb[0].activity.title}</a></h3>
-                <ul py:if="'pl' in request.identity['groups']" class="any_menu context_inline_menu" style="padding-left:2em;">
+                <ul class="any_menu context_inline_menu" style="padding-left:2em;"> <!-- py:if="'pl' in request.identity['repoze.who.identity']['level']"  -->
                     <li><a href="${tg.url('/workflow/set_state', booking_id=cb[0].id, state=10, all=1)}">booked ALL</a></li>
                     <li><a href="${tg.url('/workflow/set_state', booking_id=cb[0].id, state=20, all=1)}">approve ALL</a></li>
                     <li><a href="${tg.url('/workflow/set_state', booking_id=cb[0].id, state=-10, all=1)}">disapprove ALL</a></li>
