@@ -43,7 +43,7 @@ from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedu
 from booking_history import  remember_workflow_state_change
 from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level
 
-from hollyrosa.model import getAllActivityGroups
+from hollyrosa.model.booking_couch import getAllActivityGroups
 
 __all__ = ['tools']
 

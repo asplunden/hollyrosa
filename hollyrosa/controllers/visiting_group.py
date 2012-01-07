@@ -24,7 +24,8 @@ from repoze.what.predicates import Any, is_user,  has_permission
 from formencode import validators
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  get_visiting_groups,  get_visiting_groups_at_date,  get_visiting_groups_in_date_period,  get_visiting_groups_with_boknstatus,  get_visiting_group_names,  getBookingDays, getAllActivities,  getAllVisitingGroupsNameAmongBookings,  get_bookings_of_visiting_group
+from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  get_visiting_groups,  get_visiting_groups_at_date,  get_visiting_groups_in_date_period,  get_visiting_groups_with_boknstatus,  get_visiting_group_names,  getBookingDays,  getAllVisitingGroupsNameAmongBookings,  get_bookings_of_visiting_group
+from hollyrosa.model.booking_couch import getAllActivities
 from sqlalchemy import and_
 import datetime
 

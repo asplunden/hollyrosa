@@ -38,8 +38,8 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays,  getAllBookingDays,  getAllActivities,  getSlotAndActivityIdOfBooking,  getAllActivityGroups,  getBookingDayOfDate
-from hollyrosa.model.booking_couch import getAllHistoryForBookings
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate
+from hollyrosa.model.booking_couch import getAllHistoryForBookings,  getAllActivities,  getAllActivityGroups
 
 import datetime
 from formencode import validators
@@ -421,9 +421,9 @@ class BookingDay(BaseController):
         #...compute all blockings, create a dict mapping slot_row_position_id to actual state
         blockings_map = self.get_slot_blockings_for_booking_day(day_id)
         days = self.getAllDays()
-        
-        #reintroduce caching
-        activity_groups = getAllActivityGroups() 
+            
+        print 'all activity groups',  getAllActivityGroups()
+        activity_groups =  [DataContainer(id=d.value['_id'],  title=d.value['title']) for d in getAllActivityGroups()] 
             
         return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups)
         

@@ -53,7 +53,7 @@ def get_visiting_group_names():
 
 
     
-    
+# TODO: remove
 class BookingDayC(object):
     """Assumes a lot when loading from Couch. Make an even better wrapper"""
     def __init__(self, m):
@@ -67,31 +67,7 @@ class BookingDayC(object):
                 
                 
                 
-def getAllActivities():
-    # TODO: introduce view
-    """Helper function to get all activities from CouchDB"""
-    map_fun = '''function(doc) {
-    if (doc.type == 'activity') {
-        emit(doc._id, doc);
-    }}'''
-    
-    activities = holly_couch.query(map_fun)
-    return activities
-    
-    
-def getAllActivityGroups():
-    #try:
-    #    tmp = _activity_groups
-    #except AttributeError:
-    map_fun = '''function(doc) {
-    if (doc.type == 'activity_group')
-        emit(doc._id, doc.title);
-    }'''
-    all_groups_c = holly_couch.query(map_fun)
-    _activity_groups = [DataContainer(id=d.key,  title=d.value) for d in all_groups_c]
-    
-    tmp = _activity_groups
-    return tmp
+
         
 
 #def cmpKeyReverse(a, b):
@@ -305,3 +281,34 @@ def getAllHistoryForBookings(booking_ids,  limit=250):
     return holly_couch.view('history/history_by_booking_id',  keys=booking_ids,  descending=True,  limit=limit)
 
     
+#----
+
+def getAllActivityGroups():
+    return holly_couch.view('all_activities/all_activity_groups')
+    
+def getAllActivities():
+    return holly_couch.view('all_activities/all_activities')
+    
+
+#    map_fun = '''function(doc) {
+#    if (doc.type == 'activity') {
+#        emit(doc._id, doc);
+#    }}'''
+#    
+#    activities = holly_couch.query(map_fun)
+#    return activities
+    
+    
+#def getAllActivityGroups():
+#    #try:
+#    #    tmp = _activity_groups
+#    #except AttributeError:
+#    map_fun = '''function(doc) {
+#    if (doc.type == 'activity_group')
+#        emit(doc._id, doc.title);
+#    }'''
+#    all_groups_c = holly_couch.query(map_fun)
+#    _activity_groups = [DataContainer(id=d.key,  title=d.value) for d in all_groups_c]
+#    
+#    tmp = _activity_groups
+#    return tmp
