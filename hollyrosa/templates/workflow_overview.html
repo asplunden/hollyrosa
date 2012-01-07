@@ -1,4 +1,32 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright 2010, 2011, 2012 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<?python
+import datetime
+def makeDate(s):
+    return datetime.datetime.strptime(s, '%Y-%m-%d')
+
+?>
+
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <xi:include href="master.html" />
@@ -16,19 +44,19 @@
     <table class="data">
         <tr><th>booking_state</th><th>group</th><th>activity</th><th>content</th><th>scheduleing info</th><th>last changed by</th></tr>
         <tr py:for="b in scheduled_bookings">
-            <td class="data info"><span class="workflow_state_${str(b.booking_state)}">${workflow_map[b.booking_state]}</span> 
+            <td class="data info"><span class="workflow_state_${str(b['booking_state'])}">${workflow_map[b['booking_state']]}</span> 
                 <ul class="any_menu context_inline_menu">
-                    <li><a href="${tg.url('set_state', booking_id=b.id, state=10)}">booked</a></li>
-                    <li><a href="${tg.url('set_state', booking_id=b.id, state=20)}">approve</a></li>
-                    <li><a href="${tg.url('set_state', booking_id=b.id, state=-10)}">disapprove</a></li>
-                    <li><a href="${tg.url('set_state', booking_id=b.id, state=0)}">preliminary</a></li>
+                    <li><a href="${tg.url('set_state', booking_id=b['_id'], state=10)}">booked</a></li>
+                    <li><a href="${tg.url('set_state', booking_id=b['_id'], state=20)}">approve</a></li>
+                    <li><a href="${tg.url('set_state', booking_id=b['_id'], state=-10)}">disapprove</a></li>
+                    <li><a href="${tg.url('set_state', booking_id=b['_id'], state=0)}">preliminary</a></li>
                 </ul></td>
-            <td class="data info"><a href="${tg.url('/visiting_group/view_bookings_of_name',name=b.visiting_group_name)}">${b.visiting_group_name}</a></td>
-            <td class="data info">${b.activity.title}</td>
-            <td class="data info">${b.content}</td>
+            <td class="data info"><a href="${tg.url('/visiting_group/view_bookings_of_name',name=b['visiting_group_name'])}">${b['visiting_group_name']}</a></td>
+            <td class="data info">${b['activity_id']} TITLE</td>
+            <td class="data info">${b['cache_content']}</td>
             
-            <td class="data info"><a href="${tg.url('/booking/day',day_id=b.booking_day.id)}">booked ${b.booking_day.date.strftime('%A %d %B')} between ${b.slot_row_position.time_from.strftime('%H:%M')} to ${b.slot_row_position.time_to.strftime('%H:%M')}</a></td>
-            <td class="data info">${b.last_changed_by_id}</td>
+            <td class="data info"><a href="${tg.url('/booking/day',day_id=b['booking_day_id'])}">booked ${ b['booking_day_id'] } between <!-- ['date']).strftime('%A %d %B') ${b.slot_row_position.time_from.strftime('%H:%M')} to ${b.slot_row_position.time_to.strftime('%H:%M')} --></a></td>
+            <td class="data info">${b['last_changed_by_id']}</td>
         </tr>
     </table>
     
@@ -38,13 +66,13 @@
     <table class="data">
         <tr><th>booking_state</th><th>group</th><th>activity</th><th>content</th><th>scheduleing info</th><th>last changed by</th></tr>
         <tr py:for="b in unscheduled_bookings">
-            <td py:if="b.booking_day_id!=None" class="data info">scheduled, state=${str(b.booking_state)}</td><td py:if="b.booking_day_id==None" class="data info">unscheduled</td>
-            <td class="data info"><a href="${tg.url('/visiting_group/view_bookings_of_name',name=b.visiting_group_name)}">${b.visiting_group_name}</a></td>
-            <td class="data info">${b.activity.title}</td>
-            <td class="data info">${b.content}</td>
+            <td py:if="b.booking_day_id!=None" class="data info">scheduled, state=${str(b['booking_state'])}</td><td py:if="b['booking_day_id']==None" class="data info">unscheduled</td>
+            <td class="data info"><a href="${tg.url('/visiting_group/view_bookings_of_name',name=b.visiting_group_name)}">${b['visiting_group_name']}</a></td>
+            <td class="data info">${b['activity_id']} TITLE</td>
+            <td class="data info">${b['cache_content']}</td>
             
-            <td class="data info">requested between <span py:if="None != b.valid_from">${b.valid_from.strftime('%A %d %B')}</span> and <span py:if="None != b.valid_to">${b.valid_to.strftime('%A %d %B')},</span><span py:if="None != b.requested_date"> requested date ${b.requested_date.strftime('%A %d %B')}</span></td>
-            <td class="data info"></td>
+            <td class="data info">requested between <span py:if="None != b['valid_from']">${b['valid_from']}</span> and <span py:if="None != b['valid_to']">${b['valid_to']},</span><span py:if="None != b['requested_date']"> requested date ${b['requested_date']}</span></td>
+            <td class="data info"></td> <!--  .strftime('%A %d %B') -->
         </tr>
     </table>
 </body>

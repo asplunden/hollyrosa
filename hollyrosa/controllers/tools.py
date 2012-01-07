@@ -67,7 +67,7 @@ class Tools(BaseController):
         if day == None:
             day = datetime.datetime.today().date().strftime("%Y-%m-%d")
             
-        activity_groups = getAllActivityGroups()
+        activity_groups = [h.value for h in getAllActivityGroups()]
         return dict(show_day=day,  activity_groups=activity_groups)
         
     

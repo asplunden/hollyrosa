@@ -617,7 +617,7 @@ class BookingDay(BaseController):
         #...id can be None if a new slot is booked
         if None == id or '' == id:
             is_new = True
-            old_booking = dict(type='booking',  valid_from='',  valid_to='',  requested_date='')#booking.Booking()
+            old_booking = dict(type='booking',  valid_from='',  valid_to='',  requested_date='')
             old_booking['slot_id'] = slot_row_position_id
             old_booking['booking_day_id'] = booking_day_id
         else:
@@ -952,6 +952,7 @@ class BookingDay(BaseController):
         
         We need to find booking day, then schema, in schema there are rows per activity. Somewhere in that schema is the answear.
         """
+        # TODO: refactor
         booking_o = holly_couch[booking_day_id]
         schema_o = holly_couch[booking_o['day_schema_id']]
         

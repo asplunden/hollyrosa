@@ -31,10 +31,10 @@
                     <li><a href="${tg.url('set_state', booking_id=b.id, state=0)}">preliminary</a></li>
                 </ul></td>
             <td class="data info"><a href="${tg.url('/visiting_group/view_bookings_of_name',name=b.visiting_group_name)}">${b.visiting_group_name}</a></td>
-            <td class="data info">${b.activity.title}</td>
-            <td class="data info">${b.content}</td>
+            <td class="data info">${b.activity_id}</td>
+            <td class="data info">${b.cache_content}</td>
             
-            <td class="data info"><a href="${tg.url('/booking/day',day_id=b.booking_day.id)}">booked ${b.booking_day.date.strftime('%A %d %B')} between ${b.slot_row_position.time_from.strftime('%H:%M')} to ${b.slot_row_position.time_to.strftime('%H:%M')}</a></td>
+            <td class="data info"><a href="${tg.url('/booking/day',day_id=b.booking_day_id)}">booked ${b.booking_day_id} between <!-- ${b.slot_row_position.time_from.strftime('%H:%M')} to ${b.slot_row_position.time_to.strftime('%H:%M')} --></a></td>
             <td class="data info">${b.last_changed_by_id}</td>
         </tr>
     </table>

@@ -66,23 +66,6 @@ class BookingDayC(object):
                 self.__dict__[k] = v
                 
                 
-                
-
-        
-
-#def cmpKeyReverse(a, b):
-#    return cmp(b.key,  a.key)
-#    
-#def getBookingHistory(booking_id):
-#    map_fun = """function(doc) {
-#    if (doc.type == 'booking_history') {
-#        if (doc.booking_id == '"""+booking_id+"""') {
-#            emit(doc.timestamp, doc);
-#    }}}"""
-#    
-#    history= [h for h in holly_couch.query(map_fun)]
-#    history.sort(cmpKeyReverse)
-#    return [h.value for h in history]
 
 
 def getBookingDayOfDate(date):
@@ -150,19 +133,6 @@ def get_visiting_groups_with_boknstatus(boknstatus):
         visiting_groups.append(vgc.value)
     return visiting_groups
     
-
-#def get_visiting_groups_at_date(at_date):
-#    map_fun = """function(doc) {
-#    if ((doc.type == 'visiting_group') && (doc.from_date <= '"""+ at_date+"""' ) && (doc.to_date >= '""" + at_date+"""'))
-#        emit(doc.from_date, doc);
-#        }"""
-#    visiting_groups_c = holly_couch.query(map_fun)
-#    
-#    #...conversion 
-#    visiting_groups = []
-#    for vgc in visiting_groups_c:
-#        visiting_groups.append(vgc.value)
-#    return visiting_groups
     
     
 def getVisitingGroupsAtDate(at_date):
@@ -187,7 +157,7 @@ def getVisitingGroupsInDatePeriod(from_date,  to_date):
     #return holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates)
     
     r = dict()
-    print holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs =True)
+    #print holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs =True)
     for v in holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs =True):
         print v
         r[v.doc['_id']] = v #DataContainer(key=v.key,  value=v.doc)
@@ -325,3 +295,14 @@ def getAllActivities():
 
 def getAllVisitingGroups():
     return holly_couch.view('visiting_groups/all_visiting_groups')
+    
+#--- 
+
+def getAllScheduledBookings(limit=100):
+    return holly_couch.view('workflow/all_scheduled_bookings',  include_docs=True,  limit=limit)
+
+def getAllUnscheduledBookings(limit=100):
+    return holly_couch.view('workflow/all_unscheduled_bookings',  include_docs=True,  limit=limit)
+    
+def gelAllBookingsWithBookingState(booking_states,  limit=200):
+    return holly_couch.view('workflow/all_bookings_by_booking_state',  keys=booking_states,  include_docs=True,  limit=limit)

@@ -25,10 +25,10 @@
         <tr py:for="b in unscheduled_bookings">
             <td py:if="b.booking_day_id!=None" class="data info">scheduled, state=${str(b.booking_state)}</td><td py:if="b.booking_day_id==None" class="data info">unscheduled</td>
             <td class="data info"><a href="${tg.url('/visiting_group/view_bookings_of_name',name=b.visiting_group_name)}">${b.visiting_group_name}</a></td>
-            <td class="data info">${b.activity.title}</td>
-            <td class="data info">${b.content}</td>
+            <td class="data info">${b.activity_id}</td>
+            <td class="data info">${b.cache_content}</td>
             
-            <td class="data info">requested between <span py:if="None != b.valid_from">${b.valid_from.strftime('%A %d %B')}</span> and <span py:if="None != b.valid_to">${b.valid_to.strftime('%A %d %B')},</span><span py:if="None != b.requested_date"> requested date ${b.requested_date.strftime('%A %d %B')}</span></td>
+            <td class="data info">requested between <span py:if="None != b.valid_from">${b.valid_from}</span> and <span py:if="None != b.valid_to">${b.valid_to},</span><span py:if="None != b.requested_date"> requested date ${b.requested_date}</span></td>
             <td class="data info"></td>
         </tr>
     </table>
