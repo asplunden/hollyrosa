@@ -23,7 +23,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID,  holly_couch
-from hollyrosa.model.booking_couch import getAllScheduledBookings,  getAllUnscheduledBookings,  gelAllBookingsWithBookingState
+from hollyrosa.model.booking_couch import getAllScheduledBookings,  getAllUnscheduledBookings,  gelAllBookingsWithBookingState,  getActivityTitleMap,  getBookingDayInfoMap,  getUserNameMap,  getSchemaSlotActivityMap
 from sqlalchemy import and_
 import datetime
 
@@ -63,48 +63,42 @@ class Workflow(BaseController):
     @expose('hollyrosa.templates.workflow_overview')
     def overview(self):
         """Show an overview of all bookings"""
-        #bookings = DBSession.query(booking.Booking).filter('booking_state > -100').all()
         scheduled_bookings = [b.doc for b in getAllScheduledBookings()]
         unscheduled_bookings = [b.doc for b in getAllUnscheduledBookings()]
         
-#        for b in bookings:
-#            if None == b.booking_day_id:
-#                unscheduled_bookings.append(b)
-#            else:
-#                scheduled_bookings.append(b)
-
-        
-    
-        return dict(scheduled_bookings=scheduled_bookings,  unscheduled_bookings=unscheduled_bookings,  workflow_map=workflow_map,  workflow_submenu=workflow_submenu)
+        #...I need a map from booking_day_id to booking day date and from [booking_day_i, slot_id] to time.
+        #   actually, I do thin couch could create such a view, it's just going to be very messy 
+        # TODO: in the future we cant use a hard coded day schema, we will need one map for each day schema that exists.
+        return dict(scheduled_bookings=scheduled_bookings,  unscheduled_bookings=unscheduled_bookings,  workflow_map=workflow_map,  activity_map=getActivityTitleMap(),  booking_date_map=getBookingDayInfoMap(),  user_name_map=getUserNameMap(), slot_map=getSchemaSlotActivityMap('day_schema.1'),  workflow_submenu=workflow_submenu)
         
         
     @expose('hollyrosa.templates.workflow_view_scheduled')
     def view_nonapproved(self):
         #scheduled_bookings = DBSession.query(booking.Booking).filter(and_('booking_state < 20', 'booking_state > -100', 'booking_day_id is not NULL')).all()
         scheduled_bookings = [b.doc for b in gelAllBookingsWithBookingState([0,  10,  -10])] 
-        return dict(scheduled_bookings=scheduled_bookings,  workflow_map=workflow_map, result_title='Unapproved scheduled bookings',  workflow_submenu=workflow_submenu)
+        return dict(scheduled_bookings=scheduled_bookings,  workflow_map=workflow_map, result_title='Unapproved scheduled bookings',  activity_map=getActivityTitleMap(), booking_date_map=getBookingDayInfoMap(), user_name_map=getUserNameMap(),  slot_map=getSchemaSlotActivityMap('day_schema.1'), workflow_submenu=workflow_submenu)
     
     @expose('hollyrosa.templates.workflow_view_scheduled')
     def view_preliminary(self):
         scheduled_bookings = [b.doc for b in gelAllBookingsWithBookingState([0])] #DBSession.query(booking.Booking).filter(and_('booking_state < 10', 'booking_state > -100', 'booking_day_id is not NULL')).all()
-        return dict(scheduled_bookings=scheduled_bookings,  workflow_map=workflow_map, result_title='Preliminary scheduled bookings',  workflow_submenu=workflow_submenu)
+        return dict(scheduled_bookings=scheduled_bookings,  workflow_map=workflow_map, result_title='Preliminary scheduled bookings',  activity_map=getActivityTitleMap(), booking_date_map=getBookingDayInfoMap(), user_name_map=getUserNameMap(), slot_map=getSchemaSlotActivityMap('day_schema.1'), workflow_submenu=workflow_submenu)
     
     @expose('hollyrosa.templates.workflow_view_scheduled')
     def view_scheduled(self):
         scheduled_bookings = [b.doc for b in getAllScheduledBookings()] #DBSession.query(booking.Booking).filter(and_('booking_day_id is not NULL', 'booking_state > -100')).all()
-        return dict(scheduled_bookings=scheduled_bookings,   workflow_map=workflow_map, result_title='Schedueld bookings',  workflow_submenu=workflow_submenu)
+        return dict(scheduled_bookings=scheduled_bookings,   workflow_map=workflow_map, result_title='Schedueld bookings',  activity_map=getActivityTitleMap(), booking_date_map=getBookingDayInfoMap(), user_name_map=getUserNameMap(), slot_map=getSchemaSlotActivityMap('day_schema.1'), workflow_submenu=workflow_submenu)
         
         
     @expose('hollyrosa.templates.workflow_view_scheduled')
     def view_disapproved(self):
         scheduled_bookings = scheduled_bookings = [b.doc for b in gelAllBookingsWithBookingState([-10])]  #DBSession.query(booking.Booking).filter(and_('booking_state < 0', 'booking_state > -100', 'booking_day_id is not NULL')).all()
-        return dict(scheduled_bookings=scheduled_bookings,   workflow_map=workflow_map, result_title='Disapproved bookings', workflow_submenu=workflow_submenu)
+        return dict(scheduled_bookings=scheduled_bookings,   workflow_map=workflow_map, result_title='Disapproved bookings', activity_map=getActivityTitleMap(), booking_date_map=getBookingDayInfoMap(), user_name_map=getUserNameMap(), slot_map=getSchemaSlotActivityMap('day_schema.1'), workflow_submenu=workflow_submenu)
     
     
     @expose('hollyrosa.templates.workflow_view_unscheduled')
     def view_unscheduled(self):
         unscheduled_bookings = [b.doc for b in getAllUnscheduledBookings()] #DBSession.query(booking.Booking).filter(and_('booking_day_id is NULL','booking_state > -100')).all()
-        return dict(unscheduled_bookings=unscheduled_bookings,  workflow_map=workflow_map, result_title='Unscheduled bookings', workflow_submenu=workflow_submenu)
+        return dict(unscheduled_bookings=unscheduled_bookings,  workflow_map=workflow_map, result_title='Unscheduled bookings', activity_map=getActivityTitleMap(), booking_date_map=getBookingDayInfoMap(), user_name_map=getUserNameMap(), slot_map=getSchemaSlotActivityMap('day_schema.1'), workflow_submenu=workflow_submenu)
     
     def do_set_state(self, booking_id,  booking_o,  state):
         

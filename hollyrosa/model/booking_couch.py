@@ -306,3 +306,32 @@ def getAllUnscheduledBookings(limit=100):
     
 def gelAllBookingsWithBookingState(booking_states,  limit=200):
     return holly_couch.view('workflow/all_bookings_by_booking_state',  keys=booking_states,  include_docs=True,  limit=limit)
+    
+def getActivityTitleMap():
+    m = dict()
+    for a in holly_couch.view('all_activities/activity_titles'):
+        m[a.key[0]] = a.key[1]
+    return m
+    
+def getBookingDayInfoMap():
+    m = dict()
+    for a in holly_couch.view('workflow/booking_day_map_info'):
+        m[a.key] = a.value[0]
+    return m
+    
+def getUserNameMap():
+    m = dict()
+    for a in holly_couch.view('workflow/user_name_map'):
+        m[a.key] = a.value
+    return m
+    
+def getSchemaSlotActivityMap(day_schema_id):
+    m = dict()
+    res = holly_couch.view('day_schema/slot_map')
+    
+    for a in res:
+        v = a.value
+        
+        m[a.key[0]] = dict(activity_id=v[0],  duration=v[1]['duration'],  time_to=v[1]['time_to'],  slot_id=v[1]['slot_id'],  time_from=v[1]['time_from'],  title=v[1]['title'])
+    
+    return m

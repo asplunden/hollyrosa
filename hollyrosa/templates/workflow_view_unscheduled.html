@@ -1,4 +1,35 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright 2010, 2011, 2012 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<?python
+import datetime
+def formatDate(s):
+    try:
+        return datetime.datetime.strptime(s, '%Y-%m-%d').strftime('%A %d %B')
+    except ValueError:
+        return s
+
+?>
+
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <xi:include href="master.html" />
@@ -23,13 +54,13 @@
             <th>last changed by</th>
         </tr>
         <tr py:for="b in unscheduled_bookings">
-            <td py:if="b.booking_day_id!=None" class="data info">scheduled, state=${str(b.booking_state)}</td><td py:if="b.booking_day_id==None" class="data info">unscheduled</td>
+            <td py:if="b.booking_day_id!=None" class="data info"><span class="workflow_state_unscheduled">unscheduled</span></td><td py:if="b.booking_day_id==None" class="data info">unscheduled</td>
             <td class="data info"><a href="${tg.url('/visiting_group/view_bookings_of_name',name=b.visiting_group_name)}">${b.visiting_group_name}</a></td>
-            <td class="data info">${b.activity_id}</td>
+            <td class="data info">${activity_map[b.activity_id]}</td>
             <td class="data info">${b.cache_content}</td>
             
-            <td class="data info">requested between <span py:if="None != b.valid_from">${b.valid_from}</span> and <span py:if="None != b.valid_to">${b.valid_to},</span><span py:if="None != b.requested_date"> requested date ${b.requested_date}</span></td>
-            <td class="data info"></td>
+            <td class="data info">requested between <span py:if="None != b.valid_from">${formatDate(b.valid_from)}</span> and <span py:if="None != b.valid_to">${formatDate(b.valid_to)},</span><span py:if="None != b.requested_date"> requested date ${formatDate(b.requested_date)}</span></td>
+            <td class="data info">${user_name_map.get(b.last_changed_by_id, b.last_changed_by_id)}</td>
         </tr>
     </table>
 </body>
