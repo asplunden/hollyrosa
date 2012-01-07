@@ -218,7 +218,6 @@ dojo.addOnLoad(function() {
         <div py:for="slot_position in slot_row.slot_row_position" hollyrosa:w="$slot_position.time_from - $slot_position.time_to" class="booking_day_overview_slots ${['','slot_row_position_blocked'][blockings_map.has_key(slot_position.id)]}">
         
             <!-- we may have several slot bookings-->
-            ${slot_position.id}
             <div py:if="bookings.has_key(slot_position.id)">
             
                 

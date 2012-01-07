@@ -196,24 +196,15 @@ class BookingDay(BaseController):
     
     
     def getAllDays(self):
+        # TODO maybe stop caching and have a tuned view instead?
         try:
             tmp = self._all_days
         except AttributeError:
-            map_fun = '''function(doc) {
-            if (doc.type == 'booking_day')
-                emit(doc._id, doc.date);
-            }'''
-            all_days_c = holly_couch.query(map_fun) 
+            all_days_c = getAllBookingDays()
             self._all_days = [DataContainer(id=d.key,  date=d.value) for d in all_days_c]
-            
             tmp = self._all_days
-        
        
         return tmp
-        
-        
-    
-
         
         
     def getActivitySlotPositionsMap(self,  day_schema):
@@ -231,17 +222,11 @@ class BookingDay(BaseController):
         return cmp(a.zorder,  b.zorder)
         
         
-    def get_activities_map(self):
-        map_fun = '''function(doc) {
-        if (doc.type == 'activity')
-        emit(doc._id, doc);
-        }'''
-        
-        activities = holly_couch.query(map_fun)
-        
+    def getActivitiesMap(self,  activities):
+        """given a view from couchdb of activities, make a map/dict"""
         activities_map = dict()
         for a in activities:
-            activities_map[a.key] = a.value
+            activities_map[a.value['_id']] = a.value
         return activities_map
 
 
@@ -261,16 +246,10 @@ class BookingDay(BaseController):
         return slot_rows
 
 
-    def get_non_deleted_bookings_for_booking_day(self,  day_id):
-        map_fun = """function(doc) {
-        if (doc.type == 'booking') {
-            if ((doc.booking_day_id == '""" + day_id+  """') && (doc.booking_state > -100)) {
-                emit(doc._id, doc);
-                }
-            }
-        }"""
-        bookings_c = holly_couch.query(map_fun)
-        
+    def getNonDeletedBookingsForBookingDay(self,  day_id):
+        bookings_c = holly_couch.view('booking_day/non_deleted_bookings_of_booking_day',  keys=[day_id])
+            
+        # TODO: optimize away this dict thing
         bookings = dict()
         for x in bookings_c:
             b = x.value
@@ -302,34 +281,23 @@ class BookingDay(BaseController):
         return slot_states
         
         
-    def get_slot_blockings_for_booking_day(self,  day_id):
-        map_fun = """function(doc) {
-        if (doc.type == 'slot_state') {
-            if (doc.booking_day_id == '""" + day_id+  """')  {
-                emit(doc._id, doc);
-                }
-            }
-        }"""
-        
+    def getSlotBlockingsForBookingDay(self,  day_id):
         blockings_map = dict()
-        for x in holly_couch.query(map_fun):
+        for x in holly_couch.view("booking_day/slot_state_of_booking_day",  keys=[day_id]):
             b = x.value
-            # fix replace hack later. slot_id. and slot. 
+            # TODO: replace hack later. slot_id. and slot. 
             blockings_map[b['slot_id']] = DataContainer(level=b['level'],  booking_day_id=b['booking_day_id'],  slot_id=b['slot_id'])
             
         return blockings_map
         
         
-    def get_unscheduled_bookings_for_today(self,  date,  activity_map):
-        map_fun = """function(doc) {
-        if (doc.type == 'booking') {
-            if (((doc.booking_day_id == '') && (doc.valid_to >= '""" + date +  """') && (doc.valid_from <= '""" + date +"""')  && (doc.booking_state > -100)) || ( (doc.booking_day_id == '') && (doc.valid_to == '') &&  (doc.booking_state > -100) ))  {
-                emit(doc._id, doc);
-                }
-            }
-        }"""
+    def getUnscheduledBookingsForToday(self,  date,  activity_map):
+        # need to convert 2011-10-01 to something like Fri Aug 05 2011
+        tmp_date = datetime.datetime.strptime(date, "%Y-%m-%d" )
+        tmp_date_f = tmp_date.strftime("%a %b %d %Y")
         
-        unscheduled_bookings_c =  holly_couch.query(map_fun)
+        unscheduled_bookings_c= holly_couch.view('booking_day/unscheduled_bookings_by_date',  keys=[tmp_date_f],  descending=True) 
+        
         unscheduled_bookings = list()
         for x in unscheduled_bookings_c:
             
@@ -383,30 +351,30 @@ class BookingDay(BaseController):
         # TODO: we really need to get only the slot rows related to our booking day schema or things will go wrong at some point when we have more than one schema to work with.
         
         today_sql_date = datetime.datetime.today().date().strftime("%Y-%m-%d")
-        activities_map = self.get_activities_map()
+        activities_map = self.getActivitiesMap(getAllActivities())
         
         if day_id != None:
             booking_day_o = holly_couch[day_id]
             
-            
         elif day=='today':
-            
-            #...we need to get all slots for 'today'
-            #requested_date = datetime.datetime.today().date()
+    
             booking_day_o = bookingDayOfDate(today_sql_date)
             day_id = booking_day_o['_id']
             
-        else: # we're guessing day is a date options(eagerload_all('')).
+        else:
             booking_day_o = getBookingDayOfDate(str(day))
             day_id = booking_day_o['_id']
         
+        #  TODO: fix row below
         booking_day_o['id'] = day_id
+        
         day_schema_id = booking_day_o['day_schema_id']
         day_schema = holly_couch[day_schema_id]
+        
         slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map)
             
         #...first, get booking_day for today
-        new_bookings = self.get_non_deleted_bookings_for_booking_day(day_id)
+        new_bookings = self.getNonDeletedBookingsForBookingDay(day_id)
         
         #...we need a mapping from activity to a list / tupple slot_row_position
         #
@@ -415,14 +383,13 @@ class BookingDay(BaseController):
         activity_slot_position_map = self.getActivitySlotPositionsMap(day_schema) 
         
         #...find all unscheduled bookings
-        showing_sql_date = str(booking_day_o['date']) #.strftime("%Y-%m-%d")
-        unscheduled_bookings = self.get_unscheduled_bookings_for_today(showing_sql_date,  activities_map)
+        showing_sql_date = str(booking_day_o['date'])
+        unscheduled_bookings = self.getUnscheduledBookingsForToday(showing_sql_date,  activities_map)
         
         #...compute all blockings, create a dict mapping slot_row_position_id to actual state
-        blockings_map = self.get_slot_blockings_for_booking_day(day_id)
+        blockings_map = self.getSlotBlockingsForBookingDay(day_id)
         days = self.getAllDays()
-            
-        print 'all activity groups',  getAllActivityGroups()
+
         activity_groups =  [DataContainer(id=d.value['_id'],  title=d.value['title']) for d in getAllActivityGroups()] 
             
         return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups)

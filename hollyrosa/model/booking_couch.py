@@ -86,7 +86,7 @@ class BookingDayC(object):
 
 
 def getBookingDayOfDate(date):
-    return list(holly_couch.view('booking_day/all_booking_days',  keys=[date]))[0]
+    return list(holly_couch.view('booking_day/all_booking_days',  keys=[date]))[0].value
     
     
 def getAllBookingDays():
@@ -290,25 +290,3 @@ def getAllActivities():
     return holly_couch.view('all_activities/all_activities')
     
 
-#    map_fun = '''function(doc) {
-#    if (doc.type == 'activity') {
-#        emit(doc._id, doc);
-#    }}'''
-#    
-#    activities = holly_couch.query(map_fun)
-#    return activities
-    
-    
-#def getAllActivityGroups():
-#    #try:
-#    #    tmp = _activity_groups
-#    #except AttributeError:
-#    map_fun = '''function(doc) {
-#    if (doc.type == 'activity_group')
-#        emit(doc._id, doc.title);
-#    }'''
-#    all_groups_c = holly_couch.query(map_fun)
-#    _activity_groups = [DataContainer(id=d.key,  title=d.value) for d in all_groups_c]
-#    
-#    tmp = _activity_groups
-#    return tmp
