@@ -24,7 +24,8 @@ from repoze.what.predicates import Any, is_user, has_permission
 from formencode import validators
 from tg import expose, flash, require, url, request, redirect,  validate
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  holly_couch
+from hollyrosa.model import holly_couch
+from hollyrosa.model.booking_couch import getAllHistory,  getAllHistoryForVisitingGroup,  getAllHistoryForUser
 from sqlalchemy import and_
 import datetime,  types
 from hollyrosa.controllers.common import workflow_map,  getFormatedDate,  getLoggedInDisplayName,  change_op_map,  change_op_lookup,  has_level
@@ -153,16 +154,22 @@ class History(BaseController):
         return cmp(b.key,  a.key)
         
         
-    def getBookingHistory(self,  limit=25):
-        map_fun = '''function(doc) {
-        if (doc.type == 'booking_history') {
-            emit(doc.timestamp, doc);
-        }}'''
-    
-        booking_history = holly_couch.query(map_fun)
-        all = [h for h in booking_history]
-        all.sort(self.fnCmpTimestamp)
-        return [a.value for a in all][:25]
+    def getBookingHistory(self,  limit=30):
+        booking_history = getAllHistory(limit=limit)
+        all = [h.value for h in booking_history]
+        return all
+        
+        
+    def getBookingHistoryForVisitingGroup(self,  visiting_group_id,  limit=1000):
+        booking_history = getAllHistoryForVisitingGroup(visiting_group_id,  limit=limit)
+        all = [h.value for h in booking_history]
+        return all
+        
+    def getBookingHistoryForUser(self,  user_id,  limit=250):
+        booking_history = getAllHistoryForUser(user_id,  limit=limit)
+        all = [h.value for h in booking_history]
+        return all
+        
         
     @expose('hollyrosa.templates.history_show')
     @validate(validators={'visiting_group_id':validators.Int(not_empty=False), 'user_id':validators.Int(not_empty=False)})
@@ -170,12 +177,14 @@ class History(BaseController):
     def show(self, visiting_group_id=None, user_id=None):
         for_group_name = ''
         if visiting_group_id != None:
-            history = DBSession.query(booking.BookingHistory).join(booking.Booking).join(booking.VisitingGroup).filter('visiting_group_id='+str(visiting_group_id)).order_by('timestamp desc')
-            vgroup = DBSession.query(booking.VisitingGroup).filter('id='+str(visiting_group_id)).one() 
-            for_group_name = vgroup.name
+            #history = DBSession.query(booking.BookingHistory).join(booking.Booking).join(booking.VisitingGroup).filter('visiting_group_id='+str(visiting_group_id)).order_by('timestamp desc')
+            #vgroup = DBSession.query(booking.VisitingGroup).filter('id='+str(visiting_group_id)).one() 
+            history = self.getBookingHistoryForVisitingGroup(visiting_group_id)
+            vgroup = holly_couch[visiting_group_id]
+            for_group_name = vgroup['name']
         elif user_id != None:
 
-            history = DBSession.query(booking.BookingHistory).join(booking.Booking).filter('last_changed_by_id='+str(user_id)).order_by('timestamp desc').limit(500)
+            history = self.getBookingHistoryForUser(user_id)
             
             for_group_name = 'for user ' + str(user_id)
 

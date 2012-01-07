@@ -108,9 +108,7 @@ class MyAppConfig(AppConfig):
                                           challengers,
                                           mdproviders,
                                           default_request_classifier,
-                                          default_challenge_decider, 
-                                          log_stream = sys.stdout,
-                                          log_level = logging.DEBUG)
+                                          default_challenge_decider)
  
         return app
 

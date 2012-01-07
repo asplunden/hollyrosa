@@ -30,7 +30,12 @@ def genUID():
 
 
 
+def get_bookings_of_visiting_group(visiting_group_id):
+    return holly_couch.view('visiting_groups/bookings_of_visiting_group',  keys=[visiting_group_id])
+    
+
 def get_visiting_group_names():
+    # TODO: switch over to using views
     """Helper function to get visiting groups from CouchDB"""
     map_fun = '''function(doc) {
     if (doc.type == 'visiting_group')
@@ -43,6 +48,10 @@ def get_visiting_group_names():
     for vgn in visiting_groups_c:
         visiting_group_names.append(vgn.value)
     return visiting_group_names
+    
+    
+
+
     
     
 class BookingDayC(object):
@@ -59,6 +68,7 @@ class BookingDayC(object):
                 
                 
 def getAllActivities():
+    # TODO: introduce view
     """Helper function to get all activities from CouchDB"""
     map_fun = '''function(doc) {
     if (doc.type == 'activity') {
@@ -84,58 +94,72 @@ def getAllActivityGroups():
     return tmp
         
 
-def cmpKeyReverse(a, b):
-    return cmp(b.key,  a.key)
-    
-def getBookingHistory(booking_id):
-    map_fun = """function(doc) {
-    if (doc.type == 'booking_history') {
-        if (doc.booking_id == '"""+booking_id+"""') {
-            emit(doc.timestamp, doc);
-    }}}"""
-    
-    history= [h for h in holly_couch.query(map_fun)]
-    history.sort(cmpKeyReverse)
-    return [h.value for h in history]
+#def cmpKeyReverse(a, b):
+#    return cmp(b.key,  a.key)
+#    
+#def getBookingHistory(booking_id):
+#    map_fun = """function(doc) {
+#    if (doc.type == 'booking_history') {
+#        if (doc.booking_id == '"""+booking_id+"""') {
+#            emit(doc.timestamp, doc);
+#    }}}"""
+#    
+#    history= [h for h in holly_couch.query(map_fun)]
+#    history.sort(cmpKeyReverse)
+#    return [h.value for h in history]
 
-            
-            
-def getBookingDays(from_date='',  to_date='',  return_map=False):
+
+def getBookingDayOfDate(date):
+    return list(holly_couch.view('booking_day/all_booking_days',  keys=[date]))[0]
+    
+    
+def getAllBookingDays():
+    return holly_couch.view('booking_day/all_booking_days')
+    
+
+def getBookingDays(from_date='2011-08-01',  to_date='2011-12-11',  return_map=False):
     """Helper function to get booking days from CouchDB"""
-    if from_date=='':
-        map_fun = '''function(doc) {
-        if (doc.type == 'booking_day')
-            emit(doc.date, doc);
-            }'''
-    else:
-        from_date='2011-08-10'
-        
-        if to_date=='':
-            map_fun = """function(doc) {
-            if ((doc.type == 'booking_day') && (doc.date >= '"""+ from_date+"""' ))
-                emit(doc.date, doc);
-                }"""
-        else:
-            to_date='2011-08-15'
-            map_fun = """function(doc) {
-            if ((doc.type == 'booking_day') && (doc.date >= '"""+ from_date+"""' ) && (doc.date <= '""" + to_date+"""'))
-                emit(doc.date, doc);
-                }"""
-    booking_days_c = holly_couch.query(map_fun)
+    
+    # TODO: introduce views
+#    if from_date=='':
+#        map_fun = '''function(doc) {
+#        if (doc.type == 'booking_day')
+#            emit(doc.date, doc);
+#            }'''
+#    else:
+#        from_date='2011-08-10'
+#        
+#        if to_date=='':
+#            map_fun = """function(doc) {
+#            if ((doc.type == 'booking_day') && (doc.date >= '"""+ from_date+"""' ))
+#                emit(doc.date, doc);
+#                }"""
+#        else:
+#            to_date='2011-08-15'
+#            map_fun = """function(doc) {
+#            if ((doc.type == 'booking_day') && (doc.date >= '"""+ from_date+"""' ) && (doc.date <= '""" + to_date+"""'))
+#                emit(doc.date, doc);
+#                }"""
+#    booking_days_c = holly_couch.query(map_fun)
+    
+    booking_days_c = holly_couch.view('booking_day/all_booking_days',  startkey=from_date,  endkey=to_date)
     
     #...conversion to booking  days so the template looks like old SQL Alchemy
     if not return_map:
-        booking_days = []
-        for bdc in booking_days_c:
-            o = BookingDayC(bdc)
-            booking_days.append(o)
-        return booking_days
+        return booking_days_c
+        
+#        booking_days = []
+#        for bdc in booking_days_c:
+#            o = BookingDayC(bdc)
+#            booking_days.append(o)
+#        return booking_days
     else:
         booking_days = dict()
         for bdc in booking_days_c:
             o = BookingDayC(bdc)
             booking_days[o.id] = o
         return booking_days
+    
     
 def get_visiting_groups_with_boknstatus(boknstatus):
     map_fun = """function(doc) {
@@ -260,3 +284,24 @@ def getSlotAndActivityIdOfBooking(booking):
             if tmp_slot['slot_id'] == slot_id:
                 return (tmp_activity_id,  tmp_slot)
     return (None,  None)
+
+
+
+def getAllHistory(limit=None):
+    """returns booking history sorted in reverse chronological order."""
+    return holly_couch.view('history/all_history',  descending=True,  limit=limit)
+    
+def getAllHistoryForVisitingGroup(visiting_group_id,  limit=None):
+    """returns booking history sorted in reverse chronological order."""
+    # TODO: does not work, may need to look up all bookings first.
+    return holly_couch.view('history/all_history',  startkey= [{},  {},  visiting_group_id],  endkey=[None,  None,  visiting_group_id],  descending=True,  limit=limit)
+    
+def getAllHistoryForUser(user_id,  limit=None):
+    """returns booking history sorted in reverse chronological order."""
+    return holly_couch.view('history/history_by_username',  keys=[user_id],  descending=True,  limit=limit)
+    
+def getAllHistoryForBookings(booking_ids,  limit=250):
+    """returns booking history sorted in reverse chronological order."""
+    return holly_couch.view('history/history_by_booking_id',  keys=booking_ids,  descending=True,  limit=limit)
+
+    

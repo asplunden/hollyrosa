@@ -26,11 +26,19 @@ from repoze.what.predicates import Predicate
 
 
 workflow_map = dict()
-workflow_map[10] ='booked'
+workflow_map[10]='booked'
 workflow_map[20] ='approved'
-workflow_map[0] = 'preliminary'
-workflow_map[-10] ='disapproved'    
+workflow_map[0] ='preliminary'
+workflow_map[-10]='disapproved'
 workflow_map[-100] ='deleted'
+
+bokn_status_map = dict()
+bokn_status_map[0] ='created'
+bokn_status_map[5] ='new'
+bokn_status_map[10] ='preliminary'
+bokn_status_map[20] ='confirmed'
+bokn_status_map[50] ='island'
+
 
 change_op_lookup = {'schedule':1, 'unschedule':2, 'book_slot':3,  'new_booking_request':4,  'booking_request_change':5,  'delete_booking_request':6,  'booking_properties_change':7,  'booking_state_change':8, 'block_soft':9,  'block_hard':10,  'unblock':11,  'workflow_state_change':12}
 
@@ -82,7 +90,7 @@ def getLoggedInUserId(request):
     return request.identity.get('user', None)['_id']
     
     
-def computeCacheContent(dbsession, content,  visiting_group_id):
+def computeCacheContent(visiting_group, content):
     """
     Generate cached content must be done here. Only visiting groups that exists (has a visiting group) can be rendered using property substitution.
         
@@ -92,10 +100,11 @@ def computeCacheContent(dbsession, content,  visiting_group_id):
         
     TODO: copied for booking_day.py , how share it between all?
     """
-    if visiting_group_id != None:
+    # TODO: this is very wastefull when updating visiting groups which already are loaded from the couch database
+    if visiting_group != None:
         cache_content = content
-        the_visiting_group = dbsession[visiting_group_id] #dbsession.query(booking.VisitingGroup).filter('id='+str(visiting_group_id)).one()
-        for tmp_property in the_visiting_group['visiting_group_properties'].values():
+         
+        for tmp_property in visiting_group['visiting_group_properties'].values():
             tmp_unit = tmp_property['unit']
             if tmp_unit == None:
                 tmp_unit = '' 
@@ -137,18 +146,5 @@ class has_level(Predicate):
             self.unmet(level = self.level)
         
 
-#class has_level_staff(Predicate):
-#    message = 'Only for users with level staff'
-#
-#    def evaluate(self, environ, credentials):
-#        if 'staff' not in environ['repoze.who.identity']['user_level']:
-#            self.unmet()
-#
-#
-#class has_level_pl(Predicate):
-#    message = 'Only for users with level pl'
-#
-#    def evaluate(self, environ, credentials):
-#        if 'pl' not in environ['repoze.who.identity']['user_level']:
-#            self.unmet()
+
 

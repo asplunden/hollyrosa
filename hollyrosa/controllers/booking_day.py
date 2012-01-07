@@ -38,9 +38,9 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays,  getAllActivities,  getSlotAndActivityIdOfBooking,  getBookingHistory,  getAllActivityGroups
-from sqlalchemy import and_, or_
-from sqlalchemy.orm import eagerload,  eagerload_all
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays,  getAllBookingDays,  getAllActivities,  getSlotAndActivityIdOfBooking,  getAllActivityGroups,  getBookingDayOfDate
+from hollyrosa.model.booking_couch import getAllHistoryForBookings
+
 import datetime
 from formencode import validators
 
@@ -59,7 +59,7 @@ from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedu
 
 from hollyrosa.controllers.booking_history import remember_booking_change,  remember_schedule_booking,  remember_unschedule_booking,  remember_book_slot,  remember_booking_properties_change,  remember_new_booking_request,  remember_booking_request_change,  remember_delete_booking_request,  remember_block_slot, remember_unblock_slot
 
-from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUser,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level
+from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level
 
 __all__ = ['BookingDay',  'Calendar']
     
@@ -68,16 +68,6 @@ def getBookingDay(booking_day_id):
     return holly_couch[booking_day_id] 
 
 
-def getBookingDayOfDate(date):
-    map_fun = """function(doc) {
-            if (doc.type == 'booking_day') {
-                if (doc.date == '"""+str(date)+"""') {
-            emit(doc._id, doc);
-        }}}"""
-    bookings_c =  holly_couch.query(map_fun)
-
-    bookings = [b for b in bookings_c]
-    return bookings[0].value
     
 def getBooking(id):
     return holly_couch[id]
@@ -125,40 +115,43 @@ class Calendar(BaseController):
     @expose('hollyrosa.templates.calendar_overview')
     def overview_all(self):
         """Show an overview of all booking days"""
-        #booking_days = DBSession.query(booking.BookingDay).all()
-        return dict(booking_days=getBookingDays())
+        return dict(booking_days=[b.value for b in getAllBookingDays()])
 
 
     @expose('hollyrosa.templates.calendar_overview')
     def overview(self):
         """Show an overview of all booking days"""
-        
-        return dict(booking_days=getBookingDays(from_date=datetime.date.today().strftime('%Y-%m-%d')))
+        today = datetime.date.today().strftime('%Y-%m-%d')
+        today = '2011-08-01'
+        return dict(booking_days=[b.value for b in getBookingDays(from_date=today)])
     
 
     @expose('hollyrosa.templates.calendar_upcoming')
     def upcoming(self):
         """Show an overview of all booking days"""
         today_date_str = datetime.date.today().strftime('%Y-%m-%d')
+        today_date_str = '2011-08-01'
         end_date_str = (datetime.date.today()+datetime.timedelta(5)).strftime('%Y-%m-%d')
-        booking_days = getBookingDays(from_date=today_date_str,  to_date=end_date_str) #DBSession.query(booking.BookingDay).filter(and_('date >=\'' + today_date_str +'\'','date < \'' + end_date_str +'\'')).order_by(booking.BookingDay.date).all()
+        booking_days = getBookingDays(from_date=today_date_str,  to_date=end_date_str) 
 
-        vgroups = get_visiting_groups(from_date=today_date_str,  to_date=end_date_str) #DBSession.query(booking.VisitingGroup).filter(or_('todate >= \''+ today_date_str +'\'','fromdate <= \''+ end_date_str  +'\'')).all()
+        vgroups = get_visiting_groups(from_date=today_date_str,  to_date=end_date_str)
 
         group_info = dict()
-        for b_day in booking_days:
-             tmp_date_today_str = b_day.date.strftime('%Y-%m-%d')             
+        bdays = list()
+        for tmp in booking_days:
+            b_day = tmp.value
+            tmp_date_today_str = b_day['date']             
+            bdays.append(b_day)
+            group_info[tmp_date_today_str] = dict(arrives=[v for v in vgroups if v['from_date'] == tmp_date_today_str], leaves=[v for v in vgroups if v['to_date'] == tmp_date_today_str], stays=[v for v in vgroups if v['to_date'] > tmp_date_today_str and v['from_date'] < tmp_date_today_str])
 
-             group_info[tmp_date_today_str] = dict(arrives=[v for v in vgroups if v['from_date'] == tmp_date_today_str], leaves=[v for v in vgroups if v['to_date'] == tmp_date_today_str], stays=[v for v in vgroups if v['to_date'] > tmp_date_today_str and v['from_date'] < tmp_date_today_str])
-
-        return dict(booking_days=booking_days, group_info=group_info)
+        return dict(booking_days=bdays, group_info=group_info)
         
         
     @expose('hollyrosa.templates.booking_day_properties')
     @validate(validators={'id':validators.Int(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booking day properties'))
     def edit_booking_day(self,  id=None,  **kw):
-        booking_day = holly_couch[id] #getBookingDay(id)
+        booking_day = holly_couch[id]
         tmpl_context.form = create_edit_booking_day_form
         return dict(booking_day=booking_day,  usage='edit')
         
@@ -167,14 +160,10 @@ class Calendar(BaseController):
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booking day properties'))
     def save_booking_day_properties(self,  _id=None,  note='', num_program_crew_members=0,  num_fladan_crew_members=0):
         
-        # important: if note is too big, dont try to store it in database because that will give all kinds of HTML rendering errors later
-        #if len(note) > 1024:
-        #    raise IOError, "note too big. I appologize for this improvised failure mode but we cannot allow this to propagate to the db"
-        booking_day_c = holly_couch[_id]#getBookingDay(id)
+        booking_day_c = holly_couch[_id]
         booking_day_c['note'] = note
         booking_day_c['num_program_crew_members'] = num_program_crew_members
         booking_day_c['num_fladan_crew_members'] = num_fladan_crew_members
-        print 'HOLLY',_id
         holly_couch[_id]=booking_day_c
         
         raise redirect('/booking/day?day_id='+str(_id))
@@ -405,11 +394,10 @@ class BookingDay(BaseController):
             #...we need to get all slots for 'today'
             #requested_date = datetime.datetime.today().date()
             booking_day_o = bookingDayOfDate(today_sql_date)
-            #booking_day_o = getBookingDayOfDate(str(today_sql_date)) #DBSession.query(booking.BookingDay).filter('date=\''+today_sql_date+'\'').one()
             day_id = booking_day_o['_id']
             
         else: # we're guessing day is a date options(eagerload_all('')).
-            booking_day_o = getBookingDayOfDate(str(day)) #DBSession.query(booking.BookingDay).filter('date=\''+str(day)+'\'').one()
+            booking_day_o = getBookingDayOfDate(str(day))
             day_id = booking_day_o['_id']
         
         booking_day_o['id'] = day_id
@@ -551,10 +539,9 @@ class BookingDay(BaseController):
         tmpl_context.form = create_edit_book_slot_form
          
         #...find booking day and booking row
-        booking_day = getBookingDay(str(booking_day_id))
+        booking_day = holly_couch[booking_day_id]
         
-        
-        tmp_visiting_groups = get_visiting_groups_at_date(booking_day['date']) #DBSession.query(booking.VisitingGroup.id, booking.VisitingGroup.name,  booking.VisitingGroup.todate,  booking.VisitingGroup.fromdate ).filter(and_('visiting_group.fromdate <= \''+str(booking_day.date) + '\'', 'visiting_group.todate >= \''+str(booking_day.date) + '\''   )   ).all()
+        tmp_visiting_groups = get_visiting_groups_at_date(booking_day['date']) 
         visiting_groups = [(e['_id'],  e['name']) for e in tmp_visiting_groups] 
         
         #...find out activity of slot_id for booking_day
@@ -611,8 +598,8 @@ class BookingDay(BaseController):
                                     break
         
         activity = holly_couch[activity_id] 
-        history = getBookingHistory(id)
-        #history.reverse()
+        history = [h.value for h in getAllHistoryForBookings([id])]
+        
         return dict(booking_day=booking_day,  slot_position=slot_position, booking=booking_o,  workflow_map=workflow_map,  history=history,  change_op_map=change_op_map,  getRenderContent=getRenderContentDict,  activity=activity)
         
         
@@ -673,11 +660,11 @@ class BookingDay(BaseController):
         old_visiting_group_name = old_booking.get('visiting_group_name', '')
         old_booking['visiting_group_name'] = visiting_group_name
         old_booking['visiting_group_id'] = visiting_group_id
-        old_booking['last_changed_by_id'] = getLoggedInUser(request).user_id
+        old_booking['last_changed_by_id'] = getLoggedInUserId(request)
         
         old_booking['content'] = content
         
-        old_booking['cache_content'] = computeCacheContent(holly_couch, content, visiting_group_id)
+        old_booking['cache_content'] = computeCacheContent(holly_couch[visiting_group_id], content)
         
             
         #...make sure activity is set
@@ -880,7 +867,7 @@ class BookingDay(BaseController):
         ##vgroup = DBSession.query(booking.VisitingGroup).filter('id='+str(visiting_group_id)).one()
         new_booking['visiting_group_id'] = visiting_group_id
         
-        new_booking['cache_content'] = computeCacheContent(holly_couch, content, visiting_group_id)
+        new_booking['cache_content'] = computeCacheContent(holly_couch[visiting_group_id], content)
         
         
         new_booking['activity_id'] = activity_id
@@ -1107,7 +1094,7 @@ class BookingDay(BaseController):
             
             vgroup = DBSession.query(booking.VisitingGroup).filter('visiting_group.id='+visiting_group_id).one()
             
-            new_booking.cache_content = computeCacheContent(DBSession, content, visiting_group_id)
+            new_booking.cache_content = computeCacheContent(vgroup, content)
             
             
             

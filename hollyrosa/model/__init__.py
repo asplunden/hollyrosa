@@ -65,6 +65,7 @@ from hollyrosa.model.booking import DaySchema, BookingDay, SlotRow, Booking, Vis
 import booking_couch
 from booking_couch import genUID
 
+# TODO: refactor 
 holly_couch = booking_couch.holly_couch
 get_visiting_groups = booking_couch.get_visiting_groups
 get_visiting_groups_at_date = booking_couch.get_visiting_groups_at_date
@@ -75,5 +76,8 @@ getBookingDays = booking_couch.getBookingDays
 getAllActivities = booking_couch.getAllActivities
 getAllVisitingGroupsNameAmongBookings = booking_couch.getAllVisitingGroupsNameAmongBookings
 getSlotAndActivityIdOfBooking = booking_couch.getSlotAndActivityIdOfBooking
-getBookingHistory = booking_couch.getBookingHistory
 getAllActivityGroups = booking_couch.getAllActivityGroups
+get_bookings_of_visiting_group = booking_couch.get_bookings_of_visiting_group
+getBookingDayOfDate = booking_couch.getBookingDayOfDate
+getAllBookingDays = booking_couch.getAllBookingDays
+getBookingDays = booking_couch.getBookingDays

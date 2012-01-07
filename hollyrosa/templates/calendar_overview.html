@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010, 2011, 2012 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -20,6 +20,12 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
 
+<?python
+import datetime
+def makeDate(s):
+    return datetime.datetime.strptime(s, '%Y-%m-%d')
+
+?>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <xi:include href="master.html" />
@@ -33,18 +39,18 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
     <h2>Calendar Overview</h2>
     <table class="data">
         <tr><th>Day</th><th>Note</th><th>Crew status</th><th>Tools</th></tr>
-        <tr py:for="booking_day in booking_days" style="${['','background:#fdd;'][6==booking_day.date.weekday()]}" class="calendar_overview">
-            <td class="data info"><a href="${tg.url('/booking/day',day_id=str(booking_day.id))}">${booking_day.date.strftime('%A %d %b')}</a><br/> 
+        <tr py:for="booking_day in booking_days" style="${['','background:#fdd;'][6==makeDate(booking_day['date']).weekday()]}" class="calendar_overview"> 
+            <td class="data info"><a href="${tg.url('/booking/day',day_id=str(booking_day['_id']))}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a><br/> <!-- .strftime('%A %d %b') --> 
                 <ul class="any_menu context_inline_menu">
-                    <li><a href="${url('/visiting_group/view_at_date', at_date=booking_day.date)}">Visiting groups this day</a></li>
-                    <li><a href="${url('/booking/fladan_day', ag='Fladan', day=booking_day.date)}">Fladan schema</a></li>
-                    <li><a href="${url('/booking/fladan_day', ag='Trapper', day=booking_day.date)}">Trapper schema</a></li>
-                    <li><a href="${url('/booking/fladan_day', day=booking_day.date)}">All Day schema</a></li>
+                    <li><a href="${url('/visiting_group/view_at_date', at_date=booking_day['date'])}">Visiting groups this day</a></li>
+                    <li><a href="${url('/booking/fladan_day', ag='Fladan', day=booking_day['date'])}">Fladan schema</a></li>
+                    <li><a href="${url('/booking/fladan_day', ag='Trapper', day=booking_day['date'])}">Trapper schema</a></li>
+                    <li><a href="${url('/booking/fladan_day', day=booking_day['date'])}">All Day schema</a></li>
                 </ul> 
 </td>
             
-            <td class="data info">${HTML(booking_day.note)}</td>
-            <td class="data info">program: ${booking_day.num_program_crew_members}, Fladan: ${booking_day.num_fladan_crew_members}</td>
+            <td class="data info">${HTML(booking_day['note'])}</td>
+            <td class="data info">program: ${booking_day['num_program_crew_members']}, Fladan: ${booking_day['num_fladan_crew_members']}</td>
             <td class="data info">
 
             </td>

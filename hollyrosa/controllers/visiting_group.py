@@ -24,7 +24,7 @@ from repoze.what.predicates import Any, is_user,  has_permission
 from formencode import validators
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  get_visiting_groups,  get_visiting_groups_at_date,  get_visiting_groups_in_date_period,  get_visiting_groups_with_boknstatus,  get_visiting_group_names,  getBookingDays, getAllActivities,  getAllVisitingGroupsNameAmongBookings
+from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  get_visiting_groups,  get_visiting_groups_at_date,  get_visiting_groups_in_date_period,  get_visiting_groups_with_boknstatus,  get_visiting_group_names,  getBookingDays, getAllActivities,  getAllVisitingGroupsNameAmongBookings,  get_bookings_of_visiting_group
 from sqlalchemy import and_
 import datetime
 
@@ -221,7 +221,7 @@ class VisitingGroup(BaseController):
             #...HERE MAKE OBJECT OF DICTIONARY OR IT WONT WORK WITH THE FORMS
             vgps = []
             for id,  vgp in visiting_group_c['visiting_group_properties'].items():
-                vgpx = DataContainer(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=vgp['from_date'],  to_date=vgp['to_date'])
+                vgpx = DataContainer(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=vgp['from_date'],  to_date=vgp['to_date'],  id=str(id))
                 vgps.append(vgpx)
 
             # TODO: DataContainerFromDictLikeObject(fields=)
@@ -238,14 +238,13 @@ class VisitingGroup(BaseController):
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change visiting group properties'))
     def save_visiting_group_properties(self,  id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr='', boknstatus=0):
         # TODO: does not work?
-        if None == id:
+        if None == id or id == '':
             is_new = True
             visiting_group_c = dict(type='visiting_group')
             id_c = genUID()
         else:
             id_c = str(id)
             visiting_group_c = holly_couch[id_c]
-            
             is_new= False
             
         visiting_group_c['type'] = 'visiting_group'
@@ -261,63 +260,63 @@ class VisitingGroup(BaseController):
         visiting_group_c['camping_location'] = camping_location
         
         visiting_group_property_c = dict()
-        
+       
+            
         #...remove non-used params !!!! Make a dict and see which are used, remove the rest
         unused_params = {}
 #        for k in visiting_group.visiting_group_property:
 #            unused_params[str(k.id)] = k
         
+        used_param_ids = []
+        if  visiting_group_c.has_key('visiting_group_properties'):
+            used_param_ids = visiting_group_c['visiting_group_properties'].keys()
         
         for param in visiting_group_properties:
             is_new_param = False
+            print 'PARAM',  param
             if param['property'] != '' and param['property'] != None:
-                if param['id'] == '':
-                    raise IOError
-                    is_new_param = True
-                    new_param = booking.VistingGroupProperty()
-                
-                elif param['id'] == None:
-                    is_new_param = True
-                    new_param = booking.VistingGroupProperty()
-                
+                print 'adding param'
+                if param['id'] != '' and param['id'] != None:
+                    visiting_group_property_c[param['id']] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
+                #what if the param has no id?
                 else:
-                    new_param = DBSession.query(booking.VistingGroupProperty).filter('id='+ str(param['id'])).one()
+                    #...compute new unsued id
+                    # TODO: these ids are not perfectly unique. It shouldnt matter since its the param name that is really used
                     
-                    del unused_params[param['id']]
+                    new_id_int = 1
+                    while str(new_id_int) in used_param_ids:
+                        new_id_int += 1
+                    used_param_ids.append(str(new_id_int))
                     
-                visiting_group_property_c[param['id']] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
-                
-#                new_param.property = param['property']
-#                new_param.value = param.get('value','')
-#                new_param.description = param.get('description','')
-#                new_param.unit = param.get('unit','')
-#                new_param.fromdate = param['fromdate']
-#                new_param.todate = param['todate']
-#                
-#                #...how to add param to visiting group?
-#                new_param.visiting_group = visiting_group
-#                
-#                if is_new_param:
-#                    DBSession.add(new_param)
-                
-#        for unused in unused_params.values():
-#            DBSession.delete(unused)
-        
+                    visiting_group_property_c[str(new_id_int)] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
+                    
+        # no need to delete old params, but we need to add to history how params are changed and what it affects
         
         #...now we have to update all cached content, so we need all bookings that belong to this visiting group
         
-        # IMPORTANT TO FIX LATER
-#######        bookings = DBSession.query(booking.Booking).filter('visiting_group_name=\'' + name + '\'').all()
-#######        for tmp_booking in bookings:
-#######            tmp_booking.cache_content = computeCacheContent(DBSession, tmp_booking.content, tmp_booking.visiting_group.id)
-#######        
-        #...add visiting group properties
-        #...differ between save and new! Visiting group properties should be something like a dict in the dict.
-        #holly_couch.save({'type':'visiting_group',  'name':name}) # we need a better way to come up with unique ids!
+        visiting_group_c['visiting_group_properties'] = visiting_group_property_c
         
+        # TODO: IMPORTANT TO FIX LATER
+        bookings = get_bookings_of_visiting_group(id_c)
+        for tmp in bookings:
+            tmp_booking = tmp.value
+            #print 'tmp_booking',  tmp_booking
+            new_content = computeCacheContent(visiting_group_c, tmp_booking['content'])
+            if new_content != tmp_booking['cache_content'] :
+                #tmp_booking = holly_couch[tmp_booking['_id']]
+                tmp_booking['cache_content'] = new_content
+                print 'NEW CONTENT',  new_content
+                print tmp_booking['cache_content'] 
+            # TODO: clear ignore_warning flag
+            
+            # TODO: change last_changed_by_id
+            
+            # TODO: change booking status (from whatever, since the text has changed)
+            
+            # TODO: remember booking history change
+                holly_couch[tmp_booking['_id']] = tmp_booking
+            
         
-        #holly_couch.save(visiting_group_c) # we need a better way to come up with unique ids!
-        visiting_group_c['visiting_group_property'] = visiting_group_property_c
         holly_couch[id_c] = visiting_group_c
         
         raise redirect('/visiting_group/view_all')
