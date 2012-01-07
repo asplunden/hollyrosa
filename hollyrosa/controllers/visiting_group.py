@@ -24,8 +24,8 @@ from repoze.what.predicates import Any, is_user,  has_permission
 from formencode import validators
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  get_visiting_groups,  get_visiting_groups_at_date,  get_visiting_groups_in_date_period,  get_visiting_groups_with_boknstatus,  get_visiting_group_names,  getBookingDays,  getAllVisitingGroupsNameAmongBookings,  get_bookings_of_visiting_group
-from hollyrosa.model.booking_couch import getAllActivities
+from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  get_visiting_groups_in_date_period,  get_visiting_groups_with_boknstatus,  get_visiting_group_names,  getBookingDays,  getAllVisitingGroupsNameAmongBookings,  get_bookings_of_visiting_group
+from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod
 from sqlalchemy import and_
 import datetime
 
@@ -88,7 +88,7 @@ class VisitingGroup(BaseController):
     @validate(validators={'fromdate':validators.DateValidator(not_empty=False), 'todate':validators.DateValidator(not_empty=False)})
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_date_range(self,  fromdate=None,  todate=None):
-        visiting_groups = get_visiting_groups_in_date_period(fromdate,  todate)         
+        visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(fromdate,  todate)]
         v_group_map = self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=fromdate,  to_date=todate)        
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
 
@@ -96,7 +96,7 @@ class VisitingGroup(BaseController):
     @expose('hollyrosa.templates.visiting_group_view_all')
     @require(Any(is_user('erspl'), has_level('staff'),   msg='Only staff members and viewers may view visiting group properties'))
     def view_all(self):
-        visiting_groups = get_visiting_groups() 
+        visiting_groups = [v.value for v in getAllVisitingGroups()] 
         remaining_visiting_groups_map = self.makeRemainingVisitingGroupsMap(visiting_groups)        
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys())
 
@@ -123,16 +123,16 @@ class VisitingGroup(BaseController):
             from_date='2011-01-01'
             to_date='2011-07-16'
             
-            visiting_groups = get_visiting_groups(from_date='2011-01-01',  to_date='2011-07-16') 
+            visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(from_date,  to_date)]
         elif period == '2an':
             from_date='2011-07-17'  
             to_date='2011-08-24'
-            visiting_groups = get_visiting_groups(from_date='2011-07-17',  to_date='2011-08-24') 
+            visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(from_date,  to_date)]
 
         else:
             from_date=''
             to_date=''
-            visiting_groups = get_visiting_groups()
+            visiting_groups = [v.doc for v in getAllVisitingGroups(from_date,  to_date)]
         
         v_group_map = self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=from_date,  to_date=to_date) 
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
@@ -142,7 +142,7 @@ class VisitingGroup(BaseController):
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group and their properties properties'))
     def view_today(self):
         at_date = datetime.datetime.today().strftime('%Y-%m-%d')
-        visiting_groups = get_visiting_groups_at_date(at_date) 
+        visiting_groups = [v.doc for v in getVisitingGroupsAtDate(at_date)] 
         v_group_map = self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=at_date,  to_date=at_date)        
         
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
@@ -152,7 +152,8 @@ class VisitingGroup(BaseController):
     @validate(validators={'at_date':validators.DateValidator(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group and their properties properties'))
     def view_at_date(self,  at_date=None):
-        visiting_groups = get_visiting_groups_at_date(at_date) 
+        visiting_groups = [v.doc for v in getVisitingGroupsAtDate(at_date)] 
+        print 'visiting_groups',  visiting_groups
         v_group_map = self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=at_date,  to_date=at_date)
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
 

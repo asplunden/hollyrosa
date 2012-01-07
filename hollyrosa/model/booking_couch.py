@@ -151,20 +151,50 @@ def get_visiting_groups_with_boknstatus(boknstatus):
     return visiting_groups
     
 
-def get_visiting_groups_at_date(at_date):
-    map_fun = """function(doc) {
-    if ((doc.type == 'visiting_group') && (doc.from_date <= '"""+ at_date+"""' ) && (doc.to_date >= '""" + at_date+"""'))
-        emit(doc.from_date, doc);
-        }"""
-    visiting_groups_c = holly_couch.query(map_fun)
+#def get_visiting_groups_at_date(at_date):
+#    map_fun = """function(doc) {
+#    if ((doc.type == 'visiting_group') && (doc.from_date <= '"""+ at_date+"""' ) && (doc.to_date >= '""" + at_date+"""'))
+#        emit(doc.from_date, doc);
+#        }"""
+#    visiting_groups_c = holly_couch.query(map_fun)
+#    
+#    #...conversion 
+#    visiting_groups = []
+#    for vgc in visiting_groups_c:
+#        visiting_groups.append(vgc.value)
+#    return visiting_groups
     
-    #...conversion 
-    visiting_groups = []
-    for vgc in visiting_groups_c:
-        visiting_groups.append(vgc.value)
-    return visiting_groups
+    
+def getVisitingGroupsAtDate(at_date):
+    #...argh TODO: fix that now we have to use doc instead of value
+    formated_date = datetime.datetime.strptime(at_date,'%Y-%m-%d').strftime('%a %b %d %Y')
+    return holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=[formated_date],  include_docs =True)
     
 
+def getVisitingGroupsInDatePeriod(from_date,  to_date):
+    """create one key for each day"""
+    
+    one_day = datetime.timedelta(1)
+    formated_dates = list()
+    tmp_date = datetime.datetime.strptime(from_date,'%Y-%m-%d')
+    tmp_to_date = datetime.datetime.strptime(to_date,'%Y-%m-%d')
+    
+    while tmp_date <= tmp_to_date:
+        formated_dates.append(tmp_date.strftime('%a %b %d %Y'))
+        tmp_date = tmp_date + one_day
+    
+    # TODO: maybe one can make a view using reduce that fixes this multiple-removing stuff.
+    #return holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates)
+    
+    r = dict()
+    print holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs =True)
+    for v in holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs =True):
+        print v
+        r[v.doc['_id']] = v #DataContainer(key=v.key,  value=v.doc)
+    return r.values()
+    
+    
+    
 def get_visiting_groups_in_date_period(from_date,  to_date):
     map_fun = """function(doc) {
     if (doc.type == 'visiting_group') {
@@ -222,6 +252,8 @@ except couchdb.ResourceNotFound, e:
 def getAllVisitingGroupsNameAmongBookings(from_date='',  to_date=''):
     """find all bookings in date range and look for the visiting_group_names.
         perhaps this can be done with reduce in the future."""
+        
+    # TODO: hmm. a view shold be possible somehow. We still need to iterate, but in a different way (more efficient)
     
     if from_date == '':
         map_fun = '''function(doc) {
@@ -289,4 +321,7 @@ def getAllActivityGroups():
 def getAllActivities():
     return holly_couch.view('all_activities/all_activities')
     
+#---
 
+def getAllVisitingGroups():
+    return holly_couch.view('visiting_groups/all_visiting_groups')

@@ -38,8 +38,8 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups, get_visiting_groups_at_date,  getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate
-from hollyrosa.model.booking_couch import getAllHistoryForBookings,  getAllActivities,  getAllActivityGroups
+from hollyrosa.model import DBSession, metadata,  booking,  holly_couch,  genUID,  get_visiting_groups,  getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate
+from hollyrosa.model.booking_couch import getAllHistoryForBookings,  getAllActivities,  getAllActivityGroups,  getVisitingGroupsAtDate
 
 import datetime
 from formencode import validators
@@ -508,8 +508,8 @@ class BookingDay(BaseController):
         #...find booking day and booking row
         booking_day = holly_couch[booking_day_id]
         
-        tmp_visiting_groups = get_visiting_groups_at_date(booking_day['date']) 
-        visiting_groups = [(e['_id'],  e['name']) for e in tmp_visiting_groups] 
+        tmp_visiting_groups = getVisitingGroupsAtDate(booking_day['date']) 
+        visiting_groups = [(e.value['_id'],  e.value['name']) for e in tmp_visiting_groups] 
         
         #...find out activity of slot_id for booking_day
         schema = holly_couch[booking_day['day_schema_id']]
@@ -601,8 +601,8 @@ class BookingDay(BaseController):
         activity = holly_couch[activity_id]
         booking_ = DataContainer(activity_id=activity_id, activity=activity,  id=booking_o['_id'],  visiting_group_name=booking_o['visiting_group_name'],  visiting_group_id=booking_o['visiting_group_id'],  content=booking_o['content'], return_to_day_id=return_to_day_id )
         
-        tmp_visiting_groups = get_visiting_groups_at_date(booking_day['date']) #DBSession.query(booking.VisitingGroup.id, booking.VisitingGroup.name,  booking.VisitingGroup.todate,  booking.VisitingGroup.fromdate ).filter(and_('visiting_group.fromdate <= \''+str(booking_day.date) + '\'', 'visiting_group.todate >= \''+str(booking_day.date) + '\''   )   ).all()
-        visiting_groups = [(e['_id'],  e['name']) for e in tmp_visiting_groups]  # REFACTOR
+        tmp_visiting_groups = getVisitingGroupsAtDate(booking_day['date']) 
+        visiting_groups = [(e.value['_id'],  e.value['name']) for e in tmp_visiting_groups]  # REFACTOR
         
  
         
