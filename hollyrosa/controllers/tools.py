@@ -175,7 +175,7 @@ class Tools(BaseController):
         bookings = getAllScheduledBookings(limit=1000000) #DBSession.query(booking.Booking).join(booking.VisitingGroup).join(booking.VistingGroupProperty).all()
         booking_days_map = dict()
         for bd in getAllBookingDays():
-            booking_days_map[bd.value['_id']] = bd.value
+            booking_days_map[bd.doc['_id']] = bd.doc
             
         visiting_group_map = dict()
         for vg in getAllVisitingGroups():

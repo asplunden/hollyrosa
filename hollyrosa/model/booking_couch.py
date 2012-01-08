@@ -75,7 +75,7 @@ def getBookingDayOfDate(date):
     
     
 def getAllBookingDays():
-    return holly_couch.view('booking_day/all_booking_days')
+    return holly_couch.view('booking_day/all_booking_days',  include_docs=True)
     
 
 def getBookingDays(from_date='2011-01-01',  to_date='2011-12-11'):

@@ -103,19 +103,22 @@ class Workflow(BaseController):
     def do_set_state(self, booking_id,  booking_o,  state):
         
         #...only PL can set state=20 (approved) or -10 (disapproved)
-        print booking_o
+        
         if state=='20' or state=='-10' or booking_o['booking_state'] == 20 or booking_o['booking_state']==-10:
             #ok = False
             #for group in getLoggedInUserId(request):
             #    if group.group_name == 'pl':
             #        ok = True
             ok = has_level('pl').check_authorization(request.environ)
-
-            if not ok:
-                flash('Only PL can do that. %s' % request.referrer, 'warning')
-                raise redirect(request.referrer)
             
-        ####remember_workflow_state_change(booking=booking_o,  state=state)
+            # TODO: fix
+            
+#            if not ok:
+#                flash('Only PL can do that. %s' % request.referrer, 'warning')
+#                raise redirect(request.referrer)
+        activity = holly_couch[booking_o['activity_id']]
+        booking_day = holly_couch[booking_o['booking_day_id']]
+        remember_workflow_state_change(booking=booking_o,  state=state,  booking_day_date=booking_day['date'],  activity_title=activity['title'])
         booking_o['booking_state'] = state
         booking_o['ast_changed_by_id'] = getLoggedInUserId(request)
         holly_couch[booking_id] = booking_o
