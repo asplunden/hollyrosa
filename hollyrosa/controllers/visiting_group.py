@@ -20,13 +20,11 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from tg import expose, flash, require, url, request, redirect,  validate
-from repoze.what.predicates import Any, is_user,  has_permission
 from formencode import validators
-
+from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  get_visiting_groups_in_date_period,  get_visiting_groups_with_boknstatus,  get_visiting_group_names,  getBookingDays,  getAllVisitingGroupsNameAmongBookings,  get_bookings_of_visiting_group
-from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod
-from sqlalchemy import and_
+from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  get_visiting_groups_in_date_period,  get_visiting_groups_with_boknstatus,  get_visiting_group_names,  getBookingDays,  getAllVisitingGroupsNameAmongBookings
+from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap
 import datetime
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
@@ -38,7 +36,7 @@ from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
 from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
 from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
 from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
-from hollyrosa.controllers.common import workflow_map,  DataContainer,  getRenderContent, computeCacheContent,  has_level
+from hollyrosa.controllers.common import workflow_map,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate
 
 
 
@@ -153,7 +151,6 @@ class VisitingGroup(BaseController):
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group and their properties properties'))
     def view_at_date(self,  at_date=None):
         visiting_groups = [v.doc for v in getVisitingGroupsAtDate(at_date)] 
-        print 'visiting_groups',  visiting_groups
         v_group_map = self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=at_date,  to_date=at_date)
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
 
@@ -352,7 +349,7 @@ class VisitingGroup(BaseController):
         elif b[0].booking_day == None:
             return 1
 
-        return cmp(a[0].booking_day.date, b[0].booking_day.date)
+        return cmp(a[0].booking_day['date'], b[0].booking_day['date'])
 
     def fn_cmp_booking_timestamps(self, a, b):
         if a.booking_day == None:
@@ -364,9 +361,9 @@ class VisitingGroup(BaseController):
         elif b.booking_day == None:
             return 1
       
-        elif a.booking_day.date > b.booking_day.date:
+        elif a.booking_day['date'] > b.booking_day['date']:
             return 1
-        elif a.booking_day.date < b.booking_day.date:
+        elif a.booking_day['date'] < b.booking_day['date']:
             return -1
         else:
             return cmp(a.slot['time_from'], b.slot['time_from'])
@@ -398,23 +395,28 @@ class VisitingGroup(BaseController):
         #
         #...the bookings should be ordered by booking day or requested date or nothing. In that order.
         # todo: refactor
-        map_fun = """function(doc) {
-        if (doc.type == 'booking') {
-            if (doc.visiting_group_name == '""" + name+  """')  {
-                if (doc.booking_state > -100) {
-                    emit([doc.visiting_group_name, doc.booking_day_id], doc);
-                    }
-                }
-            }
-        }"""
+##        map_fun = """function(doc) {
+##        if (doc.type == 'booking') {
+##            if (doc.visiting_group_name == '""" + name+  """')  {
+##                if (doc.booking_state > -100) {
+##                    emit([doc.visiting_group_name, doc.booking_day_id], doc);
+##                    }
+##                }
+##            }
+##        }"""
+##        
+##        # TODO: refactor make list of bookings or any dict like object
+##        bookings = []
+##        for x in holly_couch.query(map_fun):
+##            b = x.value
+##            bookings.append(b)
         
-        # TODO: refactor make list of bookings or any dict like object
-        bookings = []
-        for x in holly_couch.query(map_fun):
-            b = x.value
-            bookings.append(b)
+        # TODO: its now possible to get bookings on both name and id
+        bookings = [b.doc for b in getBookingsOfVisitingGroup(name, '<- MATCHES NO GROUP ->')]
         
-
+        slot_map = getSchemaSlotActivityMap('day_schema.1') # TODO: load for each different schema used
+        
+        # TODO: make view. Its just so simple
         visiting_group_id = None
         visiting_group = self.getVisitingGroupOfVisitingGroupName(name)
         if len(visiting_group) == 1:
@@ -423,13 +425,18 @@ class VisitingGroup(BaseController):
 
         #...now group all bookings in a dict mapping activity_id:content
         clustered_bookings = {}
-        booking_days = getBookingDays(return_map=True)
+        booking_day_map = dict()
+        for bd in getBookingDays():
+            booking_day_map[bd.doc['_id']] = bd.doc
+        
+        print booking_day_map
+        
         activities = dict()
         for x in getAllActivities():
-            activities[x.key] = x.value
+            activities[x.key[1]] = x.value
         
         
-        for b in bookings:
+        for b in bookings: # TODO: There will be quite a few multiples if we search on both id and name!
             key = str(b['activity_id'])+':'+b['content']
             if None == b.get('booking_day_id',  None):
                 key = 'N'+key
@@ -444,18 +451,12 @@ class VisitingGroup(BaseController):
             if b.has_key('booking_day_id'):
                 booking_day_id = b['booking_day_id']
                 if '' != booking_day_id:
-                    tmp_booking_day = booking_days[booking_day_id]
-                    tmp_schema = holly_couch[tmp_booking_day.day_schema_id]
-                    slot_o = None
-                    for tmp_activity,  tmp_slot_row in tmp_schema['schema'].items():
-                        for t in tmp_slot_row[1:]:
-                            if t['slot_id'] == b['slot_id']:
-                                slot_o = t
-                                break
+                    tmp_booking_day = booking_day_map[booking_day_id]
+                    #tmp_schema = holly_couch[tmp_booking_day.day_schema_id]
                     slot_id = b['slot_id']
-
+                    slot_o = slot_map[slot_id]
             
-            b2 = DataContainer(booking_state=b['booking_state'],  cache_content=b['cache_content'],  content=b['content'] ,  activity=activities[b['activity_id']],  id=b['_id'],  booking_day=tmp_booking_day ,  slot_id=slot_id ,  slot=slot_o,  booking_day_id=booking_day_id)
+            b2 = DataContainer(booking_state=b['booking_state'],  cache_content=b['cache_content'],  content=b['content'] ,  activity=activities[b['activity_id']],  id=b['_id'],  booking_day=tmp_booking_day ,  slot_id=slot_id ,  slot=slot_o,  booking_day_id=booking_day_id,  valid_from=b['valid_from'],  valid_to=b['valid_to'],  requested_date=b['requested_date'])
             if clustered_bookings.has_key(key):
                 bl = clustered_bookings[key]
                 bl.append(b2)
@@ -470,5 +471,5 @@ class VisitingGroup(BaseController):
             bl.sort(self.fn_cmp_booking_timestamps)
             
             
-        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent)
+        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate)
         

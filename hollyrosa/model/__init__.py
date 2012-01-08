@@ -75,7 +75,6 @@ get_visiting_group_names = booking_couch.get_visiting_group_names
 getBookingDays = booking_couch.getBookingDays
 getAllVisitingGroupsNameAmongBookings = booking_couch.getAllVisitingGroupsNameAmongBookings
 getSlotAndActivityIdOfBooking = booking_couch.getSlotAndActivityIdOfBooking
-get_bookings_of_visiting_group = booking_couch.get_bookings_of_visiting_group
 getBookingDayOfDate = booking_couch.getBookingDayOfDate
 getAllBookingDays = booking_couch.getAllBookingDays
 getBookingDays = booking_couch.getBookingDays

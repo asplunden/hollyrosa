@@ -23,6 +23,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 from hollyrosa.model import booking
 
 from repoze.what.predicates import Predicate
+import datetime
+
 
 
 workflow_map = dict()
@@ -47,6 +49,9 @@ for k,  v in change_op_lookup.items():
     change_op_map[v] = k.replace('_',' ')
 
 
+def reFormatDate(b):
+    return datetime.datetime.strptime(b, '%Y-%m-%d').strftime('%A %d %B')
+    
 
 def getFormatedDate(date_obj):
     if None == date_obj:

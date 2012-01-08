@@ -30,8 +30,10 @@ def genUID():
 
 
 
-def get_bookings_of_visiting_group(visiting_group_id):
-    return holly_couch.view('visiting_groups/bookings_of_visiting_group',  keys=[visiting_group_id])
+def getBookingsOfVisitingGroup(visiting_group_id,  visiting_group_name):
+    return holly_couch.view('visiting_groups/bookings_of_visiting_group',  keys=[visiting_group_id,  visiting_group_name],  include_docs=True)
+    
+
     
 
 def get_visiting_group_names():
@@ -69,55 +71,17 @@ class BookingDayC(object):
 
 
 def getBookingDayOfDate(date):
-    return list(holly_couch.view('booking_day/all_booking_days',  keys=[date]))[0].value
+    return list(holly_couch.view('booking_day/all_booking_days',  keys=[date],  include_docs=True))[0].doc
     
     
 def getAllBookingDays():
     return holly_couch.view('booking_day/all_booking_days')
     
 
-def getBookingDays(from_date='2011-08-01',  to_date='2011-12-11',  return_map=False):
+def getBookingDays(from_date='2011-01-01',  to_date='2011-12-11'):
     """Helper function to get booking days from CouchDB"""
-    
-    # TODO: introduce views
-#    if from_date=='':
-#        map_fun = '''function(doc) {
-#        if (doc.type == 'booking_day')
-#            emit(doc.date, doc);
-#            }'''
-#    else:
-#        from_date='2011-08-10'
-#        
-#        if to_date=='':
-#            map_fun = """function(doc) {
-#            if ((doc.type == 'booking_day') && (doc.date >= '"""+ from_date+"""' ))
-#                emit(doc.date, doc);
-#                }"""
-#        else:
-#            to_date='2011-08-15'
-#            map_fun = """function(doc) {
-#            if ((doc.type == 'booking_day') && (doc.date >= '"""+ from_date+"""' ) && (doc.date <= '""" + to_date+"""'))
-#                emit(doc.date, doc);
-#                }"""
-#    booking_days_c = holly_couch.query(map_fun)
-    
-    booking_days_c = holly_couch.view('booking_day/all_booking_days',  startkey=from_date,  endkey=to_date)
-    
-    #...conversion to booking  days so the template looks like old SQL Alchemy
-    if not return_map:
-        return booking_days_c
-        
-#        booking_days = []
-#        for bdc in booking_days_c:
-#            o = BookingDayC(bdc)
-#            booking_days.append(o)
-#        return booking_days
-    else:
-        booking_days = dict()
-        for bdc in booking_days_c:
-            o = BookingDayC(bdc)
-            booking_days[o.id] = o
-        return booking_days
+    return holly_couch.view('booking_day/all_booking_days',  startkey=from_date,  endkey=to_date,  include_docs=True)
+
     
     
 def get_visiting_groups_with_boknstatus(boknstatus):
@@ -294,7 +258,7 @@ def getAllActivities():
 #---
 
 def getAllVisitingGroups():
-    return holly_couch.view('visiting_groups/all_visiting_groups')
+    return holly_couch.view('visiting_groups/all_visiting_groups',  include_docs=True)
     
 #--- 
 
