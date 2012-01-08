@@ -43,7 +43,7 @@ from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedu
 from booking_history import  remember_workflow_state_change
 from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level
 
-from hollyrosa.model.booking_couch import getAllActivityGroups
+from hollyrosa.model.booking_couch import getAllActivityGroups,  getAllScheduledBookings,  getAllBookingDays,  getAllVisitingGroups
 
 __all__ = ['tools']
 
@@ -153,22 +153,34 @@ class Tools(BaseController):
         return out_txt
 
 
-    def get_severity(self, booking_o, severity):
-        if booking_o.visiting_group.name in ['Program II', 'Konf II', 'Program I', 'Konf I', 'WSJ Home hospitality', '60 Degrees North', 'Led Utb Scout']:
+    def get_severity(self, visiting_group,  severity):
+        #if booking_o['visiting_group_name'] in ['Program II', 'Konf II', 'Program I', 'Konf I', 'WSJ Home hospitality', '60 Degrees North', 'Led Utb Scout']:
+        if visiting_group.get('hide_warn_on_suspect_bookings', False) == True:
+            print 'HIDE WARN'
             severity = 0
+        else:
+            print visiting_group.get('hide_warn_on_suspect_bookings', 'MA')
         return severity
 
 
     def fn_sort_problems_by_severity(self, a, b):
         return cmp(b['severity'], a['severity'])
+        
 
     @expose('hollyrosa.templates.view_sanity_check_property_usage')
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def sanity_check_property_usage(self):
         
-        #...iterate through all bookings
-        bookings = DBSession.query(booking.Booking).join(booking.VisitingGroup).join(booking.VistingGroupProperty).all()
-        
+        #...iterate through all bookings, we are only interested in scheduled bookings
+        bookings = getAllScheduledBookings(limit=1000000) #DBSession.query(booking.Booking).join(booking.VisitingGroup).join(booking.VistingGroupProperty).all()
+        booking_days_map = dict()
+        for bd in getAllBookingDays():
+            booking_days_map[bd.value['_id']] = bd.value
+            
+        visiting_group_map = dict()
+        for vg in getAllVisitingGroups():
+            visiting_group_map[vg.key] = vg.value
+            
         #...join visiting group (bookings with no visiting group is not interesting)
         
         #...also, booking with no booking day is not interesting
@@ -177,46 +189,50 @@ class Tools(BaseController):
         #      check content for usage of each property, if property is used, check from and to date of property against bookings day
         #...do a check on groups from and to date against booking day too.
         
-        problems = []
-        for tmp_b in bookings:
-            tmp_b_day = tmp_b.booking_day
+        problems = list()
+        for tmp_bx in bookings:
+            tmp_b = tmp_bx.doc
+            tmp_b_day_id = tmp_b['booking_day_id']
+            tmp_b_day = booking_days_map[tmp_b_day_id]
             
-            if None != tmp_b_day and tmp_b_day.date >= datetime.date.today():
-                tmp_date = tmp_b_day.date
-                
-                if tmp_b.visiting_group.fromdate > tmp_date:
-                    problems.append(dict(booking=tmp_b, msg='arrives at ' + str(tmp_b.visiting_group.fromdate) + ' but booking is at ' + str(tmp_date), severity=10))
-
-                if tmp_b.visiting_group.fromdate == tmp_date:
-                    problems.append(dict(booking=tmp_b, msg='arrives same day as booking, at ' + str(tmp_b.visiting_group.fromdate), severity=self.get_severity(tmp_b, 1)))
+            if None != tmp_b_day: # and tmp_b_day.date >= datetime.date.today():
+                if tmp_b['visiting_group_id'] != '' and (False == tmp_b.get('hide_warn_on_suspect_booking',  False)):
+                    tmp_date = tmp_b_day['date']
+                    tmp_b_visiting_group = visiting_group_map[tmp_b['visiting_group_id']]
                     
-                if tmp_b.visiting_group.todate < tmp_date:
-                    problems.append(dict(booking=tmp_b, msg='leves at ' + str(tmp_b.visiting_group.todate) + ' but booking is at ' + str(tmp_date), severity=10))
-
-                if tmp_b.visiting_group.todate == tmp_date:
-                    problems.append(dict(booking=tmp_b, msg='leves same day as booking, at ' + str(tmp_b.visiting_group.todate), severity=self.get_severity(tmp_b, 1)))
-                
-                tmp_content = tmp_b.content
-                for tmp_prop in tmp_b.visiting_group.visiting_group_property:
-                    checks = [x+tmp_prop.property for x in ['$$','$',  '$#','#']]
+                    if tmp_b_visiting_group['from_date'] > tmp_date:
+                        problems.append(dict(booking=tmp_b, msg='arrives at ' + str(tmp_b_visiting_group['from_date']) + ' but booking is at ' + str(tmp_date), severity=10))
+    
+                    if tmp_b_visiting_group['from_date'] == tmp_date:
+                        problems.append(dict(booking=tmp_b, msg='arrives same day as booking, at ' + str(tmp_b_visiting_group['from_date']), severity=self.get_severity(tmp_b_visiting_group, 1)))
+                        
+                    if tmp_b_visiting_group['to_date'] < tmp_date:
+                        problems.append(dict(booking=tmp_b, msg='leves at ' + str(tmp_b_visiting_group['to_date']) + ' but booking is at ' + str(tmp_date), severity=10))
+    
+                    if tmp_b_visiting_group['to_date'] == tmp_date:
+                        problems.append(dict(booking=tmp_b, msg='leves same day as booking, at ' + str(tmp_b_visiting_group['to_date']), severity=self.get_severity(tmp_b_visiting_group, 1)))
                     
-                    for check in checks:
-                        if check in tmp_content:
-                            if tmp_prop.fromdate > tmp_date:
-                                problems.append(dict(booking=tmp_b, msg='property $' + tmp_prop.property + ' usable from ' + str(tmp_prop.fromdate) + ' but booking is at ' + str(tmp_date), severity=10))
-
-                            if tmp_prop.fromdate == tmp_date:
-                                problems.append(dict(booking=tmp_b, msg='property $' + tmp_prop.property + ' arrives at ' + str(tmp_prop.fromdate) + ' and booking is the same day', severity=self.get_severity(tmp_b, 1)))
-                                
-                            if tmp_prop.todate < tmp_date:
-                                problems.append(dict(booking=tmp_b, msg='property $' + tmp_prop.property + ' usable to ' + str(tmp_prop.todate) + ' but booking is at ' + str(tmp_date), severity=10))
-
-                            if tmp_prop.todate == tmp_date:
-                                problems.append(dict(booking=tmp_b, msg='property $' + tmp_prop.property + ' leavs at ' + str(tmp_prop.todate) + ' and booking is the same day ', severity=self.get_severity(tmp_b, 1)))
-
-                            break # there can be more than one match in checks
+                    tmp_content = tmp_b['content']
+                    for tmp_prop in tmp_b_visiting_group['visiting_group_properties'].values():
+                        checks = [x+tmp_prop['property'] for x in ['$$','$',  '$#','#']]
+                        
+                        for check in checks:
+                            if check in tmp_content:
+                                if tmp_prop['from_date'] > tmp_date:
+                                    problems.append(dict(booking=tmp_b, msg='property $' + tmp_prop['property'] + ' usable from ' + str(tmp_prop['from_date']) + ' but booking is at ' + str(tmp_date), severity=10))
+    
+                                if tmp_prop['from_date'] == tmp_date:
+                                    problems.append(dict(booking=tmp_b, msg='property $' + tmp_prop['property'] + ' arrives at ' + str(tmp_prop['from_date']) + ' and booking is the same day', severity=self.get_severity(tmp_b_visiting_group, 1)))
+                                    
+                                if tmp_prop['to_date'] < tmp_date:
+                                    problems.append(dict(booking=tmp_b, msg='property $' + tmp_prop['property'] + ' usable to ' + str(tmp_prop['to_date']) + ' but booking is at ' + str(tmp_date), severity=10))
+    
+                                if tmp_prop['to_date'] == tmp_date:
+                                    problems.append(dict(booking=tmp_b, msg='property $' + tmp_prop['property'] + ' leavs at ' + str(tmp_prop['to_date']) + ' and booking is the same day ', severity=self.get_severity(tmp_b_visiting_group, 1)))
+    
+                                break # there can be more than one match in checks
         problems.sort(self.fn_sort_problems_by_severity)
-        return dict (problems=problems)
+        return dict (problems=problems,  visiting_group_map=visiting_group_map)
         
     @expose('hollyrosa.templates.visitor_statistics')
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can take a look at people statistics'))

@@ -474,14 +474,45 @@ class BookingDay(BaseController):
     @expose()
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may unschedule booking request'))
     def unschedule_booking(self,  booking_day_id,  booking_id):
-        b = holly_couch[booking_id] #DBSession.query(booking.Booking).filter('id='+booking_id).one()
-        b['last_changed_by_id'] = getLoggedInUser(request).user_id
+        b = holly_couch[booking_id] 
+        b['last_changed_by_id'] = getLoggedInUserId(request)
         
         #####remember_unschedule_booking(booking=b, slot_row_position=b.slot_row_position, booking_day=b.booking_day,  changed_by='')
 
         b['booking_state'] = 0
         b['booking_day_id'] = ''
         b['slot_id'] = ''
+        
+        #...fix if valid_from , valid_to and requested date is None
+        today_sql_date = datetime.datetime.today().date().strftime("%Y-%m-%d")
+        try:
+            datetime.datetime.strptime(b['valid_from'],  "%Y-%m-%d")
+        except ValueError:
+            date = holly_couch[booking_day_id]['date']
+            b['valid_from'] = date
+        except TypeError:
+            date = holly_couch[booking_day_id]['date']
+            b['valid_from'] = date
+            
+        try:
+            datetime.datetime.strptime(b['valid_to'],  "%Y-%m-%d")
+        except ValueError:
+            date = holly_couch[booking_day_id]['date']
+            b['valid_to'] = date
+        except TypeError:
+            date = holly_couch[booking_day_id]['date']
+            b['valid_to'] = date
+            
+        try:
+            datetime.datetime.strptime(b['requested_date'],  "%Y-%m-%d")
+        except ValueError:
+            date = holly_couch[booking_day_id]['date']
+            b['requested_date'] = date
+        except TypeError:
+            date = holly_couch[booking_day_id]['date']
+            b['requested_date'] = date
+            
+        b['hide_warn_on_suspect_booking']  = False # TODO: refactor
         holly_couch[b['_id']] = b
         raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(b['activity_id']))
         
@@ -490,11 +521,12 @@ class BookingDay(BaseController):
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may schedule booking request'))
     def schedule_booking(self,  booking_day_id,  booking_id,  slot_row_position_id):
         b = holly_couch[booking_id] 
-        b['last_changed_by_id'] = getLoggedInUser(request).user_id
+        b['last_changed_by_id'] = getLoggedInUserId(request)
         ####remember_schedule_booking(booking=b, slot_row_position=DBSession.query(booking.SlotRowPosition).filter('id='+slot_row_position_id).one(), booking_day=DBSession.query(booking.BookingDay).filter('id='+booking_day_id).one(),  changed_by='')
         
         b['booking_day_id'] = booking_day_id
         b['slot_id'] = slot_row_position_id
+        b['hide_warn_on_suspect_booking'] = False
         holly_couch[b['_id']] = b
         raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(b['activity_id']))
         
