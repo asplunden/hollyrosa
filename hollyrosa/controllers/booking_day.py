@@ -457,16 +457,10 @@ class BookingDay(BaseController):
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL may delete a booking request'))
     @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'booking_id':validators.Int(not_empty=True)})
     def delete_booking(self,  booking_day_id,  booking_id):
-        ###booking_o = DBSession.query(booking.Booking).filter('id='+str(booking_id)).one()        
-        ###tmp_activity = booking_o.activity
-        
-        
-        # cant do any more, foreign key problem: DBSession.delete(booking_o)
         tmp_booking = holly_couch[booking_id]
         tmp_activity_id = tmp_booking['activity_id']
-        remember_delete_booking_request(booking=tmp_booking, changed_by='',  activity=holly_couch[tmp_activity_id])
+        remember_delete_booking_request(booking=tmp_booking, changed_by='',  activity_title=holly_couch[tmp_activity_id]['title'])
         deleteBooking(tmp_booking)
-
         raise redirect('/booking/day?day_id='+str(booking_day_id) + make_booking_day_activity_anchor(tmp_activity_id)) 
         
 
@@ -998,7 +992,7 @@ class BookingDay(BaseController):
         booking_day = holly_couch[booking_day_id]
         slot_map = getSchemaSlotActivityMap(booking_day['day_schema_id'])
         slot = slot_map[slot_id]
-        remember_block_slot(slot_row_position=slot, booking_day=booking_day,  level=level,  changed_by=getLoggedInUserId())
+        remember_block_slot(slot_row_position=slot, booking_day=booking_day,  level=level,  changed_by=getLoggedInUserId(request),  activity_title=holly_couch[slot['activity_id']]['title'])
         
         
     @expose()
@@ -1019,12 +1013,13 @@ class BookingDay(BaseController):
         tmp_slot_states = self.getSlotStateOfBookingDayIdAndSlotId( booking_day_id,  slot_row_position_id)
         for sl in tmp_slot_states:
             holly_couch.delete(sl)
-        activity_id = self.getActivityIdOfBooking(booking_day_id,  slot_row_position_id)
+        #activity_id = self.getActivityIdOfBooking(booking_day_id,  slot_row_position_id)
         
         booking_day = holly_couch[booking_day_id]
         slot_map = getSchemaSlotActivityMap(booking_day['day_schema_id'])
-        slot = slot_map[slot_id]
-        remember_unblock_slot(slot_row_position=slot, booking_day=booking_day,  changed_by=getLoggedInUser(),  level=0)
+        slot = slot_map[slot_row_position_id]
+        activity_id = slot['activity_id']
+        remember_unblock_slot(slot_row_position=slot, booking_day=booking_day,  changed_by=getLoggedInUserId(request),  level=0,  activity_title=holly_couch[activity_id]['title'])
 
         raise redirect('day?day_id='+str(booking_day_id) + make_booking_day_activity_anchor(activity_id)) 
         
@@ -1128,7 +1123,7 @@ class BookingDay(BaseController):
     def delete_booking_async(self,  delete_req_booking_id=0,  activity_id=0,  visiting_group_id=None):
         vgroup = DBSession.query(booking.VisitingGroup).filter('visiting_group.id='+visiting_group_id).one()
         booking_o = DBSession.query(booking.Booking).filter('id='+str(delete_req_booking_id)).one()
-        remember_delete_booking_request(booking_o, changed_by=getLoggedInUser(request).user_id)
+        remember_delete_booking_request(booking_o)
         deleteBooking(booking_o)
 
         return dict(text="hello",  delete_req_booking_id=delete_req_booking_id, visiting_group_name=vgroup.name,  success=True)

@@ -105,9 +105,9 @@ def remember_new_booking_request(booking=None, changed_by=''):
     remember_booking_change(booking_id=booking['_id'],  change_op=4,  change_text=text,  changed_by=changed_by)
     
     
-def remember_delete_booking_request(booking=None, changed_by=''):
+def remember_delete_booking_request(booking=None, changed_by='',  activity_title=''):
     """deleted Trapper requested for HSS wedneday january 10 to friday januari 12"""
-    text = 'deleted %s requested for %s %s to %s' %(booking.activity.title, booking.visiting_group_name, getFormatedDate(booking.valid_from), getFormatedDate(booking.valid_to))
+    text = 'deleted %s requested for %s %s to %s' %(activity_title, booking['visiting_group_name'], booking['valid_from'], booking['valid_to'])
     remember_booking_change(booking_id=booking.id,  change_op=6,  change_text=text,  changed_by=changed_by)
     
 
@@ -125,16 +125,16 @@ def remember_booking_move(booking=None, old_activity_title=None, new_activity_ti
     remember_booking_change(booking_id=booking['_id'],  change_op=5,  change_text=text,  changed_by=changed_by,  booking_day_id=booking['booking_day_id'])
     
     
-def remember_block_slot(slot_row_position=None, booking_day=None,  level=0,  changed_by=''):
+def remember_block_slot(slot_row_position=None, booking_day=None,  level=0,  changed_by='',  activity_title=''):
     """Ekohuset slot blocked on level 4 wedneday january 10 between 09:00 and 12:00"""
-    text = '%s slot blocked on level %d %s between %s and %s' %(slot_row_position.slot_row.activity.title, level,  getFormatedDate(booking_day.date),  slot_row_position.time_from.strftime('%H:%M'),  slot_row_position.time_to.strftime('%H:%M'))
+    text = '%s slot blocked on level %d %s between %s and %s' %(activity_title, level,  booking_day['date'],  slot_row_position['time_from'],  slot_row_position['time_to'])
     
-    remember_booking_change(booking_id=None,  change_op=9,  change_text=text,  changed_by=changed_by,  booking_day_id=booking_day.id)
+    remember_booking_change(booking_id=None,  change_op=9,  change_text=text,  changed_by=changed_by,  booking_day_id=booking_day['_id'])
     
     
-def remember_unblock_slot(slot_row_position=None, booking_day=None,  level=0,  changed_by=''):
+def remember_unblock_slot(slot_row_position=None, booking_day=None,  level=0,  changed_by='',  activity_title=''):
     """Ekohuset slot unblocked from level 4 wedneday january 10 between 09:00 and 12:00"""
-    text = '%s slot unblocked from level %d %s between %s and %s' %(slot_row_position.slot_row.activity.title, level,  booking_day.date.strftime('%A %B %d'),  slot_row_position.time_from.strftime('%H:%M'),  slot_row_position.time_to.strftime('%H:%M'))
+    text = '%s slot unblocked from level %d %s between %s and %s' %(activity_title, level,  booking_day['date'],  slot_row_position['time_from'],  slot_row_position['time_to'])
     
     remember_booking_change(booking_id=None,  change_op=11,  change_text=text,  changed_by=changed_by, booking_day_id=booking_day.id)
     
