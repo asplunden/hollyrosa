@@ -74,7 +74,6 @@ class Workflow(BaseController):
         
     @expose('hollyrosa.templates.workflow_view_scheduled')
     def view_nonapproved(self):
-        #scheduled_bookings = DBSession.query(booking.Booking).filter(and_('booking_state < 20', 'booking_state > -100', 'booking_day_id is not NULL')).all()
         scheduled_bookings = [b.doc for b in gelAllBookingsWithBookingState([0,  10,  -10])] 
         return dict(scheduled_bookings=scheduled_bookings,  workflow_map=workflow_map, result_title='Unapproved scheduled bookings',  activity_map=getActivityTitleMap(), booking_date_map=getBookingDayInfoMap(), user_name_map=getUserNameMap(),  slot_map=getSchemaSlotActivityMap('day_schema.1'), workflow_submenu=workflow_submenu)
     
@@ -118,10 +117,12 @@ class Workflow(BaseController):
 #                raise redirect(request.referrer)
         activity = holly_couch[booking_o['activity_id']]
         booking_day = holly_couch[booking_o['booking_day_id']]
-        remember_workflow_state_change(booking=booking_o,  state=state,  booking_day_date=booking_day['date'],  activity_title=activity['title'])
+        
         booking_o['booking_state'] = state
-        booking_o['ast_changed_by_id'] = getLoggedInUserId(request)
+        booking_o['last_changed_by_id'] = getLoggedInUserId(request)
+        
         holly_couch[booking_id] = booking_o
+        remember_workflow_state_change(booking=booking_o,  state=state,  booking_day_date=booking_day['date'],  activity_title=activity['title'])
 
     @expose()
     @validate(validators={'booking_id':validators.UnicodeString(not_empty=True), 'state':validators.Int(not_empty=True), 'all':validators.Int(not_empty=False)})    
@@ -132,7 +133,7 @@ class Workflow(BaseController):
             self.do_set_state(booking_id,  booking_o, state)
         elif all == '1': # look for all bookings with same group
            booking_o = holly_couch[booking_id] 
-           bookings = [ ] # Fix later DBSession.query(booking.Booking).filter(and_('visiting_group_id='+str(booking_o.visiting_group_id), 'activity_id='+str(booking_o.activity_id), 'booking_state > -100')).all()
+           bookings = [ ] # TODO: Fix later DBSession.query(booking.Booking).filter(and_('visiting_group_id='+str(booking_o.visiting_group_id), 'activity_id='+str(booking_o.activity_id), 'booking_state > -100')).all()
            for new_b in bookings:
                if (new_b.content.strip() == booking_o.content.strip()) and (new_b.booking_day_id != None):
                    self.do_set_state(new_b._id,  new_b, state)
