@@ -25,10 +25,25 @@ from uuid import uuid4
 import datetime
 from hollyrosa.controllers.common import DataContainer
 
-def genUID():
-    return uuid4().hex
 
+# TODO: make type mandatory
+def genUID(type='', user_id='', hostname=''):
+    """
+    returns a globaly unique id for holly rosa database (couchdb)
 
+    user_id and hostname allows one to optionally see in th id
+    on which system the id was generated and that helps
+    ensuring globally unique ids (not very hopefully
+    unique ids).    
+    """
+    tmp = type + '.'
+    if hostname != '':
+        tmp += hostname + '.'
+    if user_id != '':
+        tmp += user_id + '.'
+    tmp += uuid4().hex
+    return tmp
+    
 
 def getBookingsOfVisitingGroup(visiting_group_id,  visiting_group_name):
     return holly_couch.view('visiting_groups/bookings_of_visiting_group',  keys=[visiting_group_id,  visiting_group_name],  include_docs=True)
@@ -103,8 +118,8 @@ def getVisitingGroupsAtDate(at_date):
     #...argh TODO: fix that now we have to use doc instead of value
     formated_date = datetime.datetime.strptime(at_date,'%Y-%m-%d').strftime('%a %b %d %Y')
     return holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=[formated_date],  include_docs =True)
-    
-
+    	
+	
 def getVisitingGroupsInDatePeriod(from_date,  to_date):
     """create one key for each day"""
     
@@ -259,7 +274,13 @@ def getAllActivities():
 
 def getAllVisitingGroups():
     return holly_couch.view('visiting_groups/all_visiting_groups',  include_docs=True)
-    
+
+
+def getAgeGroupStatistics(group_level=999, startkey=None):
+    if startkey == None:
+        startkey = []
+    return holly_couch.view('statistics/age_group_statistics', startkey=startkey, reduce=True, group_level=group_level)    
+
 #--- 
 
 def getAllScheduledBookings(limit=100):
