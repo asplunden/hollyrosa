@@ -26,13 +26,13 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa - Editing Activity ${activity.title}</title>
+  <title>Hollyrosa - Edit note</title>
 </head>
 
 <body>
-    <h2>Edit Activity ${activity.title}</h2>
+    <h2>Edit note</h2>
     
-    <div py:replace="tmpl_context.form(activity, action='save_activity_properties', child_args=dict(activity_group_id=dict(options=activity_groups)))">Input Form</div>
+    <div py:replace="tmpl_context.form(note, action='save_note')">Input Form</div>
 
 </body>
 </html>

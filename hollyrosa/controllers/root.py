@@ -28,7 +28,7 @@ from repoze.what import predicates
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import DBSession, metadata
 from hollyrosa.controllers.error import ErrorController
-from hollyrosa.controllers import booking_day,  booking_history,  workflow,  visiting_group,  tools
+from hollyrosa.controllers import booking_day,  booking_history,  workflow,  visiting_group,  tools, note
 
 from hollyrosa import model
 from hollyrosa.controllers.secure import SecureController
@@ -67,6 +67,9 @@ class RootController(BaseController):
     workflow = workflow.Workflow()
     
     tools = tools.Tools()
+    
+    note = note.Note()
+
 
     @expose('hollyrosa.templates.index')
     def index(self):

@@ -24,7 +24,7 @@ from formencode import validators
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  getBookingDays,  getAllVisitingGroupsNameAmongBookings
-from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus
+from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus, getNotesForTarget, getBookingInfoNotesOfUsedActivities
 import datetime
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
@@ -183,13 +183,14 @@ class VisitingGroup(BaseController):
             bookings=[]
         elif id=='':
             visiting_group = DataContainer(name='',  id=None,  info='')
-            bookingS=[]
+            bookings=[]
         else:
             visiting_group = holly_couch[str(id)]
 
             # TODO: see below
-            bookings = [] #DBSession.query(booking.Booking).filter('visiting_group_name=\'' + visiting_group.name + '\'').all()
-        return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent, bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate)
+            bookings = [] 
+            notes = [n.doc for n in getNotesForTarget(id)]
+        return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent, bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, notes=notes)
 
 
     @expose('hollyrosa.templates.edit_visiting_group')
@@ -424,9 +425,8 @@ class VisitingGroup(BaseController):
         for bd in getBookingDays():
             booking_day_map[bd.doc['_id']] = bd.doc
         
-        print booking_day_map
-        
         activities = dict()
+        used_activities_keys = dict()
         for x in getAllActivities():
             activities[x.key[1]] = x.value
         
@@ -442,6 +442,9 @@ class VisitingGroup(BaseController):
             slot_id = ''
             slot_o = None
             tmp_booking_day = None
+            
+            used_activities_keys[b['activity_id']] = 1
+            used_activities_keys[activities[b['activity_id']]['activity_group_id']] = 1
                 
             if b.has_key('booking_day_id'):
                 booking_day_id = b['booking_day_id']
@@ -465,6 +468,6 @@ class VisitingGroup(BaseController):
         for bl in clustered_bookings_list:
             bl.sort(self.fn_cmp_booking_timestamps)
             
-            
-        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate)
+        booking_info_notes = [n.doc for n in getBookingInfoNotesOfUsedActivities(used_activities_keys.keys())]            
+        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes)
         

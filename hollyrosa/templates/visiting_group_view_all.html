@@ -49,6 +49,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
             <td class="info data">${visiting_group.name}<a name="vgroupid_${visiting_group._id}"/><ul class="any_menu context_inline_menu ">
                     <li><a href="${tg.url('show_visiting_group', id=visiting_group._id)}">show</a></li>
                     <li><a href="${tg.url('edit_visiting_group', id=visiting_group._id)}">edit</a></li>
+                    <li><a href="${tg.url('/note/add_note', target_id=visiting_group._id)}">add note</a></li>
                     <li><a href="${tg.url('view_bookings_of_name', name=visiting_group.name)}">list activities</a></li>
                     <li><a href="${tg.url('/history/show', visiting_group_id=visiting_group._id)}">show history</a></li>
                     <li><a href="${tg.url('/booking/edit_booking', visiting_group_id=visiting_group._id)}">new booking request</a></li>

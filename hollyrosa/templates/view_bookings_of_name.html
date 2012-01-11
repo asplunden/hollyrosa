@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010, 2011, 2012 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -87,9 +87,11 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
                     
                 </ul>
             </div>
-       
         </div>
 	</div>
-    
+	<div py:if="len(booking_info_notes)" style="border: 1px dashed red; padding:1em;margin:2em;">
+   <h2>Att tänka på</h2>
+       <div py:for="n in booking_info_notes" style="padding:2em;">${HTML(n.text)}</div>
+   </div>
 </body>
 </html>

@@ -331,3 +331,10 @@ def getSchemaSlotActivityMap(day_schema_id):
         m[a.key[0]] = dict(activity_id=v[0],  duration=v[1]['duration'],  time_to=v[1]['time_to'],  slot_id=v[1]['slot_id'],  time_from=v[1]['time_from'],  title=v[1]['title'])
     
     return m
+    
+    
+def getNotesForTarget(target_id):
+    return holly_couch.view("notes/notes_by_target_datesorted", include_docs=True, startkey=[target_id, None], endkey=[target_id, "9999-99-99 99:99"])
+
+def getBookingInfoNotesOfUsedActivities(keys):
+    return holly_couch.view("notes/notes_for_list_bookings", include_docs=True, keys=keys)
