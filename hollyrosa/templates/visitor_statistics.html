@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010, 2011, 2012 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -44,7 +44,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
        <th>Age</th>
        </tr>
         <tr py:for="d in people_by_day" style="${['','background:#fdd;'][6==d[0].weekday()]}">
-            <td class="data info">${d[0].strftime('%A')}&nbsp;</td><td class="data timestamp">${d[0].strftime('%a %d')}</td> <td class="data info"> <div style="margin-left:4px; width:200px; height:20px; background-color:#eee;"><div style="width:${float(d[1]['tot'])/20.0}%; height:20px; background-color:${d[2]}; border-right:1px #fff solid; color:#fff;float:left;"> &nbsp;</div><div style="float:right;">${d[1]['tot']}</div></div></td>
+            <td class="data info">${d[0].strftime("%A")}&nbsp;</td><td class="data timestamp">${d[0].strftime("%B %d")}</td> <td class="data info"> <div style="margin-left:4px; width:200px; height:20px; background-color:#eee;"><div style="width:${float(d[1]['tot'])/20.0}%; height:20px; background-color:${d[2]}; border-right:1px #fff solid; color:#fff;float:left;"> &nbsp;</div><div style="float:right;">${d[1]['tot']}</div></div></td>
 
 <td class="data info">${100*d[1].get('spar',0)/d[1]['tot']}% (${d[1].get('spar',0)}) spårare, ${100*d[1].get('uppt',0)/d[1]['tot']}% (${d[1].get('uppt',0)}) upptäckare, ${100*d[1].get('aven',0)/d[1]['tot']}% (${d[1].get('aven',0)}) äventyrare, ${100*d[1].get('utm',0)/d[1]['tot']}% (${d[1].get('utm',0)}) utmanare, ${100*(d[1]['tot']-d[1].get('utm',0)-d[1].get('spar',0)-d[1].get('aven',0)-d[1].get('uppt',0))/d[1]['tot']}% övriga</td>
         

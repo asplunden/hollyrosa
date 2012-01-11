@@ -44,7 +44,7 @@ from booking_history import  remember_workflow_state_change
 from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level
 
 from hollyrosa.model.booking_couch import getAllActivityGroups,  getAllScheduledBookings,  getAllBookingDays,  getAllVisitingGroups
-
+from hollyrosa.model.booking_couch import getAgeGroupStatistics
 __all__ = ['tools']
 
 workflow_submenu = """<ul class="any_menu">
@@ -238,25 +238,57 @@ class Tools(BaseController):
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can take a look at people statistics'))
     def visitor_statistics(self):
         
-        booking_days = DBSession.query(booking.BookingDay).all()
-        visiting_groups = DBSession.query(booking.VisitingGroup).all() #join(booking.VistingGroupProperty).all()
-        vgroup_properties = DBSession.query(booking.VistingGroupProperty).all()
-        totals = []
-        dates = [b.date for b in booking_days]
-        dates.sort()
+        # TODO: this complete calculation has to be redone 
+        #       since visiting group properties doesent 
+        #       exist as a 'table' any more.
+        #
+        # One way could be to make a list of all days.
+        #   This list is filled with dicts containing the result
+        #   The dicts are filled in by iterating through the visiting groups
+        #   properties
+        #
+        # If one were to make a really complicated couch map, you would 
+        # create a key [date, property-from-vgroup-properties] -> value and then sum it using reduce :)
+        #
+        #
+        #
+        #
+        #        
+        
+        statistics_totals = getAgeGroupStatistics(group_level=1)
+        statistics = getAgeGroupStatistics()
+        
         property_names = dict()
-        for d in dates:        
-            tot = dict()
-            tot['tot'] = 0 
-            for tmp in vgroup_properties:
-                if (tmp.fromdate <= d) and (tmp.todate >= d):
-                    try:
-                        tot['tot'] += int(tmp.value)
-                        x = tot.get(tmp.property, 0)
-                        tot[tmp.property] = x + int(tmp.value)
-                        property_names[tmp.property] = 1
-                    except ValueError, e:
-                        pass
+        totals = dict() # totals = list()
+        for tmp in statistics:   
+            tmp_key = tmp.key
+            tmp_value = tmp.value            
+            
+            tmp_property = tmp_key[1]
+            tmp_date_x = tmp_key[0]
+            tmp_date = datetime.date(tmp_date_x[0], tmp_date_x[1], tmp_date_x[2]) #'-'.join([str(t) for t in tmp_date])
+
+            tot = totals.get(tmp_date, dict())
+            tot[tmp_property] = int(tmp_value)
+            property_names[tmp_property] = 1 # kepiong track of property names used
+            totals[tmp_date] = tot
+				
+        #...same thing but now for aggrgate statistics
+        all_totals = list()
+        for tmp in statistics_totals:
+            tmp_key = tmp.key
+            tmp_value = tmp.value
+            
+            tmp_date_x = tmp_key[0]
+            tmp_date = datetime.date(tmp_date_x[0], tmp_date_x[1], tmp_date_x[2]) #'-'.join([str(t) for t in tmp_date])
+				
+            tot = totals.get(tmp_date, dict())
+            #...for now we need to protect against tot=0 giving zero division errors
+            if tmp_value == 0:
+                tmp_value = 1
+            tot['tot'] = tmp_value
+            totals[tmp_date] = int(tmp_value)
+				
             mark = '#444;'
             if tot['tot'] < 250:
                 mark = '#484;'
@@ -266,7 +298,22 @@ class Tools(BaseController):
                 mark = '#828;'
             else:
                 mark = '#844;'
-            totals.append((d, tot, mark))
+            all_totals.append((tmp_date, tot, mark))
+
+            
+    #    for booking_day_kv in booking_days:
+    #        booking_day = booking_day_kv.doc        
+    #        tot = dict()
+    #        tot['tot'] = 0 
+    #        for tmp_property_row in vgroup_properties:
+     #           if (tmp.fromdate <= d) and (tmp.todate >= d):
+      #              try:       
+            #            tot['tot'] += int(tmp.value)
+             #           x = tot.get(tmp.property, 0)
+              #          tot[tmp.property] = x + int(tmp.value)
+             #           property_names[tmp.property] = 1
+         #           except ValueError, e:
+       #                 pass
 
 
         property_ns = ['spar','uppt','aven','utm']
@@ -275,7 +322,8 @@ class Tools(BaseController):
             if n not in property_ns:
                 l.append(n)
 
-        return dict(property_names=l, people_by_day=totals)
+        
+        return dict(property_names=l, people_by_day=all_totals)
 
 
 
