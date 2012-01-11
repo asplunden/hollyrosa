@@ -38,8 +38,8 @@ class EditNewBookingRequestForm(TableForm):
         content = TextArea(validator=UnicodeString)
         activity_id = SingleSelectField(validator=UnicodeString)
         requested_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
-        valid_from = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')              #date_format='%Y-%m-%d')
-        valid_to = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')                        #date_format='%Y-%m-%d')
+        valid_from = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')  
+        valid_to = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')   
         
         
 

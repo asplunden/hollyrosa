@@ -38,10 +38,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         <li><a href="${tg.url('view_at_date', at_date='2011-06-14')}">Miniscout I</a></li>
         <li><a href="${tg.url('view_at_date', at_date='2011-06-18')}">Miniscout II</a></li>
         <li><a href="${tg.url('view_date_range', fromdate='2011-08-01', todate='2011-08-14')}">60DN</a></li>
-        <li><a href="${tg.url('view_boknstatus', boknstatus='ny')}">status new</a></li>
+        <!--<li><a href="${tg.url('view_boknstatus', boknstatus='ny')}">status new</a></li>
         <li><a href="${tg.url('view_boknstatus', boknstatus='prel')}">status preliminary</a></li>
-        <li><a href="${tg.url('view_boknstatus', boknstatus='bekr')}">status confirm</a></li>
-        <!-- <li><a href="${tg.url('edit_visiting_group')}">new visiting group</a></li> -->
+        <li><a href="${tg.url('view_boknstatus', boknstatus='bekr')}">status confirm</a></li> -->
+        <li py:for="k,v in bokn_status_map.items()"><a href="${tg.url('view_boknstatus', boknstatus=k)}">${v}</a></li>
     </ul>
     <h2>Viewing visiting groups</h2>
     <table>
@@ -54,8 +54,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
                     <li><a href="${tg.url('/booking/edit_booking', visiting_group_id=visiting_group._id)}">new booking request</a></li>
                 </ul>
             </td>
-            <td class="info data">[${visiting_group.from_date} to ${visiting_group.to_date}]<br/><br/>${visiting_group.contact_person}<br/>$visiting_group.contact_person_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.contact_person_email</a></td>
-            <td class="info data"><div class="note">${HTML(visiting_group.info)}</div></td>
+            <td class="info data">[${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}]<br/><br/>${visiting_group.contact_person}<br/>$visiting_group.contact_person_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.contact_person_email</a></td>
+            <td class="info data"><div class="note">bok.nr: <b>${visiting_group.boknr}</b> <br/>bokn.status: <b>${bokn_status_map.get(visiting_group.boknstatus, '')}</b><br/>${HTML(visiting_group.info)}</div></td>
         </tr>
     </table>
     <h2>Visiting group names used that not is in any registered group</h2>

@@ -25,31 +25,44 @@ from uuid import uuid4
 import datetime
 from hollyrosa.controllers.common import DataContainer
 
+
+couch_server = couchdb.Server(url='http://localhost:5989')
+try:
+    holly_couch = couch_server['hollyrosa1']
+    print 'opened hollyrosa1'
+    
+except couchdb.ResourceNotFound, e:
+    holly_couch = couch_server.create('hollyrosa1')
+    
+    
+    
+
 def genUID():
     return uuid4().hex
 
 
 
 def getBookingsOfVisitingGroup(visiting_group_id,  visiting_group_name):
-    return holly_couch.view('visiting_groups/bookings_of_visiting_group',  keys=[visiting_group_id,  visiting_group_name],  include_docs=True)
+    args = [visiting_group_id,  visiting_group_name]
+    return holly_couch.view('visiting_groups/bookings_of_visiting_group',  keys=[k for k in args if k != None],  include_docs=True)
     
 
     
 
-def get_visiting_group_names():
-    # TODO: switch over to using views
-    """Helper function to get visiting groups from CouchDB"""
-    map_fun = '''function(doc) {
-    if (doc.type == 'visiting_group')
-        emit(doc.from_date, doc.name);
-        }'''
-    visiting_groups_c = holly_couch.query(map_fun)
-    
-    #...conversion 
-    visiting_group_names = []
-    for vgn in visiting_groups_c:
-        visiting_group_names.append(vgn.value)
-    return visiting_group_names
+#def get_visiting_group_names():
+#    # TODO: switch over to using views
+#    """Helper function to get visiting groups from CouchDB"""
+#    map_fun = '''function(doc) {
+#    if (doc.type == 'visiting_group')
+#        emit(doc.from_date, doc.name);
+#        }'''
+#    visiting_groups_c = holly_couch.query(map_fun)
+#    
+#    #...conversion 
+#    visiting_group_names = []
+#    for vgn in visiting_groups_c:
+#        visiting_group_names.append(vgn.value)
+#    return visiting_group_names
     
     
 
@@ -84,18 +97,18 @@ def getBookingDays(from_date='2011-01-01',  to_date='2011-12-11'):
 
     
     
-def get_visiting_groups_with_boknstatus(boknstatus):
-    map_fun = """function(doc) {
-    if ((doc.type == 'visiting_group') && (doc.boknstatus == '"""+ boknstatus+"""' ) )
-        emit(doc.from_date, doc);
-        }"""
-    visiting_groups_c = holly_couch.query(map_fun)
-    
-    #...conversion 
-    visiting_groups = []
-    for vgc in visiting_groups_c:
-        visiting_groups.append(vgc.value)
-    return visiting_groups
+#def get_visiting_groups_with_boknstatus(boknstatus):
+#    map_fun = """function(doc) {
+#    if ((doc.type == 'visiting_group') && (doc.boknstatus == '"""+ boknstatus+"""' ) )
+#        emit(doc.from_date, doc);
+#        }"""
+#    visiting_groups_c = holly_couch.query(map_fun)
+#    
+#    #...conversion 
+#    visiting_groups = []
+#    for vgc in visiting_groups_c:
+#        visiting_groups.append(vgc.value)
+#    return visiting_groups
     
     
     
@@ -123,65 +136,60 @@ def getVisitingGroupsInDatePeriod(from_date,  to_date):
     r = dict()
     #print holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs =True)
     for v in holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs =True):
-        print v
-        r[v.doc['_id']] = v #DataContainer(key=v.key,  value=v.doc)
+        r[v.doc['_id']] = v 
     return r.values()
     
     
+def getVisitingGroupsByBoknstatus(status):
+    return holly_couch.view("visiting_groups/all_visiting_groups_by_boknstatus",  startkey=[status,  None],  endkey=[status,  '9999-99-99'],  include_docs =True) # keys=[[s, None]  for s in statuses],  
     
-def get_visiting_groups_in_date_period(from_date,  to_date):
-    map_fun = """function(doc) {
-    if (doc.type == 'visiting_group') {
-        if ((doc.from_date <= '"""+ to_date+"""' ) && (doc.to_date >= '""" + from_date + """')) {
-            emit(doc.from_date, doc);
-        }}}"""
+#def get_visiting_groups_in_date_period(from_date,  to_date):
+#    map_fun = """function(doc) {
+#    if (doc.type == 'visiting_group') {
+#        if ((doc.from_date <= '"""+ to_date+"""' ) && (doc.to_date >= '""" + from_date + """')) {
+#            emit(doc.from_date, doc);
+#        }}}"""
+#    
+#    visiting_groups_c = holly_couch.query(map_fun)
+#    
+#    #...conversion 
+#    visiting_groups = []
+#    for vgc in visiting_groups_c:
+#        visiting_groups.append(vgc.value)
+#    return visiting_groups
     
-    visiting_groups_c = holly_couch.query(map_fun)
     
-    #...conversion 
-    visiting_groups = []
-    for vgc in visiting_groups_c:
-        visiting_groups.append(vgc.value)
-    return visiting_groups
-    
-    
-def get_visiting_groups(from_date='',  to_date=''):
-    """Helper function to get visiting groups from CouchDB"""
-    if from_date=='':
-        map_fun = '''function(doc) {
-        if (doc.type == 'visiting_group')
-            emit(doc.from_date, doc);
-            }'''
-    else:
-        
-        
-        if to_date=='':
-            map_fun = """function(doc) {
-            if ((doc.type == 'visiting_group') && (doc.from_date >= '"""+ from_date+"""' ))
-                emit(doc.from_date, doc);
-                }"""
-        else:
-        
-            map_fun = """function(doc) {
-            if ((doc.type == 'visiting_group') && (doc.from_date >= '"""+ from_date+"""' ) && (doc.to_date <= '""" + to_date+"""'))
-                emit(doc.from_date, doc);
-                }"""
-    visiting_groups_c = holly_couch.query(map_fun)
-    
-    #...conversion 
-    visiting_groups = []
-    for vgc in visiting_groups_c:
-        #o = BookingDayC(bdc)
-        visiting_groups.append(vgc.value)
-    return visiting_groups
+#def get_visiting_groups(from_date='',  to_date=''):
+#    """Helper function to get visiting groups from CouchDB"""
+#    if from_date=='':
+#        map_fun = '''function(doc) {
+#        if (doc.type == 'visiting_group')
+#            emit(doc.from_date, doc);
+#            }'''
+#    else:
+#        
+#        
+#        if to_date=='':
+#            map_fun = """function(doc) {
+#            if ((doc.type == 'visiting_group') && (doc.from_date >= '"""+ from_date+"""' ))
+#                emit(doc.from_date, doc);
+#                }"""
+#        else:
+#        
+#            map_fun = """function(doc) {
+#            if ((doc.type == 'visiting_group') && (doc.from_date >= '"""+ from_date+"""' ) && (doc.to_date <= '""" + to_date+"""'))
+#                emit(doc.from_date, doc);
+#                }"""
+#    visiting_groups_c = holly_couch.query(map_fun)
+#    
+#    #...conversion 
+#    visiting_groups = []
+#    for vgc in visiting_groups_c:
+#        #o = BookingDayC(bdc)
+#        visiting_groups.append(vgc.value)
+#    return visiting_groups
+#
 
-couch_server = couchdb.Server(url='http://localhost:5989')
-try:
-    holly_couch = couch_server['hollyrosa1']
-    print 'opened hollyrosa1'
-    
-except couchdb.ResourceNotFound, e:
-    holly_couch = couch_server.create('hollyrosa1')
     
 def getAllVisitingGroupsNameAmongBookings(from_date='',  to_date=''):
     """find all bookings in date range and look for the visiting_group_names.

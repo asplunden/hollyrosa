@@ -41,6 +41,9 @@ bokn_status_map[10] ='preliminary'
 bokn_status_map[20] ='confirmed'
 bokn_status_map[50] ='island'
 
+bokn_status_options = list()
+for k, v in bokn_status_map.items():
+    bokn_status_options.append((k, v))
 
 change_op_lookup = {'schedule':1, 'unschedule':2, 'book_slot':3,  'new_booking_request':4,  'booking_request_change':5,  'delete_booking_request':6,  'booking_properties_change':7,  'booking_state_change':8, 'block_soft':9,  'block_hard':10,  'unblock':11,  'workflow_state_change':12}
 
@@ -50,7 +53,11 @@ for k,  v in change_op_lookup.items():
 
 
 def reFormatDate(b):
-    return datetime.datetime.strptime(b, '%Y-%m-%d').strftime('%A %d %B')
+    try:
+        r = datetime.datetime.strptime(b, '%Y-%m-%d').strftime('%A %d %B')
+    except:
+        r = b
+    return r
     
 
 def getFormatedDate(date_obj):

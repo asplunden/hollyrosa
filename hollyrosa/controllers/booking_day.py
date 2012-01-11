@@ -38,7 +38,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import holly_couch,  genUID,  get_visiting_groups,  getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate
+from hollyrosa.model import holly_couch,  genUID,  getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate
 from hollyrosa.model.booking_couch import getAllHistoryForBookings,  getAllActivities,  getAllActivityGroups,  getVisitingGroupsAtDate,  getUserNameMap,  getSchemaSlotActivityMap,  getAllVisitingGroups,  getActivityTitleMap
 import datetime
 from formencode import validators
@@ -133,7 +133,7 @@ class Calendar(BaseController):
         end_date_str = (datetime.date.today()+datetime.timedelta(5)).strftime('%Y-%m-%d')
         booking_days = getBookingDays(from_date=today_date_str,  to_date=end_date_str) 
 
-        vgroups = get_visiting_groups(from_date=today_date_str,  to_date=end_date_str)
+        vgroups = getVisitingGroupsInDatePeriod(today_date_str,  end_date_str) # TODO: fix view later.  get_visiting_groups(from_date=today_date_str,  to_date=end_date_str)
 
         group_info = dict()
         bdays = list()
@@ -141,7 +141,7 @@ class Calendar(BaseController):
             b_day = tmp.doc
             tmp_date_today_str = b_day['date']             
             bdays.append(b_day)
-            group_info[tmp_date_today_str] = dict(arrives=[v for v in vgroups if v['from_date'] == tmp_date_today_str], leaves=[v for v in vgroups if v['to_date'] == tmp_date_today_str], stays=[v for v in vgroups if v['to_date'] > tmp_date_today_str and v['from_date'] < tmp_date_today_str])
+            group_info[tmp_date_today_str] = dict(arrives=[v.doc for v in vgroups if v['from_date'] == tmp_date_today_str], leaves=[v.doc for v in vgroups if v['to_date'] == tmp_date_today_str], stays=[v.doc for v in vgroups if v['to_date'] > tmp_date_today_str and v['from_date'] < tmp_date_today_str])
 
         return dict(booking_days=bdays, group_info=group_info)
         

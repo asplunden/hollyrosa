@@ -38,12 +38,11 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
        <li><a href="${tg.url('delete_visiting_group', id=visiting_group.id)}">delete</a></li>
     </ul>
     
-    <!-- <p>${visiting_group.fromdate.strftime('%A %d %B')} to ${visiting_group.todate.strftime('%A %d %B')}</p> -->
-    <p>${visiting_group.from_date} to ${visiting_group.to_date}</p>
+    <p>${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
     <div class="note">${HTML(visiting_group.info)}</div>
     <p>${visiting_group.contact_person}<br/>$visiting_group.contact_person_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.contact_person_email</a><br/>
     boknr: ${visiting_group.boknr} <br/>
-    boknstatus: ${visiting_group.boknstatus} <br/>
+    boknstatus: ${bokn_status_map.get(visiting_group.boknstatus,'')} <br/>
     camping location: ${visiting_group.camping_location}<br/>
 </p>
     <table class="data">

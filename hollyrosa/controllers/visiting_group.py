@@ -23,8 +23,8 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from formencode import validators
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  get_visiting_groups_in_date_period,  get_visiting_groups_with_boknstatus,  get_visiting_group_names,  getBookingDays,  getAllVisitingGroupsNameAmongBookings
-from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap
+from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  getBookingDays,  getAllVisitingGroupsNameAmongBookings
+from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus
 import datetime
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
@@ -36,7 +36,7 @@ from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
 from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
 from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
 from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
-from hollyrosa.controllers.common import workflow_map,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate
+from hollyrosa.controllers.common import workflow_map,  bokn_status_map,  bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate
 
 
 
@@ -60,10 +60,10 @@ class VisitingGroup(BaseController):
     @expose('hollyrosa.templates.visiting_group_view_all')
     #@require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view(self, url):
-        visiting_groups = get_visiting_groups() #DBSession.query(booking.VisitingGroup).order_by('fromdate').all()
-        visiting_group_names = [x['name'] for x in visiting_groups] #DBSession.query(booking.VisitingGroup.name).all()
+        visiting_groups = [x.doc for x in getAllVisitingGroups()]
+        visiting_group_names = [x['name'] for x in visiting_groups] 
         v_group_map = self.makeVGroupMap(visiting_group_names)        
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(),  bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate)
         
         
 
@@ -74,9 +74,6 @@ class VisitingGroup(BaseController):
         for b in all_existing_names:
                 if b not in exisiting_vgroup_names:
                     v_group_map[b] = 1
-###        for b in DBSession.query(booking.Booking.visiting_group_name).all():
-###            if b not in visiting_group_names:
-###                v_group_map[b] = 1
 
         return v_group_map
         
@@ -88,28 +85,27 @@ class VisitingGroup(BaseController):
     def view_date_range(self,  fromdate=None,  todate=None):
         visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(fromdate,  todate)]
         v_group_map = self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=fromdate,  to_date=todate)        
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate)
 
         
     @expose('hollyrosa.templates.visiting_group_view_all')
     @require(Any(is_user('erspl'), has_level('staff'),   msg='Only staff members and viewers may view visiting group properties'))
     def view_all(self):
-        visiting_groups = [v.value for v in getAllVisitingGroups()] 
+        visiting_groups = [v.doc for v in getAllVisitingGroups()] 
         remaining_visiting_groups_map = self.makeRemainingVisitingGroupsMap(visiting_groups)        
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys())
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate)
 
 
     @expose('hollyrosa.templates.visiting_group_view_all')
-    @validate(validators={'boknstatus':validators.String(not_empty=False)})
+    @validate(validators={'boknstatus':validators.Int(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_boknstatus(self,  boknstatus=None):
-        boknstatus=boknstatus[:4] # amateurish quick sanitation
-        visiting_groups = get_visiting_groups_with_boknstatus(boknstatus) 
-                
-        visiting_group_names = [] 
-        v_group_map = self.makeVGroupMap(visiting_group_names)        
+        #boknstatus=boknstatus[:4] # amateurish quick sanitation
+        #visiting_groups = get_visiting_groups_with_boknstatus(boknstatus) 
+        visiting_groups =[v.doc for v in getVisitingGroupsByBoknstatus(boknstatus)]
+        v_group_map = dict()
         
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate)
 
         
     @expose('hollyrosa.templates.visiting_group_view_all')
@@ -133,7 +129,7 @@ class VisitingGroup(BaseController):
             visiting_groups = [v.doc for v in getAllVisitingGroups(from_date,  to_date)]
         
         v_group_map = self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=from_date,  to_date=to_date) 
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys())
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate)
 
 
     @expose('hollyrosa.templates.visiting_group_view_all')
@@ -193,7 +189,7 @@ class VisitingGroup(BaseController):
 
             # TODO: see below
             bookings = [] #DBSession.query(booking.Booking).filter('visiting_group_name=\'' + visiting_group.name + '\'').all()
-        return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent)
+        return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent, bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate)
 
 
     @expose('hollyrosa.templates.edit_visiting_group')
@@ -228,7 +224,7 @@ class VisitingGroup(BaseController):
                                            ,  contact_person=visiting_group_c['contact_person'],  contact_person_email=visiting_group_c['contact_person_email'],  contact_person_phone=visiting_group_c['contact_person_phone'], 
                                            boknr=visiting_group_c['boknr'],  boknstatus=visiting_group_c['boknstatus'],  camping_location=visiting_group_c['camping_location'],  from_date=visiting_group_c['from_date'], to_date=visiting_group_c['to_date'])
             
-        return dict(visiting_group=visiting_group)
+        return dict(visiting_group=visiting_group,  bokn_status_map=bokn_status_options)
         
         
 
@@ -296,23 +292,22 @@ class VisitingGroup(BaseController):
         visiting_group_c['visiting_group_properties'] = visiting_group_property_c
         
         # TODO: IMPORTANT TO FIX LATER
-        bookings = get_bookings_of_visiting_group(id_c)
+        bookings = getBookingsOfVisitingGroup(id_c,  None)
         for tmp in bookings:
-            tmp_booking = tmp.value
+            tmp_booking = tmp.doc
             #print 'tmp_booking',  tmp_booking
             new_content = computeCacheContent(visiting_group_c, tmp_booking['content'])
             if new_content != tmp_booking['cache_content'] :
-                #tmp_booking = holly_couch[tmp_booking['_id']]
+            
                 tmp_booking['cache_content'] = new_content
-                print 'NEW CONTENT',  new_content
-                print tmp_booking['cache_content'] 
-            # TODO: clear ignore_warning flag
-            
-            # TODO: change last_changed_by_id
-            
-            # TODO: change booking status (from whatever, since the text has changed)
-            
-            # TODO: remember booking history change
+                tmp_booking['last_changed_by'] = getLoggedInUserId(request)
+                
+                # TODO: change booking status (from whatever, since the text has changed)
+                
+                
+                # TODO: remember booking history change
+                
+                
                 holly_couch[tmp_booking['_id']] = tmp_booking
             
         

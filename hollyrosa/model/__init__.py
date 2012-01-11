@@ -67,12 +67,8 @@ from booking_couch import genUID
 
 # TODO: refactor 
 holly_couch = booking_couch.holly_couch
-get_visiting_groups = booking_couch.get_visiting_groups
-get_visiting_groups_in_date_period = booking_couch.get_visiting_groups_in_date_period
-get_visiting_groups_with_boknstatus = booking_couch.get_visiting_groups_with_boknstatus 
-get_visiting_group_names = booking_couch.get_visiting_group_names
 
-getBookingDays = booking_couch.getBookingDays
+
 getAllVisitingGroupsNameAmongBookings = booking_couch.getAllVisitingGroupsNameAmongBookings
 getSlotAndActivityIdOfBooking = booking_couch.getSlotAndActivityIdOfBooking
 getBookingDayOfDate = booking_couch.getBookingDayOfDate
