@@ -24,16 +24,17 @@ import couchdb
 from uuid import uuid4
 import datetime
 from hollyrosa.controllers.common import DataContainer
+from hollyrosa.model import holly_couch
 
 
 
-couch_server = couchdb.Server(url='http://localhost:5989')
-try:
-    holly_couch = couch_server['hollyrosa1']
-    print 'opened hollyrosa1'
-    
-except couchdb.ResourceNotFound, e:
-    holly_couch = couch_server.create('hollyrosa1')
+
+#couch_server = couchdb.Server(url='http://localhost:5989')
+#try:
+#    holly_couch = couch_server['hollyrosa1']
+#    
+#except couchdb.ResourceNotFound, e:
+#    holly_couch = couch_server.create('hollyrosa1')
     
     
 

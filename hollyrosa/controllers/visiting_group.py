@@ -23,8 +23,9 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from formencode import validators
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import metadata,  booking,  holly_couch,  genUID,  getBookingDays,  getAllVisitingGroupsNameAmongBookings
+from hollyrosa.model import holly_couch,  genUID
 from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus, getNotesForTarget, getBookingInfoNotesOfUsedActivities
+from hollyrosa.model.booking_couch import getBookingDays,  getAllVisitingGroupsNameAmongBookings
 import datetime
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out

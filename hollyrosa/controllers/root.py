@@ -22,11 +22,9 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 from tg import expose, flash, require, url, request, redirect
 from pylons.i18n import ugettext as _, lazy_ugettext as l_
-from catwalk.tg2 import Catwalk
 from repoze.what import predicates
 
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import DBSession, metadata
 from hollyrosa.controllers.error import ErrorController
 from hollyrosa.controllers import booking_day,  booking_history,  workflow,  visiting_group,  tools, note
 
@@ -52,7 +50,7 @@ class RootController(BaseController):
     """
     secc = SecureController()
     
-    admin = Catwalk(model, DBSession)
+    ##admin = Catwalk(model, DBSession)
     
     error = ErrorController()
     

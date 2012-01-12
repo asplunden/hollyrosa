@@ -24,14 +24,11 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch,  genUID
-from sqlalchemy import and_
-from sqlalchemy.orm import eagerload,  eagerload_all
 
 import datetime,  StringIO,  time
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
-import OOorg 
 
 
 from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form

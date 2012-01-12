@@ -3,19 +3,21 @@
 
 from zope.sqlalchemy import ZopeTransactionExtension
 from sqlalchemy.orm import scoped_session, sessionmaker
+import couchdb
+import tg
+
 #from sqlalchemy import MetaData
-from sqlalchemy.ext.declarative import declarative_base
+###from sqlalchemy.ext.declarative import declarative_base
 
 # Global session manager: DBSession() returns the Thread-local
 # session object appropriate for the current web request.
-maker = sessionmaker(autoflush=True, autocommit=False,
-                     extension=ZopeTransactionExtension())
+maker = sessionmaker(autoflush=True, autocommit=False, extension=ZopeTransactionExtension())
 DBSession = scoped_session(maker)
 
 # Base class for all of our model classes: By default, the data model is
 # defined with SQLAlchemy's declarative extension, but if you need more
 # control, you can switch to the traditional method.
-DeclarativeBase = declarative_base()
+####DeclarativeBase = declarative_base()
 
 # There are two convenient ways for you to spare some typing.
 # You can have a query property on all your model classes by doing this:
@@ -25,7 +27,7 @@ DeclarativeBase = declarative_base()
 
 # Global metadata.
 # The default metadata is the one from the declarative base.
-metadata = DeclarativeBase.metadata
+###metadata = DeclarativeBase.metadata
 
 # If you have multiple databases with overlapping table names, you'll need a
 # metadata for each database. Feel free to rename 'metadata2'.
@@ -38,29 +40,32 @@ metadata = DeclarativeBase.metadata
 #
 ######
 
+couch_server = None
+holly_couch = None
+
+db_url = tg.config.get('couch.db_url', 'http://192.168.2.102:5989')
+db_name = tg.config.get('couch.database', 'hollyrosa1')
+
+
+
+print db_url,  db_name
+
+couch_server = couchdb.Server(url=db_url)
+try:
+    holly_couch = couch_server[db_name]
+except couchdb.ResourceNotFound, e:
+    holly_couch = couch_server.create(db_name)
+        
+        
 def init_model(engine):
     """Call me before using any of the tables or classes in the model."""
-
+    print 'INIT_MODEL'
     DBSession.configure(bind=engine)
-    # If you are using reflection to introspect your database and create
-    # table objects for you, your tables must be defined and mapped inside
-    # the init_model function, so that the engine is available if you
-    # use the model outside tg2, you need to make sure this is called before
-    # you use the model.
-
-    #
-    # See the following example:
-
-    #global t_reflected
-
-    #t_reflected = Table("Reflected", metadata,
-    #    autoload=True, autoload_with=engine)
-
-    #mapper(Reflected, t_reflected)
+    
 
 # Import your model modules here.
-from hollyrosa.model.auth import User, Group, Permission
-from hollyrosa.model.booking import DaySchema, BookingDay, SlotRow, Booking, VisitingGroup, BookingHistory, Activity, ActivityGroup, SlotRowPosition,  SlotRowPositionState
+###from hollyrosa.model.auth import User, Group, Permission
+##from hollyrosa.model.booking import DaySchema, BookingDay, SlotRow, Booking, VisitingGroup, BookingHistory, Activity, ActivityGroup, SlotRowPosition,  SlotRowPositionState
 
 import booking_couch
 from booking_couch import genUID
