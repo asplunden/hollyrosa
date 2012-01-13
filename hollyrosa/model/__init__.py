@@ -43,7 +43,7 @@ DBSession = scoped_session(maker)
 couch_server = None
 holly_couch = None
 
-db_url = tg.config.get('couch.db_url', 'http://192.168.2.102:5989')
+db_url = tg.config.get('couch.db_url', 'http://localhost:5989')
 db_name = tg.config.get('couch.database', 'hollyrosa1')
 
 

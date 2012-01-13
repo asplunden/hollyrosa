@@ -582,6 +582,55 @@ ul.context_inline_menu:hover ul {
 }
 
 /*** dropdown of minimenu ***/
+span.context_dropdown_menu {
+  background-color: transparent;
+}
+
+
+span.context_dropdown_menu:hover ul li{
+    visibility:visible;
+}
+
+
+span.context_dropdown_menu ul {
+    margin-left: 0em;
+    padding-left:0em;
+    font-size:90%;
+    position:absolute;
+    background:#fff;
+    display: inline;
+}
+
+span.context_dropdown_menu:hover ul {
+}
+
+span.context_dropdown_menu ul li {
+    visibility: hidden;
+    display:none;
+    position:relative;
+    background: #eee;
+    z-index:10;
+    border-left: 4px solid #bbb;
+    top:-10px;
+    padding-left:1em;
+    padding-top:0.2em;
+    padding-bottom:0.2em;
+    }
+
+span.context_dropdown_menu:hover ul li {
+    visibility: visible;
+    display:block;
+}
+
+span.context_dropdown_menu ul li:hover { 
+    background: #f8f8f0;
+}
+
+
+
+
+/* redundant */
+
 ul.context_dropdown_menu {
     background-color: transparent;
 }
@@ -714,4 +763,36 @@ tr.problem_severity_0 {
 
 tr.problem_severity_10 {
   background-color: #fee;
+}
+
+
+/*** tags ***/ 
+
+div.tag_list {
+  color:#888;
+  font-size:80%;
+}
+
+div.tag_list form {
+visibility:hidden;
+}
+
+div.tag_list form input {
+   border: 1px solid #cc8;
+}
+
+div.tag_list:hover form {
+visibility:visible;
+}
+
+ul.tag_list {
+  margin-left:0px;
+  padding-left:0px;
+}
+
+ul.tag_list li {
+    list-style-type: none;
+    display: inline;
+    padding-left: 0px;
+    padding-right:20px;
 }

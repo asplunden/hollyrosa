@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010, 2011, 2012 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -27,6 +27,77 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Show Visiting Group ${visiting_group.name}</title>
+  <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
+  <script type="text/javascript" src="${tg.url('/scripts/dojo-release-1.5.0/dojo/dojo.js')}" ></script>
+  <script type="text/javascript">
+
+
+function updateTags(data) {
+    dojo.query('.tag').forEach(dojo.destroy);
+    var tags = data['tags'];
+    var ul_tag_list = dojo.byId("taglist");
+    
+    for (t in tags) {
+    dojo.create("li", {innerHTML:tags[t]+' <a href="javascript:deleteTag(\'${visiting_group.id}\',\'' + tags[t] + '\')">x</a>', class:'tag'}, ul_tag_list);
+    }
+    dojo.byId('tag_input').value = '';
+}
+
+  
+function get_visiting_group_tags_from_XHR(visiting_group_id) {
+   
+    dojo.xhrGet({
+    url: "/visiting_group/get_tags",
+    content: {id: visiting_group_id},
+    handleAs: "json",
+    load: updateTags
+    });    
+}
+
+
+function add_visiting_group_tags_XHR(visiting_group_id, tags) {
+   
+    dojo.xhrGet({
+    url: "/visiting_group/add_tags",
+    content: {id: visiting_group_id, tags: tags},
+    handleAs: "json",
+    load: updateTags
+    });
+}
+ 
+
+function delete_visiting_group_tag_XHR(visiting_group_id, tag) {
+   
+    dojo.xhrGet({
+    url: "/visiting_group/delete_tag",
+    content: {id: visiting_group_id, tag: tag},
+    handleAs: "json",
+    load: updateTags
+    });
+}
+
+
+function attach_local_event_handlers() {
+    /* dojo.connect(dojo.byId('create_edit_book_slot_form_visiting_group_id'), "onchange", null, propagate_selected_value);
+    dojo.connect(dojo.byId('create_edit_book_slot_form_visiting_group_id'), "onchange", null, get_visiting_group_data_from_XHR);
+    */
+   get_visiting_group_tags_from_XHR('${visiting_group._id}');
+}
+
+function addTags(id) {
+    var input = dojo.byId(id);
+    var text = input.value;
+    add_visiting_group_tags_XHR('${visiting_group['_id']}', text);
+}
+
+function deleteTag(id, tag) {
+    delete_visiting_group_tag_XHR(id, tag);
+}
+
+  dojo.addOnLoad(attach_local_event_handlers);
+  
+  </script>
+
 </head>
 
 <body>
@@ -40,6 +111,11 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
     </ul>
     
     <p>${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
+    <div class="tag_list">
+<ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
+<a href="javascript:addTags('tag_input');">Add Tags</a>
+</form></div>
+
     <div class="note">bok.nr: <b>${visiting_group.boknr}</b><br/>
     boknstatus: <b>${bokn_status_map.get(visiting_group.boknstatus,'')}</b><br/>
     camping location: <b>${visiting_group.camping_location}</b><br/>${HTML(visiting_group.info)}</div>
@@ -57,6 +133,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
     <p>${visiting_group.contact_person}<br/>$visiting_group.contact_person_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.contact_person_email</a><br/>
     
 </p>
+
     <table class="data">
         <tr>
             <th>Property = Value Unit</th><th>Description</th><th>From date</th><th>To date</th>

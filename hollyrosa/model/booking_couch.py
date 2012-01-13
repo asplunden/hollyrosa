@@ -339,3 +339,10 @@ def getNotesForTarget(target_id):
 
 def getBookingInfoNotesOfUsedActivities(keys):
     return holly_couch.view("notes/notes_for_list_bookings", include_docs=True, keys=keys)
+
+#------ tags
+def getDocumentsByTag(tag):
+    return holly_couch.view("tags/documents_by_tag", include_docs=True, keys=[tag]) #startkey=[target_id, None], endkey=[target_id, "9999-99-99 99:99"])
+
+def getAllTags():
+    return holly_couch.view("tags/all_tags", reduce=True, group=True)
