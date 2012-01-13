@@ -69,7 +69,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
                   <span py:if="render_time=='time'" ><b>${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b></span>
                   <span py:if="render_time=='title'" ><b>${b.slot.title}</b></span>
                   <span py:if="render_time=='' and b.slot.pref=='time'" ><b>${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b></span>
-                  <span py:if="render_time=='' and b.slot.pref=='title'" ><b>${b.slot.title}</b></span>         
+                  <span py:if="render_time=='' and b.slot.pref=='title'" ><b>${b.slot.title}</b></span>
+                  <span py:if="render_time=='' and b.slot.pref=='silent'" ></span>       
                 </span>
                   ${workflow_map[b.booking_state]}</span>
                 
