@@ -111,14 +111,15 @@ function deleteTag(id, tag) {
     </ul>
     
     <p>${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
-    <div class="tag_list">
-<ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
+    
+
+
+    <div class="note"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
 <a href="javascript:addTags('tag_input');">Add Tags</a>
 </form></div>
-
-    <div class="note">bok.nr: <b>${visiting_group.boknr}</b><br/>
+    <p>bok.nr: <b>${visiting_group.boknr}</b><br/>
     boknstatus: <b>${bokn_status_map.get(visiting_group.boknstatus,'')}</b><br/>
-    camping location: <b>${visiting_group.camping_location}</b><br/>${HTML(visiting_group.info)}</div>
+    camping location: <b>${visiting_group.camping_location}</b></p>${HTML(visiting_group.info)}</div>
     <div py:for="n in notes" >
             
         <div class="note2"><i>${n.timestamp} ${n.last_changed_by}</i><br/>

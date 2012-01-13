@@ -769,8 +769,6 @@ tr.problem_severity_10 {
 /*** tags ***/ 
 
 div.tag_list {
-  color:#888;
-  font-size:80%;
 }
 
 div.tag_list form {
@@ -788,6 +786,10 @@ visibility:visible;
 ul.tag_list {
   margin-left:0px;
   padding-left:0px;
+  color:#888;
+  font-size:80%;
+  font-style: italic;
+  display: inline;
 }
 
 ul.tag_list li {

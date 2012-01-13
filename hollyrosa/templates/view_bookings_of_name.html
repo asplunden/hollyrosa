@@ -64,7 +64,14 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         
         
             <div py:if="None != b.booking_day" style="margin-left:2em;">
-                <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day',day_id=b.booking_day.id)}">${formatDate(b.booking_day.date)}</a> <b py:if="b.slot_id !=None">${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b>  ${workflow_map[b.booking_state]}</span>
+                <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day',day_id=b.booking_day.id)}">${formatDate(b.booking_day.date)}</a>
+                <span py:if="b.slot_id!=None"> 
+                  <span py:if="render_time=='time'" ><b>${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b></span>
+                  <span py:if="render_time=='title'" ><b>${b.slot.title}</b></span>
+                  <span py:if="render_time=='' and b.slot.pref=='time'" ><b>${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b></span>
+                  <span py:if="render_time=='' and b.slot.pref=='title'" ><b>${b.slot.title}</b></span>         
+                </span>
+                  ${workflow_map[b.booking_state]}</span>
                 
                 <ul class="any_menu context_inline_menu" style="padding-left:2em;">
                     <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=10)}">booked</a></li>

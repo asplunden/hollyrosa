@@ -393,9 +393,9 @@ class VisitingGroup(BaseController):
         
 
     @expose('hollyrosa.templates.view_bookings_of_name')
-    @validate(validators={"name":validators.UnicodeString()})
+    @validate(validators={"name":validators.UnicodeString(), "render_time":validators.UnicodeString})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def view_bookings_of_name(self,  name=None):
+    def view_bookings_of_name(self,  name=None, render_time=''):
         # TODO: this is one of the first queries we should try to make a view out of. Using visiting_group_name as key and view with key should do the trick.
         # another trick is that the key might even be [visiting_group_name, booking_day_id] wich would make it sorted on day (but not time wich turns out to be trickier)
         #
@@ -479,7 +479,7 @@ class VisitingGroup(BaseController):
             bl.sort(self.fn_cmp_booking_timestamps)
             
         booking_info_notes = [n.doc for n in getBookingInfoNotesOfUsedActivities(used_activities_keys.keys())]            
-        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes)
+        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time)
 
 
     # TODO: refactor into separate tags module

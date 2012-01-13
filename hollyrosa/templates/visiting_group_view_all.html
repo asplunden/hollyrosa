@@ -55,8 +55,9 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
                 </ul>
             </td>
             <td class="info data">[${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}]<br/><br/>${visiting_group.contact_person}<br/>$visiting_group.contact_person_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.contact_person_email</a></td>
-            <td class="info data"><ul class="tag_list" style="display:inline; font-size:80%; text-decoration:italic;" py:for="tag in visiting_group.get('tags',[])"><li>$tag</li></ul>
-            <div class="note">bok.nr: <b>${visiting_group.boknr}</b> <br/>bokn.status: <b>${bokn_status_map.get(visiting_group.boknstatus, '')}</b><br/>${HTML(visiting_group.info)}</div></td>
+            <td class="info data">
+            <div class="note"><ul class="tag_list" py:for="tag in visiting_group.get('tags',[])"><li>$tag</li></ul>
+            <p>bok.nr: <b>${visiting_group.boknr}</b> <br/>bokn.status: <b>${bokn_status_map.get(visiting_group.boknstatus, '')}</b></p>${HTML(visiting_group.info)}</div></td>
         </tr>
     </table>
     <h2>Visiting group names used that not is in any registered group</h2>

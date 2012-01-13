@@ -329,7 +329,7 @@ def getSchemaSlotActivityMap(day_schema_id):
     for a in res:
         v = a.value
         
-        m[a.key[0]] = dict(activity_id=v[0],  duration=v[1]['duration'],  time_to=v[1]['time_to'],  slot_id=v[1]['slot_id'],  time_from=v[1]['time_from'],  title=v[1]['title'])
+        m[a.key[0]] = dict(activity_id=v[0],  duration=v[1]['duration'],  time_to=v[1]['time_to'],  slot_id=v[1]['slot_id'],  time_from=v[1]['time_from'],  title=v[1]['title'], pref=v[1].get('pref','time'))
     
     return m
     
