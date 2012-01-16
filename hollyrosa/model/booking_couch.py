@@ -154,7 +154,7 @@ def getVisitingGroupsInDatePeriod(from_date,  to_date):
     
     r = dict()
     #print holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs =True)
-    for v in holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs =True):
+    for v in holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs=True):
         r[v.doc['_id']] = v 
     return r.values()
     
@@ -209,36 +209,41 @@ def getVisitingGroupsByBoknstatus(status):
 #    return visiting_groups
 #
 
+def getVisitingGroupOfVisitingGroupName(name):
+    return holly_couch.view('visiting_groups/visiting_group_by_name', keys=[name], include_docs=True)
     
-def getAllVisitingGroupsNameAmongBookings(from_date='',  to_date=''):
+    
+def getAllVisitingGroupsNameAmongBookings(from_date='',  to_date='9999-99-99'):
     """find all bookings in date range and look for the visiting_group_names.
         perhaps this can be done with reduce in the future."""
         
     # TODO: hmm. a view shold be possible somehow. We still need to iterate, but in a different way (more efficient)
     
-    if from_date == '':
-        map_fun = '''function(doc) {
-        if (doc.type == 'booking')
-            emit(doc._id, doc.visiting_group_name);
-            }'''
-    else:
-        #...this is harder NEED TO LOOK AT BOOKING DAY ID; THEN BOOKING DAY AND THEN DATE. TRICKY
-        map_fun = """function(doc) {
-        if (doc.type == 'booking') {
-                emit(doc._id, doc.visiting_group_name);
-            }}"""
-    #...add map fun for from_date and to_date
+#    if from_date == '':
+#        map_fun = '''function(doc) {
+#        if (doc.type == 'booking')
+#            emit(doc._id, doc.visiting_group_name);
+#            }'''
+#    else:
+#        #...this is harder NEED TO LOOK AT BOOKING DAY ID; THEN BOOKING DAY AND THEN DATE. TRICKY
+#        map_fun = """function(doc) {
+#        if (doc.type == 'booking') {
+#                emit(doc._id, doc.visiting_group_name);
+#            }}"""
+#    #...add map fun for from_date and to_date
         
-    visiting_groups_names = holly_couch.query(map_fun)
+#    visiting_groups_names = holly_couch.query(map_fun)
+    visiting_groups_names = holly_couch.view('visiting_groups/all_names_among_bookings', reduce=True, group=True)
     
     #...conversion 
     visiting_group_names_result = dict()
     for vgn in visiting_groups_names:
-        visiting_group_names_result[vgn.key] = vgn.value
+        print vgn
+        visiting_group_names_result[vgn.key[1]] = 1
         
         
     #print  visiting_group_names_result.values()
-    return visiting_group_names_result.values()
+    return visiting_group_names_result.keys()
     
     
 def getSlotAndActivityIdOfBooking(booking):
@@ -321,17 +326,26 @@ def getUserNameMap():
     for a in holly_couch.view('workflow/user_name_map'):
         m[a.key] = a.value
     return m
-    
+
+
 def getSchemaSlotActivityMap(day_schema_id):
-    m = dict()
-    res = holly_couch.view('day_schema/slot_map')
+    global _schema_slot_activity_map
+    try:    
+        tmp = _schema_slot_activity_map
+        print 'found'
+    except NameError:
+        res = holly_couch.view('day_schema/slot_map')
+        m = dict()
     
-    for a in res:
-        v = a.value
+        for a in res:
+            v = a.value
         
-        m[a.key[0]] = dict(activity_id=v[0],  duration=v[1]['duration'],  time_to=v[1]['time_to'],  slot_id=v[1]['slot_id'],  time_from=v[1]['time_from'],  title=v[1]['title'], pref=v[1].get('pref','time'))
+            m[a.key[0]] = dict(activity_id=v[0],  duration=v[1]['duration'],  time_to=v[1]['time_to'],  slot_id=v[1]['slot_id'],  time_from=v[1]['time_from'],  title=v[1]['title'], pref=v[1].get('pref','time'))
+        # TODO: stor cache and cache chack in holly_couch db wrapper when it is ready        
+        tmp = m
+        _schema_slot_activity_map = m
     
-    return m
+    return tmp
     
     
 def getNotesForTarget(target_id):
