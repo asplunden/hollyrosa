@@ -34,6 +34,20 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script type="text/javascript">
 
 
+function updateNotes(data) {
+    var vgroup_id = data['id'];
+    dojo.destroy(dojo.byId('load_notes_for_' + vgroup_id));
+    
+    var notes = data['notes'];
+    for (n in notes) {
+        note = notes[n];
+        var notes_for_id = 'notes_for_' + note['target_id'];
+        
+        e = dojo.byId(notes_for_id);
+        dojo.create("div", {innerHTML: note['text'], class:'note2'}, e);
+    }
+}
+
 function updateUnboundNames(data) {
 
     dojo.query('.unbound_names').forEach(dojo.destroy);
@@ -54,6 +68,16 @@ function getUnboundNames() {
     handleAs: "json",
     load: updateUnboundNames
     });    
+}
+
+
+function loadNotesFor(id) {   
+    dojo.xhrGet({
+    url: "/note/get_notes_for_visiting_group",
+    content: {id: id},
+    handleAs: "json",
+    load: updateNotes
+    });
 }
   
   </script>
@@ -91,13 +115,16 @@ function getUnboundNames() {
             <div class="note"><ul class="tag_list" py:for="tag in visiting_group.get('tags',[])"><li>$tag</li></ul>
             <p>bok.nr: <b>${visiting_group.boknr}</b> <br/>
             bokn.status: <b>${bokn_status_map.get(visiting_group.boknstatus, '')}</b><br/>
-            camping location: <b>${visiting_group.camping_location}</b></p>${HTML(visiting_group.info)}</div></td>
+            camping location: <b>${visiting_group.camping_location}</b></p>${HTML(visiting_group.info)}</div>
+            
+            <div id="notes_for_${visiting_group._id}"><a id="load_notes_for_${visiting_group._id}" href="javascript:loadNotesFor('${visiting_group._id}')">[+] load notes</a></div>            
+            </td>
         </tr>
     </table>
     <h2>Visiting group names used that not is in any registered group</h2>
     <p><a class="unbound_names" href="javascript:getUnboundNames();">load unbound names</a></p>
     <ul id="unbound_names">
-        <li py:for="v in remaining_visiting_group_names">"${v}" <a href="${tg.url('view_bookings_of_name', name=v)}">List all activities</a></li>
+        <li py:for="v in remaining_visiting_group_names">"${v}" <a href="${tg.url('view_bookings_of_name', name=v)};">List all activities</a></li>
     </ul>
 </body>
 </html>

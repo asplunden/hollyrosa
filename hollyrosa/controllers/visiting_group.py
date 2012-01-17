@@ -330,6 +330,8 @@ class VisitingGroup(BaseController):
         
         holly_couch[id_c] = visiting_group_c
         
+        if visiting_group_c.has_key('_id'):
+            raise redirect('/visiting_group/show_visiting_group?id='+visiting_group_c['_id'])
         raise redirect('/visiting_group/view_all')
 
 
@@ -363,6 +365,7 @@ class VisitingGroup(BaseController):
 
         return cmp(a[0].booking_day['date'], b[0].booking_day['date'])
 
+
     def fn_cmp_booking_timestamps(self, a, b):
         if a.booking_day == None:
             if b.booking_day == None:
@@ -379,50 +382,12 @@ class VisitingGroup(BaseController):
             return -1
         else:
             return cmp(a.slot['time_from'], b.slot['time_from'])
-
-
-#    def getVisitingGroupOfVisitingGroupName(self,  name):
-#        # TODO: this is a candidate for view refactoring
-#        map_fun = """function(doc) {
-#        if (doc.type == 'visiting_group') {
-#            if (doc.name == '""" + name+  """')  {
-#                emit(doc._id, doc);
-#                }
-#            }
-#        }"""
-#        
-#        vgroups = []
-#        for x in holly_couch.query(map_fun):
-#            b = x.value
-#            vgroups.append(b)
-#        return vgroups
         
 
     @expose('hollyrosa.templates.view_bookings_of_name')
     @validate(validators={"name":validators.UnicodeString(), "render_time":validators.UnicodeString})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_bookings_of_name(self,  name=None, render_time=''):
-        # TODO: this is one of the first queries we should try to make a view out of. Using visiting_group_name as key and view with key should do the trick.
-        # another trick is that the key might even be [visiting_group_name, booking_day_id] wich would make it sorted on day (but not time wich turns out to be trickier)
-        #
-        #...the bookings should be ordered by booking day or requested date or nothing. In that order.
-        # todo: refactor
-##        map_fun = """function(doc) {
-##        if (doc.type == 'booking') {
-##            if (doc.visiting_group_name == '""" + name+  """')  {
-##                if (doc.booking_state > -100) {
-##                    emit([doc.visiting_group_name, doc.booking_day_id], doc);
-##                    }
-##                }
-##            }
-##        }"""
-##        
-##        # TODO: refactor make list of bookings or any dict like object
-##        bookings = []
-##        for x in holly_couch.query(map_fun):
-##            b = x.value
-##            bookings.append(b)
-        
         # TODO: its now possible to get bookings on both name and id
         bookings = [b.doc for b in getBookingsOfVisitingGroup(name, '<- MATCHES NO GROUP ->')]
         

@@ -33,7 +33,7 @@ from tg import tmpl_context
 from hollyrosa.widgets.edit_note_form import create_edit_note_form
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId
 
-from hollyrosa.model.booking_couch import genUID
+from hollyrosa.model.booking_couch import genUID, getNotesForTarget
 
 __all__ = ['note']
 
@@ -58,7 +58,13 @@ class Note(BaseController):
         else:
             note_o = holly_couch[_id] #DataContainer(text='', target_id=target_id, _id='')
         return dict(note=note_o)
-    
+        
+    @expose("json")
+    def get_notes_for_visiting_group(self, id):
+        print 'load'
+        notes = [n.doc for n in getNotesForTarget(id)]
+        return dict(notes=notes, id=id)
+
 
     @expose()
     def save_note(self, target_id, _id, text):

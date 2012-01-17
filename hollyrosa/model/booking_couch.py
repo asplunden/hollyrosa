@@ -152,62 +152,19 @@ def getVisitingGroupsInDatePeriod(from_date,  to_date):
     # TODO: maybe one can make a view using reduce that fixes this multiple-removing stuff.
     #return holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates)
     
-    r = dict()
+    check = dict()
+    r = list()
     #print holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs =True)
     for v in holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs=True):
-        r[v.doc['_id']] = v 
-    return r.values()
+        if not check.has_key(v.doc['_id']):
+            r.append(v)
+        check[v.doc['_id']] = 1 
+    return r
     
     
 def getVisitingGroupsByBoknstatus(status):
     return holly_couch.view("visiting_groups/all_visiting_groups_by_boknstatus",  startkey=[status,  None],  endkey=[status,  '9999-99-99'],  include_docs =True) # keys=[[s, None]  for s in statuses],  
     
-#def get_visiting_groups_in_date_period(from_date,  to_date):
-#    map_fun = """function(doc) {
-#    if (doc.type == 'visiting_group') {
-#        if ((doc.from_date <= '"""+ to_date+"""' ) && (doc.to_date >= '""" + from_date + """')) {
-#            emit(doc.from_date, doc);
-#        }}}"""
-#    
-#    visiting_groups_c = holly_couch.query(map_fun)
-#    
-#    #...conversion 
-#    visiting_groups = []
-#    for vgc in visiting_groups_c:
-#        visiting_groups.append(vgc.value)
-#    return visiting_groups
-    
-    
-#def get_visiting_groups(from_date='',  to_date=''):
-#    """Helper function to get visiting groups from CouchDB"""
-#    if from_date=='':
-#        map_fun = '''function(doc) {
-#        if (doc.type == 'visiting_group')
-#            emit(doc.from_date, doc);
-#            }'''
-#    else:
-#        
-#        
-#        if to_date=='':
-#            map_fun = """function(doc) {
-#            if ((doc.type == 'visiting_group') && (doc.from_date >= '"""+ from_date+"""' ))
-#                emit(doc.from_date, doc);
-#                }"""
-#        else:
-#        
-#            map_fun = """function(doc) {
-#            if ((doc.type == 'visiting_group') && (doc.from_date >= '"""+ from_date+"""' ) && (doc.to_date <= '""" + to_date+"""'))
-#                emit(doc.from_date, doc);
-#                }"""
-#    visiting_groups_c = holly_couch.query(map_fun)
-#    
-#    #...conversion 
-#    visiting_groups = []
-#    for vgc in visiting_groups_c:
-#        #o = BookingDayC(bdc)
-#        visiting_groups.append(vgc.value)
-#    return visiting_groups
-#
 
 def getVisitingGroupOfVisitingGroupName(name):
     return holly_couch.view('visiting_groups/visiting_group_by_name', keys=[name], include_docs=True)
