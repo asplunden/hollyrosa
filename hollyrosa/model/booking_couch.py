@@ -311,9 +311,20 @@ def getNotesForTarget(target_id):
 def getBookingInfoNotesOfUsedActivities(keys):
     return holly_couch.view("notes/notes_for_list_bookings", include_docs=True, keys=keys)
 
+
+def getTargetNumberOfNotesMap():
+    number_of_notes = holly_couch.view("notes/number_of_notes_per_target", reduce=True, group=True)
+    the_map = dict()
+    for x in number_of_notes:
+        the_map[x.key] = x.value
+        
+    print the_map
+    return the_map
+    
 #------ tags
 def getDocumentsByTag(tag):
     return holly_couch.view("tags/documents_by_tag", include_docs=True, keys=[tag]) #startkey=[target_id, None], endkey=[target_id, "9999-99-99 99:99"])
 
 def getAllTags():
     return holly_couch.view("tags/all_tags", reduce=True, group=True)
+

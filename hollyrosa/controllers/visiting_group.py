@@ -25,7 +25,7 @@ from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch,  genUID
 from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus, getNotesForTarget, getBookingInfoNotesOfUsedActivities
-from hollyrosa.model.booking_couch import getBookingDays,  getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName
+from hollyrosa.model.booking_couch import getBookingDays,  getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap
 import datetime
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
@@ -63,8 +63,9 @@ class VisitingGroup(BaseController):
     def view(self, url):
         visiting_groups = [x.doc for x in getAllVisitingGroups()]
         visiting_group_names = [x['name'] for x in visiting_groups] 
-        v_group_map = dict() #self.makeVGroupMap(visiting_group_names)        
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(),  bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()])
+        v_group_map = dict() #self.makeVGroupMap(visiting_group_names)
+        has_notes_map = getTargetNumberOfNotesMap()
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(),  bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()], has_notes_map=has_notes_map)
         
         
 
@@ -85,8 +86,9 @@ class VisitingGroup(BaseController):
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_date_range(self,  fromdate=None,  todate=None):
         visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(fromdate,  todate)]
-        v_group_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=fromdate,  to_date=todate)        
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()])
+        v_group_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=fromdate,  to_date=todate)
+        has_notes_map = getTargetNumberOfNotesMap()        
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()], has_notes_map=has_notes_map)
 
     
     @expose('hollyrosa.templates.visiting_group_view_all')
@@ -94,8 +96,9 @@ class VisitingGroup(BaseController):
     def view_tags(self, tag):
         # TODO>: rename and maybe only return visiting groups docs ?
         visiting_groups = [v.doc for v in getDocumentsByTag(tag)] 
-        remaining_visiting_groups_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups)        
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()])
+        remaining_visiting_groups_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups)
+        has_notes_map = getTargetNumberOfNotesMap()
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()], has_notes_map=has_notes_map)
 
     
     @expose('hollyrosa.templates.visiting_group_view_all')
@@ -103,7 +106,8 @@ class VisitingGroup(BaseController):
     def view_all(self):
         visiting_groups = [v.doc for v in getAllVisitingGroups()] 
         remaining_visiting_groups_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups)        
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()])
+        has_notes_map = getTargetNumberOfNotesMap()
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()], has_notes_map=has_notes_map)
 
 
     @expose('hollyrosa.templates.visiting_group_view_all')
@@ -114,8 +118,8 @@ class VisitingGroup(BaseController):
         #visiting_groups = get_visiting_groups_with_boknstatus(boknstatus) 
         visiting_groups =[v.doc for v in getVisitingGroupsByBoknstatus(boknstatus)]
         v_group_map = dict()
-        
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()])
+        has_notes_map = getTargetNumberOfNotesMap()        
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()], has_notes_map=has_notes_map)
 
         
     @expose('hollyrosa.templates.visiting_group_view_all')
@@ -139,7 +143,8 @@ class VisitingGroup(BaseController):
             visiting_groups = [v.doc for v in getAllVisitingGroups(from_date,  to_date)]
         
         v_group_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=from_date,  to_date=to_date) 
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()])
+        has_notes_map = getTargetNumberOfNotesMap()        
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()], has_notes_map=has_notes_map)
 
 
     @expose("json")

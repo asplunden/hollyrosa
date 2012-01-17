@@ -117,7 +117,7 @@ function loadNotesFor(id) {
             bokn.status: <b>${bokn_status_map.get(visiting_group.boknstatus, '')}</b><br/>
             camping location: <b>${visiting_group.camping_location}</b></p>${HTML(visiting_group.info)}</div>
             
-            <div id="notes_for_${visiting_group._id}"><a id="load_notes_for_${visiting_group._id}" href="javascript:loadNotesFor('${visiting_group._id}')">[+] load notes</a></div>            
+            <div id="notes_for_${visiting_group._id}"><a py:if="has_notes_map.has_key(visiting_group._id)" id="load_notes_for_${visiting_group._id}" href="javascript:loadNotesFor('${visiting_group._id}')">[+] load notes</a></div>            
             </td>
         </tr>
     </table>
