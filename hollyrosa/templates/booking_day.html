@@ -175,7 +175,8 @@ dojo.addOnLoad(function() {
     <!--<h2>${booking_day.date.strftime("%A %d %B %Y")}</h2>-->
     <h2>${booking_day.date}</h2>
 
-    <div class="note">${HTML(booking_day.note)}
+    <div class="note"><h2>${booking_day.title}</h2>
+    <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day.events">$e</li></ul>${HTML(booking_day.note)}
     <br/>
     <a href="${tg.url('/calendar/edit_booking_day',id=booking_day.id)}">edit</a>
     </div>

@@ -29,6 +29,7 @@ class EditVisitingGroupForm(TableForm):
 
     class fields(WidgetsList):
         _id = HiddenField(validator=UnicodeString)
+        title = TextField(validator=UnicodeString)
         note = TinyMCE(validator=MarkupConverter,  mce_options = dict(theme='advanced',  
                                                                       theme_advanced_toolbar_align ="left",  
                                                                       theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat", 

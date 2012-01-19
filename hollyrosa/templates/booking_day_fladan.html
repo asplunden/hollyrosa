@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010, 2011, 2012 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -27,26 +27,19 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa - ${activity_group} ${booking_day.date.strftime("%A %d %B %Y")}</title>
+  <title>Hollyrosa - ${ag_title} ${reFormatDate(booking_day.date)}</title>
   
   <script type="text/javascript" src="${tg.url('/public/scripts/std.js')}" />
 </head>
 
 <body>
-
-
-    
-    <h2>${activity_group} ${booking_day.date.strftime("%A %d %B %Y")}</h2>
-    
-    
-
-  
+    <h2>${ag_title} ${reFormatDate(booking_day.date)}</h2>
   
   <table>
   <tr class="tr_booking_day_overview_slot_row"><td class="td_booking_day_overview_activity">Aktivitet</td><td class="td_booking_day_overview_activity">FM</td><td class="td_booking_day_overview_activity">EM</td><td class="td_booking_day_overview_activity">Kväll</td><td class="td_booking_day_overview_activity">After Hours</td></tr>
     
-    <tr py:for="slot_row in slot_rows" class="tr_booking_day_overview_slot_row" style="background: ${slot_row.activity.bg_color};">
-        <td class="td_booking_day_overview_activity"><a href="${tg.url('view_activity', activity_id=slot_row.activity.id)}">${slot_row.activity.title}</a> <span py:if="0 != slot_row.activity.capacity">[${str(slot_row.activity.capacity)}]</span></td>
+    <tr py:for="slot_row in slot_rows" class="tr_booking_day_overview_slot_row" style="background: ${slot_row.bg_color};">
+        <td class="td_booking_day_overview_activity"><a href="${tg.url('view_activity', activity_id=slot_row.activity_id)}">${slot_row.title}</a> <span py:if="0 != slot_row.capacity">[${str(slot_row.capacity)}]</span></td>
         <td py:for="slot_position in slot_row.slot_row_position" class="td_booking_day_overview_slots ${['','slot_row_position_blocked'][blockings_map.has_key(slot_position.id)]}">
         
             <!-- we may have several slot bookings-->

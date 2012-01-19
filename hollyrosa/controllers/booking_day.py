@@ -114,7 +114,7 @@ class Calendar(BaseController):
     @expose('hollyrosa.templates.calendar_overview')
     def overview_all(self):
         """Show an overview of all booking days"""
-        return dict(booking_days=[b.value for b in getAllBookingDays()])
+        return dict(booking_days=[b.doc for b in getAllBookingDays()])
 
 
     @expose('hollyrosa.templates.calendar_overview')
@@ -151,16 +151,20 @@ class Calendar(BaseController):
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booking day properties'))
     def edit_booking_day(self,  id=None,  **kw):
         booking_day = holly_couch[id]
+        if not booking_day.has_key('title'):
+            booking_day['title'] = ''
         tmpl_context.form = create_edit_booking_day_form
         return dict(booking_day=booking_day,  usage='edit')
+        
         
     @validate(create_edit_booking_day_form, error_handler=edit_booking_day)      
     @expose()
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booking day properties'))
-    def save_booking_day_properties(self,  _id=None,  note='', num_program_crew_members=0,  num_fladan_crew_members=0):
+    def save_booking_day_properties(self,  _id=None,  note='', title='', num_program_crew_members=0,  num_fladan_crew_members=0):
         
         booking_day_c = holly_couch[_id]
         booking_day_c['note'] = note
+        booking_day_c['title'] = title
         booking_day_c['num_program_crew_members'] = num_program_crew_members
         booking_day_c['num_fladan_crew_members'] = num_fladan_crew_members
         holly_couch[_id]=booking_day_c
@@ -399,6 +403,7 @@ class BookingDay(BaseController):
     def fladan_day(self,  day=None,  day_id=None, ag=''):
         """Show a complete booking day"""
         
+        # TODO: move to common
         workflow_img_mapping = {}
         workflow_img_mapping['0'] = 'sheep.png'
         workflow_img_mapping['10'] = 'paper_to_sign.png'
@@ -407,48 +412,40 @@ class BookingDay(BaseController):
         workflow_img_mapping['-100'] = 'alert.png'
         workflow_img_mapping['unscheduled'] = 'alert.png'
         
-
-        slot_rows=DBSession.query(booking.SlotRow).options(eagerload('activity'))
-        slot_rows_n = []
-        for s in slot_rows:
-            if (s.activity.activity_group.title == ag) or (ag == ''):
-                slot_rows_n.append(s)
-
         today_sql_date = datetime.datetime.today().date().strftime("%Y-%m-%d")
-        if day_id != None:
-            booking_day_o = DBSession.query(booking.BookingDay).filter('id='+str(day_id)).one()
+
+
+        activities_map = self.getActivitiesMap(getAllActivities())
+        
+        if day_id != None and day_id != '':
+            print 'day id is not none, it is "', day_id,'"'
+            booking_day_o = holly_couch[day_id]
                 
-        else: # we're guessing day is a date
-            booking_day_o = DBSession.query(booking.BookingDay).filter('date=\''+str(day)+'\'').one()
+        else:
+            the_day = str(day)
+            print the_day
+            booking_day_o = getBookingDayOfDate(the_day)
+            day_id = booking_day_o['_id']
         
-        #...first, get booking_day for today
-        bookings = DBSession.query(booking.Booking).filter('booking_day_id='+str(booking_day_o.id)).all()
+        #  TODO: fix row below
+        booking_day_o['id'] = day_id
         
-        new_bookings = dict()
-        for s in bookings:
-            if (s.activity.activity_group.title == ag) or (ag == ''):
-                ns = new_bookings.get(s.slot_row_position_id, list())
-                ns.append(s)
-                new_bookings[s.slot_row_position_id] = ns
-            
+        day_schema_id = booking_day_o['day_schema_id']
+        day_schema = holly_couch[day_schema_id]
         
-        
-        #...we need a mapping from activity to a list / tupple slot_row_position
-        activity_slot_position_map = dict()
-        for slr in slot_rows:
-            activity_slot_position_map[slr.activity_id] = [slrp for slrp in slr.slot_row_position]
-        
-        #...compute all blockings, create a dict mapping slot_row_position_id to actual state
-        blockings = DBSession.query(booking.SlotRowPositionState).filter('booking_day_id='+str(booking_day_o.id)).all()
-        blockings_map = dict()
-        for b in blockings:
-            blockings_map[b.slot_row_position_id] = b
-            
-        #days = DBSession.query(booking.BookingDay.id,  booking.BookingDay.date).all()
-        
-        #raise IOError,  new_bookings
-            
-        return dict(booking_day=booking_day_o,  slot_rows=slot_rows_n,  bookings=new_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map, activity_group=ag,  workflow_img_mapping=workflow_img_mapping)
+        if ag != '':
+            ag_title = holly_couch[ag]['title']
+            slot_rows = [sr for sr in self.make_slot_rows__of_day_schema(day_schema,  activities_map) if sr.activity_group_id == ag]
+        else:
+            ag_title = 'All'  
+            slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map)
+
+        activity_slot_position_map = self.getActivitySlotPositionsMap(day_schema) 
+
+        new_bookings = self.getNonDeletedBookingsForBookingDay(day_id)    
+        blockings_map = self.getSlotBlockingsForBookingDay(day_id)
+                        
+        return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map, activity_group=ag,  workflow_img_mapping=workflow_img_mapping, ag_title=ag_title, reFormatDate=reFormatDate)
 
 
 

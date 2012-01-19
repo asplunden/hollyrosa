@@ -65,27 +65,7 @@ def getBookingsOfVisitingGroup(visiting_group_id,  visiting_group_name):
     args = [visiting_group_id,  visiting_group_name]
     return holly_couch.view('visiting_groups/bookings_of_visiting_group',  keys=[k for k in args if k != None],  include_docs=True)
     
-
-    
-
-#def get_visiting_group_names():
-#    # TODO: switch over to using views
-#    """Helper function to get visiting groups from CouchDB"""
-#    map_fun = '''function(doc) {
-#    if (doc.type == 'visiting_group')
-#        emit(doc.from_date, doc.name);
-#        }'''
-#    visiting_groups_c = holly_couch.query(map_fun)
-#    
-#    #...conversion 
-#    visiting_group_names = []
-#    for vgn in visiting_groups_c:
-#        visiting_group_names.append(vgn.value)
-#    return visiting_group_names
-    
-    
-
-
+ 
     
 # TODO: remove
 class BookingDayC(object):
