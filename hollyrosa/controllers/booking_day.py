@@ -229,7 +229,7 @@ class BookingDay(BaseController):
         """given a view from couchdb of activities, make a map/dict"""
         activities_map = dict()
         for a in activities:
-            activities_map[a.value['_id']] = a.value
+            activities_map[a.doc['_id']] = a.doc
         return activities_map
 
 
@@ -445,7 +445,7 @@ class BookingDay(BaseController):
         new_bookings = self.getNonDeletedBookingsForBookingDay(day_id)    
         blockings_map = self.getSlotBlockingsForBookingDay(day_id)
                         
-        return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map, activity_group=ag,  workflow_img_mapping=workflow_img_mapping, ag_title=ag_title, reFormatDate=reFormatDate)
+        return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map, activity_group=ag,  workflow_img_mapping=workflow_img_mapping, ag_title=ag_title, reFormatDate=reFormatDatee)
 
 
 
@@ -745,7 +745,7 @@ class BookingDay(BaseController):
         
         # TODO: We still need to add some reasonable sorting on the activities abd the visiting groups
         
-        activities = [(a.value['_id'],  a.value['title'] ) for a in getAllActivities()]
+        activities = [(a.doc['_id'],  a.doc['title'] ) for a in getAllActivities()]
         visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in getAllVisitingGroups()]
         
         tmp_visiting_group = holly_couch[visiting_group_id]

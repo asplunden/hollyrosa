@@ -1,5 +1,5 @@
 /**
- * Copyright 2010, 2011 Martin Eliasson
+ * Copyright 2010, 2011, 2012 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *
@@ -44,7 +44,7 @@ function navigation_calendar_is_disabled(x) {
 
 function set_visiting_group_form_values(visiting_group) {
     dojo.byId("visiting_group_data_name").innerHTML = visiting_group['name'];
-    dojo.byId("visiting_group_data_info").innerHTML = visiting_group['info'];
+    dojo.byId("visiting_group_data_info").innerHTML = '<p><i>'+visiting_group['tags']+'</p></i>'+'<b>bokn.nr: </b>' + visiting_group['boknr'] + '<br/><b>bokn.status: </b>' + visiting_group['boknstatus'] +'<br/><b>location: </b>' + visiting_group['camping_location'] + '<br/>' + visiting_group['info'];
     dojo.byId("visiting_group_data_fromdate").innerHTML = visiting_group['from_date'];
     dojo.byId("visiting_group_data_todate").innerHTML = visiting_group['to_date'];
     dojo.byId("visiting_group_data_contact").innerHTML = visiting_group['contact_person'];

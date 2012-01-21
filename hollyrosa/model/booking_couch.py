@@ -222,7 +222,7 @@ def getAllActivityGroups():
     return holly_couch.view('all_activities/all_activity_groups')
     
 def getAllActivities():
-    return holly_couch.view('all_activities/all_activities')
+    return holly_couch.view('all_activities/all_activities', include_docs=True)
     
 #---
 
