@@ -85,9 +85,9 @@ def remember_unschedule_booking(booking=None, slot_row_position=None, booking_da
 
 def remember_book_slot(booking_id='',  slot_row_position=None, booking=None, booking_day=None,  changed_by='',  activity_title=''):
     """Trapper booked for HSS wedneday january 10 19:10 to 21:15"""
-    text = '%s slot booked for %s %s between %s and %s' %(activity_title, booking['visiting_group_name'],  booking_day['date'],  slot_row_position['time_from'],  slot_row_position['time_to'])
+    text = '%s slot booked for %s %s between %s and %s' %(activity_title, booking['visiting_group_name'],  booking_day['date'], slot_row_position['time_from'],  slot_row_position['time_to'])
     
-    remember_booking_change(booking_id=booking_id,    change_op=3,  change_text=text,  changed_by=changed_by,  booking_day_id=booking_day['_id'])
+    remember_booking_change(booking_id=booking_id,    change_op=3, change_text=text, changed_by=changed_by, booking_day_id=booking_day['_id'])
     
     
 def remember_booking_properties_change(booking=None, slot_row_position=None, booking_day=None,  old_visiting_group_name='',  new_visiting_group_name='', new_content='', changed_by='',  activity_title=''):
@@ -100,14 +100,14 @@ def remember_booking_properties_change(booking=None, slot_row_position=None, boo
 def remember_new_booking_request(booking=None, changed_by=''):
     """Trapper requested for HSS wedneday january 10 to friday januari 12"""
     activity = holly_couch[booking['activity_id']] # TODO: wastefull lookup
-    text = '%s requested for %s %s to %s' %(activity['title'], booking['visiting_group_name'],  booking['valid_from'],  booking['valid_to'])
+    text = '%s requested for %s %s to %s' %(activity['title'], booking['visiting_group_name'],  booking.get('valid_from',''),  booking.get('valid_to',''))
     
     remember_booking_change(booking_id=booking['_id'],  change_op=4,  change_text=text,  changed_by=changed_by)
     
     
 def remember_delete_booking_request(booking=None, changed_by='',  activity_title=''):
     """deleted Trapper requested for HSS wedneday january 10 to friday januari 12"""
-    text = 'deleted %s requested for %s %s to %s' %(activity_title, booking['visiting_group_name'], booking['valid_from'], booking['valid_to'])
+    text = 'deleted %s requested for %s %s to %s' %(activity_title, booking['visiting_group_name'], booking.get('valid_from',''), booking.get('valid_to',''))
     remember_booking_change(booking_id=booking.id,  change_op=6,  change_text=text,  changed_by=changed_by)
     
 

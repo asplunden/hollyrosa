@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010, 2011, 2012 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -26,7 +26,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa - ${booking.activity.title} booking</title>
+  <title>Hollyrosa - ${activities_map[booking.activity_id].title} booking</title>
   
   <script type="text/javascript" src="${tg.url('/scripts/dojo-release-1.5.0/dojo/dojo.js')}" ></script>
   <script type="text/javascript">
@@ -61,13 +61,14 @@ function draw_booked_slot(booking_day_id, slot_row_id, activity_id, visiting_gro
 
 function on_booking_confirmed(response_data) {
     var booking = response_data['booking'];
+    
     var error_msg = response_data['error_msg'];
     if (error_msg) {
         alert(error_msg);
     }
     else {
         var slot_row_position_state = response_data['slot_row_position_state'];
-        draw_booked_slot(response_data['booking_day_id'], response_data['slot_row_position_id'], booking.activity_id, booking.visiting_group_id, booking.cache_content, booking.id, slot_row_position_state);
+        draw_booked_slot(response_data['booking_day_id'], response_data['slot_row_position_id'], booking.activity_id, booking.visiting_group_id, booking.cache_content, booking._id, slot_row_position_state);
     }
 }
   
@@ -101,8 +102,9 @@ function cancel_book_stage_2() {
 
 function book_slot_stage_2()
 {
+    
     dojo.xhrGet({
-    url: "/hollyrosa/booking/create_booking_async",
+    url: "/booking/create_booking_async",
     handleAs:"json",
     form:"booking_req_form",
     load: on_booking_confirmed
@@ -110,6 +112,7 @@ function book_slot_stage_2()
     the_form = dojo.byId('booking_req_form');
     dojo.style(the_form, "display","none");
     //book_slot(booking_day_id, slot_row_position_id, activity_id, visiting_group_id, "new boking should be inserted here");
+    
 }
 
 
@@ -124,7 +127,7 @@ function delete_booking(booking_id, activity_id, visiting_group_id)
 {
     dojo.byId('delete_req_booking_id').value =  booking_id;
     dojo.xhrGet({
-    url: "/hollyrosa/booking/delete_booking_async",
+    url: "/booking/delete_booking_async",
     handleAs:"json",
     form:"delete_booking_form",
     load: on_booking_deleted
@@ -136,7 +139,7 @@ function unschedule_booking(booking_id, activity_id, visiting_group_id)
 {
     dojo.byId('delete_req_booking_id').value =  booking_id;
     dojo.xhrGet({
-    url: "/hollyrosa/booking/unschedule_booking_async",
+    url: "/booking/unschedule_booking_async",
     handleAs:"json",
     form:"delete_booking_form",
     load: on_booking_deleted
@@ -151,11 +154,11 @@ function unschedule_booking(booking_id, activity_id, visiting_group_id)
     <form name="booking_req_form" id="booking_req_form" method="get" style="display:none; backgroud:#fff;">
         <div style="background:#fff;">
         <fieldset>  
-        <legend>Enter ${booking.activity.title} details</legend>
+        <legend>Enter ${activities_map[booking.activity_id].title} details</legend>
         <input type="hidden" name="booking_day_id" id="req_form_booking_day_id" />
         <input type="hidden" name="slot_row_position_id" id="req_form_slot_row_position_id"/>
         <input type="hidden" name="visiting_group_id" value="$booking.visiting_group_id"/>
-        <input type="hidden" name="activity_id" value="$booking.activity.id"/>
+        <input type="hidden" name="activity_id" value="$booking.activity_id"/>
         <textarea name="content" rows="5" cols="40">${booking.content}</textarea><br/>
         <input type="checkbox" name="block_after_book"/>Block after book<br/><br/>
         <input type="button" value="book" onclick="book_slot_stage_2();"/>
@@ -166,10 +169,10 @@ function unschedule_booking(booking_id, activity_id, visiting_group_id)
     <form name="delete_booking_form" id="delete_booking_form" method="get" >
         <input type="hidden" name="delete_req_booking_id" id="delete_req_booking_id" />
         <input type="hidden" name="visiting_group_id" value="$booking.visiting_group_id"/>
-        <input type="hidden" name="activity_id" value="$booking.activity.id"/>
+        <input type="hidden" name="activity_id" value="$booking.activity_id"/>
     </form>
     
-    <h2>${booking.activity.title} booking</h2>
+    <h2>${activities_map[booking.activity_id].title} booking</h2>
     <h3>${booking.visiting_group_name}</h3> 
        
         
@@ -184,13 +187,13 @@ function unschedule_booking(booking_id, activity_id, visiting_group_id)
         <li py:if="None !=booking_day"><a href="${tg.url('/booking/multi_book', booking_id=booking.id)}">multi-book</a></li>
     </ul>
     
-    <div class="note">${getRenderContent(booking)}</div>
-    <h3>$booking.activity.title</h3>
+    <div class="note">${booking.content}</div>
+    <h3>${activities_map[booking.activity_id].title}</h3>
     
     <!-- iterate over all days, one div for each -->
     <div py:for="tmp_day in booking_days">
-        <div class="booking_day_overview_slot_row" style="background: ${slot_row.activity.bg_color};">
-            <div class="booking_day_overview_activity"><a href="${tg.url('/booking/day', day_id=tmp_day.id)}">${tmp_day.date.strftime("%A %B %d")}</a></div>
+        <div class="booking_day_overview_slot_row" style="background: ${activities_map[slot_row.activity_id].bg_color};">
+            <div class="booking_day_overview_activity"><a href="${tg.url('/booking/day', day_id=tmp_day.id)}">${tmp_day['date']}</a></div>
     
             <div py:for="slot_position in slot_row.slot_row_position" hollyrosa:w="$slot_position.time_from - $slot_position.time_to" class="booking_day_overview_slots ${['','slot_row_position_blocked'][blockings_map.has_key(str(tmp_day.id)+':'+str(slot_position.id))]}" hollyrosa:bj="${tmp_day.id}:${slot_position.id}">
             <!-- we may have several slot bookings-->
@@ -198,12 +201,12 @@ function unschedule_booking(booking_id, activity_id, visiting_group_id)
             
             
                 <div py:for="b in bookings[tmp_day.id][slot_position.id]" style="border-bottom:1px dashed #ccc;" id="booking_id_$b.id">
-                <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/visiting_group/view_bookings_of_name', name=b.visiting_group_name)}">${b.visiting_group_name}</a></span><br/><a href="${tg.url('view_booked_booking', id=b.id)}" style="padding-left:2em;">${getRenderContent(b)}</a>
+                <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/visiting_group/view_bookings_of_name', name=b.visiting_group_name)}">${b.visiting_group_name}</a></span><br/><a href="${tg.url('view_booked_booking', id=b.id)}" style="padding-left:2em;">${b.content}</a>
                 <ul class="any_menu context_inline_menu">
                         <li><a href="${tg.url('edit_booked_booking', return_to_day_id=tmp_day.id, id=b.id)}">edit</a></li>
                         <li><a href="${tg.url('view_booked_booking', return_to_day_id=tmp_day.id, id=b.id)}">view</a></li>
-                        <li><a href="javascript:delete_booking(${b.id});">delete</a></li>
-                        <li><a href="javascript:unschedule_booking(${b.id});">unschedule</a></li>
+                        <li><a href="javascript:delete_booking('${b.id}');">delete</a></li>
+                        <li><a href="javascript:unschedule_booking('${b.id}');">unschedule</a></li>
                     </ul>
                 
                 </div>
@@ -212,7 +215,7 @@ function unschedule_booking(booking_id, activity_id, visiting_group_id)
             
             <div py:if="blockings_map.has_key(str(tmp_day.id)+':'+str(slot_position.id))">&nbsp;</div>
             <ul id="minimenu_${slot_position.id}" class="context_inline_menu any_menu">
-                <li py:if="not blockings_map.has_key(str(tmp_day.id)+':'+str(slot_position.id))"><a href="javascript:book_slot(this, ${tmp_day.id} ,${slot_position.id},${booking.activity.id}, ${booking.visiting_group_id});">book</a></li>
+                <li py:if="not blockings_map.has_key(str(tmp_day.id)+':'+str(slot_position.id))"><a href="javascript:book_slot(this, '${tmp_day.id}' ,'${slot_position.id}','${booking.activity_id}', '${booking.visiting_group_id}');">book</a></li>
                 <!-- <li><a  py:if="not blockings_map.has_key(slot_position.id)" href="${tg.url('book_slot', booking_day_id=booking_day.id, slot_position_id=slot_position.id)}">book</a></li> -->
                 <!-- <li><a py:if="not blockings_map.has_key(slot_position.id)" href="${tg.url('block_slot', booking_day_id=booking_day.id, slot_row_position_id=slot_position.id)}">block slot</a></li> -->
                 <!-- <li><a py:if="blockings_map.has_key(slot_position.id)" href="${tg.url('unblock_slot', booking_day_id=booking_day.id, slot_row_position_id=slot_position.id)}">unblock slot</a></li> -->

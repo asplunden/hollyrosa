@@ -1025,9 +1025,19 @@ class BookingDay(BaseController):
     @validate(validators={'booking_id':validators.Int(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may use multibook functionality'))
     def multi_book(self,  booking_id=None,  **kw):
-        booking_o = holly_couch[booking_id] #DBSession.query(booking.Booking).filter('id='+str(booking_id)).one()
-        booking_days = DBSession.query(booking.BookingDay).all()
-        slot_row = DBSession.query(booking.SlotRow).filter('activity_id='+str(booking_o.activity.id)).one()
+        booking_o = holly_couch[booking_id]
+        booking_day_id = booking_o['booking_day_id']
+        booking_day = holly_couch[booking_day_id]
+        day_schema_id = booking_day['day_schema_id']
+        day_schema = holly_couch[day_schema_id]
+         
+        booking_days = [b.doc for b in getAllBookingDays()] 
+        activity_id = booking_o['activity_id']
+        activities_map = self.getActivitiesMap(getAllActivities())
+                
+        slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map)
+        
+        slot_row = [s for s in slot_rows if s.activity_id == activity_id][0]#DBSession.query(booking.SlotRow).filter('activity_id='+str(booking_o.activity.id)).one()
         
         
         bookings = {}
@@ -1035,109 +1045,95 @@ class BookingDay(BaseController):
         for tmp_booking_day in booking_days:
             bookings[tmp_booking_day.id] = {}
         
-        for tmp_slot_row_position in slot_row.slot_row_position:
-            bookings_of_slot_position = DBSession.query(booking.Booking).filter('slot_row_position_id='+str(tmp_slot_row_position.id)).all()
+        slot_ids = [sp.id for sp in slot_row.slot_row_position]
+        #for tmp_slot_row_position in slot_row.slot_row_position:
+        bookings_of_slot_position = [b.doc for b in holly_couch.view('booking_day/slot_id_of_booking', keys=slot_ids ,include_docs=True)] #DBSession.query(booking.Booking).filter('slot_row_position_id='+str(tmp_slot_row_position.id)).all()
             
-            for tmp_booking in bookings_of_slot_position:
-                if None == tmp_slot_row_position.id:
-                    raise IOError,  "None not expected"
-                if None == tmp_booking.id:
-                    raise IOError,  "None not expected"
+        for tmp_booking in bookings_of_slot_position:
+            #if None == tmp_slot_row_position.id:
+            #    raise IOError,  "None not expected"
+            if None == tmp_booking.id:
+                raise IOError,  "None not expected"
                     
-                if not bookings[tmp_booking.booking_day_id].has_key(tmp_slot_row_position.id):
-                    bookings[tmp_booking.booking_day_id][tmp_slot_row_position.id] = []
-                bookings[tmp_booking.booking_day_id][tmp_slot_row_position.id].append(tmp_booking)
+            if not bookings[tmp_booking['booking_day_id']].has_key(tmp_booking['slot_id']):
+                bookings[tmp_booking['booking_day_id']][tmp_booking['slot_id']] = []
+            bookings[tmp_booking['booking_day_id']][tmp_booking['slot_id']].append(tmp_booking)
         
-        slot_row_position = booking_o.slot_row_position
-        slot_row = slot_row_position.slot_row
-        slot_row_id = slot_row.id
         
-        blockings = DBSession.query(booking.SlotRowPositionState).join(booking.SlotRowPosition).filter('slot_row_position.slot_row_id='+str(slot_row_id)).all()
+        blockings = [st.doc for st in holly_couch.view('booking_day/slot_state_of_slot_id', keys=slot_ids ,include_docs=True)] #[] #DBSession.query(booking.SlotRowPositionState).join(booking.SlotRowPosition).filter('slot_row_position.slot_row_id='+str(slot_row_id)).all()
         blockings_map = dict()
         for b in blockings:
-            tmp_booking_day_id = b.booking_day_id
-            blockings_map[str(tmp_booking_day_id)+':'''+ str(b.slot_row_position_id)] = b
+            tmp_booking_day_id = b['booking_day_id']
+            blockings_map[str(tmp_booking_day_id)+':'''+ str(b['slot_id'])] = b
             
-        return dict(booking=booking_o,  booking_days=booking_days,  booking_day=None,  slot_row=slot_row,  blockings_map=blockings_map,  bookings=bookings,  getRenderContent=getRenderContent)  
+        return dict(booking=booking_o, booking_days=booking_days, booking_day=None, slot_row=slot_row,  blockings_map=blockings_map,  bookings=bookings, activities_map=activities_map, getRenderContent=getRenderContent)  
 
         
     @expose("json")
     @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'slot_row_position_id':validators.Int(not_empty=True), 'activity_id':validators.Int(not_empty=True), 'content':validators.UnicodeString(not_empty=False), 'visiting_group_id_id':validators.Int(not_empty=True), 'block_after_book':validators.Bool(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def create_booking_async(self,  booking_day_id=0,  slot_row_position_id=0,  activity_id=0,  content='', block_after_book=False,  visiting_group_id=None):
+        print 'CREATE BOOKING ASYNC'
                 
         #...TODO refactor to isBlocked
-        slot_row_position_state = DBSession.query(booking.SlotRowPositionState).filter(and_('booking_day_id='+booking_day_id, 'slot_row_position_id='+slot_row_position_id)).first()
+        slot_row_position_states = [b.doc for  b in holly_couch.view('booking_day/slot_state_of_slot_id_and_booking_day_id', keys=[booking_day_id, slot_row_position_id])] #DBSession.query(booking.SlotRowPositionState).filter(and_('booking_day_id='+booking_day_id, 'slot_row_position_id='+slot_row_position_id)).first()
         
-        if None != slot_row_position_state:
+        if 0 < len(slot_row_position_states):
             return dict(error_msg="slot blocked, wont book")
             
         else:
-            new_booking = booking.Booking()
-            new_booking.booking_state = 0
-            new_booking.content = content
-            
-            #...render cache content
-            
-            
-            
-            vgroup = DBSession.query(booking.VisitingGroup).filter('visiting_group.id='+visiting_group_id).one()
-            
-            new_booking.cache_content = computeCacheContent(vgroup, content)
-            
-            
-            
-            new_booking.activity_id = activity_id
-            
-            new_booking.last_changed_by_id = getLoggedInUser(request).user_id
-            
-            
-            new_booking.visiting_group_name = vgroup.name
-            
-            new_booking.visiting_group = vgroup
+            vgroup = holly_couch[visiting_group_id]
+            new_id = genUID(type='booking')
+            new_booking = dict(type='booking', booking_state=0, content=content, cache_content=computeCacheContent(vgroup, content))
+            new_booking['activity_id'] = activity_id
+            new_booking['last_changed_by_id'] = getLoggedInUserId(request)
+            new_booking['visiting_group_id'] = visiting_group_id 
+            new_booking['visiting_group_name'] = vgroup['name']
             
             # TODO: add dates, but only after form validation
             #new_booking.requested_date = old_booking.requested_date
             #new_booking.valid_from = old_booking.valid_from
             #new_booking.valid_to = old_booking.valid_to
                 
-            new_booking.booking_day_id = booking_day_id
-            new_booking.slot_row_position_id = slot_row_position_id
+            new_booking['booking_day_id'] = booking_day_id
+            new_booking['slot_id'] = slot_row_position_id
+            
+            holly_couch[new_id] = new_booking
                 
-            DBSession.add(new_booking)
-            DBSession.flush()
             remember_new_booking_request(new_booking)
             slot_row_position_state = 0
             if block_after_book:
                 self.block_slot_helper(booking_day_id, slot_row_position_id, level=1)
                 slot_row_position_state = 1
                 
-        return dict(text="hello",  booking_day_id=booking_day_id,  slot_row_position_id=slot_row_position_id, booking=new_booking,  visiting_group_name=vgroup.name,  success=True,  slot_row_position_state=slot_row_position_state)
+        return dict(text="hello",  booking_day_id=booking_day_id,  slot_row_position_id=slot_row_position_id, booking=new_booking,  visiting_group_name=vgroup['name'], success=True, slot_row_position_state=slot_row_position_state)
+
         
     @expose("json")
     @validate(validators={'delete_req_booking_id':validators.Int(not_empty=True), 'activity_id':validators.Int(not_empty=True), 'visiting_group_id_id':validators.Int(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def delete_booking_async(self,  delete_req_booking_id=0,  activity_id=0,  visiting_group_id=None):
-        vgroup = DBSession.query(booking.VisitingGroup).filter('visiting_group.id='+visiting_group_id).one()
-        booking_o = DBSession.query(booking.Booking).filter('id='+str(delete_req_booking_id)).one()
+        vgroup = holly_couch[visiting_group_id]
+        booking_o = holly_couch[delete_req_booking_id]
         remember_delete_booking_request(booking_o)
         deleteBooking(booking_o)
 
-        return dict(text="hello",  delete_req_booking_id=delete_req_booking_id, visiting_group_name=vgroup.name,  success=True)
+        return dict(text="hello", delete_req_booking_id=delete_req_booking_id, visiting_group_name=vgroup['name'], success=True)
         
         
     @expose("json")
     @validate(validators={'delete_req_booking_id':validators.Int(not_empty=True), 'activity_id':validators.Int(not_empty=True), 'visiting_group_id_id':validators.Int(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def unschedule_booking_async(self,  delete_req_booking_id=0,  activity_id=0,  visiting_group_id=None):
-        vgroup = DBSession.query(booking.VisitingGroup).filter('visiting_group.id='+visiting_group_id).one()
-        booking_o = DBSession.query(booking.Booking).filter('id='+str(delete_req_booking_id)).one()
-        booking_o.last_changed_by_id = getLoggedInUser(request).user_id
+        vgroup = holly_couch[visiting_group_id]
+        booking_o = holly_couch[delete_req_booking_id]
+        booking_o.last_changed_by_id = getLoggedInUserId(request)
         
         remember_unschedule_booking(booking=booking_o, slot_row_position=booking_o.slot_row_position, booking_day=booking_o.booking_day,  changed_by='')
-        booking_o.booking_state = 0
-        booking_o.booking_day_id = None
-        booking_o.slot_row_position_id = None
+        booking_o['booking_state'] = 0
+        booking_o['booking_day_id'] = None
+        booking_o['slot_row_position_id'] = None
+        holly_couch[booking_o._id] = boking_o
         
-        return dict(text="hello",  delete_req_booking_id=delete_req_booking_id, visiting_group_name=vgroup.name,  success=True)
+        return dict(text="hello",  delete_req_booking_id=delete_req_booking_id, visiting_group_name=vgroup.name, success=True)
         
