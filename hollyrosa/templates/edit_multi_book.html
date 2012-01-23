@@ -46,9 +46,9 @@ function draw_booked_slot(booking_day_id, slot_row_id, activity_id, visiting_gro
     tmp_li = dojo.create('li', {}, menu_ul);
     dojo.create('a', {innerHTML:'view', href:"view_booked_booking?id="+booking_id}, tmp_li);
     tmp_li = dojo.create('li', {}, menu_ul);
-    dojo.create('a', {innerHTML:'delete', href:"javascript:delete_booking(" + booking_id + ");"}, tmp_li);
+    dojo.create('a', {innerHTML:'delete', href:"javascript:delete_booking('" + booking_id + "');"}, tmp_li);
     tmp_li = dojo.create('li', {}, menu_ul);
-    dojo.create('a', {innerHTML:'unschedule', href:"javascript:unschedule_booking(" + booking_id +");"}, tmp_li);
+    dojo.create('a', {innerHTML:'unschedule', href:"javascript:unschedule_booking('" + booking_id +"');"}, tmp_li);
     
     //...create menu with delete | unschedule etc
     
@@ -201,7 +201,7 @@ function unschedule_booking(booking_id, activity_id, visiting_group_id)
             
             
                 <div py:for="b in bookings[tmp_day.id][slot_position.id]" style="border-bottom:1px dashed #ccc;" id="booking_id_$b.id">
-                <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/visiting_group/view_bookings_of_name', name=b.visiting_group_name)}">${b.visiting_group_name}</a></span><br/><a href="${tg.url('view_booked_booking', id=b.id)}" style="padding-left:2em;">${b.content}</a>
+                <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/visiting_group/view_bookings_of_name', name=b.visiting_group_name)}">${b.visiting_group_name}</a></span><br/><a href="${tg.url('view_booked_booking', id=b.id)}" style="padding-left:2em;">${getRenderContent(b)}</a>
                 <ul class="any_menu context_inline_menu">
                         <li><a href="${tg.url('edit_booked_booking', return_to_day_id=tmp_day.id, id=b.id)}">edit</a></li>
                         <li><a href="${tg.url('view_booked_booking', return_to_day_id=tmp_day.id, id=b.id)}">view</a></li>

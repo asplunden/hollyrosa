@@ -1054,10 +1054,12 @@ class BookingDay(BaseController):
             #    raise IOError,  "None not expected"
             if None == tmp_booking.id:
                 raise IOError,  "None not expected"
+            
+            if None != tmp_booking['booking_day_id']:
                     
-            if not bookings[tmp_booking['booking_day_id']].has_key(tmp_booking['slot_id']):
-                bookings[tmp_booking['booking_day_id']][tmp_booking['slot_id']] = []
-            bookings[tmp_booking['booking_day_id']][tmp_booking['slot_id']].append(tmp_booking)
+                if not bookings[tmp_booking['booking_day_id']].has_key(tmp_booking['slot_id']):
+                    bookings[tmp_booking['booking_day_id']][tmp_booking['slot_id']] = []
+                bookings[tmp_booking['booking_day_id']][tmp_booking['slot_id']].append(tmp_booking)
         
         
         blockings = [st.doc for st in holly_couch.view('booking_day/slot_state_of_slot_id', keys=slot_ids ,include_docs=True)] #[] #DBSession.query(booking.SlotRowPositionState).join(booking.SlotRowPosition).filter('slot_row_position.slot_row_id='+str(slot_row_id)).all()
@@ -1066,14 +1068,13 @@ class BookingDay(BaseController):
             tmp_booking_day_id = b['booking_day_id']
             blockings_map[str(tmp_booking_day_id)+':'''+ str(b['slot_id'])] = b
             
-        return dict(booking=booking_o, booking_days=booking_days, booking_day=None, slot_row=slot_row,  blockings_map=blockings_map,  bookings=bookings, activities_map=activities_map, getRenderContent=getRenderContent)  
+        return dict(booking=booking_o, booking_days=booking_days, booking_day=None, slot_row=slot_row,  blockings_map=blockings_map,  bookings=bookings, activities_map=activities_map, getRenderContent=getRenderContentDict)  
 
         
     @expose("json")
     @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'slot_row_position_id':validators.Int(not_empty=True), 'activity_id':validators.Int(not_empty=True), 'content':validators.UnicodeString(not_empty=False), 'visiting_group_id_id':validators.Int(not_empty=True), 'block_after_book':validators.Bool(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def create_booking_async(self,  booking_day_id=0,  slot_row_position_id=0,  activity_id=0,  content='', block_after_book=False,  visiting_group_id=None):
-        print 'CREATE BOOKING ASYNC'
                 
         #...TODO refactor to isBlocked
         slot_row_position_states = [b.doc for  b in holly_couch.view('booking_day/slot_state_of_slot_id_and_booking_day_id', keys=[booking_day_id, slot_row_position_id])] #DBSession.query(booking.SlotRowPositionState).filter(and_('booking_day_id='+booking_day_id, 'slot_row_position_id='+slot_row_position_id)).first()
@@ -1128,12 +1129,16 @@ class BookingDay(BaseController):
         vgroup = holly_couch[visiting_group_id]
         booking_o = holly_couch[delete_req_booking_id]
         booking_o.last_changed_by_id = getLoggedInUserId(request)
-        
-        remember_unschedule_booking(booking=booking_o, slot_row_position=booking_o.slot_row_position, booking_day=booking_o.booking_day,  changed_by='')
+        booking_day = holly_couch[booking_o['booking_day_id']]
+        old_slot_id = booking_o['slot_id']
+        slot_map = getSchemaSlotActivityMap(booking_day['day_schema_id'])
+        slot = slot_map[old_slot_id]
+        activity = holly_couch[booking_o['activity_id']]
+        remember_unschedule_booking(booking=booking_o, slot_row_position=slot, booking_day=booking_day,  changed_by='', activity=activity)
         booking_o['booking_state'] = 0
         booking_o['booking_day_id'] = None
         booking_o['slot_row_position_id'] = None
-        holly_couch[booking_o._id] = boking_o
+        holly_couch[booking_o['_id']] = booking_o
         
-        return dict(text="hello",  delete_req_booking_id=delete_req_booking_id, visiting_group_name=vgroup.name, success=True)
+        return dict(text="hello",  delete_req_booking_id=delete_req_booking_id, visiting_group_name=vgroup['name'], success=True)
         
