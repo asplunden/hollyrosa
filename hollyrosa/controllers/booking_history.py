@@ -36,7 +36,7 @@ __all__ = ['History']
 
 
 
-def remember_booking_change(booking_id=None,  booking_day_id=None,  change_op=None,  change_text='',  changed_by='',  booking_content=''):
+def remember_booking_change(booking_id=None,  booking_day_id=None,  visiting_group_id=None, note_id=None, change_op=None,  change_text='',  changed_by='',  booking_content=''):
     """
     For a better view of booking history, its better we have an enum (int) telling what kind of change we have:
     * schedule
@@ -64,7 +64,15 @@ def remember_booking_change(booking_id=None,  booking_day_id=None,  change_op=No
     bh['timestamp'] = str(datetime.datetime.now())
     bh['booking_id'] = booking_id
     bh['booking_day_id'] = booking_day_id
+
+    if visiting_group_id != None:
+
+        bh['visiting_group_id'] = visiting_group_id
+    if note_id != None:
+        bh['note_id'] = note_id
+        
     holly_couch['booking_history.'+genUID()] = bh
+
     
 def remember_schedule_booking(booking=None, slot_row_position=None, booking_day=None,  changed_by='',  activity=None):
     """Trapper booking for HSS scheduled wedneday january 10 19:10 to 21:15"""
@@ -139,11 +147,24 @@ def remember_unblock_slot(slot_row_position=None, booking_day=None,  level=0,  c
     remember_booking_change(booking_id=None,  change_op=11,  change_text=text,  changed_by=changed_by, booking_day_id=booking_day.id)
     
     
-def remember_workflow_state_change(booking=None, state=None, changed_by='',  activity_title='',  booking_day_date=''):
+def remember_workflow_state_change(booking_id=None, state=None, changed_by='',  activity_title='',  booking_day_date=''):
     """Workflow state changed for Trapper booking for HSS wedneday january 10 .State changed from pending to approved"""
     text = 'Workflow state changed for %s booking for %s %s. State changed from %s to %s.' %(activity_title, booking['visiting_group_name'],  booking_day_date,  workflow_map[booking['booking_state']], workflow_map[int(state)])
     
-    remember_booking_change(booking_id=booking.id,  change_op=12,  change_text=text,  changed_by=changed_by)
+    remember_booking_change(booking_id=booking_id,  change_op=12,  change_text=text,  changed_by=changed_by)
+
+
+def remember_tag_change(booking_id=None, old_tags='', new_tags='', changed_by='', visiting_group_id='', visiting_group_name=''):
+    text = 'Tags changed for visiting group %s from %s to %s.' %(visiting_group_name, old_tags, new_tags)
+    
+    remember_booking_change(visiting_group_id=visiting_group_id,  change_op=13,  change_text=text,  changed_by=changed_by)
+
+
+def remember_note_change(booking_id=None, note_id='', changed_by='', visiting_group_id='', visiting_group_name=''):
+    text = 'Note changed for visiting group %s, note_id=%s' %(visiting_group_name, note_id)
+    
+    remember_booking_change(visiting_group_id=visiting_group_id,  change_op=14,  change_text=text,  changed_by=changed_by)
+
 
 
 def remember_visiting_group_properties_change(booking=None, visiting_group=None, changed_by=''):

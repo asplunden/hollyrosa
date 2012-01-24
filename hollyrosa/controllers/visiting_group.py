@@ -37,8 +37,8 @@ from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
 from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
 from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
 from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
-from hollyrosa.controllers.common import workflow_map,  bokn_status_map,  bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate
-
+from hollyrosa.controllers.common import workflow_map,  bokn_status_map,  bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId
+from hollyrosa.controllers.booking_history import remember_tag_change
 
 
 __all__ = ['VisitingGroup']
@@ -474,12 +474,15 @@ class VisitingGroup(BaseController):
     def add_tags(self, id, tags):
         vgroup = holly_couch[id]
         old_tags = vgroup.get('tags',[])
+        remember_old_tags = [t for t in old_tags]
         new_tags = [t.strip() for t in tags.split(',')]
         for t in new_tags:
             if t not in old_tags:
                 old_tags.append(t)
         vgroup['tags'] = old_tags
         holly_couch[id] = vgroup
+        remember_tag_change(old_tags=remember_old_tags, new_tags=old_tags, visiting_group_id=id, visiting_group_name=vgroup['name'], changed_by=getLoggedInUserId(request))
+        
         return dict(tags=old_tags)
     
     
@@ -491,4 +494,6 @@ class VisitingGroup(BaseController):
         new_tags = [t for t in old_tags if t.strip() != tag.strip()]
         vgroup['tags'] = new_tags
         holly_couch[id] = vgroup
+        remember_tag_change(old_tags=old_tags, new_tags=new_tags, visiting_group_id=id, visiting_group_name=vgroup['name'], changed_by=getLoggedInUserId(request))
+
         return dict(tags=new_tags)

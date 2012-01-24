@@ -45,7 +45,7 @@ bokn_status_options = list()
 for k, v in bokn_status_map.items():
     bokn_status_options.append((k, v))
 
-change_op_lookup = {'schedule':1, 'unschedule':2, 'book_slot':3,  'new_booking_request':4,  'booking_request_change':5,  'delete_booking_request':6,  'booking_properties_change':7,  'booking_state_change':8, 'block_soft':9,  'block_hard':10,  'unblock':11,  'workflow_state_change':12}
+change_op_lookup = {'schedule':1, 'unschedule':2, 'book_slot':3,  'new_booking_request':4,  'booking_request_change':5,  'delete_booking_request':6,  'booking_properties_change':7,  'booking_state_change':8, 'block_soft':9,  'block_hard':10,  'unblock':11,  'workflow_state_change':12, 'tag_change':13, 'note_change':14}
 
 change_op_map = dict()
 for k,  v in change_op_lookup.items():
