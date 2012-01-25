@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010, 2011, 2012 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -44,7 +44,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
             <td class="data timestamp">${h['timestamp']}</td> <!-- .strftime('%A %B %d %H:%M:%S') -->
             <td class="data info"><a href="${tg.url('/booking/day', day_id=h['booking_day_id'])}">${h['change']}</a></td>
             <td class="data info">${h['changed_by']}</td>
-            <td class="data info"><a href="${tg.url('/booking/view_booked_booking', id=h['booking_id'])}">${h['booking_id']}</a></td>
+            <td class="data info"><a href="${tg.url('/booking/view_booked_booking', id=h['booking_id'])}">${h['booking_id']}</a><br/>
+            <a py:if="h.has_key('visiting_group_id')" href="${tg.url('/visiting_group/show_visiting_group', id=h.get('visiting_group_id',''))}">${h.get('visiting_group_id','')}</a></td>
         </tr>
     </table>
 </body>
