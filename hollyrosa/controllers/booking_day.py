@@ -418,12 +418,10 @@ class BookingDay(BaseController):
         activities_map = self.getActivitiesMap(getAllActivities())
         
         if day_id != None and day_id != '':
-            print 'day id is not none, it is "', day_id,'"'
             booking_day_o = holly_couch[day_id]
                 
         else:
             the_day = str(day)
-            print the_day
             booking_day_o = getBookingDayOfDate(the_day)
             day_id = booking_day_o['_id']
         
@@ -445,7 +443,7 @@ class BookingDay(BaseController):
         new_bookings = self.getNonDeletedBookingsForBookingDay(day_id)    
         blockings_map = self.getSlotBlockingsForBookingDay(day_id)
                         
-        return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map, activity_group=ag,  workflow_img_mapping=workflow_img_mapping, ag_title=ag_title, reFormatDate=reFormatDatee)
+        return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map, activity_group=ag,  workflow_img_mapping=workflow_img_mapping, ag_title=ag_title, reFormatDate=reFormatDate)
 
 
 
