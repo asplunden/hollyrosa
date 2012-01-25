@@ -34,6 +34,7 @@ from hollyrosa.widgets.edit_note_form import create_edit_note_form
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId
 
 from hollyrosa.model.booking_couch import genUID, getNotesForTarget
+from hollyrosa.controllers.booking_history import remember_note_change
 
 __all__ = ['note']
 
@@ -71,6 +72,7 @@ class Note(BaseController):
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         if _id == '':
             note_o = dict(type='note', _id=genUID(type='note'), target_id=target_id, note_state=0, tags=list(), history=list(), text='')
+            note_change='new'
         else:
             note_o = holly_couch[_id]
             history = note_o['history']
@@ -79,12 +81,15 @@ class Note(BaseController):
             else:
                 history.append([timestamp, note_o['text']])
             note_o['history'] = history
-        
+            note_change = 'changed'
+            
         note_o['timestamp'] = timestamp
         note_o['last_changed_by'] = getLoggedInUserId(request)
         note_o['text'] = text
         holly_couch[note_o['_id']] = note_o
         
+        remember_note_change(target_id=target_id, note_id=note_o['_id'], changed_by=getLoggedInUserId(request), note_change=note_change)
+
         # TODO: where do we go from here?
         redirect_to = '/'
         if 'visiting_group' in note_o['target_id']:

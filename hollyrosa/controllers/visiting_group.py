@@ -463,7 +463,6 @@ class VisitingGroup(BaseController):
     @expose("json")
     @validate(validators={'id':validators.UnicodeString})        
     def get_tags(self, id):
-        print "get tags"
         vgroup = holly_couch[id]
         tags = vgroup.get('tags',[])
         return dict(tags=tags)

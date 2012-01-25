@@ -160,9 +160,19 @@ def remember_tag_change(booking_id=None, old_tags='', new_tags='', changed_by=''
     remember_booking_change(visiting_group_id=visiting_group_id,  change_op=13,  change_text=text,  changed_by=changed_by)
 
 
-def remember_note_change(booking_id=None, note_id='', changed_by='', visiting_group_id='', visiting_group_name=''):
-    text = 'Note changed for visiting group %s, note_id=%s' %(visiting_group_name, note_id)
-    
+def remember_note_change(target_id='', note_id='', changed_by='', note_change='changed'):
+    text = 'Note %s for target_id=%s, note_id=%s' %(note_change, target_id, note_id)
+    visiting_group_id = ''
+    visiting_group_name = ''
+    #...check if target is a visiting_group and if so get name of visiting group
+    if 'visiting_group' in target_id:
+        visiting_group_id = target_id
+        vgroup = holly_couch[visiting_group_id]
+        visiting_group_name = vgroup['name']
+        
+        text = 'Note %s for visiting group %s, note_id=%s' %(note_change, visiting_group_name, note_id)
+         
+            
     remember_booking_change(visiting_group_id=visiting_group_id,  change_op=14,  change_text=text,  changed_by=changed_by)
 
 
