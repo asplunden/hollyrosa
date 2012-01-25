@@ -64,7 +64,7 @@ function updateUnboundNames(data) {
   
 function getUnboundNames() {   
     dojo.xhrGet({
-    url: "/visiting_group/get_unbound_visiting_group_names",
+    url: "/tag/get_unbound_visiting_group_names",
     handleAs: "json",
     load: updateUnboundNames
     });    

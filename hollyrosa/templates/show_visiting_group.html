@@ -47,7 +47,7 @@ function updateTags(data) {
 function get_visiting_group_tags_from_XHR(visiting_group_id) {
    
     dojo.xhrGet({
-    url: "/visiting_group/get_tags",
+    url: "/tag/get_tags",
     content: {id: visiting_group_id},
     handleAs: "json",
     load: updateTags
@@ -58,7 +58,7 @@ function get_visiting_group_tags_from_XHR(visiting_group_id) {
 function add_visiting_group_tags_XHR(visiting_group_id, tags) {
    
     dojo.xhrGet({
-    url: "/visiting_group/add_tags",
+    url: "/tag/add_tags",
     content: {id: visiting_group_id, tags: tags},
     handleAs: "json",
     load: updateTags
@@ -69,7 +69,7 @@ function add_visiting_group_tags_XHR(visiting_group_id, tags) {
 function delete_visiting_group_tag_XHR(visiting_group_id, tag) {
    
     dojo.xhrGet({
-    url: "/visiting_group/delete_tag",
+    url: "/tag/delete_tag",
     content: {id: visiting_group_id, tag: tag},
     handleAs: "json",
     load: updateTags
