@@ -431,14 +431,27 @@ class Tools(BaseController):
         
     @expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def update_booking_days(self):
-        booking_days = DBSession.query(booking.BookingDay).all()
-        pos = 1
-        for bd in booking_days:
-            bd_c = holly_couch['booking_day.'+str(bd.id)]
-            #bd_c = dict(type='booking_day',  date=str(bd.date),  note=bd.note, num_program_crew_members=bd.num_program_crew_members,  num_fladan_crew_members=bd.num_fladan_crew_members,  day_schema_id='day_schema.'+str(bd.day_schema_id),  zorder=pos )
-            bd_c['zorder'] = pos
-            holly_couch['booking_day.'+str(bd.id)] = bd_c
+    def make_booking_days(self):
+        pos = 1000
+        dates = list()
+        #...must iterate a date range, check out websetup.py....        
+        for i in range(30):
+            d = datetime.date(2012, 6, i+1)
+            dates.append(str(d))
+       
+        for i in range(31):
+            d = datetime.date(2012, 7, i+1)
+            dates.append(str(d))
+
+        for i in range(31):
+            d = datetime.date(2012, 8, i+1)
+            dates.append(str(d))
+            
+            
+        for d in dates:
+            print d
+            bd_c = dict(type='booking_day', date=d, note='', title='', num_program_crew_members=0, num_fladan_crew_members=0, day_schema_id='day_schema.1', zorder=pos )
+            holly_couch['booking_day.'+str(pos)] = bd_c
             pos += 1
             
         raise redirect('/')
@@ -469,36 +482,8 @@ class Tools(BaseController):
     @expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def transfer_bookings(self):
-        bookings = DBSession.query(booking.Booking).all()
-        
-        for b in bookings:
-            bc = holly_couch['booking.'+str(b.id)]
-            #bc = dict(type='booking')
-            bc['type'] = 'booking'
-            bc['content'] = b.content
-            bc['visiting_group_name'] = b.visiting_group_name
-            bc['requested_date'] = str(b.requested_date)
-            bc['valid_from'] = str(b.valid_from)
-            bc['valid_to'] = str(b.valid_to)
-            bc['booking_state']  = b.booking_state
-            bc['activity_id'] = 'activity.' + str(b.activity_id)
-            
-            if b.slot_row_position != None:
-                if b.activity_id != b.slot_row_position.slot_row.activity_id:
-                    raise IOError
-                
-            bc['last_changed_by_id'] = 'user.'+str(b.last_changed_by_id)
-            bc['approved_by_id'] = 'user.'+str(b.last_changed_by_id)
-            bc['visiting_group_id'] = 'visiting_group.' + str(b.visiting_group_id) 
-            bc['slot_id'] = 'slot.'+str(b.slot_row_position_id)
-            bc['booking_day_id'] = 'booking_day.' + str(b.booking_day_id)
-            if None == b.booking_day_id:
-                bc['booking_day_id'] = ''
-            bc['misc'] = b.misc
-            bc['cache_content'] = b.cache_content
-            
-        
-            holly_couch['booking.'+str(b.id)] = bc
+        for b in holly_couch.view('all_activities/erasure', include_docs=True):
+            holly_couch.delete(b.doc)
         raise redirect('/')
         
     @expose()
