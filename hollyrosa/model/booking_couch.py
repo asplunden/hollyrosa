@@ -19,27 +19,14 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """ 
 
-#...ME
-import couchdb
 from uuid import uuid4
 import datetime
 from hollyrosa.controllers.common import DataContainer
-from hollyrosa.model import holly_couch
-
-
-
-
-#couch_server = couchdb.Server(url='http://localhost:5989')
-#try:
-#    holly_couch = couch_server['hollyrosa1']
-#    
-#except couchdb.ResourceNotFound, e:
-#    holly_couch = couch_server.create('hollyrosa1')
     
     
 
-def genUID():
-    return uuid4().hex
+#def genUID():
+#    return uuid4().hex
 
 
 # TODO: make type mandatory
@@ -61,7 +48,7 @@ def genUID(type='', user_id='', hostname=''):
     return tmp
     
 
-def getBookingsOfVisitingGroup(visiting_group_id,  visiting_group_name):
+def getBookingsOfVisitingGroup(holly_couch, visiting_group_id,  visiting_group_name):
     args = [visiting_group_id,  visiting_group_name]
     return holly_couch.view('visiting_groups/bookings_of_visiting_group',  keys=[k for k in args if k != None],  include_docs=True)
     
@@ -82,42 +69,26 @@ class BookingDayC(object):
                 
 
 
-def getBookingDayOfDate(date):
+def getBookingDayOfDate(holly_couch, date):
     return list(holly_couch.view('booking_day/all_booking_days',  keys=[date],  include_docs=True))[0].doc
     
     
-def getAllBookingDays():
+def getAllBookingDays(holly_couch):
     return holly_couch.view('booking_day/all_booking_days',  include_docs=True)
     
 
-def getBookingDays(from_date='2011-01-01',  to_date='2011-12-11'):
+def getBookingDays(holly_couch, from_date='2011-01-01',  to_date='2011-12-11'):
     """Helper function to get booking days from CouchDB"""
     return holly_couch.view('booking_day/all_booking_days',  startkey=from_date,  endkey=to_date,  include_docs=True)
 
-    
-    
-#def get_visiting_groups_with_boknstatus(boknstatus):
-#    map_fun = """function(doc) {
-#    if ((doc.type == 'visiting_group') && (doc.boknstatus == '"""+ boknstatus+"""' ) )
-#        emit(doc.from_date, doc);
-#        }"""
-#    visiting_groups_c = holly_couch.query(map_fun)
-#    
-#    #...conversion 
-#    visiting_groups = []
-#    for vgc in visiting_groups_c:
-#        visiting_groups.append(vgc.value)
-#    return visiting_groups
-    
-    
-    
-def getVisitingGroupsAtDate(at_date):
+        
+def getVisitingGroupsAtDate(holly_couch, at_date):
     #...argh TODO: fix that now we have to use doc instead of value
     formated_date = datetime.datetime.strptime(at_date,'%Y-%m-%d').strftime('%a %b %d %Y')
     return holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=[formated_date],  include_docs =True)
     	
 
-def getVisitingGroupsInDatePeriod(from_date,  to_date):
+def getVisitingGroupsInDatePeriod(holly_couch, from_date,  to_date):
     """create one key for each day"""
     
     one_day = datetime.timedelta(1)
@@ -142,15 +113,15 @@ def getVisitingGroupsInDatePeriod(from_date,  to_date):
     return r
     
     
-def getVisitingGroupsByBoknstatus(status):
+def getVisitingGroupsByBoknstatus(holly_couch, status):
     return holly_couch.view("visiting_groups/all_visiting_groups_by_boknstatus",  startkey=[status,  None],  endkey=[status,  '9999-99-99'],  include_docs =True) # keys=[[s, None]  for s in statuses],  
     
 
-def getVisitingGroupOfVisitingGroupName(name):
+def getVisitingGroupOfVisitingGroupName(holly_couch, name):
     return holly_couch.view('visiting_groups/visiting_group_by_name', keys=[name], include_docs=True)
     
     
-def getAllVisitingGroupsNameAmongBookings(from_date='',  to_date='9999-99-99'):
+def getAllVisitingGroupsNameAmongBookings(holly_couch, from_date='',  to_date='9999-99-99'):
     """find all bookings in date range and look for the visiting_group_names.
         perhaps this can be done with reduce in the future."""
         
@@ -183,7 +154,7 @@ def getAllVisitingGroupsNameAmongBookings(from_date='',  to_date='9999-99-99'):
     return visiting_group_names_result.keys()
     
     
-def getSlotAndActivityIdOfBooking(booking):
+def getSlotAndActivityIdOfBooking(holly_couch, booking):
     booking_day_id = booking['booking_day_id']
     booking_day_o = holly_couch[booking_day_id]
     schema_o = holly_couch[booking_day_o['day_schema_id']]
@@ -198,74 +169,74 @@ def getSlotAndActivityIdOfBooking(booking):
 
 
 
-def getAllHistory(limit=None):
+def getAllHistory(holly_couch, limit=None):
     """returns booking history sorted in reverse chronological order."""
     return holly_couch.view('history/all_history',  descending=True,  limit=limit)
     
-def getAllHistoryForVisitingGroup(visiting_group_id,  limit=None):
+def getAllHistoryForVisitingGroup(holly_couch, visiting_group_id,  limit=None):
     """returns booking history sorted in reverse chronological order."""
     # TODO: does not work, may need to look up all bookings first.
     return holly_couch.view('history/all_history',  startkey= [{},  {},  visiting_group_id],  endkey=[None,  None,  visiting_group_id],  descending=True,  limit=limit)
     
-def getAllHistoryForUser(user_id,  limit=None):
+def getAllHistoryForUser(holly_couch, user_id,  limit=None):
     """returns booking history sorted in reverse chronological order."""
     return holly_couch.view('history/history_by_username',  keys=[user_id],  descending=True,  limit=limit)
     
-def getAllHistoryForBookings(booking_ids,  limit=250):
+def getAllHistoryForBookings(holly_couch, booking_ids,  limit=250):
     """returns booking history sorted in reverse chronological order."""
     return holly_couch.view('history/history_by_booking_id',  keys=booking_ids,  descending=True,  limit=limit)
 
     
 #----
 
-def getAllActivityGroups():
+def getAllActivityGroups(holly_couch):
     return holly_couch.view('all_activities/all_activity_groups')
     
-def getAllActivities():
+def getAllActivities(holly_couch):
     return holly_couch.view('all_activities/all_activities', include_docs=True)
     
 #---
 
-def getAllVisitingGroups():
+def getAllVisitingGroups(holly_couch):
     return holly_couch.view('visiting_groups/all_visiting_groups',  include_docs=True)
 
 
-def getAgeGroupStatistics(group_level=999, startkey=None):
+def getAgeGroupStatistics(holly_couch, group_level=999, startkey=None):
     if startkey == None:
         startkey = []
     return holly_couch.view('statistics/age_group_statistics', startkey=startkey, reduce=True, group_level=group_level)    
 
 #--- 
 
-def getAllScheduledBookings(limit=100):
+def getAllScheduledBookings(holly_couch, limit=100):
     return holly_couch.view('workflow/all_scheduled_bookings',  include_docs=True,  limit=limit)
 
-def getAllUnscheduledBookings(limit=100):
+def getAllUnscheduledBookings(holly_couch, limit=100):
     return holly_couch.view('workflow/all_unscheduled_bookings',  include_docs=True,  limit=limit)
     
-def gelAllBookingsWithBookingState(booking_states,  limit=200):
+def gelAllBookingsWithBookingState(holly_couch, booking_states,  limit=200):
     return holly_couch.view('workflow/all_bookings_by_booking_state',  keys=booking_states,  include_docs=True,  limit=limit)
     
-def getActivityTitleMap():
+def getActivityTitleMap(holly_couch):
     m = dict()
     for a in holly_couch.view('all_activities/activity_titles'):
         m[a.key[0]] = a.key[1]
     return m
     
-def getBookingDayInfoMap():
+def getBookingDayInfoMap(holly_couch):
     m = dict()
     for a in holly_couch.view('workflow/booking_day_map_info'):
         m[a.key] = a.value[0]
     return m
     
-def getUserNameMap():
+def getUserNameMap(holly_couch):
     m = dict()
     for a in holly_couch.view('workflow/user_name_map'):
         m[a.key] = a.value
     return m
 
 
-def getSchemaSlotActivityMap(day_schema_id):
+def getSchemaSlotActivityMap(holly_couch, day_schema_id):
     global _schema_slot_activity_map
     try:    
         tmp = _schema_slot_activity_map
@@ -285,26 +256,25 @@ def getSchemaSlotActivityMap(day_schema_id):
     return tmp
     
     
-def getNotesForTarget(target_id):
+def getNotesForTarget(holly_couch, target_id):
     return holly_couch.view("notes/notes_by_target_datesorted", include_docs=True, startkey=[target_id, None], endkey=[target_id, "9999-99-99 99:99"])
 
-def getBookingInfoNotesOfUsedActivities(keys):
+def getBookingInfoNotesOfUsedActivities(holly_couch, keys):
     return holly_couch.view("notes/notes_for_list_bookings", include_docs=True, keys=keys)
 
 
-def getTargetNumberOfNotesMap():
+def getTargetNumberOfNotesMap(holly_couch):
     number_of_notes = holly_couch.view("notes/number_of_notes_per_target", reduce=True, group=True)
     the_map = dict()
     for x in number_of_notes:
         the_map[x.key] = x.value
-        
-    print the_map
+    
     return the_map
     
 #------ tags
-def getDocumentsByTag(tag):
+def getDocumentsByTag(holly_couch, tag):
     return holly_couch.view("tags/documents_by_tag", include_docs=True, keys=[tag]) #startkey=[target_id, None], endkey=[target_id, "9999-99-99 99:99"])
 
-def getAllTags():
+def getAllTags(holly_couch):
     return holly_couch.view("tags/all_tags", reduce=True, group=True)
 

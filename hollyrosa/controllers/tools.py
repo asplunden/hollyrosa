@@ -23,7 +23,7 @@ import pylons
 from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import holly_couch,  genUID
+from hollyrosa.model import genUID, holly_couch
 
 import datetime,  StringIO,  time
 
@@ -64,7 +64,7 @@ class Tools(BaseController):
         if day == None:
             day = datetime.datetime.today().date().strftime("%Y-%m-%d")
             
-        activity_groups = [h.value for h in getAllActivityGroups()]
+        activity_groups = [h.value for h in getAllActivityGroups(holly_couch)]
         return dict(show_day=day,  activity_groups=activity_groups)
         
     
@@ -169,13 +169,13 @@ class Tools(BaseController):
     def sanity_check_property_usage(self):
         
         #...iterate through all bookings, we are only interested in scheduled bookings
-        bookings = getAllScheduledBookings(limit=1000000) #DBSession.query(booking.Booking).join(booking.VisitingGroup).join(booking.VistingGroupProperty).all()
+        bookings = getAllScheduledBookings(holly_couch, limit=1000000) #DBSession.query(booking.Booking).join(booking.VisitingGroup).join(booking.VistingGroupProperty).all()
         booking_days_map = dict()
-        for bd in getAllBookingDays():
+        for bd in getAllBookingDays(holly_couch):
             booking_days_map[bd.doc['_id']] = bd.doc
             
         visiting_group_map = dict()
-        for vg in getAllVisitingGroups():
+        for vg in getAllVisitingGroups(holly_couch):
             visiting_group_map[vg.key] = vg.value
             
         #...join visiting group (bookings with no visiting group is not interesting)
@@ -252,8 +252,8 @@ class Tools(BaseController):
         #
         #        
         
-        statistics_totals = getAgeGroupStatistics(group_level=1)
-        statistics = getAgeGroupStatistics()
+        statistics_totals = getAgeGroupStatistics(holly_couch, group_level=1)
+        statistics = getAgeGroupStatistics(holly_couch)
         
         property_names = dict()
         totals = dict() # totals = list()

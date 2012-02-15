@@ -62,7 +62,7 @@ class Tag(BaseController):
                 old_tags.append(t)
         vgroup['tags'] = old_tags
         holly_couch[id] = vgroup
-        remember_tag_change(old_tags=remember_old_tags, new_tags=old_tags, visiting_group_id=id, visiting_group_name=vgroup['name'], changed_by=getLoggedInUserId(request))
+        remember_tag_change(holly_couch, old_tags=remember_old_tags, new_tags=old_tags, visiting_group_id=id, visiting_group_name=vgroup['name'], changed_by=getLoggedInUserId(request))
         
         return dict(tags=old_tags)
     
@@ -75,6 +75,6 @@ class Tag(BaseController):
         new_tags = [t for t in old_tags if t.strip() != tag.strip()]
         vgroup['tags'] = new_tags
         holly_couch[id] = vgroup
-        remember_tag_change(old_tags=old_tags, new_tags=new_tags, visiting_group_id=id, visiting_group_name=vgroup['name'], changed_by=getLoggedInUserId(request))
+        remember_tag_change(holly_couch, old_tags=old_tags, new_tags=new_tags, visiting_group_id=id, visiting_group_name=vgroup['name'], changed_by=getLoggedInUserId(request))
 
         return dict(tags=new_tags)

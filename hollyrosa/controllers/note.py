@@ -57,13 +57,12 @@ class Note(BaseController):
         if _id == '':
             note_o = DataContainer(text='', target_id=target_id, _id='')
         else:
-            note_o = holly_couch[_id] #DataContainer(text='', target_id=target_id, _id='')
+            note_o = holly_couch[_id] 
         return dict(note=note_o)
         
     @expose("json")
     def get_notes_for_visiting_group(self, id):
-        print 'load'
-        notes = [n.doc for n in getNotesForTarget(id)]
+        notes = [n.doc for n in getNotesForTarget(holly_couch, id)]
         return dict(notes=notes, id=id)
 
 
@@ -88,7 +87,7 @@ class Note(BaseController):
         note_o['text'] = text
         holly_couch[note_o['_id']] = note_o
         
-        remember_note_change(target_id=target_id, note_id=note_o['_id'], changed_by=getLoggedInUserId(request), note_change=note_change)
+        remember_note_change(holly_couch, target_id=target_id, note_id=note_o['_id'], changed_by=getLoggedInUserId(request), note_change=note_change)
 
         # TODO: where do we go from here?
         redirect_to = '/'

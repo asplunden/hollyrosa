@@ -38,7 +38,8 @@ from tg import expose, flash, require, url, request, redirect,  validate
 
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import holly_couch,  genUID,  getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate
+from hollyrosa.model import holly_couch, genUID
+from hollyrosa.model.booking_couch import getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate
 from hollyrosa.model.booking_couch import getAllHistoryForBookings,  getAllActivities,  getAllActivityGroups,  getVisitingGroupsAtDate,  getUserNameMap,  getSchemaSlotActivityMap,  getAllVisitingGroups,  getActivityTitleMap
 import datetime
 from formencode import validators
@@ -60,20 +61,19 @@ from hollyrosa.controllers.booking_history import remember_booking_change,  reme
 
 from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate
 
+from hollyrosa.model import holly_couch
+
 __all__ = ['BookingDay',  'Calendar']
     
 
-def getBookingDay(booking_day_id):
+
+def getBookingDay(holly_couch, booking_day_id):
     return holly_couch[booking_day_id] 
-
-
     
-def getBooking(id):
+def getBooking(holly_couch, id):
     return holly_couch[id]
     
-
-
-def deleteBooking(booking_o):
+def deleteBooking(holly_couch, booking_o):
     booking_o['booking_state'] = -100
     booking_o['booking_day_id'] = ''
     booking_o['slot_id'] = ''
@@ -83,10 +83,8 @@ def make_booking_day_activity_anchor(tmp_activity_id):
     return '#activity_row_id_' + str(tmp_activity_id)
 
 
-def getNextBookingDayId(booking_day):
-    #booking_day_o = [ ]  DBSession.query(booking.BookingDay).filter('date=\''+(o_booking.booking_day.date + datetime.timedelta(1)
-#).strftime('%Y-%m-%d')+'\'').one()
-#    return booking_day_o.id
+def getNextBookingDayId(holly_couch, booking_day):
+    # TODO: relly needs refactoring
     this_date = booking_day['date'] # make date from string, but HOW?
     next_date = (datetime.datetime.strptime(this_date,'%Y-%m-%d') +  datetime.timedelta(1)).strftime('%Y-%m-%d')
     print 'next date',  next_date
@@ -114,7 +112,7 @@ class Calendar(BaseController):
     @expose('hollyrosa.templates.calendar_overview')
     def overview_all(self):
         """Show an overview of all booking days"""
-        return dict(booking_days=[b.doc for b in getAllBookingDays()])
+        return dict(booking_days=[b.doc for b in getAllBookingDays(holly_couch)])
 
 
     @expose('hollyrosa.templates.calendar_overview')
@@ -122,7 +120,7 @@ class Calendar(BaseController):
         """Show an overview of all booking days"""
         today = datetime.date.today().strftime('%Y-%m-%d')
         today = '2011-08-01'
-        return dict(booking_days=[b.doc for b in getBookingDays(from_date=today)])
+        return dict(booking_days=[b.doc for b in getBookingDays(holly_couch, from_date=today)])
     
 
     @expose('hollyrosa.templates.calendar_upcoming')
@@ -131,9 +129,9 @@ class Calendar(BaseController):
         today_date_str = datetime.date.today().strftime('%Y-%m-%d')
         today_date_str = '2011-08-01'
         end_date_str = (datetime.date.today()+datetime.timedelta(5)).strftime('%Y-%m-%d')
-        booking_days = getBookingDays(from_date=today_date_str,  to_date=end_date_str) 
+        booking_days = getBookingDays(holly_couch, from_date=today_date_str,  to_date=end_date_str) 
 
-        vgroups = getVisitingGroupsInDatePeriod(today_date_str,  end_date_str) # TODO: fix view later.  get_visiting_groups(from_date=today_date_str,  to_date=end_date_str)
+        vgroups = getVisitingGroupsInDatePeriod(holly_couch, today_date_str,  end_date_str) # TODO: fix view later.  get_visiting_groups(from_date=today_date_str,  to_date=end_date_str)
 
         group_info = dict()
         bdays = list()
@@ -150,7 +148,7 @@ class Calendar(BaseController):
     @validate(validators={'id':validators.Int(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booking day properties'))
     def edit_booking_day(self,  id=None,  **kw):
-        booking_day = holly_couch[id]
+        booking_day = getBookingDay(holly_couch, id)
         if not booking_day.has_key('title'):
             booking_day['title'] = ''
         tmpl_context.form = create_edit_booking_day_form
@@ -162,7 +160,7 @@ class Calendar(BaseController):
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booking day properties'))
     def save_booking_day_properties(self,  _id=None,  note='', title='', num_program_crew_members=0,  num_fladan_crew_members=0):
         
-        booking_day_c = holly_couch[_id]
+        booking_day_c = getBookingDay(holly_couch, _id)
         booking_day_c['note'] = note
         booking_day_c['title'] = title
         booking_day_c['num_program_crew_members'] = num_program_crew_members
@@ -203,7 +201,7 @@ class BookingDay(BaseController):
         try:
             tmp = self._all_days
         except AttributeError:
-            all_days_c = getAllBookingDays()
+            all_days_c = getAllBookingDays(holly_couch)
             self._all_days = [DataContainer(id=d.key,  date=d.value) for d in all_days_c]
             tmp = self._all_days
        
@@ -249,7 +247,8 @@ class BookingDay(BaseController):
         return slot_rows
 
 
-    def getNonDeletedBookingsForBookingDay(self,  day_id):
+    def getNonDeletedBookingsForBookingDay(self, holly_couch, day_id):
+        # TODO refactor out view
         bookings_c = holly_couch.view('booking_day/non_deleted_bookings_of_booking_day',  keys=[day_id])
             
         # TODO: optimize away this dict thing
@@ -266,7 +265,8 @@ class BookingDay(BaseController):
         return bookings
         
         
-    def getSlotStateOfBookingDayIdAndSlotId(self,  booking_day_id,  slot_id):
+    def getSlotStateOfBookingDayIdAndSlotId(self, holly_couch, booking_day_id,  slot_id):
+        # TODO: refactor map fun immediately!
         map_fun = """function(doc) {
         if (doc.type == 'slot_state') {
             if (doc.booking_day_id == '""" + booking_day_id+  """')  {
@@ -284,7 +284,8 @@ class BookingDay(BaseController):
         return slot_states
         
         
-    def getSlotBlockingsForBookingDay(self,  day_id):
+    def getSlotBlockingsForBookingDay(self, holly_couch, day_id):
+        # todo refactor
         blockings_map = dict()
         for x in holly_couch.view("booking_day/slot_state_of_booking_day",  keys=[day_id]):
             b = x.value
@@ -294,8 +295,9 @@ class BookingDay(BaseController):
         return blockings_map
         
         
-    def getUnscheduledBookingsForToday(self,  date,  activity_map):
+    def getUnscheduledBookingsForToday(self, holly_couch, date,  activity_map):
         # need to convert 2011-10-01 to something like Fri Aug 05 2011
+        # TODO: refactor
         tmp_date = datetime.datetime.strptime(date, "%Y-%m-%d" )
         tmp_date_f = tmp_date.strftime("%a %b %d %Y")
         
@@ -354,18 +356,18 @@ class BookingDay(BaseController):
         # TODO: we really need to get only the slot rows related to our booking day schema or things will go wrong at some point when we have more than one schema to work with.
         
         today_sql_date = datetime.datetime.today().date().strftime("%Y-%m-%d")
-        activities_map = self.getActivitiesMap(getAllActivities())
+        activities_map = self.getActivitiesMap(getAllActivities(holly_couch))
         
         if day_id != None:
-            booking_day_o = holly_couch[day_id]
+            booking_day_o = getBookingDay(holly_couch, day_id)
             
         elif day=='today':
     
-            booking_day_o = getBookingDayOfDate(today_sql_date)
+            booking_day_o = getBookingDayOfDate(holly_couch, today_sql_date)
             day_id = booking_day_o['_id']
             
         else:
-            booking_day_o = getBookingDayOfDate(str(day))
+            booking_day_o = getBookingDayOfDate(holly_couch, str(day))
             day_id = booking_day_o['_id']
         
         #  TODO: fix row below
@@ -377,7 +379,7 @@ class BookingDay(BaseController):
         slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map)
             
         #...first, get booking_day for today
-        new_bookings = self.getNonDeletedBookingsForBookingDay(day_id)
+        new_bookings = self.getNonDeletedBookingsForBookingDay(holly_couch, day_id)
         
         #...we need a mapping from activity to a list / tupple slot_row_position
         #
@@ -387,13 +389,13 @@ class BookingDay(BaseController):
         
         #...find all unscheduled bookings
         showing_sql_date = str(booking_day_o['date'])
-        unscheduled_bookings = self.getUnscheduledBookingsForToday(showing_sql_date,  activities_map)
+        unscheduled_bookings = self.getUnscheduledBookingsForToday(holly_couch, showing_sql_date,  activities_map)
         
         #...compute all blockings, create a dict mapping slot_row_position_id to actual state
-        blockings_map = self.getSlotBlockingsForBookingDay(day_id)
+        blockings_map = self.getSlotBlockingsForBookingDay(holly_couch, day_id)
         days = self.getAllDays()
 
-        activity_groups =  [DataContainer(id=d.value['_id'],  title=d.value['title']) for d in getAllActivityGroups()] 
+        activity_groups = [DataContainer(id=d.value['_id'],  title=d.value['title']) for d in getAllActivityGroups(holly_couch)] 
             
         return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups)
         
@@ -415,14 +417,14 @@ class BookingDay(BaseController):
         today_sql_date = datetime.datetime.today().date().strftime("%Y-%m-%d")
 
 
-        activities_map = self.getActivitiesMap(getAllActivities())
+        activities_map = self.getActivitiesMap(getAllActivities(holly_couch))
         
         if day_id != None and day_id != '':
-            booking_day_o = holly_couch[day_id]
+            booking_day_o = getBookingDay(holly_couch, day_id)
                 
         else:
             the_day = str(day)
-            booking_day_o = getBookingDayOfDate(the_day)
+            booking_day_o = getBookingDayOfDate(holly_couch, the_day)
             day_id = booking_day_o['_id']
         
         #  TODO: fix row below
@@ -440,8 +442,8 @@ class BookingDay(BaseController):
 
         activity_slot_position_map = self.getActivitySlotPositionsMap(day_schema) 
 
-        new_bookings = self.getNonDeletedBookingsForBookingDay(day_id)    
-        blockings_map = self.getSlotBlockingsForBookingDay(day_id)
+        new_bookings = self.getNonDeletedBookingsForBookingDay(holly_couch, day_id)    
+        blockings_map = self.getSlotBlockingsForBookingDay(holly_couch, day_id)
                         
         return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map, activity_group=ag,  workflow_img_mapping=workflow_img_mapping, ag_title=ag_title, reFormatDate=reFormatDate)
 
@@ -454,8 +456,8 @@ class BookingDay(BaseController):
     def delete_booking(self,  booking_day_id,  booking_id):
         tmp_booking = holly_couch[booking_id]
         tmp_activity_id = tmp_booking['activity_id']
-        remember_delete_booking_request(booking=tmp_booking, changed_by='',  activity_title=holly_couch[tmp_activity_id]['title'])
-        deleteBooking(tmp_booking)
+        remember_delete_booking_request(holly_couch, booking=tmp_booking, changed_by='',  activity_title=holly_couch[tmp_activity_id]['title'])
+        deleteBooking(holly_couch, tmp_booking)
         raise redirect('/booking/day?day_id='+str(booking_day_id) + make_booking_day_activity_anchor(tmp_activity_id)) 
         
 
@@ -508,7 +510,7 @@ class BookingDay(BaseController):
         slot = slot_map[old_slot_id]
         activity = holly_couch[b['activity_id']]
         
-        remember_unschedule_booking(booking=b, slot_row_position=slot, booking_day=booking_day,  changed_by='',  activity=activity)
+        remember_unschedule_booking(holly_couch, booking=b, slot_row_position=slot, booking_day=booking_day,  changed_by='',  activity=activity)
 
         raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(b['activity_id']))
         
@@ -530,7 +532,7 @@ class BookingDay(BaseController):
         slot = slot_map[slot_row_position_id]
         
         #...TODO: have all lookuped data in some local ctx that can be passed on to all helper functions so we dont have to do a lot of re-lookups
-        remember_schedule_booking(booking=b, slot_row_position=slot, booking_day=booking_day,  activity=activity)
+        remember_schedule_booking(holly_couch, booking=b, slot_row_position=slot, booking_day=booking_day,  activity=activity)
         
         raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(b['activity_id']))
         
@@ -544,7 +546,7 @@ class BookingDay(BaseController):
         #...find booking day and booking row
         booking_day = holly_couch[booking_day_id]
         
-        tmp_visiting_groups = getVisitingGroupsAtDate(booking_day['date']) 
+        tmp_visiting_groups = getVisitingGroupsAtDate(holly_couch, booking_day['date']) 
         visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in tmp_visiting_groups] 
         
         #...find out activity of slot_id for booking_day
@@ -557,12 +559,12 @@ class BookingDay(BaseController):
 #                    activity_id = tmp_activity_id
 #                    slot = tmp_slot
 #                    break
-        slot_map= getSchemaSlotActivityMap(booking_day['day_schema_id'])
+        slot_map= getSchemaSlotActivityMap(holly_couch, booking_day['day_schema_id'])
         slot = slot_map[slot_position_id]        
         activity = holly_couch[slot['activity_id']] 
         booking_o = DataContainer(content='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_row_position_id=slot_position_id)
         
-        return dict(booking_day=booking_day,    booking=booking_o,  visiting_groups=visiting_groups, edit_this_visiting_group=0,  slot_position=slot)
+        return dict(booking_day=booking_day, booking=booking_o, visiting_groups=visiting_groups, edit_this_visiting_group=0,  slot_position=slot)
         
 
     @expose('hollyrosa.templates.show_booking')
@@ -583,13 +585,13 @@ class BookingDay(BaseController):
             if '' != booking_day_id:
                 booking_day = holly_couch[booking_day_id] 
             
-                slot_map = getSchemaSlotActivityMap(booking_day['day_schema_id'])
+                slot_map = getSchemaSlotActivityMap(holly_couch, booking_day['day_schema_id'])
                 slot_id = booking_o['slot_id']
                 slot_position = slot_map[slot_id]
         
         activity = holly_couch[activity_id] 
-        history = [h.value for h in getAllHistoryForBookings([id])]
-        user_name_map = getUserNameMap()
+        history = [h.value for h in getAllHistoryForBookings(holly_couch, [id])]
+        user_name_map = getUserNameMap(holly_couch)
         
         return dict(booking_day=booking_day,  slot_position=slot_position, booking=booking_o,  workflow_map=workflow_map,  history=history,  change_op_map=change_op_map,  getRenderContent=getRenderContentDict,  activity=activity, formatDate=reFormatDate,  user_name_map=user_name_map)
         
@@ -613,7 +615,7 @@ class BookingDay(BaseController):
         activity = holly_couch[activity_id]
         booking_ = DataContainer(activity_id=activity_id, activity=activity,  id=booking_o['_id'],  visiting_group_name=booking_o['visiting_group_name'],  visiting_group_id=booking_o['visiting_group_id'],  content=booking_o['content'], return_to_day_id=return_to_day_id )
         
-        tmp_visiting_groups = getVisitingGroupsAtDate(booking_day['date']) 
+        tmp_visiting_groups = getVisitingGroupsAtDate(holly_couch, booking_day['date']) 
         visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in tmp_visiting_groups]  
         
         return dict(booking_day=booking_day,  slot_position=slot_position, booking=booking_,  visiting_groups=visiting_groups, edit_this_visiting_group=booking_o['visiting_group_id'],  activity=activity)
@@ -659,22 +661,22 @@ class BookingDay(BaseController):
         
         if is_new:
             booking_day = holly_couch[booking_day_id]
-            slot_map  = getSchemaSlotActivityMap(booking_day['day_schema_id'])
+            slot_map  = getSchemaSlotActivityMap(holly_couch, booking_day['day_schema_id'])
             slot = slot_map[slot_row_position_id]
-            new_uid = 'booking.'+genUID()
-            remember_book_slot(booking_id=new_uid, booking=old_booking,  slot_row_position=slot, booking_day=booking_day,  activity_title=activity['title'])
+            new_uid = genUID(type='booking')
+            remember_book_slot(holly_couch, booking_id=new_uid, booking=old_booking,  slot_row_position=slot, booking_day=booking_day,  activity_title=activity['title'])
             holly_couch[new_uid] = old_booking
         else:
             booking_day = holly_couch[booking_day_id]
             slot_map  = getSchemaSlotActivityMap(booking_day['day_schema_id'])
             slot = slot_map[slot_row_position_id]
-            remember_booking_properties_change(booking=old_booking, slot_row_position=slot, booking_day=booking_day,  old_visiting_group_name=old_visiting_group_name,  new_visiting_group_name=visiting_group_name, new_content='',  activity_title=activity['title'])
+            remember_booking_properties_change(holly_couch, booking=old_booking, slot_row_position=slot, booking_day=booking_day,  old_visiting_group_name=old_visiting_group_name,  new_visiting_group_name=visiting_group_name, new_content='',  activity_title=activity['title'])
             
             holly_couch[old_booking['_id']] = old_booking
         
         #...block after book?
         if block_after_book:
-            self.block_slot_helper(booking_day_id,  slot_row_position_id)
+            self.block_slot_helper(holly_couch, booking_day_id,  slot_row_position_id)
         
         raise redirect('day?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id))
     
@@ -690,7 +692,7 @@ class BookingDay(BaseController):
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change activity information'))
     def edit_activity(self, activity_id=None,  **kw):
         tmpl_context.form = create_edit_activity_form
-        activity_groups = self.get_activity_groups() #DBSession.query(booking.ActivityGroup.id, booking.ActivityGroup.title).all() # in the future filter on from and to dates
+        activity_groups = self.get_activity_groups(holly_couch)
         if None == activity_id:
             activity = DataContainer(id=None,  title='',  info='')
         elif id=='':
@@ -743,8 +745,8 @@ class BookingDay(BaseController):
         
         # TODO: We still need to add some reasonable sorting on the activities abd the visiting groups
         
-        activities = [(a.doc['_id'],  a.doc['title'] ) for a in getAllActivities()]
-        visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in getAllVisitingGroups()]
+        activities = [(a.doc['_id'],  a.doc['title'] ) for a in getAllActivities(holly_couch)]
+        visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in getAllVisitingGroups(holly_couch)]
         
         tmp_visiting_group = holly_couch[visiting_group_id]
         
@@ -764,7 +766,7 @@ class BookingDay(BaseController):
     @validate(validators={'return_to_day_id':validators.UnicodeString(not_empty=False), 'id':validators.UnicodeString(not_empty=False)})
     def move_booking(self,  return_to_day_id=None,  id=None,  **kw):
         tmpl_context.form = create_move_booking_form
-        activities = [(a.value['_id'],  a.value['title'] ) for a in getAllActivities()]
+        activities = [(a.value['_id'],  a.value['title'] ) for a in getAllActivities(holly_couch)]
         
         #...patch since this is the way we will be called if validator for new will fail
         booking_o = holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
@@ -817,10 +819,10 @@ class BookingDay(BaseController):
         new_booking['slot_id'] = new_slot_id
         holly_couch[new_booking['_id']] = new_booking
         
-        activity_title_map = getActivityTitleMap()
+        activity_title_map = getActivityTitleMap(holly_couch)
         
         # TODO: remember move booking
-        remember_booking_move(booking=new_booking,  booking_day=booking_day_o,  old_activity_title=activity_title_map[old_activity_id],  new_activity_title=activity_title_map[activity_id])
+        remember_booking_move(holly_couch, booking=new_booking,  booking_day=booking_day_o,  old_activity_title=activity_title_map[old_activity_id],  new_activity_title=activity_title_map[activity_id])
         raise redirect('/booking/day?day_id='+str(return_to_day_id)) 
         
         
@@ -864,9 +866,9 @@ class BookingDay(BaseController):
         
         if is_new:
             holly_couch['booking.'+genUID()] = new_booking
-            remember_new_booking_request(new_booking)
+            remember_new_booking_request(holly_couch, new_booking)
         else:
-            remember_booking_request_change(old_booking=old_booking,  new_booking=new_booking)
+            remember_booking_request_change(holly_couch, old_booking=old_booking,  new_booking=new_booking)
         
         if return_to_day_id != None:
             if return_to_day_id != '':
@@ -908,7 +910,7 @@ class BookingDay(BaseController):
         if (old_slot_index+1) >= len(old_slot_row):
             flash('last slot')
             
-            new_booking_day_id = getNextBookingDayId(booking_day)
+            new_booking_day_id = getNextBookingDayId(holly_couch, booking_day)
             #new_booking_slot_row_position_id = slot_row_positions[0].id
             new_slot_id = old_slot_row[1]['slot_id']
         else:
@@ -928,7 +930,7 @@ class BookingDay(BaseController):
         #todo: figure out if slot is blocked
         
         #new_booking_slot_row_position_state = DBSession.query(booking.SlotRowPositionState).filter(and_('slot_row_position_id='+str(new_booking_slot_row_position_id), 'booking_day_id='+str(new_booking_booking_day_id))) .all()
-        new_booking_slot_row_position_states = self.getSlotStateOfBookingDayIdAndSlotId(new_booking_day_id,  new_slot_id)
+        new_booking_slot_row_position_states = self.getSlotStateOfBookingDayIdAndSlotId(holly_couch, new_booking_day_id,  new_slot_id)
         
         #...if it isn't blocked, then book that slot.
         if len(new_booking_slot_row_position_states) == 0:
@@ -950,7 +952,7 @@ class BookingDay(BaseController):
             
             
             holly_couch['booking.'+genUID()] = new_booking
-            remember_new_booking_request(new_booking)
+            remember_new_booking_request(holly_couch, new_booking)
         else:
             flash('wont prolong since next slot is blocked',  'warning')
             redirect('/booking/day?day_id='+str(booking_day_id)) 
@@ -960,7 +962,7 @@ class BookingDay(BaseController):
         raise redirect('/booking/day?day_id='+str(new_booking['booking_day_id']) + make_booking_day_activity_anchor(new_booking['activity_id'])) 
 
 
-    def getActivityIdOfBooking(self,  booking_day_id,  slot_id):
+    def getActivityIdOfBooking(self, holly_couch, booking_day_id,  slot_id):
         """
         try to find activity given booking day and slot_id
         
@@ -979,23 +981,23 @@ class BookingDay(BaseController):
         # todo: I dont think it is unreasonable that each schema has a lookuptable slot_id -> activity that is updated if the schema is updated.
         
 
-    def block_slot_helper(self, booking_day_id,  slot_id,  level = 1):
+    def block_slot_helper(self, holly_couch, booking_day_id,  slot_id,  level = 1):
         slot_state = dict(slot_id=slot_id,  booking_day_id=booking_day_id, level=level,  type='slot_state')
-        holly_couch['slot_state.'+genUID()] = slot_state 
+        holly_couch[genUID(type='slot_state')] = slot_state 
         # TODO: set state variable when it has been introduced
         
         booking_day = holly_couch[booking_day_id]
-        slot_map = getSchemaSlotActivityMap(booking_day['day_schema_id'])
+        slot_map = getSchemaSlotActivityMap(holly_couch, booking_day['day_schema_id'])
         slot = slot_map[slot_id]
-        remember_block_slot(slot_row_position=slot, booking_day=booking_day,  level=level,  changed_by=getLoggedInUserId(request),  activity_title=holly_couch[slot['activity_id']]['title'])
+        remember_block_slot(holly_couch, slot_row_position=slot, booking_day=booking_day,  level=level,  changed_by=getLoggedInUserId(request),  activity_title=holly_couch[slot['activity_id']]['title'])
         
         
     @expose()
     @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'slot_row_position_id':validators.Int(not_empty=True), 'level':validators.Int(not_empty=True)})
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
     def block_slot(self, booking_day_id,  slot_row_position_id,  level = 1):
-        self.block_slot_helper(booking_day_id, slot_row_position_id, level=level)
-        activity_id = self.getActivityIdOfBooking(booking_day_id,  slot_row_position_id)
+        self.block_slot_helper(holly_couch, booking_day_id, slot_row_position_id, level=level)
+        activity_id = self.getActivityIdOfBooking(holly_couch, booking_day_id,  slot_row_position_id)
         raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(activity_id))
         
 
@@ -1005,16 +1007,16 @@ class BookingDay(BaseController):
     def unblock_slot(self, booking_day_id,  slot_row_position_id):
         
         # todo: set state variable when it has been introduced
-        tmp_slot_states = self.getSlotStateOfBookingDayIdAndSlotId( booking_day_id,  slot_row_position_id)
+        tmp_slot_states = self.getSlotStateOfBookingDayIdAndSlotId(holly_couch,  booking_day_id,  slot_row_position_id)
         for sl in tmp_slot_states:
             holly_couch.delete(sl)
         #activity_id = self.getActivityIdOfBooking(booking_day_id,  slot_row_position_id)
         
         booking_day = holly_couch[booking_day_id]
-        slot_map = getSchemaSlotActivityMap(booking_day['day_schema_id'])
+        slot_map = getSchemaSlotActivityMap(holly_couch, booking_day['day_schema_id'])
         slot = slot_map[slot_row_position_id]
         activity_id = slot['activity_id']
-        remember_unblock_slot(slot_row_position=slot, booking_day=booking_day,  changed_by=getLoggedInUserId(request),  level=0,  activity_title=holly_couch[activity_id]['title'])
+        remember_unblock_slot(holly_couch, slot_row_position=slot, booking_day=booking_day,  changed_by=getLoggedInUserId(request),  level=0,  activity_title=holly_couch[activity_id]['title'])
 
         raise redirect('day?day_id='+str(booking_day_id) + make_booking_day_activity_anchor(activity_id)) 
         
@@ -1029,9 +1031,9 @@ class BookingDay(BaseController):
         day_schema_id = booking_day['day_schema_id']
         day_schema = holly_couch[day_schema_id]
          
-        booking_days = [b.doc for b in getAllBookingDays()] 
+        booking_days = [b.doc for b in getAllBookingDays(holly_couch)] 
         activity_id = booking_o['activity_id']
-        activities_map = self.getActivitiesMap(getAllActivities())
+        activities_map = self.getActivitiesMap(getAllActivities(holly_couch))
                 
         slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map)
         
@@ -1075,7 +1077,7 @@ class BookingDay(BaseController):
     def create_booking_async(self,  booking_day_id=0,  slot_row_position_id=0,  activity_id=0,  content='', block_after_book=False,  visiting_group_id=None):
                 
         #...TODO refactor to isBlocked
-        slot_row_position_states = [b.doc for  b in holly_couch.view('booking_day/slot_state_of_slot_id_and_booking_day_id', keys=[booking_day_id, slot_row_position_id])] #DBSession.query(booking.SlotRowPositionState).filter(and_('booking_day_id='+booking_day_id, 'slot_row_position_id='+slot_row_position_id)).first()
+        slot_row_position_states = [b.doc for  b in holly_couch.view('booking_day/slot_state_of_slot_id_and_booking_day_id', keys=[booking_day_id, slot_row_position_id])]
         
         if 0 < len(slot_row_position_states):
             return dict(error_msg="slot blocked, wont book")
@@ -1099,10 +1101,10 @@ class BookingDay(BaseController):
             
             holly_couch[new_id] = new_booking
                 
-            remember_new_booking_request(new_booking)
+            remember_new_booking_request(holly_couch, new_booking)
             slot_row_position_state = 0
             if block_after_book:
-                self.block_slot_helper(booking_day_id, slot_row_position_id, level=1)
+                self.block_slot_helper(holly_couch, booking_day_id, slot_row_position_id, level=1)
                 slot_row_position_state = 1
                 
         return dict(text="hello",  booking_day_id=booking_day_id,  slot_row_position_id=slot_row_position_id, booking=new_booking,  visiting_group_name=vgroup['name'], success=True, slot_row_position_state=slot_row_position_state)
@@ -1114,8 +1116,8 @@ class BookingDay(BaseController):
     def delete_booking_async(self,  delete_req_booking_id=0,  activity_id=0,  visiting_group_id=None):
         vgroup = holly_couch[visiting_group_id]
         booking_o = holly_couch[delete_req_booking_id]
-        remember_delete_booking_request(booking_o)
-        deleteBooking(booking_o)
+        remember_delete_booking_request(holly_couch, booking_o)
+        deleteBooking(holly_couch, booking_o)
 
         return dict(text="hello", delete_req_booking_id=delete_req_booking_id, visiting_group_name=vgroup['name'], success=True)
         
@@ -1132,7 +1134,7 @@ class BookingDay(BaseController):
         slot_map = getSchemaSlotActivityMap(booking_day['day_schema_id'])
         slot = slot_map[old_slot_id]
         activity = holly_couch[booking_o['activity_id']]
-        remember_unschedule_booking(booking=booking_o, slot_row_position=slot, booking_day=booking_day,  changed_by='', activity=activity)
+        remember_unschedule_booking(holly_couch, booking=booking_o, slot_row_position=slot, booking_day=booking_day,  changed_by='', activity=activity)
         booking_o['booking_state'] = 0
         booking_o['booking_day_id'] = None
         booking_o['slot_row_position_id'] = None

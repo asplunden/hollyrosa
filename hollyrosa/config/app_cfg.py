@@ -22,8 +22,8 @@ from repoze.who.plugins.auth_tkt import AuthTktCookiePlugin
 from repoze.who.middleware import PluggableAuthenticationMiddleware
 
 import hollyrosa
-#from hollyrosa import model
-from hollyrosa.model import holly_couch
+#from hollyrosa.model import holly_couch
+from hollyrosa import model
 from hollyrosa.lib import app_globals, helpers 
 from hollyrosa.controllers.common import DataContainer
 
@@ -42,7 +42,7 @@ class CouchAuthenticatorPlugin(object):
         login = identity.get('login')
         ###raise IOError, str(dir(db))
         ###user = db.users.find_one({'user_name':login})
-        user = holly_couch.get('user.'+login)
+        user = model.holly_couch.get('user.'+login)
         
         if user and validate_password(user, identity.get('password')):
             return identity['login']
@@ -53,12 +53,12 @@ class CouchAuthenticatorPlugin(object):
 
 class CouchUserMDPlugin(object):
     implements(IMetadataProvider)
- 
+    
     def add_metadata(self, environ, identity):
         ####user_data = {'user_name':identity['repoze.who.userid']}
         ###identity['user'] = db.users.find_one(user_data)
         user_name = identity['repoze.who.userid']
-        user_doc = holly_couch.get('user.'+user_name)
+        user_doc = model.holly_couch.get('user.'+user_name)
         identity['user'] = user_doc
         identity['user_level'] = user_doc['level']
         

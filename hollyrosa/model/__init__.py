@@ -40,29 +40,36 @@ DBSession = scoped_session(maker)
 #
 ######
 
+
 couch_server = None
 holly_couch = None
 
-db_url = tg.config.get('couch.db_url', 'http://localhost:5989')
-db_name = tg.config.get('couch.database', 'hollyrosa1')
 
-
-
-print db_url,  db_name
-
-couch_server = couchdb.Server(url=db_url)
-try:
-    holly_couch = couch_server[db_name]
-except couchdb.ResourceNotFound, e:
-    holly_couch = couch_server.create(db_name)
-        
         
 def init_model(engine):
     """Call me before using any of the tables or classes in the model."""
-    print 'INIT_MODEL'
     DBSession.configure(bind=engine)
-    
 
+    
+def getDB():
+    return holly_couch
+    
+    
+def initDB():
+    db_url = tg.config.get('couch.db_url', 'http://localhost:5989')
+    db_name = tg.config.get('couch.database', 'hollyrosa1')
+
+    print 'initDB...', db_url,  db_name
+    global couch_server
+    global holly_couch
+    
+    couch_server = couchdb.Server(url=db_url)
+    try:
+        holly_couch = couch_server[db_name]
+    except couchdb.ResourceNotFound, e:
+        holly_couch = couch_server.create(db_name)
+    
+    
 # Import your model modules here.
 ###from hollyrosa.model.auth import User, Group, Permission
 ##from hollyrosa.model.booking import DaySchema, BookingDay, SlotRow, Booking, VisitingGroup, BookingHistory, Activity, ActivityGroup, SlotRowPosition,  SlotRowPositionState
@@ -71,11 +78,11 @@ import booking_couch
 from booking_couch import genUID
 
 # TODO: refactor 
-holly_couch = booking_couch.holly_couch
+##holly_couch = booking_couch.holly_couch
 
 
-getAllVisitingGroupsNameAmongBookings = booking_couch.getAllVisitingGroupsNameAmongBookings
-getSlotAndActivityIdOfBooking = booking_couch.getSlotAndActivityIdOfBooking
-getBookingDayOfDate = booking_couch.getBookingDayOfDate
-getAllBookingDays = booking_couch.getAllBookingDays
-getBookingDays = booking_couch.getBookingDays
+#getAllVisitingGroupsNameAmongBookings = booking_couch.getAllVisitingGroupsNameAmongBookings
+#getSlotAndActivityIdOfBooking = booking_couch.getSlotAndActivityIdOfBooking
+#getBookingDayOfDate = booking_couch.getBookingDayOfDate
+#getAllBookingDays = booking_couch.getAllBookingDays
+#getBookingDays = booking_couch.getBookingDays

@@ -23,7 +23,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from formencode import validators
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import holly_couch,  genUID
+from hollyrosa.model import genUID, holly_couch
 from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus, getNotesForTarget, getBookingInfoNotesOfUsedActivities
 from hollyrosa.model.booking_couch import getBookingDays,  getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap
 import datetime
@@ -61,17 +61,17 @@ class VisitingGroup(BaseController):
     @expose('hollyrosa.templates.visiting_group_view_all')
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view(self, url):
-        visiting_groups = [x.doc for x in getAllVisitingGroups()]
+        visiting_groups = [x.doc for x in getAllVisitingGroups(holly_couch)]
         visiting_group_names = [x['name'] for x in visiting_groups] 
-        v_group_map = dict() #self.makeVGroupMap(visiting_group_names)
-        has_notes_map = getTargetNumberOfNotesMap()
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(),  bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()], has_notes_map=has_notes_map)
+        v_group_map = dict() 
+        has_notes_map = getTargetNumberOfNotesMap(holly_couch)
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(),  bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
         
         
 
     def makeRemainingVisitingGroupsMap(self, visiting_groups,  from_date='',  to_date=''):
         v_group_map = dict()
-        all_existing_names = getAllVisitingGroupsNameAmongBookings(from_date=from_date,  to_date=to_date)
+        all_existing_names = getAllVisitingGroupsNameAmongBookings(holly_couch, from_date=from_date,  to_date=to_date)
         exisiting_vgroup_names = [n['name'] for n in visiting_groups]
         for b in all_existing_names:
                 if b not in exisiting_vgroup_names:
@@ -85,29 +85,29 @@ class VisitingGroup(BaseController):
     @validate(validators={'fromdate':validators.DateValidator(not_empty=False), 'todate':validators.DateValidator(not_empty=False)})
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_date_range(self,  fromdate=None,  todate=None):
-        visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(fromdate,  todate)]
+        visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(holly_couch, fromdate,  todate)]
         v_group_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=fromdate,  to_date=todate)
-        has_notes_map = getTargetNumberOfNotesMap()        
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()], has_notes_map=has_notes_map)
+        has_notes_map = getTargetNumberOfNotesMap(holly_couch)        
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
 
     
     @expose('hollyrosa.templates.visiting_group_view_all')
     @require(Any(is_user('erspl'), has_level('staff'),   msg='Only staff members and viewers may view visiting group properties'))
     def view_tags(self, tag):
         # TODO>: rename and maybe only return visiting groups docs ?
-        visiting_groups = [v.doc for v in getDocumentsByTag(tag)] 
+        visiting_groups = [v.doc for v in getDocumentsByTag(holly_couch, tag)] 
         remaining_visiting_groups_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups)
-        has_notes_map = getTargetNumberOfNotesMap()
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()], has_notes_map=has_notes_map)
+        has_notes_map = getTargetNumberOfNotesMap(holly_couch)
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
 
     
     @expose('hollyrosa.templates.visiting_group_view_all')
     @require(Any(is_user('erspl'), has_level('staff'),   msg='Only staff members and viewers may view visiting group properties'))
     def view_all(self):
-        visiting_groups = [v.doc for v in getAllVisitingGroups()] 
+        visiting_groups = [v.doc for v in getAllVisitingGroups(holly_couch)] 
         remaining_visiting_groups_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups)        
-        has_notes_map = getTargetNumberOfNotesMap()
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()], has_notes_map=has_notes_map)
+        has_notes_map = getTargetNumberOfNotesMap(holly_couch)
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
 
 
     @expose('hollyrosa.templates.visiting_group_view_all')
@@ -116,10 +116,10 @@ class VisitingGroup(BaseController):
     def view_boknstatus(self,  boknstatus=None):
         #boknstatus=boknstatus[:4] # amateurish quick sanitation
         #visiting_groups = get_visiting_groups_with_boknstatus(boknstatus) 
-        visiting_groups =[v.doc for v in getVisitingGroupsByBoknstatus(boknstatus)]
+        visiting_groups =[v.doc for v in getVisitingGroupsByBoknstatus(holly_couch, boknstatus)]
         v_group_map = dict()
-        has_notes_map = getTargetNumberOfNotesMap()        
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()], has_notes_map=has_notes_map)
+        has_notes_map = getTargetNumberOfNotesMap(holly_couch)  
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
 
         
     @expose('hollyrosa.templates.visiting_group_view_all')
@@ -131,20 +131,20 @@ class VisitingGroup(BaseController):
             from_date='2011-01-01'
             to_date='2011-07-16'
             
-            visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(from_date,  to_date)]
+            visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(holly_couch, from_date,  to_date)]
         elif period == '2an':
             from_date='2011-07-17'  
             to_date='2011-08-24'
-            visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(from_date,  to_date)]
+            visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(holly_couch, from_date,  to_date)]
 
         else:
             from_date=''
             to_date=''
-            visiting_groups = [v.doc for v in getAllVisitingGroups(from_date,  to_date)]
+            visiting_groups = [v.doc for v in getAllVisitingGroups(holly_couch, from_date,  to_date)]
         
         v_group_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=from_date,  to_date=to_date) 
-        has_notes_map = getTargetNumberOfNotesMap()        
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()], has_notes_map=has_notes_map)
+        has_notes_map = getTargetNumberOfNotesMap(holly_couch)        
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
 
 
     @expose("json")
@@ -157,20 +157,20 @@ class VisitingGroup(BaseController):
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group and their properties properties'))
     def view_today(self):
         at_date = datetime.datetime.today().strftime('%Y-%m-%d')
-        visiting_groups = [v.doc for v in getVisitingGroupsAtDate(at_date)] 
+        visiting_groups = [v.doc for v in getVisitingGroupsAtDate(holly_couch, at_date)] 
         v_group_map = self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=at_date,  to_date=at_date)        
         
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()])
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)])
 
 
     @expose('hollyrosa.templates.visiting_group_view_all')
     @validate(validators={'at_date':validators.DateValidator(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group and their properties properties'))
     def view_at_date(self,  at_date=None):
-        visiting_groups = [v.doc for v in getVisitingGroupsAtDate(at_date)] 
+        visiting_groups = [v.doc for v in getVisitingGroupsAtDate(holly_couch, at_date)] 
         v_group_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=at_date,  to_date=at_date)
-        has_notes_map = getTargetNumberOfNotesMap() 
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags()], has_notes_map=has_notes_map)
+        has_notes_map = getTargetNumberOfNotesMap(holly_couch) 
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
 
 
     @expose("json")
@@ -211,7 +211,7 @@ class VisitingGroup(BaseController):
 
             # TODO: see below
             bookings = [] 
-            notes = [n.doc for n in getNotesForTarget(id)]
+            notes = [n.doc for n in getNotesForTarget(holly_couch, id)]
         return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent, bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, notes=notes)
 
 
@@ -291,9 +291,7 @@ class VisitingGroup(BaseController):
         
         for param in visiting_group_properties:
             is_new_param = False
-            print 'PARAM',  param
             if param['property'] != '' and param['property'] != None:
-                print 'adding param'
                 if param['id'] != '' and param['id'] != None:
                     visiting_group_property_c[param['id']] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
                 #what if the param has no id?
@@ -395,13 +393,13 @@ class VisitingGroup(BaseController):
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_bookings_of_name(self,  name=None, render_time=''):
         # TODO: its now possible to get bookings on both name and id
-        bookings = [b.doc for b in getBookingsOfVisitingGroup(name, '<- MATCHES NO GROUP ->')]
-        
-        slot_map = getSchemaSlotActivityMap('day_schema.1') # TODO: load for each different schema used
+        bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, name, '<- MATCHES NO GROUP ->')]
+        print 'view_bookings_of_name', bookings
+        slot_map = getSchemaSlotActivityMap(holly_couch, 'day_schema.1') # TODO: load for each different schema used
         
         # TODO: make view. Its just so simple
         visiting_group_id = None
-        visiting_group = [v.doc for v in getVisitingGroupOfVisitingGroupName(name)]
+        visiting_group = [v.doc for v in getVisitingGroupOfVisitingGroupName(holly_couch, name)]
         if len(visiting_group) == 1:
             visiting_group_id = visiting_group[0]['_id']
             
@@ -409,13 +407,13 @@ class VisitingGroup(BaseController):
         #...now group all bookings in a dict mapping activity_id:content
         clustered_bookings = {}
         booking_day_map = dict()
-        for bd in getBookingDays():
+        for bd in getBookingDays(holly_couch):
             booking_day_map[bd.doc['_id']] = bd.doc
         
         activities = dict()
         used_activities_keys = dict()
-        for x in getAllActivities():
-            activities[x.key[1]] = x.value
+        for x in getAllActivities(holly_couch):
+            activities[x.key[1]] = x.doc
         
         
         for b in bookings: # TODO: There will be quite a few multiples if we search on both id and name!
@@ -455,7 +453,7 @@ class VisitingGroup(BaseController):
         for bl in clustered_bookings_list:
             bl.sort(self.fn_cmp_booking_timestamps)
             
-        booking_info_notes = [n.doc for n in getBookingInfoNotesOfUsedActivities(used_activities_keys.keys())]            
+        booking_info_notes = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())]            
         return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time)
 
 
