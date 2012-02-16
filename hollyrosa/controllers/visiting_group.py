@@ -224,9 +224,7 @@ class VisitingGroup(BaseController):
         new_empty_visiting_group_property = [DataContainer(property='spar',  value='0',  unit=u'spår',  description=u'antal deltagare 8 till 9 år'), 
                                              DataContainer(property='uppt',  value='0',  unit=u'uppt',  description=u'antal deltagare 10 till 11 år'), 
                                              DataContainer(property='aven',  value='0',  unit=u'aven',  description=u'antal deltagare 12 till 15 år'), 
-                                             DataContainer(property='utm',  value='0',  unit=u'utm',  description=u'antal deltagare 16 till 18 år'),
-                                             DataContainer(property='refnr',  value='',  unit=u'',  description=u'referensnummer'),
-                                             DataContainer(property='boknstatus',  value='ny',  unit=u'',  description=u'bokningsstatus')]
+                                             DataContainer(property='utm',  value='0',  unit=u'utm',  description=u'antal deltagare 16 till 18 år')]
  
  
         if None == id:
@@ -235,17 +233,31 @@ class VisitingGroup(BaseController):
             visiting_group = DataContainer(name='',  id=None,  info='')
         else:
             visiting_group_c = holly_couch[id] 
+#            visiting_group_c['from_date'] = datetime.datetime.strptime(visiting_group_c['from_date'],'%Y-%m-%d')
+#            visiting_group_c['to_date'] = datetime.datetime.strptime(visiting_group_c['to_date'],'%Y-%m-%d')
             
             #...HERE MAKE OBJECT OF DICTIONARY OR IT WONT WORK WITH THE FORMS
             vgps = []
             for id,  vgp in visiting_group_c['visiting_group_properties'].items():
-                vgpx = DataContainer(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=vgp['from_date'],  to_date=vgp['to_date'],  id=str(id))
+                try:
+                    print 'vgp',vgp['to_date']
+                    tmp_to_date = datetime.datetime.strptime(vgp['to_date'],'%Y-%m-%d')
+                except ValueError:
+                    tmp_to_date = None
+                
+                try:
+                    tmp_from_date = datetime.datetime.strptime(vgp['from_date'],'%Y-%m-%d')
+                except ValueError:
+                    tmp_from_date = None
+                
+                
+                vgpx = DataContainer(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=tmp_from_date,  to_date=tmp_to_date,  id=str(id))
                 vgps.append(vgpx)
 
             # TODO: DataContainerFromDictLikeObject(fields=)
             visiting_group = DataContainer(name=visiting_group_c['name'],  id=visiting_group_c['_id'],  info=visiting_group_c['info'],  visiting_group_properties=vgps
                                            ,  contact_person=visiting_group_c['contact_person'],  contact_person_email=visiting_group_c['contact_person_email'],  contact_person_phone=visiting_group_c['contact_person_phone'], 
-                                           boknr=visiting_group_c['boknr'],  boknstatus=visiting_group_c['boknstatus'],  camping_location=visiting_group_c['camping_location'],  from_date=visiting_group_c['from_date'], to_date=visiting_group_c['to_date'])
+                                           boknr=visiting_group_c['boknr'],  boknstatus=visiting_group_c['boknstatus'],  camping_location=visiting_group_c['camping_location'],  from_date=datetime.datetime.strptime(visiting_group_c['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(visiting_group_c['to_date'], '%Y-%m-%d'))
             
         return dict(visiting_group=visiting_group,  bokn_status_map=bokn_status_options)
         
@@ -259,9 +271,14 @@ class VisitingGroup(BaseController):
         if None == id or id == '':
             is_new = True
             visiting_group_c = dict(type='visiting_group')
-            id_c = genUID()
+            id_c = genUID(type='visiting_group')
+        elif 'visiting_group' not in id:
+            is_new = True
+            visiting_group_c = dict(type='visiting_group')
+            id_c = 'visiting_group.'+id
+            
         else:
-            id_c = str(id)
+            id_c = id
             visiting_group_c = holly_couch[id_c]
             is_new= False
             
@@ -313,7 +330,7 @@ class VisitingGroup(BaseController):
         visiting_group_c['visiting_group_properties'] = visiting_group_property_c
         
         # TODO: IMPORTANT TO FIX LATER
-        bookings = getBookingsOfVisitingGroup(id_c,  None)
+        bookings = getBookingsOfVisitingGroup(holly_couch, id_c,  None)
         for tmp in bookings:
             tmp_booking = tmp.doc
             #print 'tmp_booking',  tmp_booking

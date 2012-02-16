@@ -44,7 +44,7 @@ class EditVisitingGroupForm(TableForm):
     show_errors = True
     
     class fields(WidgetsList):
-        id = HiddenField(validator=UnicodeString())
+        id = TextField(validator=UnicodeString())
         name = TextField(validator=UnicodeString(min=1),  css_class="edit_name",  size=40)
         info = TinyMCE(validator=MarkupConverter, mce_options = dict(theme='advanced',  
                                                                    theme_advanced_toolbar_align ="left",  
