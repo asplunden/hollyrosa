@@ -29,7 +29,7 @@ import datetime,  StringIO,  time
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
-
+import hashlib
 
 from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
 from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
@@ -512,21 +512,11 @@ class Tools(BaseController):
 
     @expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def transfer_history(self):
-        sts = DBSession.query(booking.BookingHistory).all()
-        
-        for st in sts:
-            #s = dict(type='booking_history')
-            s = holly_couch['booking_history.'+str(st.id)]
-            
-            s['change_op'] = st.change_op
-            s['booking_content'] = st.booking_content
-            s['change'] = st.change
-            s['changed_by'] = st.changed_by
-            s['timestamp'] = str(st.timestamp)
-            s['booking_id'] = 'booking.'+str(st.booking_id)
-            s['booking_day_id'] = 'booking_day.'+str(st.booking_day_id)
-            holly_couch['booking_history.'+str(st.id)] = s
-            
-        
+    def update_password(self, id, new_passwd):
+        s = holly_couch[id]
+        h = hashlib.sha256('gninyd') # salt
+        h.update(new_passwd)
+        c = h.hexdigest()
+        s['password'] = c
+        holly_couch[id] = s
         raise redirect('/')

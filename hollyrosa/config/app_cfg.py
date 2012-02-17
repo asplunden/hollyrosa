@@ -26,9 +26,13 @@ import hollyrosa
 from hollyrosa import model
 from hollyrosa.lib import app_globals, helpers 
 from hollyrosa.controllers.common import DataContainer
+import hashlib
 
 def validate_password(user, password):
-   return user['password'] == password
+    h = hashlib.sha256('gninyd') # salt
+    h.update(password)
+    c = h.hexdigest()
+    return user['password'] == c
 
 
 class CouchAuthenticatorPlugin(object):
