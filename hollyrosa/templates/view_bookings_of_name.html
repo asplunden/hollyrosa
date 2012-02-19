@@ -99,7 +99,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 	</div>
 	<div py:if="len(booking_info_notes)" style="border: 1px dashed red; padding:1em;margin:2em;">
    <h2>Att tänka på</h2>
-       <div py:for="n in booking_info_notes" style="padding:2em;">${HTML(n.text)}</div>
+       <div py:for="n in booking_info_notes" style="padding:2em;">${HTML(n.get('text','missing text for note %s' % n['_id']))}</div>
    </div>
 </body>
 </html>

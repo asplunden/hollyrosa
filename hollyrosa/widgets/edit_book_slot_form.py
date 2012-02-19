@@ -32,7 +32,7 @@ class EditBookSlotForm(TableForm):
     class fields(WidgetsList):
         id = HiddenField(validator=UnicodeString)
         booking_day_id = HiddenField(validator=UnicodeString)
-        slot_row_position_id = HiddenField(validator=UnicodeString)
+        slot_id = HiddenField(validator=UnicodeString)
         activity_id = HiddenField(validator=UnicodeString)
         return_to_day_id = HiddenField(validator=UnicodeString)
         visiting_group_name = TextField(validator=UnicodeString(min=1),  css_class="edit_name",  size=40)

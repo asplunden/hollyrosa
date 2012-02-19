@@ -119,7 +119,7 @@ class Calendar(BaseController):
     def overview(self):
         """Show an overview of all booking days"""
         today = datetime.date.today().strftime('%Y-%m-%d')
-        today = '2011-08-01'
+        #today = '2011-08-01'
         return dict(booking_days=[b.doc for b in getBookingDays(holly_couch, from_date=today)])
     
 
@@ -562,7 +562,7 @@ class BookingDay(BaseController):
         slot_map= getSchemaSlotActivityMap(holly_couch, booking_day['day_schema_id'])
         slot = slot_map[slot_position_id]        
         activity = holly_couch[slot['activity_id']] 
-        booking_o = DataContainer(content='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_row_position_id=slot_position_id)
+        booking_o = DataContainer(content='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_id=slot_position_id)
         
         return dict(booking_day=booking_day, booking=booking_o, visiting_groups=visiting_groups, edit_this_visiting_group=0,  slot_position=slot)
         
@@ -609,28 +609,28 @@ class BookingDay(BaseController):
         booking_day_id = booking_o['booking_day_id']
         booking_day = holly_couch[booking_day_id]
         slot_id = booking_o['slot_id']
-        slot_map = getSchemaSlotActivityMap(booking_day['day_schema_id'])
+        slot_map = getSchemaSlotActivityMap(holly_couch, booking_day['day_schema_id'])
         slot_position = slot_map[slot_id]
         activity_id = booking_o['activity_id']
         activity = holly_couch[activity_id]
-        booking_ = DataContainer(activity_id=activity_id, activity=activity,  id=booking_o['_id'],  visiting_group_name=booking_o['visiting_group_name'],  visiting_group_id=booking_o['visiting_group_id'],  content=booking_o['content'], return_to_day_id=return_to_day_id )
+        booking_ = DataContainer(activity_id=activity_id, slot_id=slot_id, activity=activity,  id=booking_o['_id'],  visiting_group_name=booking_o['visiting_group_name'],  visiting_group_id=booking_o['visiting_group_id'],  content=booking_o['content'], return_to_day_id=return_to_day_id, booking_day_id=return_to_day_id )
         
         tmp_visiting_groups = getVisitingGroupsAtDate(holly_couch, booking_day['date']) 
         visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in tmp_visiting_groups]  
         
-        return dict(booking_day=booking_day,  slot_position=slot_position, booking=booking_,  visiting_groups=visiting_groups, edit_this_visiting_group=booking_o['visiting_group_id'],  activity=activity)
+        return dict(booking_day=booking_day, slot_position=slot_position, booking=booking_,  visiting_groups=visiting_groups, edit_this_visiting_group=booking_o['visiting_group_id'],  activity=activity)
         
         
     @validate(create_edit_book_slot_form, error_handler=edit_booked_booking)      
     @expose()
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
-    def save_booked_booking_properties(self,  id=None,  content=None,  visiting_group_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_row_position_id=None,  booking_day_id=None,  block_after_book=False ):
+    def save_booked_booking_properties(self,  id=None,  content=None,  visiting_group_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  block_after_book=False ):
        
         #...id can be None if a new slot is booked
         if None == id or '' == id:
             is_new = True
             old_booking = dict(type='booking',  valid_from='',  valid_to='',  requested_date='')
-            old_booking['slot_id'] = slot_row_position_id
+            old_booking['slot_id'] = slot_id
             old_booking['booking_day_id'] = booking_day_id
         else:
             is_new = False
@@ -640,9 +640,7 @@ class BookingDay(BaseController):
         old_booking['visiting_group_name'] = visiting_group_name
         old_booking['visiting_group_id'] = visiting_group_id
         old_booking['last_changed_by_id'] = getLoggedInUserId(request)
-        
         old_booking['content'] = content
-        
         old_booking['cache_content'] = computeCacheContent(holly_couch[visiting_group_id], content)
         
             
@@ -662,17 +660,19 @@ class BookingDay(BaseController):
         if is_new:
             booking_day = holly_couch[booking_day_id]
             slot_map  = getSchemaSlotActivityMap(holly_couch, booking_day['day_schema_id'])
-            slot = slot_map[slot_row_position_id]
-            new_uid = genUID(type='booking')
+            slot = slot_map[slot_id]
+            new_uid = genUID(type='booking')            
             remember_book_slot(holly_couch, booking_id=new_uid, booking=old_booking,  slot_row_position=slot, booking_day=booking_day,  activity_title=activity['title'])
             holly_couch[new_uid] = old_booking
+            id = new_uid
         else:
             booking_day = holly_couch[booking_day_id]
-            slot_map  = getSchemaSlotActivityMap(booking_day['day_schema_id'])
-            slot = slot_map[slot_row_position_id]
+            print booking_day_id, slot_id
+            slot_map  = getSchemaSlotActivityMap(holly_couch, booking_day['day_schema_id'])
+            slot = slot_map[slot_id]
             remember_booking_properties_change(holly_couch, booking=old_booking, slot_row_position=slot, booking_day=booking_day,  old_visiting_group_name=old_visiting_group_name,  new_visiting_group_name=visiting_group_name, new_content='',  activity_title=activity['title'])
             
-            holly_couch[old_booking['_id']] = old_booking
+            holly_couch[id] = old_booking
         
         #...block after book?
         if block_after_book:
@@ -692,7 +692,11 @@ class BookingDay(BaseController):
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change activity information'))
     def edit_activity(self, activity_id=None,  **kw):
         tmpl_context.form = create_edit_activity_form
-        activity_groups = self.get_activity_groups(holly_couch)
+        activity_groups = list()
+        for x in getAllActivityGroups(holly_couch):
+            activity_groups.append((x.value, x.value['title']))
+            
+        print 'activity group', activity_groups
         if None == activity_id:
             activity = DataContainer(id=None,  title='',  info='')
         elif id=='':

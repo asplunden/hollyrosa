@@ -102,7 +102,7 @@ def remember_booking_properties_change(holly_couch, booking=None, slot_row_posit
     """Trapper booked for HSS wedneday january 10 19:10 to 21:15"""
     text = '%s booking for %s properties changed to %s, slot on %s between %s and %s' %(activity_title, old_visiting_group_name,  new_visiting_group_name,  booking_day['date'],  slot_row_position['time_from'],  slot_row_position['time_to'])
     
-    remember_booking_change(holly_couch, booking_id=booking['_id'],  change_op=7,  change_text=text,  changed_by=changed_by, booking_day_id=booking_day['id'])
+    remember_booking_change(holly_couch, booking_id=booking['_id'],  change_op=7,  change_text=text,  changed_by=changed_by, booking_day_id=booking_day['_id'])
     
 
 def remember_new_booking_request(holly_couch, booking=None, changed_by=''):

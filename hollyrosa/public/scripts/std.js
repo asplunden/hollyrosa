@@ -38,7 +38,7 @@ function set_form_field_value(form_field_id, value){
 
 function navigation_calendar_is_disabled(x) {
     var test_date = dojo.date.locale.format(x, {datePattern: "yyyy-MM-dd", selector: "date"});
-    return test_date < "2011-06-11" || test_date > "2011-08-14"; 
+    return test_date < "2012-06-01" || test_date > "2012-08-30"; 
 }
 
 

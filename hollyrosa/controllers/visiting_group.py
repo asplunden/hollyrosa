@@ -456,7 +456,7 @@ class VisitingGroup(BaseController):
                     slot_id = b['slot_id']
                     slot_o = slot_map[slot_id]
             
-            b2 = DataContainer(booking_state=b['booking_state'],  cache_content=b['cache_content'],  content=b['content'] ,  activity=activities[b['activity_id']],  id=b['_id'],  booking_day=tmp_booking_day ,  slot_id=slot_id ,  slot=slot_o,  booking_day_id=booking_day_id,  valid_from=b['valid_from'],  valid_to=b['valid_to'],  requested_date=b['requested_date'])
+            b2 = DataContainer(booking_state=b['booking_state'],  cache_content=b['cache_content'],  content=b['content'] ,  activity=activities[b['activity_id']],  id=b['_id'],  booking_day=tmp_booking_day ,  slot_id=slot_id ,  slot=slot_o,  booking_day_id=booking_day_id,  valid_from=b.get('valid_from',''),  valid_to=b.get('valid_to',''),  requested_date=b.get('requested_date',''))
             if clustered_bookings.has_key(key):
                 bl = clustered_bookings[key]
                 bl.append(b2)
