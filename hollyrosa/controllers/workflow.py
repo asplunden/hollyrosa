@@ -23,7 +23,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID,  holly_couch
-from hollyrosa.model.booking_couch import getAllScheduledBookings,  getAllUnscheduledBookings,  gelAllBookingsWithBookingState,  getActivityTitleMap,  getBookingDayInfoMap,  getUserNameMap,  getSchemaSlotActivityMap
+from hollyrosa.model.booking_couch import getAllScheduledBookings,  getAllUnscheduledBookings,  gelAllBookingsWithBookingState,  getActivityTitleMap,  getBookingDayInfoMap,  getUserNameMap,  getSchemaSlotActivityMap, getAllSimilarBookings
 from sqlalchemy import and_
 import datetime
 
@@ -131,12 +131,12 @@ class Workflow(BaseController):
         if all == 0 or all==None:
             booking_o = holly_couch[booking_id] 
             self.do_set_state(holly_couch, booking_id,  booking_o, state)
-        elif all == '1': # look for all bookings with same group
+        elif all == 1: # look for all bookings with same group
            booking_o = holly_couch[booking_id] 
-           bookings = [ ] # TODO: Fix later DBSession.query(booking.Booking).filter(and_('visiting_group_id='+str(booking_o.visiting_group_id), 'activity_id='+str(booking_o.activity_id), 'booking_state > -100')).all()
+           bookings = [b.doc for b in getAllSimilarBookings(holly_couch, [booking_o['visiting_group_id'], booking_o['activity_id']]) ] # TODO: Fix later DBSession.query(booking.Booking).filter(and_('visiting_group_id='+str(booking_o.visiting_group_id), 'activity_id='+str(booking_o.activity_id), 'booking_state > -100')).all()
            for new_b in bookings:
-               if (new_b.content.strip() == booking_o.content.strip()) and (new_b.booking_day_id != None):
-                   self.do_set_state(holly_couch, new_b._id,  new_b, state)
+               if (new_b['content'].strip() == booking_o['content'].strip()) and (new_b['booking_day_id'] != None):
+                   self.do_set_state(holly_couch, new_b['_id'],  new_b, state)
         else:
             pass        
         raise redirect(request.referrer)

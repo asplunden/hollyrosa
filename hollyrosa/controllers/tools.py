@@ -176,7 +176,7 @@ class Tools(BaseController):
             
         visiting_group_map = dict()
         for vg in getAllVisitingGroups(holly_couch):
-            visiting_group_map[vg.key] = vg.value
+            visiting_group_map[vg.key] = vg.doc
             
         #...join visiting group (bookings with no visiting group is not interesting)
         
@@ -196,12 +196,16 @@ class Tools(BaseController):
                 if tmp_b['visiting_group_id'] != '' and (False == tmp_b.get('hide_warn_on_suspect_booking',  False)):
                     tmp_date = tmp_b_day['date']
                     tmp_b_visiting_group = visiting_group_map[tmp_b['visiting_group_id']]
+                    print tmp_b_visiting_group
                     
-                    if tmp_b_visiting_group['from_date'] > tmp_date:
-                        problems.append(dict(booking=tmp_b, msg='arrives at ' + str(tmp_b_visiting_group['from_date']) + ' but booking is at ' + str(tmp_date), severity=10))
+                    if not tmp_b_visiting_group.has_key('from_date'):
+                        problems.append(dict(booking=tmp_b, msg='visiting group %s has no from_date' % tmp_b_visiting_group['visiting_group_name'], severity=100))
+                    else:
+                        if tmp_b_visiting_group['from_date'] > tmp_date:
+                            problems.append(dict(booking=tmp_b, msg='arrives at ' + str(tmp_b_visiting_group['from_date']) + ' but booking is at ' + str(tmp_date), severity=10))
     
-                    if tmp_b_visiting_group['from_date'] == tmp_date:
-                        problems.append(dict(booking=tmp_b, msg='arrives same day as booking, at ' + str(tmp_b_visiting_group['from_date']), severity=self.get_severity(tmp_b_visiting_group, 1)))
+                        if tmp_b_visiting_group['from_date'] == tmp_date:
+                            problems.append(dict(booking=tmp_b, msg='arrives same day as booking, at ' + str(tmp_b_visiting_group['from_date']), severity=self.get_severity(tmp_b_visiting_group, 1)))
                         
                     if tmp_b_visiting_group['to_date'] < tmp_date:
                         problems.append(dict(booking=tmp_b, msg='leves at ' + str(tmp_b_visiting_group['to_date']) + ' but booking is at ' + str(tmp_date), severity=10))

@@ -222,6 +222,10 @@ def getAllUnscheduledBookings(holly_couch, limit=100):
     
 def gelAllBookingsWithBookingState(holly_couch, booking_states,  limit=200):
     return holly_couch.view('workflow/all_bookings_by_booking_state',  keys=booking_states,  include_docs=True,  limit=limit)
+
+def getAllSimilarBookings(holly_couch, keys, limit=1000):
+    return holly_couch.view('workflow/all_similar_bookings',  key=keys, include_docs=True,  limit=limit)
+
     
 def getActivityTitleMap(holly_couch):
     m = dict()

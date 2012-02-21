@@ -40,6 +40,14 @@ function on_booking_deleted(response_data) {
 }
 
 
+function on_booking_warning_ignored(response_data) {
+    var booking_id = response_data['booking_id'];
+    var to_remove = dojo.byId('booking_id_' + booking_id);
+    dojo.destroy(to_remove);
+}
+
+
+
 function unschedule_booking(booking_id, activity_id, visiting_group_id)
 {
     dojo.byId('delete_req_booking_id').value =  booking_id;
@@ -50,6 +58,17 @@ function unschedule_booking(booking_id, activity_id, visiting_group_id)
     handleAs:"json",
     form:"delete_booking_form",
     load: on_booking_deleted
+    });
+}
+
+
+function ignore_warning(booking_id)
+{
+    dojo.xhrGet({
+    url: "/booking/ignore_booking_warning_async",
+    handleAs:"json",
+    content: {booking_id:booking_id},
+    load: on_booking_warning_ignored
     });
 }
   </script>
@@ -72,6 +91,7 @@ function unschedule_booking(booking_id, activity_id, visiting_group_id)
             <ul class="any_menu">
                 <li><a href="${tg.url('/booking/view_booked_booking', id=p.booking.id)}">view</a></li>
                 <li><a href="javascript:unschedule_booking(${p.booking.id}, ${p.booking.activity_id}, ${p.booking.visiting_group_id});">unschedule</a></li>
+                <li><a href="javascript:ignore_warning('${p.booking.id}');">ignore warning</a></li>
             </ul>
             </td>
         </tr>

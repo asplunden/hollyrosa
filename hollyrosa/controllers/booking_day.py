@@ -1115,7 +1115,7 @@ class BookingDay(BaseController):
 
         
     @expose("json")
-    @validate(validators={'delete_req_booking_id':validators.Int(not_empty=True), 'activity_id':validators.Int(not_empty=True), 'visiting_group_id_id':validators.Int(not_empty=True)})
+    @validate(validators={'delete_req_booking_id':validators.UnicodeString(not_empty=True), 'activity_id':validators.Int(not_empty=True), 'visiting_group_id_id':validators.Int(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def delete_booking_async(self,  delete_req_booking_id=0,  activity_id=0,  visiting_group_id=None):
         vgroup = holly_couch[visiting_group_id]
@@ -1124,6 +1124,19 @@ class BookingDay(BaseController):
         deleteBooking(holly_couch, booking_o)
 
         return dict(text="hello", delete_req_booking_id=delete_req_booking_id, visiting_group_name=vgroup['name'], success=True)
+        
+        
+        
+    @expose("json")
+    @validate(validators={'booking_id':validators.UnicodeString(not_empty=True)})
+    @require(Any(is_user('root'), has_level('pl'), msg='Only pl members may change booked booking properties'))
+    def ignore_booking_warning_async(self, booking_id=''):
+        booking_o = holly_couch[booking_id]
+        ##remember_delete_booking_request(holly_couch, booking_o)
+        ##deleteBooking(holly_couch, booking_o)
+        booking_o['hide_warn_on_suspect_booking'] = True
+        holly_couch[booking_id] = booking_o
+        return dict(booking_id=booking_id)
         
         
     @expose("json")
