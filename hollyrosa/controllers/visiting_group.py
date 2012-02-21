@@ -82,10 +82,10 @@ class VisitingGroup(BaseController):
         
 
     @expose('hollyrosa.templates.visiting_group_view_all')
-    @validate(validators={'fromdate':validators.DateValidator(not_empty=False), 'todate':validators.DateValidator(not_empty=False)})
+    @validate(validators={'from_date':validators.DateValidator(not_empty=False), 'to_date':validators.DateValidator(not_empty=False)})
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def view_date_range(self,  fromdate=None,  todate=None):
-        visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(holly_couch, fromdate,  todate)]
+    def view_date_range(self,  from_date=None,  to_date=None):
+        visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(holly_couch, from_date,  to_date)]
         v_group_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=fromdate,  to_date=todate)
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)        
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)

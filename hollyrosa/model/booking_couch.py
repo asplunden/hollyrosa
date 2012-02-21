@@ -206,6 +206,12 @@ def getAgeGroupStatistics(holly_couch, group_level=999, startkey=None):
         startkey = []
     return holly_couch.view('statistics/age_group_statistics', startkey=startkey, reduce=True, group_level=group_level)    
 
+
+def getTagStatistics(holly_couch, group_level=999, startkey=None):
+    if startkey == None:
+        startkey = []
+    return holly_couch.view('tag_statistics/tag_group_statistics', startkey=startkey, reduce=True, group_level=group_level)    
+
 #--- 
 
 def getAllScheduledBookings(holly_couch, limit=100):

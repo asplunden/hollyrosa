@@ -89,11 +89,11 @@ function loadNotesFor(id) {
     Choose time period: <ul class="any_menu">
 
         <li><a href="${tg.url('view_today')}">today</a></li>
-        <li><a href="${tg.url('view_period', period='1an')}">1:an</a></li>
-        <li><a href="${tg.url('view_period', period='2an')}">2:an</a></li>
-        <li><a href="${tg.url('view_at_date', at_date='2011-06-14')}">Miniscout I</a></li>
-        <li><a href="${tg.url('view_at_date', at_date='2011-06-18')}">Miniscout II</a></li>
-        <li><a href="${tg.url('view_date_range', fromdate='2011-08-01', todate='2011-08-14')}">60DN</a></li>
+        <li><a href="${tg.url('view_at_date', at_date='2012-06-15')}">Miniscout I</a></li>
+        <li><a href="${tg.url('view_at_date', at_date='2012-06-18')}">Miniscout II</a></li>
+        <li><a href="${tg.url('view_at_date', at_date='2012-08-14')}">Miniscout III</a></li>
+        <li><a href="${tg.url('view_date_range', from_date='2012-07-22', to_date='2012-07-29')}">1719</a></li>        
+        <li><a href="${tg.url('view_date_range', from_date='2012-08-04', to_date='2012-08-11')}">Boomerang</a></li>
         
         <li><span class="context_dropdown_menu">view by status<ul><li py:for="k,v in bokn_status_map.items()"><a href="${tg.url('view_boknstatus', boknstatus=k)}">${v}</a></li></ul></span></li>
         <li><span class="context_dropdown_menu">view by tag<ul><li py:for="tag in all_tags"><a href="${tg.url('view_tags', tag=tag)}">${tag}</a></li></ul></span></li>

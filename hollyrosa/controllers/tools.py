@@ -41,7 +41,7 @@ from booking_history import  remember_workflow_state_change
 from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level
 
 from hollyrosa.model.booking_couch import getAllActivityGroups,  getAllScheduledBookings,  getAllBookingDays,  getAllVisitingGroups
-from hollyrosa.model.booking_couch import getAgeGroupStatistics
+from hollyrosa.model.booking_couch import getAgeGroupStatistics, getTagStatistics
 __all__ = ['tools']
 
 workflow_submenu = """<ul class="any_menu">
@@ -321,6 +321,68 @@ class Tools(BaseController):
 
         
         return dict(property_names=l, people_by_day=all_totals)
+
+
+
+
+
+
+    @expose('hollyrosa.templates.vodb_statistics')
+    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can take a look at people statistics'))
+    def vodb_statistics(self):
+        
+        statistics_totals = getTagStatistics(holly_couch, group_level=1)
+        statistics = getTagStatistics(holly_couch, group_level=2)
+        
+        #...find all tags that is used and perhaps filter out unwanted ones.
+        
+        tags = dict()
+        totals = dict() 
+        for tmp in statistics:   
+            tmp_key = tmp.key
+            tmp_value = tmp.value                        
+            tmp_tag = tmp_key[1]
+            
+            if tmp_tag[:4] == 'vodb':
+                tmp_date_x = tmp_key[0]
+                tmp_date = datetime.date(tmp_date_x[0], tmp_date_x[1], tmp_date_x[2]) 
+            
+                tot = totals.get(tmp_date, dict())
+                tot[tmp_tag] = int(tmp_value)
+                sum = tot.get('tot',0) 
+                sum += int(tmp_value)
+                tot['tot'] = sum
+                tags[tmp_tag] = 1
+                totals[tmp_date] = tot
+                
+        all_totals=list()
+        for tmp in statistics_totals:   
+            tmp_key = tmp.key
+            tmp_value = tmp.value                        
+            tmp_date_x = tmp_key[0]
+            tmp_date = datetime.date(tmp_date_x[0], tmp_date_x[1], tmp_date_x[2]) 
+            
+            tot = totals[tmp_date]
+            mark = '#444;'                
+            if tot['tot'] < 250:
+                mark = '#484;'
+            elif tot['tot'] < 500:
+                mark = '#448;'
+            elif tot['tot'] < 1000:
+                mark = '#828;'
+            else:
+                mark = '#844;'
+            all_totals.append((tmp_date, tot, mark))
+
+        
+        return dict(tags=['vodb:definitiv',u'vodb:preliminär',u'vodb:förfrågan', 'vodb:na'], people_by_day=all_totals)
+
+
+
+
+
+
+
 
 
 
