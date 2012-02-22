@@ -240,7 +240,7 @@ class VisitingGroup(BaseController):
             vgps = []
             for id,  vgp in visiting_group_c['visiting_group_properties'].items():
                 try:
-                    print 'vgp',vgp['to_date']
+                    #print 'vgp',vgp['to_date']
                     tmp_to_date = datetime.datetime.strptime(vgp['to_date'],'%Y-%m-%d')
                 except ValueError:
                     tmp_to_date = None
@@ -411,7 +411,7 @@ class VisitingGroup(BaseController):
     def view_bookings_of_name(self,  name=None, render_time=''):
         # TODO: its now possible to get bookings on both name and id
         bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, name, '<- MATCHES NO GROUP ->')]
-        print 'view_bookings_of_name', bookings
+        #print 'view_bookings_of_name', bookings
         slot_map = getSchemaSlotActivityMap(holly_couch, 'day_schema.1') # TODO: load for each different schema used
         
         # TODO: make view. Its just so simple

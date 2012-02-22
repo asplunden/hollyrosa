@@ -41,7 +41,7 @@ from booking_history import  remember_workflow_state_change
 from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level
 
 from hollyrosa.model.booking_couch import getAllActivityGroups,  getAllScheduledBookings,  getAllBookingDays,  getAllVisitingGroups
-from hollyrosa.model.booking_couch import getAgeGroupStatistics, getTagStatistics
+from hollyrosa.model.booking_couch import getAgeGroupStatistics, getTagStatistics, getSchemaSlotActivityMap, getActivityTitleMap
 __all__ = ['tools']
 
 workflow_submenu = """<ul class="any_menu">
@@ -99,7 +99,7 @@ class Tools(BaseController):
             if s.slot_row_position != None:
                 tmp_activity_row = new_bookings.get(s.slot_row_position.slot_row.activity.title, [[] for i in range(4)] )
                 tmp_slot_index = 0
-                print s.slot_row_position.time_from.strftime('%H:%M') 
+                #print s.slot_row_position.time_from.strftime('%H:%M') 
                 if s.slot_row_position.time_from.strftime('%H:%M') =='09:00':
                     tmp_slot_index = 0
                 elif s.slot_row_position.time_from.strftime('%H:%M') == '13:00':
@@ -119,7 +119,7 @@ class Tools(BaseController):
                 #print '***',  tmp_slot_index,  tmp_new_string,  s.slot_row_position.slot_row.activity.title
                 
                 if s.slot_row_position.slot_row.activity.title == 'Trapper':
-                    print 'TRAPPER'
+                    #print 'TRAPPER'
                     tmp_trapper_index = 1
                     while (tmp_trapper_index < 8):
                         if 0 == len(new_bookings['Trapper %d' % tmp_trapper_index][tmp_slot_index] ):
@@ -153,10 +153,10 @@ class Tools(BaseController):
     def get_severity(self, visiting_group,  severity):
         #if booking_o['visiting_group_name'] in ['Program II', 'Konf II', 'Program I', 'Konf I', 'WSJ Home hospitality', '60 Degrees North', 'Led Utb Scout']:
         if visiting_group.get('hide_warn_on_suspect_bookings', False) == True:
-            print 'HIDE WARN'
+            #print 'HIDE WARN'
             severity = 0
-        else:
-            print visiting_group.get('hide_warn_on_suspect_bookings', 'MA')
+        #else:
+            #print visiting_group.get('hide_warn_on_suspect_bookings', 'MA')
         return severity
 
 
@@ -176,15 +176,10 @@ class Tools(BaseController):
             
         visiting_group_map = dict()
         for vg in getAllVisitingGroups(holly_couch):
-            visiting_group_map[vg.key] = vg.doc
+            visiting_group_map[vg.key[1]] = vg.doc
             
-        #...join visiting group (bookings with no visiting group is not interesting)
-        
-        #...also, booking with no booking day is not interesting
-        
-        #...given a visiting group for the booking, check the visiting group properties and for each visiting group property:
-        #      check content for usage of each property, if property is used, check from and to date of property against bookings day
-        #...do a check on groups from and to date against booking day too.
+        #activity_map = dict()
+        activity_title_map = getActivityTitleMap(holly_couch)
         
         problems = list()
         for tmp_bx in bookings:
@@ -192,26 +187,32 @@ class Tools(BaseController):
             tmp_b_day_id = tmp_b['booking_day_id']
             tmp_b_day = booking_days_map[tmp_b_day_id]
             
+        #    if not activity_map.has_key(tmp_b_day['day_schema_id']):
+        #        activity_map[tmp_b_day['day_schema_id']] = getSchemaSlotActivityMap(holly_couch, tmp_b_day['day_schema_id'])
+
+        #    tmp_activity_map = activity_map[tmp_b_day['day_schema_id']]
+                 
             if None != tmp_b_day: # and tmp_b_day.date >= datetime.date.today():
                 if tmp_b['visiting_group_id'] != '' and (False == tmp_b.get('hide_warn_on_suspect_booking',  False)):
                     tmp_date = tmp_b_day['date']
+                    tmp_content = activity_title_map[tmp_b['activity_id']] + ' ' + tmp_b['content']
                     tmp_b_visiting_group = visiting_group_map[tmp_b['visiting_group_id']]
-                    print tmp_b_visiting_group
+
                     
                     if not tmp_b_visiting_group.has_key('from_date'):
                         problems.append(dict(booking=tmp_b, msg='visiting group %s has no from_date' % tmp_b_visiting_group['visiting_group_name'], severity=100))
                     else:
                         if tmp_b_visiting_group['from_date'] > tmp_date:
-                            problems.append(dict(booking=tmp_b, msg='arrives at ' + str(tmp_b_visiting_group['from_date']) + ' but booking is at ' + str(tmp_date), severity=10))
+                            problems.append(dict(booking=tmp_b, msg='arrives at %s but booking %s is at %s' %(str(tmp_b_visiting_group['from_date']), tmp_content ,str(tmp_date)), severity=10))
     
                         if tmp_b_visiting_group['from_date'] == tmp_date:
-                            problems.append(dict(booking=tmp_b, msg='arrives same day as booking, at ' + str(tmp_b_visiting_group['from_date']), severity=self.get_severity(tmp_b_visiting_group, 1)))
+                            problems.append(dict(booking=tmp_b, msg='arrives same day as booking %s, at %s' % (tmp_content, str(tmp_b_visiting_group['from_date'])), severity=self.get_severity(tmp_b_visiting_group, 1)))
                         
                     if tmp_b_visiting_group['to_date'] < tmp_date:
-                        problems.append(dict(booking=tmp_b, msg='leves at ' + str(tmp_b_visiting_group['to_date']) + ' but booking is at ' + str(tmp_date), severity=10))
+                        problems.append(dict(booking=tmp_b, msg='leves at %s but booking %s is at %s' % (str(tmp_b_visiting_group['to_date']), tmp_content , str(tmp_date)), severity=10))
     
                     if tmp_b_visiting_group['to_date'] == tmp_date:
-                        problems.append(dict(booking=tmp_b, msg='leves same day as booking, at ' + str(tmp_b_visiting_group['to_date']), severity=self.get_severity(tmp_b_visiting_group, 1)))
+                        problems.append(dict(booking=tmp_b, msg='leves same day as booking %s, at %s' % (tmp_content, str(tmp_b_visiting_group['to_date'])), severity=self.get_severity(tmp_b_visiting_group, 1)))
                     
                     tmp_content = tmp_b['content']
                     for tmp_prop in tmp_b_visiting_group['visiting_group_properties'].values():
@@ -434,29 +435,9 @@ class Tools(BaseController):
 
         return dict(slot_rows=slot_rows_n,  bookings=activity_totals, totals=totals)
     
-    @expose()
-    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def transfer_activity_groups(self):
-        activity_groups = DBSession.query(booking.ActivityGroup).all()
-        for acg in activity_groups:
-            acg_c = dict(title=acg.title,  description=acg.description, zorder=acg.id,  type='activity_group')
-            holly_couch['activity_group.'+str(acg.id)] = acg_c
-        raise redirect('tools')
     
-    @expose()
-    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def transfer_activity(self):
-        activity = DBSession.query(booking.Activity).all()
-        for ac in activity:
-            print ac
-            ac_c = dict(type='activity',  bg_color=ac.bg_color,  guides_per_slot=ac.guides_per_slot,  guides_per_day=ac.guides_per_day,  equipment_needed=ac.equipment_needed, education_needed=ac.education_needed,  certificate_needed = ac.certificate_needed, 
-                        tags = '', title=ac.title, description = ac.description,  external_link = ac.external_link,  internal_link = ac.internal_link,  print_on_demand_link = ac.print_on_demand_link,  capacity = ac.capacity,  default_booking_state = ac.default_booking_state, 
-                        activity_group_id = 'activity_group.'+str(ac.activity_group_id))
-                        
-            holly_couch['activity.'+str(ac.id)] = ac_c
-        raise redirect('/')
         
-    @expose()
+    #@expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def update_schema(self):
         s = holly_couch['day_schema.1']
@@ -495,7 +476,7 @@ class Tools(BaseController):
         raise redirect('/')
         
         
-    @expose()
+#    @expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def make_booking_days(self):
         pos = 1000
@@ -515,67 +496,21 @@ class Tools(BaseController):
             
             
         for d in dates:
-            print d
+            #print d
             bd_c = dict(type='booking_day', date=d, note='', title='', num_program_crew_members=0, num_fladan_crew_members=0, day_schema_id='day_schema.1', zorder=pos )
             holly_couch['booking_day.'+str(pos)] = bd_c
             pos += 1
             
-        raise redirect('/')
+        raise redirect('/')       
         
-        
-    @expose()
-    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def transfer_visiting_groups(self):
-        visiting_groups = DBSession.query(booking.VisitingGroup).all()
-        for vg in visiting_groups:
-            vg_c = dict(type='visiting_group', name=vg.name,  from_date=str(vg.fromdate),  to_date = str(vg.todate),  info = vg.info,  contact_person = vg.contact_person,  contact_person_phone = vg.contact_person_phone,
-                        contact_person_email = vg.contact_person_email,  calendar_id=vg.calendar_id,  boknr=vg.boknr, boknstatus=vg.boknstatus,  camping_location = vg.camping_location)        
-                        
-            #...now transfer properties
-            vgp_c = dict()
-            for vgp in vg.visiting_group_property:
-                vgp_c[vgp.id] = dict(property=vgp.property,  value=vgp.value,  unit=vgp.unit,  description=vgp.description,  from_date=str(vgp.fromdate),  to_date=str(vgp.todate),  id=vgp.id)
-            vg_c['visiting_group_properties'] = vgp_c
-
-
-
-            holly_couch['visiting_group.'+str(vg.id)] = vg_c
-        raise redirect('/')
-        
-        #...need to move all bookings into couch !
-        
-        
-    @expose()
+#    @expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def transfer_bookings(self):
         for b in holly_couch.view('all_activities/erasure', include_docs=True):
             holly_couch.delete(b.doc)
         raise redirect('/')
+    
         
-    @expose()
-    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def transfer_slot_state(self):
-        sts = DBSession.query(booking.SlotRowPositionState).all()
-        
-        for st in sts:
-            #s = dict(type='slot_state')
-            s = holly_couch['slot_state.'+str(st.id)]
-            s['type'] = 'slot_state'
-            s['level'] = st.level
-            s['slot_id'] = 'slot.'+str(st.slot_row_position_id)
-            s['booking_day_id'] = 'booking_day.'+str(st.booking_day_id)
-            
-            
-            
-            
-            
-            
-            
-            holly_couch['slot_state.'+str(st.id)] = s
-        
-        raise redirect('/')
-
-
     @expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def update_password(self, id, new_passwd):
@@ -586,3 +521,16 @@ class Tools(BaseController):
         s['password'] = c
         holly_couch[id] = s
         raise redirect('/')
+
+
+    @expose()
+    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
+    def set_booking_day_schema_ids(self):
+        booking_days = [b.doc for b in getAllBookingDays(holly_couch)]
+        for bdy in booking_days:
+            if bdy['date'] <= '2012-07-22' or bdy['date'] > '2012<07-29':
+                bdy['day_schema_id'] = 'day_schema.2012'
+                holly_couch[bdy['_id']] = bdy
+            
+        raise redirect('/')
+        

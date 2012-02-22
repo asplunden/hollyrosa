@@ -245,9 +245,9 @@ def getUserNameMap(holly_couch):
         m[a.key] = a.value
     return m
 
-
+# TODO: VERY DNGEROUS TO CACHE
 def getSchemaSlotActivityMap(holly_couch, day_schema_id):
-    global _schema_slot_activity_map
+    #global _schema_slot_activity_map
     try:    
         tmp = _schema_slot_activity_map
         print 'found'

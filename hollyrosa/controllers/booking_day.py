@@ -528,7 +528,7 @@ class BookingDay(BaseController):
         b['booking_state'] = activity['default_booking_state']
         holly_couch[b['_id']] = b
         booking_day = holly_couch[b['booking_day_id']]
-        slot_map = getSchemaSlotActivityMap(booking_day['day_schema_id'])
+        slot_map = getSchemaSlotActivityMap(holly_couch, booking_day['day_schema_id'])
         slot = slot_map[slot_row_position_id]
         
         #...TODO: have all lookuped data in some local ctx that can be passed on to all helper functions so we dont have to do a lot of re-lookups
@@ -747,13 +747,6 @@ class BookingDay(BaseController):
     def edit_booking(self,  booking_day_id=None,  id=None, visiting_group_id='', **kw):
         tmpl_context.form = create_edit_new_booking_request_form
         
-        # TODO: We still need to add some reasonable sorting on the activities abd the visiting groups
-        
-        activities = [(a.doc['_id'],  a.doc['title'] ) for a in getAllActivities(holly_couch)]
-        visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in getAllVisitingGroups(holly_couch)]
-        
-        tmp_visiting_group = holly_couch[visiting_group_id]
-        
         #...patch since this is the way we will be called if validator for new will fail
         if (visiting_group_id != '') and (visiting_group_id != None):
             booking_o = DataContainer(id='', content='', visiting_group_id = visiting_group_id, visiting_group_name=tmp_visiting_group['name'])
@@ -761,6 +754,18 @@ class BookingDay(BaseController):
             booking_o = DataContainer(id='', content='')
         else:
             booking_o = holly_couch[id] 
+    
+        # TODO: We still need to add some reasonable sorting on the activities abd the visiting groups
+        
+        activities = [(a.doc['_id'],  a.doc['title'] ) for a in getAllActivities(holly_couch)]
+        if booking_day_id == None: 
+            visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in getAllVisitingGroups(holly_couch)]
+        else:
+            booking_day_o = holly_couch[booking_day_id]
+            visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in getVisitingGroupsAtDate(holly_couch, booking_day_o['date'])]
+            booking_o.requested_date = booking_day_o['date']
+        tmp_visiting_group = holly_couch[visiting_group_id]
+        
         booking_o.return_to_day_id = booking_day_id
         return dict(visiting_groups=visiting_groups,  activities=activities, booking=booking_o)
         
