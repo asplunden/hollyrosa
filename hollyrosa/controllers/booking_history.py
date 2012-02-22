@@ -79,7 +79,7 @@ def remember_schedule_booking(holly_couch, booking=None, slot_row_position=None,
     #activity = holly_couch[booking['activity_id']] # TODO: wastefull lookup
     text = '%s booking for %s scheduled %s between %s and %s' %(activity['title'], booking['visiting_group_name'],  booking_day['date'],  slot_row_position['time_from'], slot_row_position['time_to'])
     
-    remember_booking_change(holly_couch, booking_id=booking.id,  change_op=1,  change_text=text,  changed_by=changed_by,  booking_day_id=booking_day.id)
+    remember_booking_change(holly_couch, booking_id=booking.id, visiting_group_id=booking['visiting_group_id'], change_op=1,  change_text=text,  changed_by=changed_by,  booking_day_id=booking_day.id)
 
 
 def remember_unschedule_booking(holly_couch, booking=None, slot_row_position=None, booking_day=None,  changed_by='',  activity=None):
@@ -88,14 +88,14 @@ def remember_unschedule_booking(holly_couch, booking=None, slot_row_position=Non
         text = '%s booking for %s unscheduled. Was scheduled for %s between %s and %s' %(activity['title'], booking['visiting_group_name'],  booking_day['date'],  slot_row_position['time_from'],  slot_row_position['time_to'])
     else:
         text = 'WARN: no slot_row_position for unscheduled booking. Cannot determine the time of unscheduling or activity but group was %s and bookingdate %s.' %(booking['visiting_group_name'],  booking_day['date'])
-    remember_booking_change(holly_couch, booking_id=booking['_id'],  change_op=2,  change_text=text,  changed_by=changed_by,  booking_day_id=booking_day['_id'])
+    remember_booking_change(holly_couch, booking_id=booking['_id'], visiting_group_id=booking['visiting_group_id'], change_op=2,  change_text=text,  changed_by=changed_by,  booking_day_id=booking_day['_id'])
 
 
 def remember_book_slot(holly_couch, booking_id='',  slot_row_position=None, booking=None, booking_day=None,  changed_by='',  activity_title=''):
     """Trapper booked for HSS wedneday january 10 19:10 to 21:15"""
     text = '%s slot booked for %s %s between %s and %s' %(activity_title, booking['visiting_group_name'],  booking_day['date'], slot_row_position['time_from'],  slot_row_position['time_to'])
     
-    remember_booking_change(holly_couch, booking_id=booking_id,    change_op=3, change_text=text, changed_by=changed_by, booking_day_id=booking_day['_id'])
+    remember_booking_change(holly_couch, booking_id=booking_id, visiting_group_id=booking['visiting_group_id'],    change_op=3, change_text=text, changed_by=changed_by, booking_day_id=booking_day['_id'])
     
     
 def remember_booking_properties_change(holly_couch, booking=None, slot_row_position=None, booking_day=None,  old_visiting_group_name='',  new_visiting_group_name='', new_content='', changed_by='',  activity_title=''):
@@ -110,27 +110,27 @@ def remember_new_booking_request(holly_couch, booking=None, changed_by=''):
     activity = holly_couch[booking['activity_id']] # TODO: wastefull lookup
     text = '%s requested for %s %s to %s' %(activity['title'], booking['visiting_group_name'],  booking.get('valid_from',''),  booking.get('valid_to',''))
     
-    remember_booking_change(holly_couch, booking_id=booking['_id'],  change_op=4,  change_text=text,  changed_by=changed_by)
+    remember_booking_change(holly_couch, booking_id=booking['_id'], visiting_group_id=booking['visiting_group_id'],  change_op=4,  change_text=text,  changed_by=changed_by)
     
     
 def remember_delete_booking_request(holly_couch, booking=None, changed_by='',  activity_title=''):
     """deleted Trapper requested for HSS wedneday january 10 to friday januari 12"""
     text = 'deleted %s requested for %s %s to %s' %(activity_title, booking['visiting_group_name'], booking.get('valid_from',''), booking.get('valid_to',''))
-    remember_booking_change(holly_couch, booking_id=booking.id,  change_op=6,  change_text=text,  changed_by=changed_by)
+    remember_booking_change(holly_couch, booking_id=booking.id, visiting_group_id=booking['visiting_group_id'],  change_op=6,  change_text=text,  changed_by=changed_by)
     
 
 def remember_booking_request_change(holly_couch, old_booking=None, new_booking=None, changed_by=''):
     """Change Trapper requested for HSS wedneday january 10 to friday januari 12 . Changed to """
     text = 'Change %s requested for %s %s to %s. Changed to %s requested for %s %s to %s.' %(old_booking.activity.title, old_booking.visiting_group_name,  getFormatedDate(old_booking.valid_from),  getFormatedDate(old_booking.valid_to),  new_booking.activity.title, new_booking.visiting_group_name,  getFormatedDate(new_booking.valid_from),  getFormatedDate(new_booking.valid_to))
     
-    remember_booking_change(holly_couch, booking_id=old_booking.id,  change_op=5,  change_text=text,  changed_by=changed_by)
+    remember_booking_change(holly_couch, booking_id=old_booking.id, visiting_group_id=old_booking['visiting_group_id'],  change_op=5,  change_text=text,  changed_by=changed_by)
     
     
 def remember_booking_move(holly_couch, booking=None, old_activity_title=None, new_activity_title=None,  changed_by='',  booking_day=None):
     """Change Trapper requested for HSS wedneday january 10 to friday januari 12 . Changed to """
     text = 'Move from %s to %s requested for %s at %s .' %(old_activity_title, new_activity_title, booking['visiting_group_name'],  booking_day['date'])
     
-    remember_booking_change(holly_couch, booking_id=booking['_id'],  change_op=5,  change_text=text,  changed_by=changed_by,  booking_day_id=booking['booking_day_id'])
+    remember_booking_change(holly_couch, booking_id=booking['_id'], visiting_group_id=booking['visiting_group_id'],  change_op=5,  change_text=text,  changed_by=changed_by,  booking_day_id=booking['booking_day_id'])
     
     
 def remember_block_slot(holly_couch, slot_row_position=None, booking_day=None,  level=0,  changed_by='',  activity_title=''):
@@ -151,7 +151,7 @@ def remember_workflow_state_change(holly_couch, booking=None, state=None, change
     """Workflow state changed for Trapper booking for HSS wedneday january 10 .State changed from pending to approved"""
     text = 'Workflow state changed for %s booking for %s %s. State changed from %s to %s.' %(activity_title, booking['visiting_group_name'],  booking_day_date,  workflow_map[booking['booking_state']], workflow_map[int(state)])
     
-    remember_booking_change(holly_couch, booking_id=booking['_id'],  change_op=12,  change_text=text,  changed_by=changed_by)
+    remember_booking_change(holly_couch, booking_id=booking['_id'], visiting_group_id=booking['visiting_group_id'],  change_op=12,  change_text=text,  changed_by=changed_by)
 
 
 def remember_tag_change(holly_couch, booking_id=None, old_tags='', new_tags='', changed_by='', visiting_group_id='', visiting_group_name=''):
@@ -182,8 +182,14 @@ def remember_visiting_group_properties_change(holly_couch, booking=None, visitin
 
     text = 'Visiting group properties saved/changed for %s' % visiting_group.visiting_group_name
 
-    remember_booking_change(holly_couch, booking_id=booking.id,  change_op=14,  change_text=text,  changed_by=changed_by)
+    remember_booking_change(holly_couch, booking_id=booking.id, visiting_group_id=visiting_group.id,  change_op=14,  change_text=text,  changed_by=changed_by)
 
+
+def remember_ignore_booking_warning(holly_couch, booking=None, slot_row_position=None, booking_day=None,  changed_by='',  activity=None):
+    """Trapper booking for HSS scheduled wedneday january 10 19:10 to 21:15"""
+    text = 'Ignoring warning for %s booking for %s scheduled %s between %s and %s' %(activity['title'], booking['visiting_group_name'],  booking_day['date'],  slot_row_position['time_from'], slot_row_position['time_to'])
+    
+    remember_booking_change(holly_couch, booking_id=booking.id, visiting_group_id=booking['visiting_group_id'], change_op=1,  change_text=text,  changed_by=changed_by,  booking_day_id=booking_day.id)
 
 class History(BaseController):
     def view(self, url):
