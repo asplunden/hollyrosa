@@ -138,7 +138,12 @@ class Workflow(BaseController):
                if (new_b['content'].strip() == booking_o['content'].strip()) and (new_b['booking_day_id'] != None):
                    self.do_set_state(holly_couch, new_b['_id'],  new_b, state)
         else:
-            pass        
+            pass
+            
+        
+        if 'booking/day' in request.referrer:
+            raise redirect(request.referrer + '#activity_row_id_' + booking_o['activity_id'])
+            
         raise redirect(request.referrer)
 
        
