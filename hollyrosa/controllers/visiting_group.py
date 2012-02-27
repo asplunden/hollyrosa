@@ -406,9 +406,9 @@ class VisitingGroup(BaseController):
         
 
     @expose('hollyrosa.templates.view_bookings_of_name')
-    @validate(validators={"name":validators.UnicodeString(), "render_time":validators.UnicodeString})
+    @validate(validators={"name":validators.UnicodeString(), "render_time":validators.UnicodeString(), "hide_comment":validators.Int()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def view_bookings_of_name(self,  name=None, render_time=''):
+    def view_bookings_of_name(self,  name=None, render_time='', hide_comment=0):
         # TODO: its now possible to get bookings on both name and id
         bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, name, '<- MATCHES NO GROUP ->')]
         #print 'view_bookings_of_name', bookings
@@ -434,6 +434,12 @@ class VisitingGroup(BaseController):
         
         
         for b in bookings: # TODO: There will be quite a few multiples if we search on both id and name!
+            if hide_comment==1:
+                tmp = b['cache_content'] # getRenderedContent
+                i = tmp.find('//')
+                if i > 0:
+                    b['cache_content'] = b['cache_content'][:i]
+                         
             key = str(b['activity_id'])+':'+b['content']
             if None == b.get('booking_day_id',  None):
                 key = 'N'+key

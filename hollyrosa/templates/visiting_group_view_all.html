@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010, 2011, 2012 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -105,7 +105,7 @@ function loadNotesFor(id) {
                     <li><a href="${tg.url('show_visiting_group', id=visiting_group._id)}">show</a></li>
                     <li><a href="${tg.url('edit_visiting_group', id=visiting_group._id)}">edit</a></li>
                     <li><a href="${tg.url('/note/add_note', target_id=visiting_group._id)}">add note</a></li>
-                    <li><a href="${tg.url('view_bookings_of_name', name=visiting_group.name)}">list activities</a></li>
+                    <li><a href="${tg.url('view_bookings_of_name', name=visiting_group.name, hide_comment=1)}">list activities</a></li>
                     <li><a href="${tg.url('/history/show', visiting_group_id=visiting_group._id)}">show history</a></li>
                     <li><a href="${tg.url('/booking/edit_booking', visiting_group_id=visiting_group._id)}">new booking request</a></li>
                 </ul>
