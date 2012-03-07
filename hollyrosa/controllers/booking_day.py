@@ -478,9 +478,13 @@ class BookingDay(BaseController):
         try:
             datetime.datetime.strptime(b['valid_from'],  "%Y-%m-%d")
         except ValueError:
+            #vgroup = holly_couch[b]
             date = holly_couch[booking_day_id]['date']
             b['valid_from'] = date
         except TypeError:
+            date = holly_couch[booking_day_id]['date']
+            b['valid_from'] = date
+        except KeyError:
             date = holly_couch[booking_day_id]['date']
             b['valid_from'] = date
             
@@ -492,6 +496,9 @@ class BookingDay(BaseController):
         except TypeError:
             date = holly_couch[booking_day_id]['date']
             b['valid_to'] = date
+        except KeyError:
+            date = holly_couch[booking_day_id]['date']
+            b['valid_to'] = date
             
         try:
             datetime.datetime.strptime(b['requested_date'],  "%Y-%m-%d")
@@ -499,6 +506,9 @@ class BookingDay(BaseController):
             date = holly_couch[booking_day_id]['date']
             b['requested_date'] = date
         except TypeError:
+            date = holly_couch[booking_day_id]['date']
+            b['requested_date'] = date
+        except KeyError:
             date = holly_couch[booking_day_id]['date']
             b['requested_date'] = date
             
@@ -629,9 +639,15 @@ class BookingDay(BaseController):
         #...id can be None if a new slot is booked
         if None == id or '' == id:
             is_new = True
+            print 'NEW BOOKING'
             old_booking = dict(type='booking',  valid_from='',  valid_to='',  requested_date='')
             old_booking['slot_id'] = slot_id
             old_booking['booking_day_id'] = booking_day_id
+            
+            if visiting_group_id!=None:
+                vgroup = holly_couch[visiting_group_id]
+                old_booking['valid_from'] = vgroup['from_date']
+                old_booking['valid_to'] = vgroup['to_date']
         else:
             is_new = False
             old_booking = holly_couch[id]

@@ -435,7 +435,7 @@ class VisitingGroup(BaseController):
         
         for b in bookings: # TODO: There will be quite a few multiples if we search on both id and name!
             if hide_comment==1:
-                tmp = b['cache_content'] # getRenderedContent
+                tmp = b['cache_content'] 
                 i = tmp.find('//')
                 if i > 0:
                     b['cache_content'] = b['cache_content'][:i]
