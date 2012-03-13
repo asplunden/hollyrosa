@@ -88,19 +88,22 @@ def getNextBookingDayId(holly_couch, booking_day):
     this_date = booking_day['date'] # make date from string, but HOW?
     next_date = (datetime.datetime.strptime(this_date,'%Y-%m-%d') +  datetime.timedelta(1)).strftime('%Y-%m-%d')
     print 'next date',  next_date
+    #
+    #map_fun = """function(doc) {
+    #        if (doc.type == 'booking_day') {
+    #            if (doc.date == '"""+str(next_date)+"""') {
+    #        emit(doc._id, doc);
+    #    }}}"""
     
-    map_fun = """function(doc) {
-            if (doc.type == 'booking_day') {
-                if (doc.date == '"""+str(next_date)+"""') {
-            emit(doc._id, doc);
-        }}}"""
+    #booking_day_c =  holly_couch.query(map_fun)
+
+    #booking_days = [b for b in booking_day_c]
+    #return (booking_days[0].value)['_id']
+    bdays = holly_couch.view('booking_day/all_booking_days', keys=[next_date], include_docs=True)
     
-    booking_day_c =  holly_couch.query(map_fun)
-
-    booking_days = [b for b in booking_day_c]
-    return (booking_days[0].value)['_id']
-
-
+    bdays2 = [b for b in bdays]
+         
+    return bdays2[0].value
         
     
 class Calendar(BaseController):
@@ -267,21 +270,21 @@ class BookingDay(BaseController):
         
     def getSlotStateOfBookingDayIdAndSlotId(self, holly_couch, booking_day_id,  slot_id):
         # TODO: refactor map fun immediately!
-        map_fun = """function(doc) {
-        if (doc.type == 'slot_state') {
-            if (doc.booking_day_id == '""" + booking_day_id+  """')  {
-                if (doc.slot_id == '"""+slot_id+"""') {
-                    emit(doc._id, doc);
-                    }
-                }
-            }
-        }"""
+        #map_fun = """function(doc) {
+        #if (doc.type == 'slot_state') {
+        #    if (doc.booking_day_id == '""" + booking_day_id+  """')  {
+        #        if (doc.slot_id == '"""+slot_id+"""') {
+        #            emit(doc._id, doc);
+        #            }
+        #        }
+        #    }
+        #}"""
         
-        slot_states = []
-        for x in holly_couch.query(map_fun):
-            b = x.value
-            slot_states.append(b)
-        return slot_states
+        #slot_states = []
+        #for x in holly_couch.query(map_fun):
+        #    b = x.doc
+        #    slot_states.append(b)
+        return [s for s in holly_couch.view('booking_day/slot_states',keys=[[booking_day_id, slot_id]],include_docs=True)]
         
         
     def getSlotBlockingsForBookingDay(self, holly_couch, day_id):
