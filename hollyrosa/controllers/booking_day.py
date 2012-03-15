@@ -87,22 +87,9 @@ def getNextBookingDayId(holly_couch, booking_day):
     # TODO: relly needs refactoring
     this_date = booking_day['date'] # make date from string, but HOW?
     next_date = (datetime.datetime.strptime(this_date,'%Y-%m-%d') +  datetime.timedelta(1)).strftime('%Y-%m-%d')
-    print 'next date',  next_date
-    #
-    #map_fun = """function(doc) {
-    #        if (doc.type == 'booking_day') {
-    #            if (doc.date == '"""+str(next_date)+"""') {
-    #        emit(doc._id, doc);
-    #    }}}"""
     
-    #booking_day_c =  holly_couch.query(map_fun)
-
-    #booking_days = [b for b in booking_day_c]
-    #return (booking_days[0].value)['_id']
     bdays = holly_couch.view('booking_day/all_booking_days', keys=[next_date], include_docs=True)
-    
-    bdays2 = [b for b in bdays]
-         
+    bdays2 = [b for b in bdays]     
     return bdays2[0].value
         
     
@@ -269,21 +256,6 @@ class BookingDay(BaseController):
         
         
     def getSlotStateOfBookingDayIdAndSlotId(self, holly_couch, booking_day_id,  slot_id):
-        # TODO: refactor map fun immediately!
-        #map_fun = """function(doc) {
-        #if (doc.type == 'slot_state') {
-        #    if (doc.booking_day_id == '""" + booking_day_id+  """')  {
-        #        if (doc.slot_id == '"""+slot_id+"""') {
-        #            emit(doc._id, doc);
-        #            }
-        #        }
-        #    }
-        #}"""
-        
-        #slot_states = []
-        #for x in holly_couch.query(map_fun):
-        #    b = x.doc
-        #    slot_states.append(b)
         return [s for s in holly_couch.view('booking_day/slot_states',keys=[[booking_day_id, slot_id]],include_docs=True)]
         
         
@@ -721,7 +693,7 @@ class BookingDay(BaseController):
         elif id=='':
             activity = DataContainer(id=None,  title='', info='')
         else:
-            activity = holly_couch[activity_id] #DBSession.query(booking.Activity).filter('id=' + str(activity_id)).one()
+            activity = holly_couch[activity_id] 
         return dict(activity=activity,  activity_group=activity_groups,  activity_groups=activity_groups)
         
         
@@ -800,7 +772,7 @@ class BookingDay(BaseController):
         activities = [(a.doc['_id'],  a.doc['title'] ) for a in getAllActivities(holly_couch)]
         
         #...patch since this is the way we will be called if validator for new will fail
-        booking_o = holly_couch[id] #DBSession.query(booking.Booking).filter('id='+str(id)).one()
+        booking_o = holly_couch[id]
         booking_o.return_to_day_id = return_to_day_id
         activity_id,  slot_o = getSlotAndActivityIdOfBooking(holly_couch, booking_o)
         activity_o = holly_couch[booking_o['activity_id']]
@@ -960,7 +932,6 @@ class BookingDay(BaseController):
         
         #todo: figure out if slot is blocked
         
-        #new_booking_slot_row_position_state = DBSession.query(booking.SlotRowPositionState).filter(and_('slot_row_position_id='+str(new_booking_slot_row_position_id), 'booking_day_id='+str(new_booking_booking_day_id))) .all()
         new_booking_slot_row_position_states = self.getSlotStateOfBookingDayIdAndSlotId(holly_couch, new_booking_day_id,  new_slot_id)
         
         #...if it isn't blocked, then book that slot.
@@ -1068,7 +1039,7 @@ class BookingDay(BaseController):
                 
         slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map)
         
-        slot_row = [s for s in slot_rows if s.activity_id == activity_id][0]#DBSession.query(booking.SlotRow).filter('activity_id='+str(booking_o.activity.id)).one()
+        slot_row = [s for s in slot_rows if s.activity_id == activity_id][0]
         
         
         bookings = {}
@@ -1078,7 +1049,7 @@ class BookingDay(BaseController):
         
         slot_ids = [sp.id for sp in slot_row.slot_row_position]
         #for tmp_slot_row_position in slot_row.slot_row_position:
-        bookings_of_slot_position = [b.doc for b in holly_couch.view('booking_day/slot_id_of_booking', keys=slot_ids ,include_docs=True)] #DBSession.query(booking.Booking).filter('slot_row_position_id='+str(tmp_slot_row_position.id)).all()
+        bookings_of_slot_position = [b.doc for b in holly_couch.view('booking_day/slot_id_of_booking', keys=slot_ids ,include_docs=True)] 
             
         for tmp_booking in bookings_of_slot_position:
             #if None == tmp_slot_row_position.id:
@@ -1093,7 +1064,7 @@ class BookingDay(BaseController):
                 bookings[tmp_booking['booking_day_id']][tmp_booking['slot_id']].append(tmp_booking)
         
         
-        blockings = [st.doc for st in holly_couch.view('booking_day/slot_state_of_slot_id', keys=slot_ids ,include_docs=True)] #[] #DBSession.query(booking.SlotRowPositionState).join(booking.SlotRowPosition).filter('slot_row_position.slot_row_id='+str(slot_row_id)).all()
+        blockings = [st.doc for st in holly_couch.view('booking_day/slot_state_of_slot_id', keys=slot_ids ,include_docs=True)] 
         blockings_map = dict()
         for b in blockings:
             tmp_booking_day_id = b['booking_day_id']

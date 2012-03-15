@@ -169,7 +169,7 @@ class Tools(BaseController):
     def sanity_check_property_usage(self):
         
         #...iterate through all bookings, we are only interested in scheduled bookings
-        bookings = getAllScheduledBookings(holly_couch, limit=1000000) #DBSession.query(booking.Booking).join(booking.VisitingGroup).join(booking.VistingGroupProperty).all()
+        bookings = getAllScheduledBookings(holly_couch, limit=1000000) 
         booking_days_map = dict()
         for bd in getAllBookingDays(holly_couch):
             booking_days_map[bd.doc['_id']] = bd.doc
@@ -443,7 +443,7 @@ class Tools(BaseController):
         s = holly_couch['day_schema.1']
         pos = 1
         activity = DBSession.query(booking.Activity).all() # use slot_rows instead , the pos counter screws things up...
-        slot_rows = DBSession.query(booking.SlotRow).all()
+        slot_rows = DBSession(booking.SlotRow).all()
         
         zorder = 1
         sch = dict()

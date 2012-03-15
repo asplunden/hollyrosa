@@ -363,14 +363,7 @@ class VisitingGroup(BaseController):
     def delete_visiting_group(self,  id=None):
         if None == id:
             pass
-            #visiting_group = booking.VisitingGroup()
             
-#        else:
-#            visiting_group = DBSession.query(booking.VisitingGroup).filter('id='+ str(id)).one()
-#            
-#            
-#        #...WARNING: bookings will remain. Perhaps a non-destructive delete instead?
-#        DBSession.delete(visiting_group)
         raise redirect('/visiting_group/view_all')
         
         
