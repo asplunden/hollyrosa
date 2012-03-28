@@ -754,7 +754,8 @@ class BookingDay(BaseController):
         elif id=='' or id==None:
             booking_o = DataContainer(id='', content='')
         else:
-            booking_o = holly_couch[id] 
+            b = holly_couch[id]
+            booking_o = DataContainer(id=b['_id'], content=b['content'], visiting_group_id=b['visiting_group_id'], valid_from=b['valid_from'], valid_to=b['valid_to'], requested_date=b['requested_date'], activity_id=b['activity_id'], visiting_group_name=b['visiting_group_name']) #holly_couch[id] 
     
         # TODO: We still need to add some reasonable sorting on the activities abd the visiting groups
         
@@ -838,11 +839,12 @@ class BookingDay(BaseController):
             new_booking = dict(type='booking',  booking_day_id='', slot_id='') 
             is_new = True
         else:
-            new_booking = holly_couch[id] 
-            old_booking = DataContainer(activity=new_booking.activity,  visiting_group_name=new_booking.visiting_group_name,  valid_from=new_booking.valid_from,  valid_to=new_booking.valid_to,  requested_date=new_booking.requested_date,  content=new_booking.content,  id=new_booking.id)
+            new_booking = holly_couch[id]
+            tmp_activity = holly_couch[new_booking['activity_id']]
+            old_booking = DataContainer(activity=tmp_activity, activity_id=new_booking['activity_id'], visiting_group_name=new_booking['visiting_group_name'], visiting_group_id=new_booking['visiting_group_id'],  valid_from=new_booking['valid_from'],  valid_to=new_booking['valid_to'],  requested_date=new_booking['requested_date'],  content=new_booking['content'],  id=new_booking['_id'])
             
         if is_new:
-            print 'setting booking state=0'
+           
             new_booking['booking_state'] = 0
         else:
            # DEPENDS ON WHAT HAS CHANGED. Maybe content change isnt enough to change state?
@@ -871,8 +873,10 @@ class BookingDay(BaseController):
             holly_couch['booking.'+genUID()] = new_booking
             remember_new_booking_request(holly_couch, new_booking)
         else:
+            holly_couch[id] = new_booking
+
             remember_booking_request_change(holly_couch, old_booking=old_booking,  new_booking=new_booking)
-        
+            
         if return_to_day_id != None:
             if return_to_day_id != '':
                 raise redirect('/booking/day?day_id='+str(return_to_day_id)) 
@@ -995,7 +999,7 @@ class BookingDay(BaseController):
         
         
     @expose()
-    @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'slot_row_position_id':validators.Int(not_empty=True), 'level':validators.Int(not_empty=True)})
+    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_row_position_id':validators.UnicodeString(not_empty=True), 'level':validators.UnicodeString(not_empty=True)})
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
     def block_slot(self, booking_day_id,  slot_row_position_id,  level = 1):
         self.block_slot_helper(holly_couch, booking_day_id, slot_row_position_id, level=level)
@@ -1011,7 +1015,10 @@ class BookingDay(BaseController):
         # todo: set state variable when it has been introduced
         tmp_slot_states = self.getSlotStateOfBookingDayIdAndSlotId(holly_couch,  booking_day_id,  slot_row_position_id)
         for sl in tmp_slot_states:
-            holly_couch.delete(sl)
+            #print 'slot state:',sl, tmp_slot_states, sl.id
+            # todo: optimize this, we shoud get the docs through the query above
+            deleteme = holly_couch[sl.id]
+            holly_couch.delete(deleteme)
         #activity_id = self.getActivityIdOfBooking(booking_day_id,  slot_row_position_id)
         
         booking_day = holly_couch[booking_day_id]

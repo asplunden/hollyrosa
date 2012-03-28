@@ -121,9 +121,9 @@ def remember_delete_booking_request(holly_couch, booking=None, changed_by='',  a
 
 def remember_booking_request_change(holly_couch, old_booking=None, new_booking=None, changed_by=''):
     """Change Trapper requested for HSS wedneday january 10 to friday januari 12 . Changed to """
-    text = 'Change %s requested for %s %s to %s. Changed to %s requested for %s %s to %s.' %(old_booking.activity.title, old_booking.visiting_group_name,  getFormatedDate(old_booking.valid_from),  getFormatedDate(old_booking.valid_to),  new_booking.activity.title, new_booking.visiting_group_name,  getFormatedDate(new_booking.valid_from),  getFormatedDate(new_booking.valid_to))
+    text = 'Change %s requested for %s %s to %s. Changed to %s requested for %s %s to %s.' %(old_booking.activity['title'], old_booking.visiting_group_name,  old_booking.valid_from,  old_booking.valid_to,  new_booking['activity_id'], new_booking['visiting_group_name'],  new_booking['valid_from'],  new_booking['valid_to'])
     
-    remember_booking_change(holly_couch, booking_id=old_booking.id, visiting_group_id=old_booking['visiting_group_id'],  change_op=5,  change_text=text,  changed_by=changed_by)
+    remember_booking_change(holly_couch, booking_id=old_booking.id, visiting_group_id=old_booking.visiting_group_id,  change_op=5,  change_text=text,  changed_by=changed_by)
     
     
 def remember_booking_move(holly_couch, booking=None, old_activity_title=None, new_activity_title=None,  changed_by='',  booking_day=None):
