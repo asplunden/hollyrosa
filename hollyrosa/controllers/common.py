@@ -138,7 +138,7 @@ def computeCacheContent(visiting_group, content):
 
 
 class has_level(Predicate):
-    message = 'Only for users with level %level'
+    message = 'Only for users with level %s'
 
     def __init__(self, level, **kwargs):
         super(has_level, self).__init__(**kwargs)
@@ -151,11 +151,11 @@ class has_level(Predicate):
         #print 'cred', dir(environ),  environ.keys(),  environ['repoze.who.identity'],  environ['repoze.who.identity']['user_level']
         
         if not environ.has_key('repoze.who.identity'):
-            self.unmet(level = self.level)
+            self.unmet(level=self.level)
             
         if self.level not in environ['repoze.who.identity']['user_level']:
             #self.unmet(post_id=post_id, author=post.author_userid)
-            self.unmet(level = self.level)
+            self.unmet(level=self.level) # self.level
         
 
 
