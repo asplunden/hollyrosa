@@ -126,7 +126,7 @@ class Calendar(BaseController):
         booking_days = getBookingDays(holly_couch, from_date=today_date_str,  to_date=end_date_str) 
 
 
-        vgroups = getVisitingGroupsInDatePeriod(holly_couch, today_date_str,  end_date_str) # TODO: fix view later.  get_visiting_groups(from_date=today_date_str,  to_date=end_date_str)
+        vedit_agroups = getVisitingGroupsInDatePeriod(holly_couch, today_date_str,  end_date_str) # TODO: fix view later.  get_visiting_groups(from_date=today_date_str,  to_date=end_date_str)
 
         group_info = dict()
         bdays = list()
@@ -691,15 +691,19 @@ class BookingDay(BaseController):
         tmpl_context.form = create_edit_activity_form
         activity_groups = list()
         for x in getAllActivityGroups(holly_couch):
-            activity_groups.append((x.value, x.value['title']))
+            activity_groups.append((x.value['_id'], x.value['title']))
             
-        print 'activity group', activity_groups
         if None == activity_id:
             activity = DataContainer(id=None,  title='',  info='')
         elif id=='':
             activity = DataContainer(id=None,  title='', info='')
         else:
-            activity = holly_couch[activity_id] 
+            try:
+                activity = holly_couch[activity_id] 
+                activity['id'] = activity_id 
+            except:
+                activity = DataContainer(id=activity_id,  title='', info='', default_booking_state=0)
+                
         return dict(activity=activity,  activity_group=activity_groups,  activity_groups=activity_groups)
         
         
@@ -707,34 +711,40 @@ class BookingDay(BaseController):
     @expose()
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change activity properties'))
     def save_activity_properties(self,  id=None,  title=None,  external_link='', internal_link='',  print_on_demand_link='',  description='', tags='', capacity=0,  default_booking_state=0,  activity_group_id=1,  gps_lat=0,  gps_long=0,  equipment_needed=False, education_needed=False,  certificate_needed=False,  bg_color='', guides_per_slot=0,  guides_per_day=0 ):
-        if None == id:
-            acticity = booking.Activity()
+        if None == id or '' == id:
+            activity = dict(type='activity')
+            id = genUID(type='activity')
             is_new = True
-            raise IOError,  "None!!!"
-        else:
-            activity = DBSession.query(booking.Activity).filter('id='+ str(id)).one()
-            is_new= False
             
-        activity.title = title
-        activity.description= description
-        activity.external_link = external_link
-        activity.internal_link = internal_link
-        activity.print_on_demand_link = print_on_demand_link
-        activity.tags=tags
-        activity.capacity=capacity
+        else:
+            try:
+                activity = holly_couch[id] 
+                is_new= False
+            except:
+                activity = dict(type='activity')
+                is_new = True
+                
+        activity['title'] = title
+        activity['description'] = description
+        activity['external_link'] = external_link
+        activity['internal_link'] = internal_link
+        activity['print_on_demand_link'] = print_on_demand_link
+        activity['tags'] = tags
+        activity['capacity'] = capacity
 #        #activity.default_booking_state=default_booking_state
-        activity.activity_group_id = activity_group_id
+        activity['activity_group_id'] = activity_group_id
 #        activity.gps_lat = gps_lat
  #       activity.gps_long = gps_long
-        activity.equipment_needed = equipment_needed
-        activity.education_needed = education_needed
-        activity.certificate_needed = certificate_needed
-        activity.bg_color = bg_color
-        activity.guides_per_slot = guides_per_slot
-        activity.guides_per_day = guides_per_day
-            
-        if is_new:
-            DBSession.add(activity)
+        activity['equipment_needed'] = equipment_needed
+        activity['education_needed'] = education_needed
+        activity['certificate_needed'] = certificate_needed
+        activity['bg_color'] = bg_color
+        activity['guides_per_slot'] = guides_per_slot
+        activity['guides_per_day'] = guides_per_day
+        
+        holly_couch[id] = activity    
+        #if is_new:
+        #    DBSession.add(activity)
         raise redirect('/booking/view_activity',  activity_id=id)
      
         

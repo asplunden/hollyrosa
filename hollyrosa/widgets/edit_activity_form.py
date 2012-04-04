@@ -1,5 +1,5 @@
 """
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010, 2011, 2012 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -32,7 +32,7 @@ class EditActivityForm(TableForm):
     show_errors = True
 
     class fields(WidgetsList):
-        id = HiddenField(validator=Int)
+        id = HiddenField(validator=UnicodeString())
         title = TextField(validator=UnicodeString(min=1),  css_class="edit_name")
         description = TinyMCE(validator=MarkupConverter, mce_options = dict(theme='advanced',  
                                                                    theme_advanced_toolbar_align ="left",  
@@ -46,7 +46,7 @@ class EditActivityForm(TableForm):
         print_on_demand_link = TextField(validator=UnicodeString())
         capacity = TextField(size=4, validator=Int)
         default_booking_state = HiddenField()
-        activity_group_id = SingleSelectField(validator=Int)
+        activity_group_id = SingleSelectField(validator=UnicodeString())
         gps_lat  = TextField(validator=UnicodeString())
         gps_long = TextField(validator=UnicodeString())
         equipment_needed = CheckBox()
