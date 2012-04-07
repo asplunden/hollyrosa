@@ -171,20 +171,20 @@ def getSlotAndActivityIdOfBooking(holly_couch, booking):
 
 def getAllHistory(holly_couch, limit=None):
     """returns booking history sorted in reverse chronological order."""
-    return holly_couch.view('history/all_history',  descending=True,  limit=limit)
+    return holly_couch.view('history/all_history',  descending=True,  include_docs=True, limit=limit)
     
 def getAllHistoryForVisitingGroup(holly_couch, visiting_group_id,  limit=None):
     """returns booking history sorted in reverse chronological order."""
     # TODO: does not work, may need to look up all bookings first.
-    return holly_couch.view('history/all_history',  startkey= [{},  {},  visiting_group_id],  endkey=[None,  None,  visiting_group_id],  descending=True,  limit=limit)
+    return holly_couch.view('history/all_history_by_visiting_group', startkey=[visiting_group_id,'999999999999999999'], endkey=[visiting_group_id,None], include_docs=True, descending=True, limit=limit)
     
 def getAllHistoryForUser(holly_couch, user_id,  limit=None):
     """returns booking history sorted in reverse chronological order."""
-    return holly_couch.view('history/history_by_username',  keys=[user_id],  descending=True,  limit=limit)
+    return holly_couch.view('history/history_by_username',  keys=[user_id], include_docs=True, descending=True,  limit=limit)
     
 def getAllHistoryForBookings(holly_couch, booking_ids,  limit=250):
     """returns booking history sorted in reverse chronological order."""
-    return holly_couch.view('history/history_by_booking_id',  keys=booking_ids,  descending=True,  limit=limit)
+    return holly_couch.view('history/history_by_booking_id',  keys=booking_ids, include_docs=True, descending=True,  limit=limit)
 
     
 #----

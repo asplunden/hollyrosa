@@ -77,7 +77,7 @@ def formatDateStr(b):
             <td class="data info">${activity_map[b['activity_id']]}</td>
             <td class="data info">${b['cache_content']}</td>
             
-            <td class="data info">requested between <span py:if="'None' != b['valid_from']">${formatDateStr(b['valid_from'])}</span> and <span py:if="'None' != b['valid_to']">${formatDateStr(b['valid_to'])},</span><span py:if="'None' != b['requested_date']"> requested date ${formatDateStr(b['requested_date'])}</span></td>
+            <td class="data info">requested between <span py:if="'None' != b.get('valid_from','')">${formatDateStr(b.get('valid_from',''))}</span> and <span py:if="'None' != b.get('valid_to','')">${formatDateStr(b.get('valid_to',''))},</span><span py:if="'None' != b.get('requested_date','')"> requested date ${formatDateStr(b.get('requested_date',''))}</span></td>
             <td class="data info"></td> <!--  .strftime('%A %d %B') -->
         </tr>
     </table>

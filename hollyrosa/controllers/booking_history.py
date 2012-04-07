@@ -202,18 +202,18 @@ class History(BaseController):
         
     def getBookingHistory(self, holly_couch, limit=30):
         booking_history = getAllHistory(holly_couch, limit=limit)
-        all = [h.value for h in booking_history]
+        all = [h.doc for h in booking_history]
         return all
         
         
     def getBookingHistoryForVisitingGroup(self, holly_couch, visiting_group_id,  limit=1000):
         booking_history = getAllHistoryForVisitingGroup(holly_couch, visiting_group_id,  limit=limit)
-        all = [h.value for h in booking_history]
+        all = [h.doc for h in booking_history]
         return all
         
     def getBookingHistoryForUser(self, holly_couch,  user_id,  limit=250):
         booking_history = getAllHistoryForUser(holly_couch, user_id,  limit=limit)
-        all = [h.value for h in booking_history]
+        all = [h.doc for h in booking_history]
         return all
         
         
@@ -223,8 +223,6 @@ class History(BaseController):
     def show(self, visiting_group_id=None, user_id=None):
         for_group_name = ''
         if visiting_group_id != None:
-            #history = DBSession.query(booking.BookingHistory).join(booking.Booking).join(booking.VisitingGroup).filter('visiting_group_id='+str(visiting_group_id)).order_by('timestamp desc')
-            #vgroup = DBSession.query(booking.VisitingGroup).filter('id='+str(visiting_group_id)).one() 
             history = self.getBookingHistoryForVisitingGroup(holly_couch, visiting_group_id)
             vgroup = holly_couch[visiting_group_id]
             for_group_name = vgroup['name']
@@ -243,3 +241,6 @@ class History(BaseController):
     @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view history'))
     def rss(self):
         return dict(history = DBSession.query(booking.BookingHistory).all().limit(100),  change_op_map=change_op_map,  publishing_date=time.localtime(time.time()))
+
+
+    

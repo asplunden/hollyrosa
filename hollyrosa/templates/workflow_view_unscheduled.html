@@ -59,7 +59,7 @@ def formatDate(s):
             <td class="data info">${activity_map[b.activity_id]}</td>
             <td class="data info">${b.cache_content}</td>
             
-            <td class="data info">requested between <span py:if="None != b.valid_from">${formatDate(b.valid_from)}</span> and <span py:if="None != b.valid_to">${formatDate(b.valid_to)},</span><span py:if="None != b.requested_date"> requested date ${formatDate(b.requested_date)}</span></td>
+            <td class="data info">requested between <span py:if="None != b.get('valid_from','')">${formatDate(b.get('valid_from',''))}</span> and <span py:if="None != b.get('valid_to','')">${formatDate(b.get('valid_to',''))},</span><span py:if="None != b.get('requested_date','')"> requested date ${formatDate(b.get('requested_date',''))}</span></td>
             <td class="data info">${user_name_map.get(b.last_changed_by_id, b.last_changed_by_id)}</td>
         </tr>
     </table>
