@@ -64,7 +64,7 @@ function updateUnboundNames(data) {
   
 function getUnboundNames() {   
     dojo.xhrGet({
-    url: "/tag/get_unbound_visiting_group_names",
+    url: "${tg.url('/tag/get_unbound_visiting_group_names')}",
     handleAs: "json",
     load: updateUnboundNames
     });    
@@ -73,7 +73,7 @@ function getUnboundNames() {
 
 function loadNotesFor(id) {   
     dojo.xhrGet({
-    url: "/note/get_notes_for_visiting_group",
+    url: "${tg.url('/note/get_notes_for_visiting_group')}",
     content: {id: id},
     handleAs: "json",
     load: updateNotes
