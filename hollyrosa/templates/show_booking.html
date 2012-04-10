@@ -68,7 +68,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
             <th>change op</th><th>time stamp</th><th>description</th><th>changed by</th>
         </tr>
         <tr py:for="h in history">
-            <td class="data info"><span class="change_op_${h.change_op}">${change_op_map[h.change_op]}</span></td>
+            <td class="data info"><span class="change_op_${h.get('change_op',0)}">${change_op_map[h.get('change_op',0)]}</span></td>
             <td class="data timestamp">${h.timestamp}</td>
             <td class="data info">${h.change}</td>
             <td class="data info">${h.changed_by}</td>

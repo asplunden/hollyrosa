@@ -581,7 +581,7 @@ class BookingDay(BaseController):
                 slot_position = slot_map[slot_id]
         
         activity = holly_couch[activity_id] 
-        history = [h.value for h in getAllHistoryForBookings(holly_couch, [id])]
+        history = [h.doc for h in getAllHistoryForBookings(holly_couch, [id])]
         user_name_map = getUserNameMap(holly_couch)
         
         return dict(booking_day=booking_day,  slot_position=slot_position, booking=booking_o,  workflow_map=workflow_map,  history=history,  change_op_map=change_op_map,  getRenderContent=getRenderContentDict,  activity=activity, formatDate=reFormatDate,  user_name_map=user_name_map)

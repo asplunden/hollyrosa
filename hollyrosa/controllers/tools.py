@@ -512,8 +512,9 @@ class Tools(BaseController):
     
         
     @expose()
-    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
+    #@require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def update_password(self, id, new_passwd):
+        print 'update password'
         s = holly_couch[id]
         h = hashlib.sha256('gninyd') # salt
         h.update(new_passwd)
