@@ -26,7 +26,7 @@ from repoze.what import predicates
 
 from hollyrosa.lib.base import BaseController
 from hollyrosa.controllers.error import ErrorController
-from hollyrosa.controllers import booking_day,  booking_history,  workflow,  visiting_group,  tools, note, tag
+from hollyrosa.controllers import booking_day,  booking_history, workflow, visiting_group, tools, note, tag, user
 
 from hollyrosa import model
 from hollyrosa.controllers.secure import SecureController
@@ -69,6 +69,8 @@ class RootController(BaseController):
     note = note.Note()
 
     tag = tag.Tag()
+    
+    user = user.User()
     
     @expose('hollyrosa.templates.index')
     def index(self):

@@ -287,4 +287,14 @@ def getDocumentsByTag(holly_couch, tag):
 
 def getAllTags(holly_couch):
     return holly_couch.view("tags/all_tags", reduce=True, group=True)
+    
+    
+#------
+
+def getAllUsers(holly_couch):
+    return holly_couch.view('user/all_users', include_docs=True)
+    
+def getAllUtelunchBookings(holly_couch):
+    return holly_couch.view('user/utelunch', include_docs=True)
+  
 

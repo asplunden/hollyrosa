@@ -132,8 +132,10 @@ function deleteTag(id, tag) {
     </div>
     
     <p>${visiting_group.contact_person}<br/>$visiting_group.contact_person_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.contact_person_email</a><br/>
+    </p> 
+
     
-</p>
+    
 
     <table class="data">
         <tr>
@@ -143,6 +145,10 @@ function deleteTag(id, tag) {
             <td class="info">$$$prop.property = $prop.value $prop.unit</td><td class="info">$prop.description</td><td class="info">$prop.from_date</td><td class="info">$prop.to_date</td>
         </tr>
     </table>
+    
+    <h4>attachments:</h4>
+    <ul py:for="at in visiting_group.get('_attachments',[])"><li><a href="${tg.url('download_attachment',visiting_group_id=visiting_group._id,doc_id=at)}">${at}</a></li></ul>
+
 
     
 
@@ -181,6 +187,9 @@ function deleteTag(id, tag) {
             <div style="margin-left:2em;">
                 <div class="note"> ${getRenderContent(b)}</div>
             </div>
+            
+            
+    
         </div>
     
 </body>

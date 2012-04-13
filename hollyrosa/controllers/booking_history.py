@@ -211,22 +211,22 @@ class History(BaseController):
         all = [h.doc for h in booking_history]
         return all
         
-    def getBookingHistoryForUser(self, holly_couch,  user_id,  limit=250):
+    def getBookingHistoryForUser(self, holly_couch, user_id, limit=250):
         booking_history = getAllHistoryForUser(holly_couch, user_id,  limit=limit)
         all = [h.doc for h in booking_history]
         return all
         
         
     @expose('hollyrosa.templates.history_show')
-    @validate(validators={'visiting_group_id':validators.Int(not_empty=False), 'user_id':validators.Int(not_empty=False)})
+    @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=False), 'user_id':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view history'))
-    def show(self, visiting_group_id=None, user_id=None):
+    def show(self, visiting_group_id='', user_id=''):
         for_group_name = ''
-        if visiting_group_id != None:
+        if visiting_group_id != '':
             history = self.getBookingHistoryForVisitingGroup(holly_couch, visiting_group_id)
             vgroup = holly_couch[visiting_group_id]
             for_group_name = vgroup['name']
-        elif user_id != None:
+        elif user_id != '':
 
             history = self.getBookingHistoryForUser(holly_couch, user_id)
             

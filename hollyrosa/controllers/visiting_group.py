@@ -473,3 +473,10 @@ class VisitingGroup(BaseController):
         return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time)
 
 
+    @expose(content_type='x-application/download')
+    @validate(validators={"visiting_group_id":validators.UnicodeString(), "doc_id":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_level('pl'), has_level('staff'), msg='Only staff members may view visiting group attachments'))   
+    def download_attachment(self, visiting_group_id, doc_id):
+        return holly_couch.get_attachment(visiting_group_id, doc_id)
+        
+        

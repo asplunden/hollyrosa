@@ -41,7 +41,7 @@ from booking_history import  remember_workflow_state_change
 from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level
 
 from hollyrosa.model.booking_couch import getAllActivityGroups,  getAllScheduledBookings,  getAllBookingDays,  getAllVisitingGroups
-from hollyrosa.model.booking_couch import getAgeGroupStatistics, getTagStatistics, getSchemaSlotActivityMap, getActivityTitleMap
+from hollyrosa.model.booking_couch import getAgeGroupStatistics, getTagStatistics, getSchemaSlotActivityMap, getActivityTitleMap, getBookingDays, getAllUtelunchBookings
 __all__ = ['tools']
 
 workflow_submenu = """<ul class="any_menu">
@@ -511,18 +511,28 @@ class Tools(BaseController):
         raise redirect('/')
     
         
-    @expose()
-    #@require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def update_password(self, id, new_passwd):
-        print 'update password'
-        s = holly_couch[id]
-        h = hashlib.sha256('gninyd') # salt
-        h.update(new_passwd)
-        c = h.hexdigest()
-        s['password'] = c
-        holly_couch[id] = s
-        raise redirect('/')
-
+        
+        
+    @expose('hollyrosa.templates.sannah_overview')
+    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can take a look at people statistics'))
+    def sannah(self):
+        #...get all booking days in the future
+        today = datetime.date.today().strftime('%Y-%m-%d')
+        all_booking_days = [b.doc for b in getBookingDays(holly_couch, from_date=today)]
+        
+        #...get all utelunch bookings
+        utelunch_bookings = getAllUtelunchBookings(holly_couch)
+        
+        #...make dict mapping booking day id (key) to bookings
+        utelunch_dict = dict()
+        for ub in utelunch_bookings:
+            
+            tmp_booking_list = utelunch_dict.get(ub.key, list())
+            tmp_booking_list.append(ub.doc)
+            utelunch_dict[ub.key] = tmp_booking_list        
+        
+        print utelunch_dict
+        return dict(booking_days=all_booking_days, utelunches=utelunch_dict)
 
     @expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))

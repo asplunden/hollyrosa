@@ -24,26 +24,19 @@ from tw.forms import TableForm, TextField, TextArea, HiddenField, CheckBox
 
 #...for form validation
 from tw.forms.validators import Int, NotEmpty, DateConverter, UnicodeString
-from tw.tinymce import TinyMCE, MarkupConverter
 
 
-class EditNoteForm(TableForm):
+class EditUserForm(TableForm):
     
     show_errors = True
 
     class fields(WidgetsList):
         _id = HiddenField(validator=UnicodeString)
-        target_id = HiddenField(validator=UnicodeString)
-
-        text = TinyMCE(validator=MarkupConverter, mce_options = dict(theme='advanced',  
-                                                                   theme_advanced_toolbar_align ="left",  
-                                                                   theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat", 
-                                                                   theme_advanced_buttons2 = "",
-                                                                   theme_advanced_buttons3 = ""
-                                                                   ))
-        
+        user_name = TextField(validator=UnicodeString)
+        display_name = TextField(validator=UnicodeString)
+        level = TextField()
         
         
         
 
-create_edit_note_form = EditNoteForm("create_edit_note_form")
+create_edit_user_form = EditUserForm("create_edit_user_form")

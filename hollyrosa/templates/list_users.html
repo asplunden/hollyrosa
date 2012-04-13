@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright 2010, 2011, 2012 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Show users</title>
+  <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
+  
+</head>
+
+<body>
+    <h2>Show users</h2>
+    
+    <table class="data">
+        <tr>
+            <th>user name</th><th>display name</th><th>level</th><th>op</th>
+        </tr>
+        <tr py:for="u in users">
+            <td class="data info">${u.user_name}
+              <ul class="any_menu context_inline_menu">
+                <li><a href="${tg.url('edit', user_id=u.id)}">edit</a></li>
+                <li><a href="${tg.url('change_password', user_id=u.id)}">change password</a></li>
+                <li><a href="${tg.url('/history/show', user_id=u.display_name)}">history</a></li> 
+              </ul>            
+            </td>
+            <td class="data info">${u.display_name}</td>
+            <td class="data info"><ul py:for="l in u.level"><li>${l}</li></ul></td>
+            <td class="data info"></td>
+        </tr>    
+    </table>
+</body>
+</html>

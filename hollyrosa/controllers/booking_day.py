@@ -886,7 +886,7 @@ class BookingDay(BaseController):
         #raise IOError,  "%s %s %s" % (str(requested_date),  str(valid_from),  str(valid_to))
         
         if is_new:
-            holly_couch['booking.'+genUID()] = new_booking
+            holly_couch[genUID(type='booking')] = new_booking
             remember_new_booking_request(holly_couch, new_booking)
         else:
             holly_couch[id] = new_booking
@@ -973,7 +973,7 @@ class BookingDay(BaseController):
             new_booking['booking_state'] = activity['default_booking_state']
             
             
-            holly_couch['booking.'+genUID()] = new_booking
+            holly_couch[genUID(type='booking')] = new_booking
             remember_new_booking_request(holly_couch, new_booking)
         else:
             flash('wont prolong since next slot is blocked',  'warning')
