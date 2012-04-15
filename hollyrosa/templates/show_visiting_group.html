@@ -148,7 +148,11 @@ function deleteTag(id, tag) {
     
     <h4>attachments:</h4>
     <ul py:for="at in visiting_group.get('_attachments',[])"><li><a href="${tg.url('download_attachment',visiting_group_id=visiting_group._id,doc_id=at)}">${at}</a></li></ul>
-
+    <form method="post" action="upload_attachment" enctype="multipart/form-data">
+        <input type="file" name="file"/>
+        <input type="hidden" name="vgrpid" value="${visiting_group.id}"/> 
+        <input type="submit"/>
+    </form>
 
     
 

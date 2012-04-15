@@ -486,3 +486,14 @@ class VisitingGroup(BaseController):
         return holly_couch.get_attachment(visiting_group_id, doc_id).read()
         
         
+    @expose()
+    @require(Any(is_user('root'), has_level('pl'), has_level('staff'), msg='Only staff members may upload visiting group attachments'))   
+    def upload_attachment(self, vgrpid, file=''):
+        doc = holly_couch[vgrpid]
+        
+        file = request.POST['file']
+
+        holly_couch.put_attachment(doc, file.file, filename=file.filename)
+        raise redirect('/')
+        
+        
