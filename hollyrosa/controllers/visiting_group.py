@@ -40,6 +40,8 @@ from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedu
 from hollyrosa.controllers.common import workflow_map,  bokn_status_map,  bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId
 from hollyrosa.controllers.booking_history import remember_tag_change
 
+from tg import request, response
+from tg.controllers import CUSTOM_CONTENT_TYPE
 
 __all__ = ['VisitingGroup']
 
@@ -473,10 +475,14 @@ class VisitingGroup(BaseController):
         return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time)
 
 
-    @expose(content_type='x-application/download')
+    #@expose(content_type='x-application/download')
+    @expose(content_type=CUSTOM_CONTENT_TYPE)
     @validate(validators={"visiting_group_id":validators.UnicodeString(), "doc_id":validators.UnicodeString()})
     @require(Any(is_user('root'), has_level('pl'), has_level('staff'), msg='Only staff members may view visiting group attachments'))   
     def download_attachment(self, visiting_group_id, doc_id):
-        return holly_couch.get_attachment(visiting_group_id, doc_id)
+        response.content_type='x-application/download'
+        response.headerlist.append(('Content-Disposition','attachment;filename=%s' % doc_id))        
+                
+        return holly_couch.get_attachment(visiting_group_id, doc_id).read()
         
         
