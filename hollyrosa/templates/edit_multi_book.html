@@ -104,7 +104,7 @@ function book_slot_stage_2()
 {
     
     dojo.xhrGet({
-    url: "/booking/create_booking_async",
+    url: "${tg.url("/booking/create_booking_async")}",
     handleAs:"json",
     form:"booking_req_form",
     load: on_booking_confirmed
@@ -127,7 +127,7 @@ function delete_booking(booking_id, activity_id, visiting_group_id)
 {
     dojo.byId('delete_req_booking_id').value =  booking_id;
     dojo.xhrGet({
-    url: "/booking/delete_booking_async",
+    url: "${tg.url("/booking/delete_booking_async")}",
     handleAs:"json",
     form:"delete_booking_form",
     load: on_booking_deleted
@@ -139,7 +139,7 @@ function unschedule_booking(booking_id, activity_id, visiting_group_id)
 {
     dojo.byId('delete_req_booking_id').value =  booking_id;
     dojo.xhrGet({
-    url: "/booking/unschedule_booking_async",
+    url: "${tg.url("/booking/unschedule_booking_async")}",
     handleAs:"json",
     form:"delete_booking_form",
     load: on_booking_deleted
