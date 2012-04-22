@@ -359,7 +359,7 @@ class VisitingGroup(BaseController):
 
 
     
-    @expose()
+  
     @validate(validators={'id':validators.Int})
     @require(Any(is_user('root'), has_level('pl'), msg='Only pl members may change visiting group properties'))
     def delete_visiting_group(self,  id=None):
@@ -406,15 +406,15 @@ class VisitingGroup(BaseController):
     def view_bookings_of_name(self,  name=None, render_time='', hide_comment=0):
         # TODO: its now possible to get bookings on both name and id
         bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, name, '<- MATCHES NO GROUP ->')]
-        #print 'view_bookings_of_name', bookings
+        
         slot_map = getSchemaSlotActivityMap(holly_couch, 'day_schema.1') # TODO: load for each different schema used
         
-        # TODO: make view. Its just so simple
+        
         visiting_group_id = None
         visiting_group = [v.doc for v in getVisitingGroupOfVisitingGroupName(holly_couch, name)]
         if len(visiting_group) == 1:
             visiting_group_id = visiting_group[0]['_id']
-            
+        first_visiting_group = visiting_group[0]
 
         #...now group all bookings in a dict mapping activity_id:content
         clustered_bookings = {}
@@ -472,7 +472,7 @@ class VisitingGroup(BaseController):
             bl.sort(self.fn_cmp_booking_timestamps)
             
         booking_info_notes = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())]            
-        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time)
+        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time, visiting_group=first_visiting_group, bokn_status_map=bokn_status_map, notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)], show_group=1)
 
 
     #@expose(content_type='x-application/download')
@@ -494,6 +494,6 @@ class VisitingGroup(BaseController):
         file = request.POST['file']
 
         holly_couch.put_attachment(doc, file.file, filename=file.filename)
-        raise redirect('/')
+        raise redirect(request.referrer)
         
         
