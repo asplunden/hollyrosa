@@ -401,9 +401,9 @@ class VisitingGroup(BaseController):
         
 
     @expose('hollyrosa.templates.view_bookings_of_name')
-    @validate(validators={"name":validators.UnicodeString(), "render_time":validators.UnicodeString(), "hide_comment":validators.Int()})
+    @validate(validators={"name":validators.UnicodeString(), "render_time":validators.UnicodeString(), "hide_comment":validators.Int(), "show_group":validators.Int()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def view_bookings_of_name(self,  name=None, render_time='', hide_comment=0):
+    def view_bookings_of_name(self,  name=None, render_time='', hide_comment=0, show_group=0):
         # TODO: its now possible to get bookings on both name and id
         bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, name, '<- MATCHES NO GROUP ->')]
         
@@ -414,8 +414,9 @@ class VisitingGroup(BaseController):
         visiting_group = [v.doc for v in getVisitingGroupOfVisitingGroupName(holly_couch, name)]
         if len(visiting_group) == 1:
             visiting_group_id = visiting_group[0]['_id']
-        first_visiting_group = visiting_group[0]
-
+            
+            first_visiting_group = visiting_group[0]
+            
         #...now group all bookings in a dict mapping activity_id:content
         clustered_bookings = {}
         booking_day_map = dict()
@@ -470,9 +471,12 @@ class VisitingGroup(BaseController):
         clustered_bookings_list.sort(self.fn_cmp_booking_date_list)
         for bl in clustered_bookings_list:
             bl.sort(self.fn_cmp_booking_timestamps)
-            
-        booking_info_notes = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())]            
-        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time, visiting_group=first_visiting_group, bokn_status_map=bokn_status_map, notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)], show_group=1)
+        
+        if show_group==1:    
+            booking_info_notes = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())]            
+        else:
+            booking_info_notes = []
+        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time, visiting_group=first_visiting_group, bokn_status_map=bokn_status_map, notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)], show_group=show_group)
 
 
     #@expose(content_type='x-application/download')
@@ -495,5 +499,12 @@ class VisitingGroup(BaseController):
 
         holly_couch.put_attachment(doc, file.file, filename=file.filename)
         raise redirect(request.referrer)
+    
         
+    @expose('hollyrosa.templates.edit_visiting_group_vodb_data')
+    @validate(validators={"id":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def edit_vodb_data(self, id):
+        vgroup = holly_couch[id]
+        return dict(visiting_group=vgroup)
         
