@@ -116,7 +116,6 @@ class User(BaseController):
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL can change passwords'))
     def update_password(self, user_id, password, password2):
-        
         if not password==password2:
             raise IOError, 'passwords must agree'
  
@@ -125,12 +124,13 @@ class User(BaseController):
         if not s['type'] == 'user':
             raise IOError, 'document must be of type user'
 
+        # todo make salt part of development.ini
         h = hashlib.sha256('gninyd') # salt
         h.update(password)
         c = h.hexdigest()
         s['password'] = c
         holly_couch[user_id] = s
-        raise redirect('/')
+        raise redirect('show')
 
 
     
