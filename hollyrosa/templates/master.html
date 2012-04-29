@@ -22,8 +22,8 @@ from genshi import HTML, XML
 <body py:match="body" py:attrs="select('@*')">
   ${header()}
   <ul id="mainmenu" class="any_menu">
-        <li class="first" style="background-image:url('${tg.url('images/calendar_skiss-s.png')}');background-repeat:no-repeat; padding-left:10px;padding-rigth:20px;"><a href="${tg.url('/calendar/overview')}">Calendar overview</a></li>
-        <li py:if="request.identity" style="background-image:url('${tg.url('images/group_skiss-s.png')}');background-repeat:no-repeat; padding-left:20px;padding-rigth:20px;"><a href="${tg.url('/visiting_group/view_all')}">Visiting groups</a></li>
+        <li class="first"><a href="${tg.url('/calendar/overview')}">Calendar overview</a></li>
+        <li py:if="request.identity" ><a href="${tg.url('/visiting_group/view_all')}">Visiting groups</a></li>
         <li py:if="request.identity"><a href="${tg.url('/tools/show')}" id="toolslink">Tools</a></li>
 	<li py:if="request.identity"><a href="${tg.url('/visiting_group/edit_visiting_group')}">New visiting group</a></li>
         <li py:if="request.identity"><a href="${tg.url('/booking/edit_booking')}">New booking</a></li>
