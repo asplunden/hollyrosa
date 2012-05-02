@@ -27,7 +27,6 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <!-- <title>Hollyrosa - ${booking_day.date.strftime("%A %d %B %Y")}</title> -->
   <title>Hollyrosa - ${booking_day.date}</title>
   
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.5.0/dijit/themes/tundra/tundra.css')}" />
@@ -196,7 +195,7 @@ dojo.addOnLoad(function() {
            <li><a href="${tg.url('delete_booking', booking_day_id=booking_day.id, booking_id=booking.id)}">delete</a></li>
             
             
-            <li py:for="tt in [t for t in activity_slot_position_map[booking.activity_id][1:]  if not blockings_map.has_key(t['slot_id'])]">
+            <li py:for="tt in [t for t in activity_slot_position_map.get(booking.activity_id,[])[1:]  if not blockings_map.has_key(t['slot_id'])]">
         <a href="${tg.url('schedule_booking', booking_id=booking.id, booking_day_id=booking_day.id, slot_row_position_id=tt.slot_id)}">[${tt.time_from} - ${tt.time_to}]</a></li>
     </ul>
     </li></ul>
