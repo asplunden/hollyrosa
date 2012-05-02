@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010, 2011,2012 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -40,7 +40,7 @@ function get_visiting_group_data_from_XHR(visiting_group_id) {
     
     
     dojo.xhrGet({
-    url: "/visiting_group/show_visiting_group_data?id="+value,
+    url: "${tg.url('/visiting_group/show_visiting_group_data?id=')}"+value,
     handleAs:"json",
     load: on_update_visiting_group_data
     });
@@ -64,7 +64,7 @@ function get_visiting_group_data_from_XHR(visiting_group_id) {
     var value = visiting_group_id.options[visiting_group_id_index].value;
     if (0 != visiting_group_id_index) {
         dojo.xhrGet({
-        url: "/visiting_group/show_visiting_group_data?id="+value,
+        url: "${tg.url('/visiting_group/show_visiting_group_data?id=')}"+value,
         handleAs:"json",
         load: on_update_visiting_group_data
     });
