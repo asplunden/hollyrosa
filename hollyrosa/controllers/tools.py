@@ -496,7 +496,6 @@ class Tools(BaseController):
             
             
         for d in dates:
-            #print d
             bd_c = dict(type='booking_day', date=d, note='', title='', num_program_crew_members=0, num_fladan_crew_members=0, day_schema_id='day_schema.1', zorder=pos )
             holly_couch['booking_day.'+str(pos)] = bd_c
             pos += 1
@@ -531,7 +530,7 @@ class Tools(BaseController):
             tmp_booking_list.append(ub.doc)
             utelunch_dict[ub.key] = tmp_booking_list        
         
-        print utelunch_dict
+        log.info( utelunch_dict )
         return dict(booking_days=all_booking_days, utelunches=utelunch_dict)
 
     @expose()

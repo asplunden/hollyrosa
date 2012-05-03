@@ -242,7 +242,7 @@ class VisitingGroup(BaseController):
             vgps = []
             for id,  vgp in visiting_group_c['visiting_group_properties'].items():
                 try:
-                    #print 'vgp',vgp['to_date']
+                    
                     tmp_to_date = datetime.datetime.strptime(vgp['to_date'],'%Y-%m-%d')
                 except ValueError:
                     tmp_to_date = None
@@ -335,7 +335,7 @@ class VisitingGroup(BaseController):
         bookings = getBookingsOfVisitingGroup(holly_couch, id_c,  None)
         for tmp in bookings:
             tmp_booking = tmp.doc
-            #print 'tmp_booking',  tmp_booking
+            
             new_content = computeCacheContent(visiting_group_c, tmp_booking['content'])
             if new_content != tmp_booking['cache_content'] :
             
@@ -472,7 +472,7 @@ class VisitingGroup(BaseController):
         for bl in clustered_bookings_list:
             bl.sort(self.fn_cmp_booking_timestamps)
         
-        if show_group==1:    
+        if True: #show_group==1:    
             booking_info_notes = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())]            
         else:
             booking_info_notes = []
