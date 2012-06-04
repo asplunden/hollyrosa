@@ -126,7 +126,7 @@ class Calendar(BaseController):
         booking_days = getBookingDays(holly_couch, from_date=today_date_str,  to_date=end_date_str) 
 
 
-        vedit_agroups = getVisitingGroupsInDatePeriod(holly_couch, today_date_str,  end_date_str) # TODO: fix view later.  get_visiting_groups(from_date=today_date_str,  to_date=end_date_str)
+        vgroups = getVisitingGroupsInDatePeriod(holly_couch, today_date_str,  end_date_str) # TODO: fix view later.  get_visiting_groups(from_date=today_date_str,  to_date=end_date_str)
 
         group_info = dict()
         bdays = list()
