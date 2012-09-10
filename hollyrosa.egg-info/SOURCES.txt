@@ -22,8 +22,10 @@ hollyrosa/controllers/booking_day.py
 hollyrosa/controllers/booking_history.py
 hollyrosa/controllers/common.py
 hollyrosa/controllers/error.py
+hollyrosa/controllers/note.py
 hollyrosa/controllers/root.py
 hollyrosa/controllers/secure.py
+hollyrosa/controllers/tag.py
 hollyrosa/controllers/template.py
 hollyrosa/controllers/tools.py
 hollyrosa/controllers/validators.py
@@ -37,6 +39,7 @@ hollyrosa/lib/helpers.py
 hollyrosa/model/__init__.py
 hollyrosa/model/auth.py
 hollyrosa/model/booking.py
+hollyrosa/model/booking_couch.py
 hollyrosa/public/favicon.ico
 hollyrosa/public/css/print.css
 hollyrosa/public/css/style.css
@@ -89,6 +92,7 @@ hollyrosa/templates/debug.html
 hollyrosa/templates/edit_activity.html
 hollyrosa/templates/edit_booked_booking.html
 hollyrosa/templates/edit_multi_book.html
+hollyrosa/templates/edit_note.html
 hollyrosa/templates/edit_visiting_group.html
 hollyrosa/templates/error.html
 hollyrosa/templates/footer.html
@@ -110,6 +114,7 @@ hollyrosa/templates/view_bookings_of_name2.html~
 hollyrosa/templates/view_sanity_check_property_usage.html
 hollyrosa/templates/visiting_group_view_all.html
 hollyrosa/templates/visitor_statistics.html
+hollyrosa/templates/vodb_statistics.html
 hollyrosa/templates/workflow_overview.html
 hollyrosa/templates/workflow_view_scheduled.html
 hollyrosa/templates/workflow_view_unscheduled.html
@@ -124,6 +129,7 @@ hollyrosa/widgets/edit_activity_form.py
 hollyrosa/widgets/edit_book_slot_form.py
 hollyrosa/widgets/edit_booking_day_form.py
 hollyrosa/widgets/edit_new_booking_request.py
+hollyrosa/widgets/edit_note_form.py
 hollyrosa/widgets/edit_visiting_group_form.py
 hollyrosa/widgets/move_booking_form.py
 hollyrosa/widgets/validate_get_method_inputs.py
