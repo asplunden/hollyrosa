@@ -25,8 +25,8 @@ from genshi import HTML, XML
         <li class="first"><a href="${tg.url('/calendar/overview')}">Calendar overview</a></li>
         <li py:if="request.identity" ><a href="${tg.url('/visiting_group/view_all')}">Visiting groups</a></li>
         <li py:if="request.identity"><a href="${tg.url('/tools/show')}" id="toolslink">Tools</a></li>
-	<li py:if="request.identity"><a href="${tg.url('/visiting_group/edit_visiting_group')}">New visiting group</a></li>
-        <li py:if="request.identity"><a href="${tg.url('/booking/edit_booking')}">New booking</a></li>
+	<!-- <li py:if="request.identity"><a href="${tg.url('/visiting_group/edit_visiting_group')}">New visiting group</a></li>
+        <li py:if="request.identity"><a href="${tg.url('/booking/edit_booking')}">New booking</a></li>-->
 
     <span py:if="tg.auth_stack_enabled" py:strip="True">
         <li><a href="${tg.url('/about')}" class="${('', 'active')[defined('page') and page==page=='about']}">About</a></li>
