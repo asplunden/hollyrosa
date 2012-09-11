@@ -41,7 +41,8 @@ def makeDate(s):
    require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query"], function(registry, Menu, MenuItem, xq, ioQuery) {
    var menu = new Menu({
        targetNodeIds: ["calendar_listing"],
-       selector: "tr.calendar_overview"
+       selector: "tr.calendar_overview",
+       leftClickToOpen: true
        });
 
    menu.addChild(new MenuItem({

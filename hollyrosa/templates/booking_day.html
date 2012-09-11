@@ -36,22 +36,15 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         </style>
         
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" />
-  <script type="text/javascript" src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" ></script>
-  <script type="text/javascript">
+  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
+  <script>
+
+require(["dojo/dom", "dojo/query!css2", "dojo/dom-form", "dojo/dom-attr", "dojo/_base/array", "dojo/query", "dojo/cookie", "dojo/date", "dijit/Calendar", "dojo/on", "dojo/parser", "dojo/ready"], function(dom, query, domForm, domAttr, array, query, cookie, date, calendar, on, parser, ready) {
 
 var jdata = {};
-  
-dojo.require("dojo.cookie");
-dojo.require("dojo.date");
-dojo.require("dijit.dijit");
-dojo.require("dijit.Calendar");
 
-
-
- 
- 
 function update_activity_group_visible_rows() {
-    var odata = dojo.formToObject('bday_hide_form');
+    var odata = domForm.toJson('bday_hide_form');
     var show_these_activity_group_ids = Object();
     for (var param_name in odata) {
         param_value = odata[param_name];
@@ -59,9 +52,9 @@ function update_activity_group_visible_rows() {
     }
     
     //...we now have a list of agc ids to show, all other should be hidden
-    var elems = dojo.query("[hollyrosa:acgid]");
-    dojo.forEach(elems, function(elem) {
-        var agc_val = dojo.attr(elem, 'hollyrosa:acgid');
+    var elems = query("[hollyrosa:acgid]");
+    array.forEach(elems, function(elem) {
+        var agc_val = domAttr.get(elem, 'hollyrosa:acgid');
         if (show_these_activity_group_ids[agc_val]) {
             dojo.style(elem, {display: 'block'});
         }
@@ -73,15 +66,14 @@ function update_activity_group_visible_rows() {
  
 
 function save_visible_ag() {
-    var cdata = dojo.formToJson('bday_hide_form');
-    dojo.cookie('visible_ag', cdata, {expires:5});    
+    var cdata = domform.toJson('bday_hide_form');
+    cookie('visible_ag', cdata, {expires:5});    
     update_activity_group_visible_rows();
 }
   
 
-
-function set_visible_ag_checkboxes(g){
-    var checkbox_element_value = dojo.attr(g, 'value');
+function set_visible_ag_checkboxes(g) {
+    var checkbox_element_value = domAttr.get(g, 'value');
     var checkbox_element_id = "show_activity_group_checkbox_" + checkbox_element_value;
     visible_data_from_cookie = jdata[checkbox_element_id];
     if (visible_data_from_cookie) {
@@ -95,59 +87,121 @@ function set_visible_ag_checkboxes(g){
 
   
 function recall_visible_ag() {
-    var cdata = dojo.cookie('visible_ag');
+    var cdata = cookie('visible_ag');
     if (cdata == undefined) {
       jdata = {};
     } else {
       jdata = dojo.fromJson(cdata);
-      var visible_ag_checkboxes = dojo.query('[hollyrosa:show_ag]');
-      dojo.forEach(visible_ag_checkboxes, set_visible_ag_checkboxes );  
+      var visible_ag_checkboxes = query('[hollyrosa:show_ag]');
+      array.forEach(visible_ag_checkboxes, set_visible_ag_checkboxes );  
     }
 }
 
-
-  
  
- function set_save_visible_handlers() {
-    dojo.forEach(dojo.query('[hollyrosa:show_ag]'), function(h) { dojo.connect(h, "onclick", null, save_visible_ag);  });
+function set_save_visible_handlers() {
+    array.forEach(
+       query('[hollyrosa:show_ag]'), 
+       function(h) { 
+           on(h, 'onclick', save_visible_ag); 
+       }
+    )
 }
 
-
-
-
-dojo.addOnLoad(recall_visible_ag);
-dojo.addOnLoad(set_save_visible_handlers);
 
 
 //...functions for showing the nevigation calendar
 
+
+
+
+
+ready(function() {
+
+    
+
+    recall_visible_ag();
+    set_save_visible_handlers();
+    
+    var e = dom.byId('navigation_calendar'); 
+    domAttr.set(e, 'dojoType', 'dijit.Calendar'); 
+    domAttr.set(e, 'onChange', 'navigation_calendar_clicked'); 
+    domAttr.set(e, 'isDisabledDate','navigation_calendar_is_disabled');
+    parser.parse(e.parentNode);
+    
+    var tools_link_elem = dom.byId('toolslink');
+    var href = domAttr.get(tools_link_elem, "href");
+    domAttr.get(tools_link_elem, "href", href + "?day=" + "${booking_day.date}" );
+
+});
+
+});
+
+
 function navigation_calendar_clicked(x) {
-    var selected_date = dojo.date.locale.format(x, {datePattern: "yyyy-MM-dd", selector: "date"});
-    if ("${booking_day.date}" != selected_date) {
-        window.location.assign('day?day=' + selected_date);
+        var selected_date = dojo.date.locale.format(x, {datePattern: "yyyy-MM-dd", selector: "date"});
+        if ("${booking_day.date}" != selected_date) {
+            window.location.assign('day?day=' + selected_date);
+        }
     }
-}
-
-
-dojo.addOnLoad(function() {
-    var e = dojo.byId('navigation_calendar'); 
-    dojo.attr(e, 'dojoType', 'dijit.Calendar'); 
-    dojo.attr(e, 'onChange', 'navigation_calendar_clicked'); 
-    dojo.attr(e, 'isDisabledDate','navigation_calendar_is_disabled');
-    dojo.parser.parse(e.parentNode);
-});
-
-
-//...fix tools link
-dojo.addOnLoad(function() {
-    var tools_link_elem = dojo.byId('toolslink');
-    var href = dojo.attr(tools_link_elem, "href");
-    dojo.attr(tools_link_elem, "href", href + "?day=" + "${booking_day.date}" );
-});
-
-
-
+    
   </script>
+  <script>
+   require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query", "dojo/ready"], function(registry, Menu, MenuItem, xq, ioQuery, ready) {
+   
+       ready(function() {
+   
+           var menu = new Menu({
+               targetNodeIds: ["booking_day_overview"],
+               selector: "div.slot_booking"
+           });
+
+           menu.addChild(new MenuItem({
+               label: "Edit booking",
+               onClick: function(evt) {
+                   var node = this.getParent().currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       id: bid,
+                       return_to_day_id: '${booking_day.id}'
+                   };
+                        
+               window.location = '${tg.url('edit_booked_booking')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+           
+           menu.addChild(new MenuItem({
+               label: "View booking",
+               onClick: function(evt) {
+                   var node = this.getParent().currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       id: bid,
+                       return_to_day_id: '${booking_day.id}'
+                   };
+                        
+               window.location = '${tg.url('view_booked_booking')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+           
+           menu.addChild(new MenuItem({
+               label: "Unschedule booking",
+               onClick: function(evt) {
+                   var node = this.getParent().currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       booking_id: bid,
+                       booking_day_id: '${booking_day.id}'
+                   };        
+               window.location = '${tg.url('unschedule_booking')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+
+           /* add submenu with more entries  */
+       });
+});
+</script>
+  
+  
 </head>
 
 <body class="tundra">   
@@ -201,7 +255,7 @@ dojo.addOnLoad(function() {
     </li></ul>
     
     <h3>Scheduled bookings and daily overview</h3>
-  <div class="booking_day_overview">
+  <div class="booking_day_overview" id="booking_day_overview">
   
   <!-- hack for 2011 for showing FM EM evening and after hours -->
   <div class="booking_day_overview_slot_row">
@@ -221,7 +275,7 @@ dojo.addOnLoad(function() {
             <div py:if="bookings.has_key(slot_position.id)">
             
                 
-                <div py:for="b in bookings[slot_position.id]" style="border-bottom:1px dashed #ccc;">
+                <div py:for="b in bookings[slot_position.id]" class="slot_booking" hollyrosa:bid="${b.id}" style="border-bottom:1px dashed #ccc;">
                 <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/visiting_group/view_bookings_of_name', name=b.visiting_group_name)}">${b.visiting_group_name}</a></span><br/><a href="${tg.url('view_booked_booking', id=b.id, return_to_day_id=booking_day.id)}" style="padding-left:2em;">${getRenderContent(b)}</a>
                 
                     <ul class="any_menu context_inline_menu">

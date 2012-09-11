@@ -37,7 +37,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query"], function(registry, Menu, MenuItem, xq, ioQuery) {
    var menu = new Menu({
        targetNodeIds: ["vgroup_listing"],
-       selector: "tr.name_menu"
+       selector: "tr.name_menu",
+       leftClickToOpen: true
        });
 
        
