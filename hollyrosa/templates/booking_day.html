@@ -146,7 +146,7 @@ function navigation_calendar_clicked(x) {
     
   </script>
   <script>
-   require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query", "dojo/ready"], function(registry, Menu, MenuItem, xq, ioQuery, ready) {
+   require(["dijit/registry","dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem","dojo/query!css2", "dojo/io-query", "dojo/ready"], function(registry, Menu, MenuItem, PopupMenuItem, xq, ioQuery, ready) {
    
        ready(function() {
    
@@ -197,6 +197,114 @@ function navigation_calendar_clicked(x) {
            })); 
 
            /* add submenu with more entries  */
+           
+           var more = new Menu();
+           more.addChild(new MenuItem({
+               label: "prolong",
+               onClick: function(evt) {
+                   var node = menu.currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       id: bid
+                   };        
+               window.location = '${tg.url('prolong')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+                      
+           more.addChild(new MenuItem({
+               label: "move",
+               onClick: function(evt) {
+                   var node = menu.currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       id: bid,
+                       return_to_day_id: '${booking_day.id}'
+                   };        
+               window.location = '${tg.url('move_booking')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+           
+           more.addChild(new MenuItem({
+               label: "> preliminary",
+               onClick: function(evt) {
+                   var node = menu.currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       booking_id: bid,
+                       state: 0
+                   };        
+               window.location = '${tg.url('/workflow/set_state')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+           
+           more.addChild(new MenuItem({
+               label: "> booked",
+               onClick: function(evt) {
+                   var node = menu.currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       booking_id: bid,
+                       state: 10
+                   };        
+               window.location = '${tg.url('/workflow/set_state')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+           
+           more.addChild(new MenuItem({
+               label: "> approved",
+               onClick: function(evt) {
+                   var node = menu.currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       booking_id: bid,
+                       state: 20
+                   };        
+               window.location = '${tg.url('/workflow/set_state')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+                      
+           more.addChild(new MenuItem({
+               label: "> disapprove",
+               onClick: function(evt) {
+                   var node = menu.currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       booking_id: bid,
+                       state: -10
+                   };        
+               window.location = '${tg.url('/workflow/set_state')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+           
+           more.addChild(new MenuItem({
+               label: "multi-book",
+               onClick: function(evt) {
+                   var node = menu.currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       booking_id: bid
+                   };        
+               window.location = '${tg.url('multi_book')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+           
+           more.addChild(new MenuItem({
+               label: "delete",
+               onClick: function(evt) {
+                   var node = menu.currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       booking_id: bid,
+                       booking_day_id: '${booking_day.id}'
+                   };        
+               window.location = '${tg.url('delete_booking')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+           
+           menu.addChild(new PopupMenuItem({
+               label: "more...",
+               popup: more
+               }));
        });
 });
 </script>
