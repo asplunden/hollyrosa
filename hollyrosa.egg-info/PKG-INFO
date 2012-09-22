@@ -2,9 +2,9 @@ Metadata-Version: 1.0
 Name: hollyrosa
 Version: 0.1dev
 Summary: UNKNOWN
-Home-page: UNKNOWN
-Author: UNKNOWN
-Author-email: UNKNOWN
-License: UNKNOWN
-Description: UNKNOWN
-Platform: UNKNOWN
+Home-page: http://github.com/asplunden/hollyrosa
+Author: Martin Eliasson
+Author-email: asplunden@gmail.com
+License: AGPL
+Description: Booking system for Vässarö scout center
+Platform: Linux
