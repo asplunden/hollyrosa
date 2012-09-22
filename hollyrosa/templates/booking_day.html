@@ -152,9 +152,26 @@ function navigation_calendar_clicked(x) {
    
            var menu = new Menu({
                targetNodeIds: ["booking_day_overview"],
-               selector: "div.slot_booking"
+               selector: "div.slot_booking",
+               onShow: function(evt) {
+                   alert('helooo');
+               }
            });
 
+           menu.addChild(new MenuItem({
+               label: "New booking",
+               onClick: function(evt) {
+                   var node = this.getParent().currentTarget;
+                   var sid = node.attributes["hollyrosa:slot_position_id"].value;
+                   var ioq = {
+                       slot_position_id: sid,
+                       booking_day_id: '${booking_day.id}'
+                   };
+                        
+               window.location = '${tg.url('book_slot')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+           
            menu.addChild(new MenuItem({
                label: "Edit booking",
                onClick: function(evt) {
@@ -200,7 +217,7 @@ function navigation_calendar_clicked(x) {
            
            var more = new Menu();
            more.addChild(new MenuItem({
-               label: "prolong",
+               label: "Prolong",
                onClick: function(evt) {
                    var node = menu.currentTarget;
                    var bid = node.attributes["hollyrosa:bid"].value;
@@ -212,7 +229,7 @@ function navigation_calendar_clicked(x) {
            })); 
                       
            more.addChild(new MenuItem({
-               label: "move",
+               label: "Move",
                onClick: function(evt) {
                    var node = menu.currentTarget;
                    var bid = node.attributes["hollyrosa:bid"].value;
@@ -289,7 +306,7 @@ function navigation_calendar_clicked(x) {
            })); 
            
            more.addChild(new MenuItem({
-               label: "delete",
+               label: "Delete",
                onClick: function(evt) {
                    var node = menu.currentTarget;
                    var bid = node.attributes["hollyrosa:bid"].value;
@@ -300,13 +317,101 @@ function navigation_calendar_clicked(x) {
                window.location = '${tg.url('delete_booking')}' + '?' + ioQuery.objectToQuery(ioq);
                }
            })); 
+
+           /* var node = this.getParent().currentTarget;
+           var slot_is_blocked_value = node.attributes["hollyrosa:lock"].value;
+           var slot_is_blocked = ('on' == 'slot_is_blocked_value');
+           */
+           
+           menu.addChild(new MenuItem({
+               label: "Block slot",
+               disabled: false, 
+               onClick: function(evt) {
+                   var node = this.getParent().currentTarget;
+                   var sid = node.attributes["hollyrosa:slot_position_id"].value;
+                   var ioq = {
+                       slot_row_position_id: sid,
+                       booking_day_id: '${booking_day.id}'
+                   };    
+               window.location = '${tg.url('block_slot')}' + '?' + ioQuery.objectToQuery(ioq);
+               },
+               onShow: function(evt) {
+                   var node = this.getParent().currentTarget;
+                   alert(node);
+               }
+           })); 
+           
+           
+           menu.addChild(new MenuItem({
+               label: "Unblock slot",
+               disabled: false, 
+               onClick: function(evt) {
+                   var node = this.getParent().currentTarget;
+                   var sid = node.attributes["hollyrosa:slot_position_id"].value;
+                   var ioq = {
+                       slot_row_position_id: sid,
+                       booking_day_id: '${booking_day.id}'
+                   };    
+                   window.location = '${tg.url('unblock_slot')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
            
            menu.addChild(new PopupMenuItem({
                label: "more...",
                popup: more
                }));
-       });
-});
+       
+       
+       /*..........................*/
+      
+           var book_menu = new Menu({
+               targetNodeIds: ["booking_day_overview"],
+               selector: "div.slot_empty"
+           });
+
+           book_menu.addChild(new MenuItem({
+               label: "New booking",
+               onClick: function(evt) {
+                   var node = this.getParent().currentTarget;
+                   var sid = node.attributes["hollyrosa:slot_position_id"].value;
+                   var ioq = {
+                       slot_position_id: sid,
+                       booking_day_id: '${booking_day.id}'
+                   };    
+               window.location = '${tg.url('book_slot')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+           
+           book_menu.addChild(new MenuItem({
+               label: "Block slot",
+               disabled: false,
+               onClick: function(evt) {
+                   var node = this.getParent().currentTarget;
+                   var sid = node.attributes["hollyrosa:slot_position_id"].value;
+                   var ioq = {
+                       slot_row_position_id: sid,
+                       booking_day_id: '${booking_day.id}'
+                   };    
+               window.location = '${tg.url('block_slot')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+           
+           book_menu.addChild(new MenuItem({
+               label: "Unblock slot",
+               disabled: false, /* in the future we need a way to set this as the menu are about to be displayed, everytime. */
+               onClick: function(evt) {
+                   var node = this.getParent().currentTarget;
+                   var sid = node.attributes["hollyrosa:slot_position_id"].value;
+                   var ioq = {
+                       slot_row_position_id: sid,
+                       booking_day_id: '${booking_day.id}'
+                   };    
+               window.location = '${tg.url('unblock_slot')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+       }); /* end ready */
+                 
+}); /* end require */
 </script>
   
   
@@ -383,35 +488,21 @@ function navigation_calendar_clicked(x) {
             <div py:if="bookings.has_key(slot_position.id)">
             
                 
-                <div py:for="b in bookings[slot_position.id]" class="slot_booking" hollyrosa:bid="${b.id}" style="border-bottom:1px dashed #ccc;">
+                <div py:for="b in bookings[slot_position.id]" class="slot_booking" hollyrosa:bid="${b.id}" hollyrosa:lock="${['off','block'][blockings_map.has_key(slot_position.id)]}"  style="margin-bottom: 0.5em; margin-top: 0.5em; padding-bottom:0.5em; border-bottom:1px dashed #ccc;" hollyrosa:slot_position_id="${slot_position.id}">
                 <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/visiting_group/view_bookings_of_name', name=b.visiting_group_name)}">${b.visiting_group_name}</a></span><br/><a href="${tg.url('view_booked_booking', id=b.id, return_to_day_id=booking_day.id)}" style="padding-left:2em;">${getRenderContent(b)}</a>
                 
-                    <ul class="any_menu context_inline_menu">
-                        <li><a href="${tg.url('edit_booked_booking', return_to_day_id=booking_day.id, id=b.id)}">edit</a></li>
-                        <li><a href="${tg.url('view_booked_booking', return_to_day_id=booking_day.id, id=b.id)}">view</a></li>
-                        <li><a href="${tg.url('unschedule_booking', booking_day_id=booking_day.id, booking_id=b.id)}">unschedule</a></li>
-                        
-                        <li><ul style="background-color:transparent; padding:0px;" class="any_menu context_dropdown_menu">more...
-                            <li><a href="${tg.url('prolong', id=b.id)}">prolong</a></li>
-                            <li><a href="${tg.url('move_booking', return_to_day_id=booking_day.id, id=b.id, )}">move</a></li>
-                            <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=0)}">>preliminary</a></li>
-                            <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=10)}">>booked</a></li>
-                            <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=20)}">>approve</a></li>
-                            <li><a href="${tg.url('/workflow/set_state', booking_id=b.id, state=-10)}">>disapprove</a></li>
-                            <li><a href="${tg.url('multi_book', booking_id=b.id)}">multi-book</a></li>
-                            <li><a href="${tg.url('delete_booking', booking_day_id=booking_day.id, booking_id=b.id)}">delete</a></li>
-                        </ul></li>
-                    </ul>
+                    
                 </div>
             </div>
+            <div py:if="not bookings.has_key(slot_position.id)" class="slot_empty" hollyrosa:slot_position_id="${slot_position.id}">&nbsp;</div>
             
-            <div py:if="blockings_map.has_key(slot_position.id)">&nbsp;</div>
+            <!-- <div py:if="blockings_map.has_key(slot_position.id)"></div>
             
-            <ul id="minimenu_${slot_position.id}" class="context_inline_menu any_menu">
+             <ul id="minimenu_${slot_position.id}" class="context_inline_menu any_menu">
                 <li><a  py:if="not blockings_map.has_key(slot_position.id)" href="${tg.url('book_slot', booking_day_id=booking_day.id, slot_position_id=slot_position.id)}">book</a></li>
                 <li><a py:if="not blockings_map.has_key(slot_position.id)" href="${tg.url('block_slot', booking_day_id=booking_day.id, slot_row_position_id=slot_position.id)}">block slot</a></li>
                 <li><a py:if="blockings_map.has_key(slot_position.id)" href="${tg.url('unblock_slot', booking_day_id=booking_day.id, slot_row_position_id=slot_position.id)}">unblock slot</a></li>
-            </ul>
+            </ul> -->
             
         </div>
     </div> 
