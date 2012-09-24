@@ -62,7 +62,7 @@ def makeDate(s):
        onClick: function(evt) {
            var node = this.getParent().currentTarget;
            var bdate = node.attributes["hollyrosa:bdate"].value;
-           window.location = '${tg.url('/visiting_group/view_at_date', at_date='')}' + bdate;
+           window.location = '${tg.url('/visiting_group/view_at_date', params={'at_date':''})}' + bdate;
            }
        }));
        
@@ -119,7 +119,7 @@ def makeDate(s):
     <table class="data" id="calendar_listing">
         <tr><th>Day</th><th>Note</th></tr>
         <tr py:for="booking_day in booking_days" style="${['','background:#fdd;'][6==makeDate(booking_day['date']).weekday()]}" class="calendar_overview" hollyrosa:bdate="${booking_day['date']}" hollyrosa:bdayid="${booking_day['_id']}"> 
-            <td class="data info"><a href="${tg.url('/booking/day',day_id=str(booking_day['_id']))}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a><br/>  
+            <td class="data info"><a href="${tg.url('/booking/day', params={'day_id':str(booking_day['_id'])})}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a><br/>  
             </td>
             <td class="data info"><h2>${booking_day.get('title','')}</h2>
             <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day['events']">$e</li></ul>            

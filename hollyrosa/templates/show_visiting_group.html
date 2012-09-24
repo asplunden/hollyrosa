@@ -103,11 +103,11 @@ function deleteTag(id, tag) {
 <body>
     <h2>${visiting_group.name}</h2>
 <ul class="any_menu context_inline_menu ">
-       <li><a href="${tg.url('edit_visiting_group', id=visiting_group.id)}">edit</a></li>
-       <li><a href="${tg.url('/note/add_note', target_id=visiting_group._id)}">add note</a></li>
-       <li><a href="${tg.url('view_bookings_of_name', name=visiting_group.name)}">list activities</a></li>
-       <li><a href="${tg.url('../history/show', visiting_group_id=visiting_group.id)}">view booking history</a></li>
-       <li><a href="${tg.url('delete_visiting_group', id=visiting_group.id)}">delete</a></li>
+       <li><a href="${tg.url('edit_visiting_group', params={'id':visiting_group.id})}">edit</a></li>
+       <li><a href="${tg.url('/note/add_note', params={'target_id':visiting_group._id})}">add note</a></li>
+       <li><a href="${tg.url('view_bookings_of_name', params={'name':visiting_group.name})}">list activities</a></li>
+       <li><a href="${tg.url('../history/show', params={'visiting_group_id':visiting_group.id})}">view booking history</a></li>
+       <li><a href="${tg.url('delete_visiting_group', params={'id':visiting_group.id})}">delete</a></li>
     </ul>
     
     <p>${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
@@ -124,9 +124,9 @@ function deleteTag(id, tag) {
             
         <div class="note2"><i>${n.timestamp} ${n.last_changed_by}</i><br/>
         <ul class="any_menu context_inline_menu ">
-           <li><a href="${tg.url('/note/edit_note', _id=n._id)}">edit</a></li>
-           <li><a href="${tg.url('/note/add_note', target_id=visiting_group._id)}">add note</a></li>
-           <li><a href="${tg.url('/note/delete_note', _id=n._id)}">delete</a></li>
+           <li><a href="${tg.url('/note/edit_note', params={'_id':n._id})}">edit</a></li>
+           <li><a href="${tg.url('/note/add_note', params={'target_id':visiting_group._id})}">add note</a></li>
+           <li><a href="${tg.url('/note/delete_note', params={'_id':n._id})}">delete</a></li>
         </ul>${HTML(n.text)}</div>
                 
     </div>
@@ -147,7 +147,7 @@ function deleteTag(id, tag) {
     </table>
     
     <h4>attachments:</h4>
-    <ul py:for="at in visiting_group.get('_attachments',[])"><li><a href="${tg.url('download_attachment',visiting_group_id=visiting_group._id,doc_id=at)}">${at}</a></li></ul>
+    <ul py:for="at in visiting_group.get('_attachments',[])"><li><a href="${tg.url('download_attachment', params={'visiting_group_id':visiting_group._id, 'doc_id':at})}">${at}</a></li></ul>
     <form method="post" action="upload_attachment" enctype="multipart/form-data">
         <input type="file" name="file"/>
         <input type="hidden" name="vgrpid" value="${visiting_group.id}"/> 
@@ -157,7 +157,7 @@ function deleteTag(id, tag) {
     
 
         <div py:for="b in bookings">
-        <h3><a href="${tg.url('/booking/view_activity', activity_id=b.activity.id)}">${b.activity.title}</a></h3>
+        <h3><a href="${tg.url('/booking/view_activity', params={'activity_id':b.activity.id})}">${b.activity.title}</a></h3>
             
             <div py:if="None != b.booking_day">
                 
@@ -166,15 +166,14 @@ function deleteTag(id, tag) {
         
             <div py:if="None != b.booking_day" style="margin-left:2em;">
                 <!--<span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day',day_id=b.booking_day.id)}">${b.booking_day.date.strftime('%A %d %B')}</a> <b>${b.slot_row_position.time_from}</b> to <b>${b.slot_row_position.time_to}</b>  ${workflow_map[b.booking_state]}</span>-->
-                
-                <ul class="any_menu context_inline_menu" style="padding-left:2em;">
-                    <li><a href="${tg.url('/workflow/set_state', booking_id=b._id, state=10)}">booked</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', booking_id=b._id, state=20)}">approve</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', booking_id=b._id, state=-10)}">disapprove</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', booking_id=b._id, state=0)}">preliminary</a></li>
-                    <li><a href="${tg.url('/booking/edit_booked_booking', return_to_day_id=b.booking_day_id, id=b._id)}">edit</a></li>
-                    <li><a href="${tg.url('/booking/view_booked_booking', return_to_day_id=b.booking_day_id, id=b._id)}">view</a></li>
-                    <li><a href="${tg.url('/booking/unschedule_booking', booking_day_id=b.booking_day_id, booking_id=b._id)}">unschedule</a></li>
+                 <ul class="any_menu context_inline_menu" style="padding-left:2em;">
+                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':b._id, 'state':10})}">booked</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':b._id, 'state':20})}">approve</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':b._id, 'state':-10})}">disapprove</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':b._id, 'state':0})}">preliminary</a></li>
+                    <li><a href="${tg.url('/booking/edit_booked_booking', params={'return_to_day_id':b.booking_day_id, 'id':b._id})}">edit</a></li>
+                    <li><a href="${tg.url('/booking/view_booked_booking', params={'return_to_day_id':b.booking_day_id, 'id':b._id})}">view</a></li>
+                    <li><a href="${tg.url('/booking/unschedule_booking', params={'booking_day_id':b.booking_day_id, 'booking_id':b._id})}">unschedule</a></li>
                 </ul>
                 
                 
@@ -183,8 +182,8 @@ function deleteTag(id, tag) {
                 <span class="workflow_state_unscheduled">unscheduled</span>
                 <ul class="any_menu context_inline_menu" style="padding-left:2em;">
                     
-                    <li><a href="${tg.url('/booking/edit_booked_booking', id=b._id)}">edit</a></li>
-                    <li><a href="${tg.url('/booking/view_booked_booking', id=b._id)}">view</a></li>
+                    <li><a href="${tg.url('/booking/edit_booked_booking', params={'id':b._id})}">edit</a></li>
+                    <li><a href="${tg.url('/booking/view_booked_booking', params={'id':b._id})}">view</a></li>
                     
                 </ul>
             </div>

@@ -47,7 +47,7 @@ require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo
        onClick: function(evt) {
            var node = this.getParent().currentTarget;
            var vgroup_id = node.attributes["hollyrosa:vg"].value;
-           window.location = '${tg.url('show_visiting_group', id='')}' + vgroup_id;
+           window.location = '${tg.url('show_visiting_group', params={'id':''})}' + vgroup_id;
            }
        }));
        
@@ -56,7 +56,7 @@ require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo
        onClick: function(evt) {
            var node = this.getParent().currentTarget;
            var vgroup_id = node.attributes["hollyrosa:vg"].value;
-           window.location = '${tg.url('edit_visiting_group', id='')}' + vgroup_id;
+           window.location = '${tg.url('edit_visiting_group', params={'id':''})}' + vgroup_id;
            }
        }));
        
@@ -78,7 +78,7 @@ require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo
        onClick: function(evt) {
            var node = this.getParent().currentTarget;
            var vgroup_id = node.attributes["hollyrosa:vg"].value;
-           window.location = '${tg.url('/note/add_note', target_id='')}' + vgroup_id;
+           window.location = '${tg.url('/note/add_note', params={'target_id':''})}' + vgroup_id;
 
            }
        }));
@@ -88,7 +88,7 @@ require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo
        onClick: function(evt) {
            var node = this.getParent().currentTarget;
            var vgroup_id = node.attributes["hollyrosa:vg"].value;
-           window.location = '${tg.url('/history/show', visiting_group_id='')}' + vgroup_id;
+           window.location = '${tg.url('/history/show', params={'visiting_group_id':''})}' + vgroup_id;
            }
        }));
        
@@ -97,7 +97,7 @@ require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo
        onClick: function(evt) {
            var node = this.getParent().currentTarget;
            var vgroup_id = node.attributes["hollyrosa:vg"].value;
-           window.location = '${tg.url('/booking/edit_booking', visiting_group_id='')}' + vgroup_id;
+           window.location = '${tg.url('/booking/edit_booking', params={'visiting_group_id':''})}' + vgroup_id;
            }
        }));
    });
@@ -160,15 +160,15 @@ function loadNotesFor(id) {
     Choose time period: <ul class="any_menu">
 
         <li><a href="${tg.url('view_today')}">today</a></li>
-        <li><a href="${tg.url('view_at_date', at_date='2012-06-15')}">Miniscout I</a></li>
+        <!-- <li><a href="${tg.url('view_at_date', at_date='2012-06-15')}">Miniscout I</a></li>
         <li><a href="${tg.url('view_at_date', at_date='2012-06-18')}">Miniscout II</a></li>
         <li><a href="${tg.url('view_at_date', at_date='2012-08-14')}">Miniscout III</a></li>
         <li><a href="${tg.url('view_date_range', from_date='2012-07-22', to_date='2012-07-29')}">1719</a></li>        
         <li><a href="${tg.url('view_date_range', from_date='2012-08-04', to_date='2012-08-11')}">Boomerang</a></li>
-    	  <li py:if="request.identity"><a href="${tg.url('/visiting_group/edit_visiting_group')}">New visiting group</a></li>
+    	  <li py:if="request.identity"><a href="${tg.url('/visiting_group/edit_visiting_group')}">New visiting group</a></li>-->
     
-        <li><span class="context_dropdown_menu">view by status<ul><li py:for="k,v in bokn_status_map.items()"><a href="${tg.url('view_boknstatus', boknstatus=k)}">${v}</a></li></ul></span></li>
-        <li><span class="context_dropdown_menu">view by tag<ul><li py:for="tag in all_tags"><a href="${tg.url('view_tags', tag=tag)}">${tag}</a></li></ul></span></li>
+        <li><span class="context_dropdown_menu">view by status<ul><li py:for="k,v in bokn_status_map.items()"><a href="${tg.url('view_boknstatus', params={'boknstatus':k})}">${v}</a></li></ul></span></li>
+        <li><span class="context_dropdown_menu">view by tag<ul><li py:for="tag in all_tags"><a href="${tg.url('view_tags', params={'tag':tag})}">${tag}</a></li></ul></span></li>
     </ul>
     <h2>Viewing visiting groups</h2>
     <table id="vgroup_listing">

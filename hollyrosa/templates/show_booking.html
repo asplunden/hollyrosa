@@ -33,7 +33,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
     <h2>${activity.title} booking</h2>
     <h3>${booking.visiting_group_name}</h3> 
     <p py:if="booking['slot_id'] != '' and booking['slot_id'] != None and booking_day != None">
-    <a href="${tg.url('day', day_id=booking_day.id)}">${formatDate(booking_day.date)}</a> <b py:if="booking.slot_id !=None"> ${slot_position.time_from} to ${slot_position.time_to} </b>  <b py:if="booking.slot_id ==None">booking has no slot row position </b>
+    <a href="${tg.url('day', params={'day_id':booking_day.id})}">${formatDate(booking_day.date)}</a> <b py:if="booking.slot_id !=None"> ${slot_position.time_from} to ${slot_position.time_to} </b>  <b py:if="booking.slot_id ==None">booking has no slot row position </b>
     <p py:if="None !=booking_day"><span class="workflow_state_${str(booking.booking_state)}">${workflow_map[booking.booking_state]}</span></p>
     </p>
     <p py:if="'' == booking.get('slot_id','')">
@@ -42,14 +42,14 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
     </p>
     
     <ul class="any_menu context_inline_menu">
-                    <li py:if="None !=booking_day"><a href="${tg.url('/booking/edit_booked_booking', return_to_day_id=booking.get('booking_day_id',''), id=booking.id)}">edit</a></li>
-                    <li py:if="None ==booking_day"><a href="${tg.url('/booking/edit_booking', return_to_day_id=booking.get('booking_day_id',''), id=booking.id)}">edit</a></li>
-                    <li py:if="None !=booking_day"><a href="${tg.url('/booking/unschedule_booking', booking_day_id=booking.get('booking_day_id',''), booking_id=booking.id)}">unschedule</a></li>
-                    <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', booking_id=booking.id, state=0)}">preliminary</a></li>
-                    <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', booking_id=booking.id, state=10)}">booked</a></li>
-                    <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', booking_id=booking.id, state=20)}">approve</a></li>
-                    <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', booking_id=booking.id, state=-10)}">disapprove</a></li>
-                    <li py:if="None !=booking_day"><a href="${tg.url('/booking/multi_book', booking_id=booking.id)}">multi-book</a></li>
+                    <li py:if="None !=booking_day"><a href="${tg.url('/booking/edit_booked_booking', params={'return_to_day_id':booking.get('booking_day_id',''), 'id':booking.id})}">edit</a></li>
+                    <li py:if="None ==booking_day"><a href="${tg.url('/booking/edit_booking', params={'return_to_day_id':booking.get('booking_day_id',''), 'id':booking.id})}">edit</a></li>
+                    <li py:if="None !=booking_day"><a href="${tg.url('/booking/unschedule_booking', params={'booking_day_id':booking.get('booking_day_id',''), 'booking_id':booking.id})}">unschedule</a></li>
+                    <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', params={'booking_id':booking.id, 'state':0})}">preliminary</a></li>
+                    <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', params={'booking_id':booking.id, 'state':10})}">booked</a></li>
+                    <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', params={'booking_id':booking.id, 'state':20})}">approve</a></li>
+                    <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', params={'booking_id':booking.id, 'state':-10})}">disapprove</a></li>
+                    <li py:if="None !=booking_day"><a href="${tg.url('/booking/multi_book', params={'booking_id':booking.id})}">multi-book</a></li>
                 </ul>
     
     <div class="note">${getRenderContent(booking)}</div>
