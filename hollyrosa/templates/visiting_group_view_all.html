@@ -143,25 +143,6 @@ function loadNotesFor(id) {
 require(["dojo/_base/array", "dojo/dom-construct", "dojo/query!css2", "dojo/dom", "dojo/request/xhr", "dojo/on", "dojo/ready"], function(array, domConstruct, query, dom, xhr, on, ready) {
 
 
-
-
-/*
-function updateNotes(data) {
-    var vgroup_id = data['id'];
-    domConstruct.destroy(dojo.byId('load_notes_for_' + vgroup_id));
-    
-    var notes = data['notes'];
-    for (n in notes) {
-        note = notes[n];
-        var notes_for_id = 'notes_for_' + note['target_id'];
-        
-        e = dom.byId(notes_for_id);
-        domConstruct.create("div", {innerHTML: note['text'], class:'note2'}, e);
-    }
-}
-*/
-
-
 function updateUnboundNames(data) {
 
     query('.unbound_names').forEach(domConstruct.destroy);
@@ -189,21 +170,7 @@ function loadNotesFor(id) {
     handleAs: "json",
     method: "GET"}).then(function(data){ updatedNotes(data); })
 	}
-	
 
-/*
-ready( function() {
-   //var elems = query("[hollyrosa:loadnotes]");
-   
-   
-	array.forEach(
-       elems, function(h) {
-           on(h, 'click', function(evt) {
-           		loadNotesFor(evt.target.attributes['hollyrosa:loadnotes']);
-           });
-       });
-    });
-*/
 
 });  
   </script>

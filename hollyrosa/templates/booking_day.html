@@ -67,7 +67,6 @@ function update_activity_group_visible_rows() {
 
 function save_visible_ag() {
     var cdata = domForm.toJson('bday_hide_form');
-    alert(cdata);
     cookie('visible_ag', cdata, {expires:5});
     update_activity_group_visible_rows();
 }
