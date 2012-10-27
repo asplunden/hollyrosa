@@ -39,12 +39,12 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
 
-require(["dojo/dom", "dojo/query!css2", "dojo/dom-form", "dojo/dom-attr", "dojo/_base/array", "dojo/query", "dojo/cookie", "dojo/date", "dijit/Calendar", "dojo/on", "dojo/parser", "dojo/ready"], function(dom, query, domForm, domAttr, array, query, cookie, date, calendar, on, parser, ready) {
+require(["dojo/dom", "dojo/query!css2", "dojo/dom-form", "dojo/dom-attr", "dojo/_base/array", "dojo/query", "dojo/cookie", "dojo/date", "dijit/Calendar", "dojo/on", "dojo/parser", "dojo/ready", "dojo/json"], function(dom, query, domForm, domAttr, array, query, cookie, date, calendar, on, parser, ready, json) {
 
 var jdata = {};
 
-function update_activity_group_visible_rows() {
-    var odata = domForm.toJson('bday_hide_form');
+function update_activity_group_visible_rows() {    
+    var odata = domForm.toObject('bday_hide_form');
     var show_these_activity_group_ids = Object();
     for (var param_name in odata) {
         param_value = odata[param_name];
@@ -66,11 +66,12 @@ function update_activity_group_visible_rows() {
  
 
 function save_visible_ag() {
-    var cdata = domform.toJson('bday_hide_form');
-    cookie('visible_ag', cdata, {expires:5});    
+    var cdata = domForm.toJson('bday_hide_form');
+    alert(cdata);
+    cookie('visible_ag', cdata, {expires:5});
     update_activity_group_visible_rows();
 }
-  
+ 
 
 function set_visible_ag_checkboxes(g) {
     var checkbox_element_value = domAttr.get(g, 'value');
@@ -85,13 +86,21 @@ function set_visible_ag_checkboxes(g) {
     update_activity_group_visible_rows();
 }
 
-  
+ 
 function recall_visible_ag() {
     var cdata = cookie('visible_ag');
     if (cdata == undefined) {
       jdata = {};
     } else {
-      jdata = dojo.fromJson(cdata);
+      try
+      {
+      	jdata = json.parse(cdata);
+      }
+      catch(SyntaxError)
+      {
+			jdata = {};      
+      }
+      
       var visible_ag_checkboxes = query('[hollyrosa:show_ag]');
       array.forEach(visible_ag_checkboxes, set_visible_ag_checkboxes );  
     }
@@ -101,24 +110,14 @@ function recall_visible_ag() {
 function set_save_visible_handlers() {
     array.forEach(
        query('[hollyrosa:show_ag]'), 
-       function(h) { 
-           on(h, 'onclick', save_visible_ag); 
+       function(h) {
+           on(h, 'click', save_visible_ag);
        }
     )
 }
 
 
-
-//...functions for showing the nevigation calendar
-
-
-
-
-
 ready(function() {
-
-    
-
     recall_visible_ag();
     set_save_visible_handlers();
     
@@ -131,7 +130,6 @@ ready(function() {
     var tools_link_elem = dom.byId('toolslink');
     var href = domAttr.get(tools_link_elem, "href");
     domAttr.get(tools_link_elem, "href", href + "?day=" + "${booking_day.date}" );
-
 });
 
 });
