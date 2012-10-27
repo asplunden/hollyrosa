@@ -28,74 +28,36 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Show Visiting Group ${visiting_group.name}</title>
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
-  <script type="text/javascript" src="${tg.url('/scripts/dojo-release-1.5.0/dojo/dojo.js')}" ></script>
-  <script type="text/javascript">
+  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true, debugAtAllCosts: true"></script>
+  <script>
+
+require(["dojo/ready", "tags", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window"], function(ready, tags, dom, array, query, on, win) {
 
 
-function updateTags(data) {
-    dojo.query('.tag').forEach(dojo.destroy);
-    var tags = data['tags'];
-    var ul_tag_list = dojo.byId("taglist");
-    
-    for (t in tags) {
-    dojo.create("li", {innerHTML:tags[t]+' <a href="javascript:deleteTag(\'${visiting_group.id}\',\'' + tags[t] + '\')">x</a>', class:'tag'}, ul_tag_list);
-    }
-    dojo.byId('tag_input').value = '';
-}
-
-  
-function get_visiting_group_tags_from_XHR(visiting_group_id) {
-   
-    dojo.xhrGet({
-    url: "${tg.url('/tag/get_tags')}",
-    content: {id: visiting_group_id},
-    handleAs: "json",
-    load: updateTags
-    });    
+function deleteTagHelper(evt) {
+   var tag_elem = evt.srcElement.parentElement;
+   var inner_text = tag_elem.innerText;
+   inner_text = inner_text.replace(' (X)',''); 
+   tags.deleteTag("${tg.url('/tag/delete_tag')}", "${visiting_group['_id']}", inner_text);
 }
 
 
-function add_visiting_group_tags_XHR(visiting_group_id, tags) {
-   
-    dojo.xhrGet({
-    url: "${tg.url('/tag/add_tags')}",
-    content: {id: visiting_group_id, tags: tags},
-    handleAs: "json",
-    load: updateTags
-    });
-}
- 
-
-function delete_visiting_group_tag_XHR(visiting_group_id, tag) {
-   
-    dojo.xhrGet({
-    url: "${tg.url('/tag/delete_tag')}",
-    content: {id: visiting_group_id, tag: tag},
-    handleAs: "json",
-    load: updateTags
-    });
+function addTagHelper() {
+   tags.addTags("${tg.url('/tag/add_tags')}", "${visiting_group['_id']}", tag_input);
 }
 
-
-function attach_local_event_handlers() {
-    /* dojo.connect(dojo.byId('create_edit_book_slot_form_visiting_group_id'), "onchange", null, propagate_selected_value);
-    dojo.connect(dojo.byId('create_edit_book_slot_form_visiting_group_id'), "onchange", null, get_visiting_group_data_from_XHR);
-    */
-   get_visiting_group_tags_from_XHR('${visiting_group._id}');
-}
-
-function addTags(id) {
-    var input = dojo.byId(id);
-    var text = input.value;
-    add_visiting_group_tags_XHR('${visiting_group['_id']}', text);
-}
-
-function deleteTag(id, tag) {
-    delete_visiting_group_tag_XHR(id, tag);
-}
-
-  dojo.addOnLoad(attach_local_event_handlers);
-  
+ready(function() {
+	//...load all tags for visiting group
+	tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group._id}");
+      
+   //...attach the add tag handler
+	var the_add_tag_href_elem = dom.byId('add_tag_href2');
+	on(the_add_tag_href_elem, 'click', addTagHelper);
+	
+	//...link delete tag handler to any element with class .tag in document.
+	on(win.doc, '.tag:click', deleteTagHelper)
+	});
+  });
   </script>
 
 </head>
@@ -115,7 +77,7 @@ function deleteTag(id, tag) {
 
 
     <div class="note"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
-<a href="javascript:addTags('tag_input');">Add Tags</a>
+<a id="add_tag_href2" href="javascript:;">Add Tags</a>
 </form></div>
     <p>bok.nr: <b>${visiting_group.boknr}</b><br/>
     boknstatus: <b>${bokn_status_map.get(visiting_group.boknstatus,'')}</b><br/>

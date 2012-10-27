@@ -29,75 +29,64 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <title>Hollyrosa - Viewing All Bookings for ${name}</title>
   
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
-  <script type="text/javascript" src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" ></script>
- 
-  <script type="text/javascript">
-
+  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
+  <script>
+require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], function(registry, Menu, MenuItem, xq, ioQuery, dom, domConstruct, xhr, ready) {
 
 function updateTags(data) {
-    dojo.query('.tag').forEach(dojo.destroy);
+    query('.tag').forEach(domConstruct.destroy);
     var tags = data['tags'];
-    var ul_tag_list = dojo.byId("taglist");
+    var ul_tag_list = byId("taglist");
     
     for (t in tags) {
-    dojo.create("li", {innerHTML:tags[t]+' <a href="javascript:deleteTag(\'${visiting_group.id}\',\'' + tags[t] + '\')">x</a>', class:'tag'}, ul_tag_list);
+    domConstruct.create("li", {innerHTML:tags[t]+' <a href="javascript:deleteTag(\'${visiting_group.id}\',\'' + tags[t] + '\')">x</a>', class:'tag'}, ul_tag_list);
     }
-    dojo.byId('tag_input').value = '';
+    byId('tag_input').value = '';
 }
 
   
 function get_visiting_group_tags_from_XHR(visiting_group_id) {
-   
-    dojo.xhrGet({
-    url: "${tg.url('/tag/get_tags')}",
-    content: {id: visiting_group_id},
+    xhr("${tg.url('/tag/get_tags')}", {
+    query: {'id': visiting_group_id},
     handleAs: "json",
-    load: updateTags
-    });    
+    method: "GET"}).then( updateTags );    
 }
 
 
-function add_visiting_group_tags_XHR(visiting_group_id, tags) {
-   
-    dojo.xhrGet({
-    url: "${tg.url('/tag/add_tags')}",
-    content: {id: visiting_group_id, tags: tags},
+function add_visiting_group_tags_XHR(visiting_group_id, tags) {   
+    xhr("${tg.url('/tag/add_tags')}", {
+    query: {'id': visiting_group_id, 'tags': tags},
     handleAs: "json",
-    load: updateTags
-    });
+    method: "GET"}).then( updateTags );
 }
  
 
 function delete_visiting_group_tag_XHR(visiting_group_id, tag) {
-   
-    dojo.xhrGet({
-    url: "${tg.url('/tag/delete_tag')}",
-    content: {id: visiting_group_id, tag: tag},
+    xhr("${tg.url('/tag/delete_tag')}", {
+    query: {'id': visiting_group_id, 'tag': tag},
     handleAs: "json",
-    load: updateTags
-    });
+    method:"GET"}).then( updateTags );
 }
 
-
-function attach_local_event_handlers() {
-    /* dojo.connect(dojo.byId('create_edit_book_slot_form_visiting_group_id'), "onchange", null, propagate_selected_value);
-    dojo.connect(dojo.byId('create_edit_book_slot_form_visiting_group_id'), "onchange", null, get_visiting_group_data_from_XHR);
-    */
-   get_visiting_group_tags_from_XHR('${visiting_group._id}');
-}
 
 function addTags(id) {
-    var input = dojo.byId(id);
+    var input = byId(id);
     var text = input.value;
     add_visiting_group_tags_XHR('${visiting_group['_id']}', text);
 }
 
+
 function deleteTag(id, tag) {
     delete_visiting_group_tag_XHR(id, tag);
 }
-
-  dojo.addOnLoad(attach_local_event_handlers);
   
+ 
+ready(function() {
+	get_visiting_group_tags_from_XHR('${visiting_group._id}'); 
+	})
+  
+});
+
   </script>
 
 
