@@ -198,29 +198,29 @@ class VisitingGroup(BaseController):
         
         
     @expose('hollyrosa.templates.show_visiting_group')
-    @validate(validators={'id':validators.Int})
+    @validate(validators={'visiting_group_id':validators.UnicodeString})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def show_visiting_group(self,  id=None,  **kw):
+    def show_visiting_group(self,  visiting_group_id=None,  **kw):
         
-        if None == id:
+        if None == visiting_group_id:
             visiting_group = DataContainer(name='',  id=None,  info='')
             bookings=[]
-        elif id=='':
+        elif visiting_group_id=='':
             visiting_group = DataContainer(name='',  id=None,  info='')
             bookings=[]
         else:
-            visiting_group = holly_couch[str(id)]
+            visiting_group = holly_couch[str(visiting_group_id)]
 
             # TODO: see below
             bookings = [] 
-            notes = [n.doc for n in getNotesForTarget(holly_couch, id)]
+            notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)]
         return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent, bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, notes=notes)
 
 
     @expose('hollyrosa.templates.edit_visiting_group')
-    @validate(validators={'id':validators.Int})
+    @validate(validators={'visiting_group_id':validators.UnicodeString})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change visiting group properties'))
-    def edit_visiting_group(self,  id=None,  **kw):
+    def edit_visiting_group(self,  visiting_group_id=None,  **kw):
         tmpl_context.form = create_edit_visiting_group_form
         
         new_empty_visiting_group_property = [DataContainer(property='spar',  value='0',  unit=u'spår',  description=u'antal deltagare 8 till 9 år'), 
@@ -229,12 +229,12 @@ class VisitingGroup(BaseController):
                                              DataContainer(property='utm',  value='0',  unit=u'utm',  description=u'antal deltagare 16 till 18 år')]
  
  
-        if None == id:
+        if None == visiting_group_id:
             visiting_group = DataContainer(name='',  id=None,  info='',  visiting_group_properties=new_empty_visiting_group_property)
-        elif id=='':
+        elif visiting_group_id=='':
             visiting_group = DataContainer(name='',  id=None,  info='')
         else:
-            visiting_group_c = holly_couch[id] 
+            visiting_group_c = holly_couch[str(visiting_group_id)] 
 #            visiting_group_c['from_date'] = datetime.datetime.strptime(visiting_group_c['from_date'],'%Y-%m-%d')
 #            visiting_group_c['to_date'] = datetime.datetime.strptime(visiting_group_c['to_date'],'%Y-%m-%d')
             

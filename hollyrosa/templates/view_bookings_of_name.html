@@ -33,7 +33,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
   
-require(["dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], function(array, registry, Menu, MenuItem, PopupMenuItem, query, ioQuery, dom, domConstruct, xhr, ready) {
+require(["common_menu", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], function(common_menu, array, Menu, MenuItem, PopupMenuItem, query, ioQuery, dom, domConstruct, xhr, ready) {
 
 function updateTags(data) {
     query('.tag').forEach(domConstruct.destroy);
@@ -90,25 +90,13 @@ function deleteTag(id, tag) {
 
 
 
-function add_change_booking_state_menu_item(a_menu, a_sub_menu, state_name, state_value, reload_url)
-{
-   a_sub_menu.addChild(new MenuItem({
-      	label: state_name,
-         onClick: function(evt) {
-            var node = a_menu.currentTarget;
-            var bid = node.attributes["hollyrosa:bid"].value;
-           
-            var ioq = {
-                       booking_id: bid,
-                       state: state_value
-                   };        
-               window.location = reload_url + '?' + ioQuery.objectToQuery(ioq);
-           }}));
-}  
+
 
  
 ready(function() {
 
+   //...setup menu for each little booking
+   
 	var menu = new Menu({
    	targetNodeIds: ["clustered_booking_list"],
       selector: "div.booking_meta_info",
@@ -150,7 +138,7 @@ ready(function() {
                }
            })); 
            
-           
+                
            var more = new Menu();
            menu.addChild(new PopupMenuItem({
                label: "more...",
@@ -158,7 +146,7 @@ ready(function() {
                }));
            
     
-    var reload_url = '${tg.url('/workflow/set_state')}';       
+    var set_state_url = '${tg.url('/workflow/set_state')}';       
     
     var state_change_list = [
          {name:"> Disapprove", state:-10}, 
@@ -167,17 +155,30 @@ ready(function() {
         	{name:"> Booked", state:10}, 
         	{name:"> Approve", state:20}, 
         	{name:"> Drop-in", state:30}, 
-        	{name:"Delete", state:-100}
+        	{name:"Delete booking", state:-100}
     ];
-    array.forEach(state_change_list, function(x) {add_change_booking_state_menu_item(menu, more, x['name'], x['state'], reload_url);});
+    array.forEach(state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(menu, more, x['name'], x['state'], set_state_url);});
 
+		//...setup menu for visiting group itself.
+		
+		
+		var vgroup_menu = new Menu({
+       targetNodeIds: ["visiting_group_menu"],
+       leftClickToOpen: false
+       });
+    
+	common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Show visiting group", '${visiting_group['id']}', '${tg.url('show_visiting_group')}');
+   common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Edit visiting group", '${visiting_group['id']}', '${tg.url('edit_visiting_group')}');  
+   common_menu.add_note_redirect_menu_item(vgroup_menu, vgroup_menu, "Add note", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
+   common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Show history", '${visiting_group['id']}', '${tg.url('/history/show')}');
+   common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "New booking request", '${visiting_group['id']}', '${tg.url('/booking/edit_booking')}');
 
-	get_visiting_group_tags_from_XHR('${visiting_group._id}'); 
+	//get_visiting_group_tags_from_XHR('${visiting_group._id}'); 
+	
 	})
 });
 
-  </script>
-
+</script>
 
 </head>
 
@@ -185,7 +186,7 @@ ready(function() {
     <div py:if="show_group==1">
     <h2>${name}</h2>
     <p>${formatDate(visiting_group.from_date)} to ${formatDate(visiting_group.to_date)}</p>
-    <div class="note">
+    <div class="note" >
       <div class="tag_list">
         <ul style="display:inline;" id="taglist" class="tag_list"></ul>
         <form style="display:inline;">
@@ -222,27 +223,27 @@ ready(function() {
     </table>
     
     
-    </div>
-    <h2>Viewing all bookings for ${name}</h2>
+    </div> <!-- else if not show grouo -->
     
+    
+    <h2 id="visiting_group_menu">Viewing all bookings for ${name}</h2>
+    <!--
     <ul py:if="visiting_group_id!=None" class="any_menu context_inline_menu" style="padding-left:2em;">
-        <li><a href="${tg.url('/visiting_group/show_visiting_group', {'id':visiting_group_id})}">show</a></li>
-        <li><a href="${tg.url('/visiting_group/edit_visiting_group', {'id':visiting_group_id})}">edit</a></li>
-        <li><a href="${tg.url('/booking/edit_booking', {'visiting_group_id':visiting_group_id})}">new booking request</a></li>
+        <li><a href="${tg.url('/visiting_group/show_visiting_group', params={'id':visiting_group_id})}">show</a></li>
+        <li><a href="${tg.url('/visiting_group/edit_visiting_group', params={'id':visiting_group_id})}">edit</a></li>
+        <li><a href="${tg.url('/booking/edit_booking', params={'visiting_group_id':visiting_group_id})}">new booking request</a></li>
     </ul>
-                
+     -->        
     <div id="clustered_booking_list">
                 
         <div py:for="cb in clustered_bookings">
           <h3><a href="${tg.url('/booking/view_activity', {'activity_id':cb[0].activity['_id']})}">${cb[0].activity.title}</a></h3>
                 <ul class="any_menu context_inline_menu" style="padding-left:2em;"> <!-- py:if="'pl' in request.identity['repoze.who.identity']['level']"  -->
-                    <li><a href="${tg.url('/workflow/set_state', {'booking_id':cb[0].id, 'state':10, 'all':1})}">booked ALL</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', {'booking_id':cb[0].id, 'state':20, 'all':1})}">approve ALL</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', {'booking_id':cb[0].id, 'state':-10, 'all':1})}">disapprove ALL</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', {'booking_id':cb[0].id, 'state':0, 'all':1})}">preliminary ALL</a></li>
-                    <!--<li><a href="${tg.url('/booking/edit_booked_booking', return_to_day_id=cb[0].booking_day_id, id=cb[0].id)}">edit</a></li>
-                    <li><a href="${tg.url('/booking/view_booked_booking', return_to_day_id=cb[0].booking_day_id, id=cb[0].id)}">view</a></li>
-                    <li><a href="${tg.url('/booking/unschedule_booking', booking_day_id=cb[0].booking_day_id, booking_id=cb[0].id)}">unschedule</a></li> -->
+                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':cb[0].id, 'state':10, 'all':1})}">booked ALL</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':cb[0].id, 'state':20, 'all':1})}">approve ALL</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':cb[0].id, 'state':-10, 'all':1})}">disapprove ALL</a></li>
+                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':cb[0].id, 'state':0, 'all':1})}">preliminary ALL</a></li>
+                    <!-- <li><a href="${tg.url('/booking/unschedule_booking', booking_day_id=cb[0].booking_day_id, booking_id=cb[0].id)}">unschedule</a></li> -->
                 </ul>
 
             <div style="margin-left:2em;">
@@ -266,18 +267,6 @@ ready(function() {
                   <span py:if="render_time=='' and b.slot.pref=='silent'" ></span>       
                 </span>
                   ${workflow_map[b.booking_state]}</span>
-                <!--
-                <ul class="any_menu context_inline_menu" style="padding-left:2em;">
-                    <li><a href="${tg.url('/workflow/set_state', {'booking_id':b.id, 'state':10})}">booked</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', {'booking_id':b.id, 'state':20})}">approve</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', {'booking_id':b.id, 'state':-10})}">disapprove</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', {'booking_id':b.id, 'state':0})}">preliminary</a></li>
-                    <li><a href="${tg.url('/booking/edit_booked_booking', {'return_to_day_id':b.booking_day_id, 'id':b.id})}">edit</a></li>
-                    <li><a href="${tg.url('/booking/view_booked_booking', {'return_to_day_id':b.booking_day_id, 'id':b.id})}">view</a></li>
-                    <li><a href="${tg.url('/booking/unschedule_booking', {'booking_day_id':b.booking_day_id, 'booking_id':b.id})}">unschedule</a></li>
-                </ul>
-                -->
-                
             </div>
             <div py:if="None == b.booking_day" style="margin-left:2em;">
                 <span class="workflow_state_unscheduled">unscheduled requested from ${formatDate(b.valid_from)} to ${formatDate(b.valid_to)} <a href="${tg.url('/booking/day',day=b.requested_date)}">requested date ${formatDate(b.requested_date)}</a></span>

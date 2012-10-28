@@ -32,7 +32,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true, debugAtAllCosts: true"></script>
   <script>
 
-require(["dojo/ready", "tags", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window"], function(ready, tags, dom, array, query, on, win) {
+require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window"], function(ready, tags, common_menu, Menu, dom, array, query, on, win) {
 
 
 function deleteTagHelper(evt) {
@@ -50,76 +50,33 @@ function addTagHelper() {
 ready(function() {
 	//...load all tags for visiting group
 	tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group._id}");
+
+   //...setup main menu for visiting group
+   //var node = a_menu.currentTarget;
+   //var vgid = node.attributes["hollyrosa:bid"].value;
+  	
+   var menu = new Menu({
+       targetNodeIds: ["visiting_group_menu"],
+       leftClickToOpen: false
+       });
+    
+	common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit visiting group", '${visiting_group['id']}', '${tg.url('edit_visiting_group')}');
+   common_menu.add_list_bookings_redirect_menu_item(menu, menu, "List bookings", '${visiting_group['name']}', '${tg.url('/visiting_group/view_bookings_of_name')}');
+   common_menu.add_note_redirect_menu_item(menu, menu, "Add note", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history", '${visiting_group['id']}', '${tg.url('/history/show')}');
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request", '${visiting_group['id']}', '${tg.url('/booking/edit_booking')}');
       
    //...attach the add tag handler
 	var the_add_tag_href_elem = dom.byId('add_tag_href2');
 	on(the_add_tag_href_elem, 'click', addTagHelper);
 	
 	//...link delete tag handler to any element with class .tag in document.
-	on(win.doc, '.tag:click', deleteTagHelper)
+	on(win.doc, '.tag:click', deleteTagHelper);
 	});
   });
   </script>
   
-  
-  <script>
-require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr"], function(registry, Menu, MenuItem, xq, ioQuery, dom, domConstruct, xhr) {
-		
-   var menu = new Menu({
-       targetNodeIds: ["visiting_group_menu"],
-       leftClickToOpen: false
-       });
-       
-   menu.addChild(new MenuItem({
-       label: "edit visiting group",
-       onClick: function(evt) {
-           var vgroup_id = '${visiting_group['id']}';
-           window.location = '${tg.url('edit_visiting_group', params={'id':''})}' + vgroup_id;
-           }
-       }));
-       
-   menu.addChild(new MenuItem({
-       label: "list bookings",
-       onClick: function(evt) {
-           var vgroup_name = '${visiting_group['name']}';
-           //var vgroup_name = node.attributes["hollyrosa:vgname"].value;
-           ioq = {
-              name: vgroup_name, 
-              hide_comment: 1            
-           };
-           window.location = '${tg.url('view_bookings_of_name')}' + '?' + ioQuery.objectToQuery(ioq);
-           }
-       }));
-       
-   menu.addChild(new MenuItem({
-       label: "add note",
-       onClick: function(evt) {
-           var vgroup_id = '${visiting_group['id']}';
-           window.location = '${tg.url('/note/add_note', params={'target_id':''})}' + vgroup_id;
 
-           }
-       }));
-       
-   menu.addChild(new MenuItem({
-       label: "show history",
-       onClick: function(evt) {
-           var vgroup_id = '${visiting_group['id']}';
-           window.location = '${tg.url('/history/show', params={'visiting_group_id':''})}' + vgroup_id;
-           }
-       }));
-       
-   menu.addChild(new MenuItem({
-       label: "new booking request",
-       onClick: function(evt) {
-           /*var node = this.getParent().currentTarget;*/
-           var vgroup_id = '${visiting_group['id']}';
-           window.location = '${tg.url('/booking/edit_booking', params={'visiting_group_id':''})}' + vgroup_id;
-           }
-       }));
-       
-   });
-  
-  </script>
 
 </head>
 
@@ -186,16 +143,7 @@ require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo
         
         
             <div py:if="None != b.booking_day" style="margin-left:2em;">
-                <!--<span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day',day_id=b.booking_day.id)}">${b.booking_day.date.strftime('%A %d %B')}</a> <b>${b.slot_row_position.time_from}</b> to <b>${b.slot_row_position.time_to}</b>  ${workflow_map[b.booking_state]}</span>-->
-                 <ul class="any_menu context_inline_menu" style="padding-left:2em;">
-                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':b._id, 'state':10})}">booked</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':b._id, 'state':20})}">approve</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':b._id, 'state':-10})}">disapprove</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':b._id, 'state':0})}">preliminary</a></li>
-                    <li><a href="${tg.url('/booking/edit_booked_booking', params={'return_to_day_id':b.booking_day_id, 'id':b._id})}">edit</a></li>
-                    <li><a href="${tg.url('/booking/view_booked_booking', params={'return_to_day_id':b.booking_day_id, 'id':b._id})}">view</a></li>
-                    <li><a href="${tg.url('/booking/unschedule_booking', params={'booking_day_id':b.booking_day_id, 'booking_id':b._id})}">unschedule</a></li>
-                </ul>
+                
                 
                 
             </div>
