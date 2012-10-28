@@ -33,67 +33,17 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
   
-require(["common_menu", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], function(common_menu, array, Menu, MenuItem, PopupMenuItem, query, ioQuery, dom, domConstruct, xhr, ready) {
-
-function updateTags(data) {
-    query('.tag').forEach(domConstruct.destroy);
-    var tags = data['tags'];
-    var ul_tag_list = byId("taglist");
-    
-    for (t in tags) {
-    	domConstruct.create("li", {innerHTML:tags[t]+' <a href="javascript:deleteTag(\'${visiting_group.id}\',\'' + tags[t] + '\')">x</a>', class:'tag'}, ul_tag_list);
-    }
-    byId('tag_input').value = '';
-}
-
-  
-function get_visiting_group_tags_from_XHR(visiting_group_id) {
-    xhr("${tg.url('/tag/get_tags')}", {
-    query: {'id': visiting_group_id},
-    handleAs: "json",
-    method: "GET"}).then( updateTags );    
-}
+require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/on", "dojo/ready"], function(common_menu, tags, array, Menu, MenuItem, PopupMenuItem, query, ioQuery, dom, on, ready) {
 
 
-function add_visiting_group_tags_XHR(visiting_group_id, tags) {   
-    xhr("${tg.url('/tag/add_tags')}", {
-    query: {'id': visiting_group_id, 'tags': tags},
-    handleAs: "json",
-    method: "GET"}).then( updateTags );
+function addTagHelper() {
+   tags.addTags("${tg.url('/tag/add_tags')}", "${visiting_group['_id']}", tag_input);
 }
  
-
-function delete_visiting_group_tag_XHR(visiting_group_id, tag) {
-    xhr("${tg.url('/tag/delete_tag')}", {
-    query: {'id': visiting_group_id, 'tag': tag},
-    handleAs: "json",
-    method:"GET"}).then( updateTags );
-}
-
-
-function addTags(id) {
-    var input = byId(id);
-    var text = input.value;
-    add_visiting_group_tags_XHR('${visiting_group['_id']}', text);
-}
-
-
-function deleteTag(id, tag) {
-    delete_visiting_group_tag_XHR(id, tag);
-}
-
-
-/* Build context menu */
-  
-  
-
-
-
-
-
-
  
 ready(function() {
+
+   tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group._id}");
 
    //...setup menu for each little booking
    
@@ -182,8 +132,15 @@ ready(function() {
    common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Show history", '${visiting_group['id']}', '${tg.url('/history/show')}');
    common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "New booking request", '${visiting_group['id']}', '${tg.url('/booking/edit_booking')}');
 
-	//get_visiting_group_tags_from_XHR('${visiting_group._id}'); 
 	
+	//...attach the add tag handler, wont work if show_group is 0 so I disable it here
+	/*
+	var the_add_tag_href_elem = dom.byId('add_tag_href2');
+	on(the_add_tag_href_elem, 'click', addTagHelper);
+	
+	//...link delete tag handler to any element with class .tag in document.
+	on(win.doc, '.tag:click', deleteTagHelper);
+	*/
 	})
 });
 
@@ -200,7 +157,7 @@ ready(function() {
         <ul style="display:inline;" id="taglist" class="tag_list"></ul>
         <form style="display:inline;">
           <input id="tag_input" type="text" name="tags" value="" />
-          <a href="javascript:addTags('tag_input');">Add Tags</a>
+          <a id="add_tag_href2" href="javascript:;">Add Tags</a>
         </form>
       </div>
     <p>bok.nr: <b>${visiting_group.boknr}</b><br/>

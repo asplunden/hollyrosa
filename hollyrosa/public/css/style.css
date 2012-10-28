@@ -503,7 +503,7 @@ td.timestamp  {
     }
 .workflow_state_5  { /* workflow state 5 is standby which is lower than booked.*/ 
     color: #884; 
-    background-image:url('../images/sheep.png');
+    background-image:url('../images/jarno_aircraft.png'); 
     background-repeat:no-repeat;
     padding-left: 2em;
     font-weight:bold;
@@ -525,7 +525,7 @@ td.timestamp  {
     }
 .workflow_state_30  { /* workflow state 30 is drop-in */
     color: #484; 
-    background-image:url('../images/check_mark.png');
+    background-image:url('../images/cogwheel_dropin.png');
     background-repeat:no-repeat;
     padding-left: 2em;
     font-weight:bold;
