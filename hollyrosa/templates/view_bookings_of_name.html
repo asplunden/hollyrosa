@@ -33,7 +33,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
   
-require(["dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], function(array, registry, Menu, MenuItem, query, ioQuery, dom, domConstruct, xhr, ready) {
+require(["dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], function(array, registry, Menu, MenuItem, PopupMenuItem, query, ioQuery, dom, domConstruct, xhr, ready) {
 
 function updateTags(data) {
     query('.tag').forEach(domConstruct.destroy);
@@ -90,15 +90,15 @@ function deleteTag(id, tag) {
 
 
 
-function add_change_booking_state_menu_item(a_menu, state_name, state_value, reload_url)
+function add_change_booking_state_menu_item(a_menu, a_sub_menu, state_name, state_value, reload_url)
 {
-   a_menu.addChild(new MenuItem({
+   a_sub_menu.addChild(new MenuItem({
       	label: state_name,
          onClick: function(evt) {
-         	var node = this.getParent().currentTarget;
             var node = a_menu.currentTarget;
-                   var bid = node.attributes["hollyrosa:bid"].value;
-                   var ioq = {
+            var bid = node.attributes["hollyrosa:bid"].value;
+           
+            var ioq = {
                        booking_id: bid,
                        state: state_value
                    };        
@@ -149,6 +149,14 @@ ready(function() {
                window.location = '${tg.url('/booking/view_booked_booking')}' + '?' + ioQuery.objectToQuery(ioq);
                }
            })); 
+           
+           
+           var more = new Menu();
+           menu.addChild(new PopupMenuItem({
+               label: "more...",
+               popup: more
+               }));
+           
     
     var reload_url = '${tg.url('/workflow/set_state')}';       
     
@@ -161,7 +169,7 @@ ready(function() {
         	{name:"> Drop-in", state:30}, 
         	{name:"Delete", state:-100}
     ];
-    array.forEach(state_change_list, function(x) {add_change_booking_state_menu_item(menu, x['name'], x['state'], reload_url);});
+    array.forEach(state_change_list, function(x) {add_change_booking_state_menu_item(menu, more, x['name'], x['state'], reload_url);});
 
 
 	get_visiting_group_tags_from_XHR('${visiting_group._id}'); 
