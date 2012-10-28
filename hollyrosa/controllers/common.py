@@ -28,13 +28,17 @@ import datetime
 
 
 workflow_map = dict()
+workflow_map[5]='stand-by'
 workflow_map[10]='booked'
 workflow_map[20] ='approved'
+workflow_map[30]='drop-in'
 workflow_map[0] ='preliminary'
 workflow_map[-10]='disapproved'
 workflow_map[-100] ='deleted'
 
 bokn_status_map = dict()
+bokn_status_map[-100] ='deleted'
+bokn_status_map[-10] ='canceled'
 bokn_status_map[0] ='created'
 bokn_status_map[5] ='new'
 bokn_status_map[10] ='preliminary'

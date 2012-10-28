@@ -501,6 +501,13 @@ td.timestamp  {
     padding-left: 2em;
     font-weight:bold;
     }
+.workflow_state_5  { /* workflow state 5 is standby which is lower than booked.*/ 
+    color: #884; 
+    background-image:url('../images/sheep.png');
+    background-repeat:no-repeat;
+    padding-left: 2em;
+    font-weight:bold;
+    }
 .workflow_state_10  {
     color: #448; 
     background-image:url('../images/paper_to_sign.png');
@@ -516,7 +523,13 @@ td.timestamp  {
     padding-left: 2em;
     font-weight:bold;
     }
-
+.workflow_state_30  { /* workflow state 30 is drop-in */
+    color: #484; 
+    background-image:url('../images/check_mark.png');
+    background-repeat:no-repeat;
+    padding-left: 2em;
+    font-weight:bold;
+    }
 .workflow_state_-10  {
     color: #844; 
     font-weight:bold;
