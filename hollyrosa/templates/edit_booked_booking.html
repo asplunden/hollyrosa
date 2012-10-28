@@ -29,21 +29,27 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Book Slot</title>
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
-  <script type="text/javascript" src="${tg.url('/scripts/dojo-release-1.5.0/dojo/dojo.js')}" ></script>
-  <script type="text/javascript">
-  
+  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
+  <script>
+ 
+ 
+require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/ready"], function(edit_booking, dom, on, xhr, ready) { 
 
-  
-  
+
+function on_update_visiting_group_data(data)
+{
+    alert(data);
+}
+
 function get_visiting_group_data_from_XHR_helper(visiting_group_id, value) {
-    dojo.xhrGet({
-    url: "${tg.url('/visiting_group/show_visiting_group_data?id=')}" + value,
+    xhr("${tg.url('/visiting_group/show_visiting_group_data')}", {
     handleAs:"json",
-    load: on_update_visiting_group_data
-    });
+    method:"GET",
+    query: {'id':value}}).then(edit_booking.update_visiting_group_data);
 }
 
 
+/* check if this is really right */
 function get_visiting_group_data_from_XHR(visiting_group_id) {
     var value = this.options[this.selectedIndex].value;
     get_visiting_group_data_from_XHR_helper(visiting_group_id, value);
@@ -52,43 +58,45 @@ function get_visiting_group_data_from_XHR(visiting_group_id) {
 
 function propagate_selected_value() {
     var value = this.options[this.selectedIndex].text;
-    set_form_field_value('create_edit_book_slot_form_visiting_group_name', value);
-}
-
-  
-function attach_local_event_handlers() {
-    dojo.connect(dojo.byId('create_edit_book_slot_form_visiting_group_id'), "onchange", null, propagate_selected_value);
-    dojo.connect(dojo.byId('create_edit_book_slot_form_visiting_group_id'), "onchange", null, get_visiting_group_data_from_XHR);
-
-    if ( '${edit_this_visiting_group}' ) {
-      get_visiting_group_data_from_XHR_helper('${edit_this_visiting_group}', '${edit_this_visiting_group}');
-    }
+    edit_booking.set_form_field_value('create_edit_book_slot_form_visiting_group_name', value);
 }
 
   
 function transfer_from_date(date) {
-    dojo.byId("create_edit_new_booking_request_form_valid_from").value = date;
+    dom.byId("create_edit_new_booking_request_form_valid_from").value = date;
 }
 
 
 function transfer_to_date(date) {
-    dojo.byId("create_edit_new_booking_request_form_valid_to").value = date;
+    dom.byId("create_edit_new_booking_request_form_valid_to").value = date;
 }
 
 
 function transfer_to_content(text) {
-    var old_text = dojo.byId("create_edit_book_slot_form_content").value;
+    var old_text = dom.byId("create_edit_book_slot_form_content").value;
     if ('' == old_text) {
-        dojo.byId("create_edit_book_slot_form_content").value = text;
+        dom.byId("create_edit_book_slot_form_content").value = text;
     }
     else {
-        dojo.byId("create_edit_book_slot_form_content").value = old_text + " " + text;
+        dom.byId("create_edit_book_slot_form_content").value = old_text + " " + text;
     }
 }
 
 
+ready(function(){
+    var elem = dom.byId('create_edit_book_slot_form_visiting_group_id');
+    on( elem, "change", propagate_selected_value);
+    on( elem, "change", get_visiting_group_data_from_XHR);
+
+     
+    if ( '0' != '${edit_this_visiting_group}' ) {
+      get_visiting_group_data_from_XHR_helper('${edit_this_visiting_group}', '${edit_this_visiting_group}');
+    }
+});
+
+
   
-  dojo.addOnLoad(attach_local_event_handlers);
+});
   
   </script>
 

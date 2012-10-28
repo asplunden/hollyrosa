@@ -28,12 +28,13 @@ function set_visible_ag_rows(acg_id, v) {
     } );
  }
 
-
+/* moved to std_1_8.js
 function set_form_field_value(form_field_id, value){
     var form_field = dojo.byId(form_field_id);
     form_field.value = value;
 }
 
+*/
 
 
 function navigation_calendar_is_disabled(x) {
@@ -42,6 +43,7 @@ function navigation_calendar_is_disabled(x) {
 }
 
 
+/* moved to std_1_8.js
 function set_visiting_group_form_values(visiting_group) {
     dojo.byId("visiting_group_data_name").innerHTML = visiting_group['name'];
     dojo.byId("visiting_group_data_info").innerHTML = '<p><i>'+visiting_group['tags']+'</p></i>'+'<b>bokn.nr: </b>' + visiting_group['boknr'] + '<br/><b>bokn.status: </b>' + visiting_group['boknstatus'] +'<br/><b>location: </b>' + visiting_group['camping_location'] + '<br/>' + visiting_group['info'];
@@ -51,9 +53,9 @@ function set_visiting_group_form_values(visiting_group) {
     dojo.byId("visiting_group_data_phone").innerHTML = visiting_group['contact_person_phone'];
     dojo.byId("visiting_group_data_email").innerHTML = visiting_group['contact_person_email'];
 }
+*/
 
-
-
+/* moved to std_1_8.js
 function create_visiting_group_properties_table_headings(table) {
     tr = dojo.create("tr", null, table);
     th = dojo.create("th", { innerHTML: "property" }, table);
@@ -63,13 +65,12 @@ function create_visiting_group_properties_table_headings(table) {
     th = dojo.create("th", { innerHTML: "from date" }, table);
     th = dojo.create("th", { innerHTML: "to date" }, table);
  }
+*/ 
  
  
- function transfer_date(to_ement, date) {
+function transfer_date(to_ement, date) {
     e.value = date;
 }
-
-
 
 
 function transfer_to_booking_request_fromdate() {
@@ -90,6 +91,7 @@ function transfer_to_booking_request_todate() {
 
 /* from edit booked booking  */
 
+/* transferred to std_1_8.js
  function on_update_visiting_group_data(data) {
     var visiting_group = data['visiting_group'];
     
@@ -119,40 +121,5 @@ function transfer_to_booking_request_todate() {
     });
 }
 
-
-
-/*
-function on_update_visiting_group_data(data) {
-    var visiting_group = data['visiting_group'];
-    set_visiting_group_form_values(visiting_group);
-    
-    var elemCont = dojo.byId("visiting_group_data");
-    var table = dojo.byId("visiting_group_properties_table");
-    var properties = data['properties']
-    
-    //...clean property table
-    dojo.forEach(dojo.query('visiting_group_properties_table >'), function(g){
-    dojo.destroy(g);
-    });
-
-    //...create heading
-    create_visiting_group_properties_table_headings(table);
-    
-    //...add data rows
-    dojo.forEach(properties, function(g){
-        tr = dojo.create("tr", null, table);
-        td = dojo.create("td", {}, table);
-        ahref = dojo.create("a", {href:'javascript:transfer_to_content("\$\$' + g['property'] +'");', innerHTML: '\$'+g['property']}, td);
-        
-        td = dojo.create("td", { innerHTML: g['value'] }, table);
-        td = dojo.create("td", { innerHTML: g['unit'] }, table);
-        td = dojo.create("td", { innerHTML: g['description'] }, table);
-        
-        td = dojo.create("td", {}, table);
-        ahref = dojo.create("a", {href:'javascript:transfer_from_date("' + g['fromdate'] +'");', innerHTML: g['fromdate']}, td);
-       
-        td = dojo.create("td", {}, table);
-        ahref = dojo.create("a", {href:'javascript:transfer_to_date("' + g['todate'] +'");', innerHTML: g['todate']}, td);
-    });
-}
 */
+

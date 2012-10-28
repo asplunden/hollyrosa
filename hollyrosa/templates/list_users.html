@@ -41,9 +41,9 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         <tr py:for="u in users">
             <td class="data info">${u.user_name}
               <ul class="any_menu context_inline_menu">
-                <li><a href="${tg.url('edit', user_id=u.id)}">edit</a></li>
-                <li><a href="${tg.url('change_password', user_id=u.id)}">change password</a></li>
-                <li><a href="${tg.url('/history/show', user_id=u.display_name)}">history</a></li> 
+                <li><a href="${tg.url('edit', {'user_id':u.id})}">edit</a></li>
+                <li><a href="${tg.url('change_password', {'user_id':u.id})}">change password</a></li>
+                <li><a href="${tg.url('/history/show', {'user_id':u.display_name})}">history</a></li> 
               </ul>            
             </td>
             <td class="data info">${u.display_name}</td>
