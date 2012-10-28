@@ -20,18 +20,20 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
 
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:hollyrosa="http://asplunden.org/guldkant/hollyrosa" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <xi:include href="master.html" />
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Viewing All Bookings for ${name}</title>
+  <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
   
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
-require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], function(registry, Menu, MenuItem, xq, ioQuery, dom, domConstruct, xhr, ready) {
+  
+require(["dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], function(array, registry, Menu, MenuItem, query, ioQuery, dom, domConstruct, xhr, ready) {
 
 function updateTags(data) {
     query('.tag').forEach(domConstruct.destroy);
@@ -39,7 +41,7 @@ function updateTags(data) {
     var ul_tag_list = byId("taglist");
     
     for (t in tags) {
-    domConstruct.create("li", {innerHTML:tags[t]+' <a href="javascript:deleteTag(\'${visiting_group.id}\',\'' + tags[t] + '\')">x</a>', class:'tag'}, ul_tag_list);
+    	domConstruct.create("li", {innerHTML:tags[t]+' <a href="javascript:deleteTag(\'${visiting_group.id}\',\'' + tags[t] + '\')">x</a>', class:'tag'}, ul_tag_list);
     }
     byId('tag_input').value = '';
 }
@@ -79,12 +81,91 @@ function addTags(id) {
 function deleteTag(id, tag) {
     delete_visiting_group_tag_XHR(id, tag);
 }
+
+
+/* Build context menu */
   
+  
+
+
+
+
+function add_change_booking_state_menu_item(a_menu, state_name, state_value, reload_url)
+{
+   a_menu.addChild(new MenuItem({
+      	label: state_name,
+         onClick: function(evt) {
+         	var node = this.getParent().currentTarget;
+            var node = a_menu.currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       booking_id: bid,
+                       state: state_value
+                   };        
+               window.location = reload_url + '?' + ioQuery.objectToQuery(ioq);
+           }}));
+}  
+
  
 ready(function() {
+
+	var menu = new Menu({
+   	targetNodeIds: ["clustered_booking_list"],
+      selector: "div.booking_meta_info",
+      onShow: function(evt) {
+      	alert('helooo');
+         }
+      });
+
+
+   /* create a list of possible booking state transistions, iterate over it and build (sub) menu */
+   
+   
+   
+   menu.addChild(new MenuItem({
+               label: "Edit booking",
+               onClick: function(evt) {
+                   var node = this.getParent().currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       id: bid,
+                       return_to_day_id: node.attributes["hollyrosa:bdayid"].value
+                   };
+                        
+               window.location = '${tg.url('/booking/edit_booked_booking')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+           
+           menu.addChild(new MenuItem({
+               label: "View booking",
+               onClick: function(evt) {
+                   var node = this.getParent().currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       id: bid,
+                       return_to_day_id: node.attributes["hollyrosa:bdayid"].value
+                   };
+                        
+               window.location = '${tg.url('/booking/view_booked_booking')}' + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+    
+    var reload_url = '${tg.url('/workflow/set_state')}';       
+    
+    var state_change_list = [
+         {name:"> Disapprove", state:-10}, 
+    		{name:"> Preliminary", state:0},
+        	{name:"> Stand-by", state:5},
+        	{name:"> Booked", state:10}, 
+        	{name:"> Approve", state:20}, 
+        	{name:"> Drop-in", state:30}, 
+        	{name:"Delete", state:-100}
+    ];
+    array.forEach(state_change_list, function(x) {add_change_booking_state_menu_item(menu, x['name'], x['state'], reload_url);});
+
+
 	get_visiting_group_tags_from_XHR('${visiting_group._id}'); 
 	})
-  
 });
 
   </script>
@@ -92,7 +173,7 @@ ready(function() {
 
 </head>
 
-<body>
+<body class="tundra">
     <div py:if="show_group==1">
     <h2>${name}</h2>
     <p>${formatDate(visiting_group.from_date)} to ${formatDate(visiting_group.to_date)}</p>
@@ -142,7 +223,7 @@ ready(function() {
         <li><a href="${tg.url('/booking/edit_booking', {'visiting_group_id':visiting_group_id})}">new booking request</a></li>
     </ul>
                 
-                
+    <div id="clustered_booking_list">
                 
         <div py:for="cb in clustered_bookings">
           <h3><a href="${tg.url('/booking/view_activity', {'activity_id':cb[0].activity['_id']})}">${cb[0].activity.title}</a></h3>
@@ -167,7 +248,7 @@ ready(function() {
                 </div>
         
         
-            <div py:if="None != b.booking_day" style="margin-left:2em;">
+            <div py:if="None != b.booking_day" class="booking_meta_info" hollyrosa:bid="${b['id']}" hollyrosa:bdayid="${b['booking_day_id']}">
                 <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day', {'day_id':b.booking_day.id})}">${formatDate(b.booking_day.date)}</a>
                 <span py:if="b.slot_id!=None"> 
                   <span py:if="render_time=='time'" ><b>${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b></span>
@@ -177,7 +258,7 @@ ready(function() {
                   <span py:if="render_time=='' and b.slot.pref=='silent'" ></span>       
                 </span>
                   ${workflow_map[b.booking_state]}</span>
-                
+                <!--
                 <ul class="any_menu context_inline_menu" style="padding-left:2em;">
                     <li><a href="${tg.url('/workflow/set_state', {'booking_id':b.id, 'state':10})}">booked</a></li>
                     <li><a href="${tg.url('/workflow/set_state', {'booking_id':b.id, 'state':20})}">approve</a></li>
@@ -187,7 +268,7 @@ ready(function() {
                     <li><a href="${tg.url('/booking/view_booked_booking', {'return_to_day_id':b.booking_day_id, 'id':b.id})}">view</a></li>
                     <li><a href="${tg.url('/booking/unschedule_booking', {'booking_day_id':b.booking_day_id, 'booking_id':b.id})}">unschedule</a></li>
                 </ul>
-                
+                -->
                 
             </div>
             <div py:if="None == b.booking_day" style="margin-left:2em;">
@@ -200,6 +281,8 @@ ready(function() {
                 </ul>
             </div>
         </div>
+        </div>
+        
 	</div>
 	<div py:if="len(booking_info_notes)" style="border: 1px dashed red; padding:1em;margin:2em;">
    <h2>Att tänka på</h2>
