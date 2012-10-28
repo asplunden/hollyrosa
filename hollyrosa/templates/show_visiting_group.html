@@ -132,36 +132,6 @@ ready(function() {
         <input type="submit"/>
     </form>
 
-    
-
-        <div py:for="b in bookings">
-        <h3><a href="${tg.url('/booking/view_activity', params={'activity_id':b.activity.id})}">${b.activity.title}</a></h3>
-            
-            <div py:if="None != b.booking_day">
-                
-                </div>
-        
-        
-            <div py:if="None != b.booking_day" style="margin-left:2em;">
-                
-                
-                
-            </div>
-            <div py:if="None == b.booking_day" style="margin-left:2em;">
-                <span class="workflow_state_unscheduled">unscheduled</span>
-                <ul class="any_menu context_inline_menu" style="padding-left:2em;">
-                    
-                    <li><a href="${tg.url('/booking/edit_booked_booking', params={'id':b._id})}">edit</a></li>
-                    <li><a href="${tg.url('/booking/view_booked_booking', params={'id':b._id})}">view</a></li>
-                    
-                </ul>
-            </div>
-            <div style="margin-left:2em;">
-                <div class="note"> ${getRenderContent(b)}</div>
-            </div>
-            
-            
-    
-        </div>
+  
 </body>
 </html>

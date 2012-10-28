@@ -72,7 +72,34 @@
                window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
            }}));
    }    
+   
+	function add_booking_op_menu_item(a_menu, a_sub_menu, a_name, a_url) {
+   	a_sub_menu.addChild(new MenuItem({
+               label: a_name,
+               onClick: function(evt) {
+                   var node = a_menu.currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       booking_id: bid,
+                       return_to_day_id: node.attributes["hollyrosa:bdayid"].value
+                   };
+               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+	}
+
+   
+   var state_change_list = [
+         {name:"> Disapprove", state:-10}, 
+    		{name:"> Preliminary", state:0},
+        	{name:"> Stand-by", state:5},
+        	{name:"> Booked", state:10}, 
+        	{name:"> Approve", state:20}, 
+        	{name:"> Drop-in", state:30}, 
+        	{name:"Delete booking", state:-100}
+    ];
 	
-	return {add_redirect_menu_item:add_redirect_menu_item, add_vgid_redirect_menu_item:add_vgid_redirect_menu_item, add_note_redirect_menu_item:add_note_redirect_menu_item, add_list_bookings_redirect_menu_item:add_list_bookings_redirect_menu_item, add_change_booking_state_menu_item:add_change_booking_state_menu_item};
+	return {add_redirect_menu_item:add_redirect_menu_item, add_vgid_redirect_menu_item:add_vgid_redirect_menu_item, add_note_redirect_menu_item:add_note_redirect_menu_item, add_list_bookings_redirect_menu_item:add_list_bookings_redirect_menu_item, 
+	add_change_booking_state_menu_item:add_change_booking_state_menu_item, state_change_list:state_change_list, add_booking_op_menu_item:add_booking_op_menu_item};
 	});
 	

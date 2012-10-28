@@ -42,19 +42,14 @@ function addTagHelper() {
  
  
 ready(function() {
-
+	//...load tags
    tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group._id}");
 
    //...setup menu for each little booking
-   
 	var menu = new Menu({
    	targetNodeIds: ["clustered_booking_list"],
-      selector: "div.booking_meta_info",
-      onShow: function(evt) {
-      	alert('helooo');
-         }
+      selector: "div.booking_meta_info"
       });
-      
       
 	var cluster_menu = new Menu({
    	targetNodeIds: ["clustered_booking_list"],
@@ -62,69 +57,29 @@ ready(function() {
       });
 
 
-   /* create a list of possible booking state transistions, iterate over it and build (sub) menu */
+   /* refactor  show booked booking adding menus to it, then attack booking day add menus to it, then attack the clanedar overview...list visiting groups */
    
-   
-   
-   menu.addChild(new MenuItem({
-               label: "Edit booking",
-               onClick: function(evt) {
-                   var node = this.getParent().currentTarget;
-                   var bid = node.attributes["hollyrosa:bid"].value;
-                   var ioq = {
-                       id: bid,
-                       return_to_day_id: node.attributes["hollyrosa:bdayid"].value
-                   };
-                        
-               window.location = '${tg.url('/booking/edit_booked_booking')}' + '?' + ioQuery.objectToQuery(ioq);
-               }
-           })); 
-           
-           menu.addChild(new MenuItem({
-               label: "View booking",
-               onClick: function(evt) {
-                   var node = this.getParent().currentTarget;
-                   var bid = node.attributes["hollyrosa:bid"].value;
-                   var ioq = {
-                       id: bid,
-                       return_to_day_id: node.attributes["hollyrosa:bdayid"].value
-                   };
-                        
-               window.location = '${tg.url('/booking/view_booked_booking')}' + '?' + ioQuery.objectToQuery(ioq);
-               }
-           })); 
-           
-                
-           var more = new Menu();
-           menu.addChild(new PopupMenuItem({
-               label: "more...",
-               popup: more
-               }));
-           
+	common_menu.add_booking_op_menu_item(menu, menu, "Edit booking", '${tg.url('/booking/edit_booked_booking')}');
+	common_menu.add_booking_op_menu_item(menu, menu, "View booking", '${tg.url('/booking/view_booked_booking')}');
+	common_menu.add_booking_op_menu_item(menu, menu, "Unschedule booking", '${tg.url('/booking/unschedule_booking')}');
+   common_menu.add_booking_op_menu_item(menu, menu, "Multi-book", '${tg.url('/booking/multi_book')}');
+	                    
+   var more = new Menu();
+   menu.addChild(new PopupMenuItem({
+   	label: "more...",
+      popup: more
+   }));  
     
     var set_state_url = '${tg.url('/workflow/set_state')}';       
     
-    var state_change_list = [
-         {name:"> Disapprove", state:-10}, 
-    		{name:"> Preliminary", state:0},
-        	{name:"> Stand-by", state:5},
-        	{name:"> Booked", state:10}, 
-        	{name:"> Approve", state:20}, 
-        	{name:"> Drop-in", state:30}, 
-        	{name:"Delete booking", state:-100}
-    ];
-    array.forEach(state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(menu, more, x['name'], x['state'], 0, set_state_url);});
-    array.forEach(state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(cluster_menu, cluster_menu, x['name'], x['state'], 1, set_state_url);});
-
-
-
-		//...setup menu for visiting group itself.
-		
-		
-		var vgroup_menu = new Menu({
-       targetNodeIds: ["visiting_group_menu"],
-       leftClickToOpen: false
-       });
+    array.forEach(common_menu.state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(menu, more, x['name'], x['state'], 0, set_state_url);});
+    array.forEach(common_menu.state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(cluster_menu, cluster_menu, x['name'], x['state'], 1, set_state_url);});
+    
+	//...setup menu for visiting group itself.
+	var vgroup_menu = new Menu({
+   	targetNodeIds: ["visiting_group_menu"],
+   	leftClickToOpen: false
+   });
     
 	common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Show visiting group", '${visiting_group['id']}', '${tg.url('show_visiting_group')}');
    common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Edit visiting group", '${visiting_group['id']}', '${tg.url('edit_visiting_group')}');  
@@ -198,25 +153,11 @@ ready(function() {
                 
         <div py:for="cb in clustered_bookings">
           <h3><a href="${tg.url('/booking/view_activity', {'activity_id':cb[0].activity['_id']})}">${cb[0].activity.title}</a></h3>
-                <!-- <ul class="any_menu context_inline_menu" style="padding-left:2em;">  py:if="'pl' in request.identity['repoze.who.identity']['level']"  
-                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':cb[0].id, 'state':10, 'all':1})}">booked ALL</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':cb[0].id, 'state':20, 'all':1})}">approve ALL</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':cb[0].id, 'state':-10, 'all':1})}">disapprove ALL</a></li>
-                    <li><a href="${tg.url('/workflow/set_state', params={'booking_id':cb[0].id, 'state':0, 'all':1})}">preliminary ALL</a></li>
-                    <li><a href="${tg.url('/booking/unschedule_booking', booking_day_id=cb[0].booking_day_id, booking_id=cb[0].id)}">unschedule</a></li> 
-                </ul> -->
-
             <div style="margin-left:2em;" class="cluster_meta_info" hollyrosa:bid="${cb[0].id}">
                 <div class="note"> ${getRenderContent(cb[0])}</div>
            </div>
 
-
-          <div py:for="b in cb">            
-            <div py:if="None != b.booking_day">
-                
-                </div>
-        
-        
+          <div py:for="b in cb">
             <div py:if="None != b.booking_day" class="booking_meta_info" hollyrosa:bid="${b['id']}" hollyrosa:bdayid="${b['booking_day_id']}">
                 <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day', {'day_id':b.booking_day.id})}">${formatDate(b.booking_day.date)}</a>
                 <span py:if="b.slot_id!=None"> 

@@ -445,7 +445,7 @@ class BookingDay(BaseController):
     @validate(create_validate_unschedule_booking)
     @expose()
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may unschedule booking request'))
-    def unschedule_booking(self,  booking_day_id,  booking_id):
+    def unschedule_booking(self,  return_to_day_id=None,  booking_id=None):
         b = holly_couch[booking_id] 
         b['last_changed_by_id'] = getLoggedInUserId(request)
         b['booking_state'] = 0
@@ -460,37 +460,37 @@ class BookingDay(BaseController):
             datetime.datetime.strptime(b['valid_from'],  "%Y-%m-%d")
         except ValueError:
             #vgroup = holly_couch[b]
-            date = holly_couch[booking_day_id]['date']
+            date = holly_couch[old_booking_day_id]['date']
             b['valid_from'] = date
         except TypeError:
-            date = holly_couch[booking_day_id]['date']
+            date = holly_couch[old_booking_day_id]['date']
             b['valid_from'] = date
         except KeyError:
-            date = holly_couch[booking_day_id]['date']
+            date = holly_couch[old_booking_day_id]['date']
             b['valid_from'] = date
             
         try:
             datetime.datetime.strptime(b['valid_to'],  "%Y-%m-%d")
         except ValueError:
-            date = holly_couch[booking_day_id]['date']
+            date = holly_couch[old_booking_day_id]['date']
             b['valid_to'] = date
         except TypeError:
-            date = holly_couch[booking_day_id]['date']
+            date = holly_couch[old_booking_day_id]['date']
             b['valid_to'] = date
         except KeyError:
-            date = holly_couch[booking_day_id]['date']
+            date = holly_couch[old_booking_day_id]['date']
             b['valid_to'] = date
             
         try:
             datetime.datetime.strptime(b['requested_date'],  "%Y-%m-%d")
         except ValueError:
-            date = holly_couch[booking_day_id]['date']
+            date = holly_couch[old_booking_day_id]['date']
             b['requested_date'] = date
         except TypeError:
-            date = holly_couch[booking_day_id]['date']
+            date = holly_couch[old_booking_day_id]['date']
             b['requested_date'] = date
         except KeyError:
-            date = holly_couch[booking_day_id]['date']
+            date = holly_couch[old_booking_day_id]['date']
             b['requested_date'] = date
             
         b['hide_warn_on_suspect_booking']  = False # TODO: refactor
@@ -503,12 +503,12 @@ class BookingDay(BaseController):
         
         remember_unschedule_booking(holly_couch, booking=b, slot_row_position=slot, booking_day=booking_day,  changed_by='',  activity=activity)
 
-        raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(b['activity_id']))
+        raise redirect('day?day_id='+return_to_day_id + make_booking_day_activity_anchor(b['activity_id']))
         
     @validate(create_validate_schedule_booking)
     @expose()
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may schedule booking request'))
-    def schedule_booking(self,  booking_day_id,  booking_id,  slot_row_position_id):
+    def schedule_booking(self,  return_to_day_id=None,  booking_id=None,  slot_row_position_id=None):
         b = holly_couch[booking_id] 
         b['last_changed_by_id'] = getLoggedInUserId(request)
         b['booking_day_id'] = booking_day_id
@@ -525,7 +525,7 @@ class BookingDay(BaseController):
         #...TODO: have all lookuped data in some local ctx that can be passed on to all helper functions so we dont have to do a lot of re-lookups
         remember_schedule_booking(holly_couch, booking=b, slot_row_position=slot, booking_day=booking_day,  activity=activity)
         
-        raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(b['activity_id']))
+        raise redirect('day?day_id='+return_to_day_id + make_booking_day_activity_anchor(b['activity_id']))
         
         
     @expose('hollyrosa.templates.edit_booked_booking')
@@ -559,11 +559,11 @@ class BookingDay(BaseController):
         
 
     @expose('hollyrosa.templates.show_booking')
-    @validate(validators={'id':validators.Int(not_empty=True), 'return_to_day_id':validators.Int(not_empty=False)})
-    def view_booked_booking(self,  return_to_day_id=None,  id=None):
+    @validate(validators={'booking_id':validators.UnicodeString(not_empty=True), 'return_to_day_id':validators.UnicodeString(not_empty=False)})
+    def view_booked_booking(self,  return_to_day_id=None,  booking_id=None):
        
         #...find booking day and booking row
-        booking_o = holly_couch[id] 
+        booking_o = holly_couch[booking_id] 
         booking_o.return_to_day_id = return_to_day_id
         activity_id = booking_o['activity_id']
         
@@ -581,20 +581,20 @@ class BookingDay(BaseController):
                 slot_position = slot_map[slot_id]
         
         activity = holly_couch[activity_id] 
-        history = [h.doc for h in getAllHistoryForBookings(holly_couch, [id])]
+        history = [h.doc for h in getAllHistoryForBookings(holly_couch, [booking_id])]
         user_name_map = getUserNameMap(holly_couch)
         
         return dict(booking_day=booking_day,  slot_position=slot_position, booking=booking_o,  workflow_map=workflow_map,  history=history,  change_op_map=change_op_map,  getRenderContent=getRenderContentDict,  activity=activity, formatDate=reFormatDate,  user_name_map=user_name_map)
         
         
     @expose('hollyrosa.templates.edit_booked_booking')
-    @validate(validators={'id':validators.UnicodeString(not_empty=True), 'return_to_day':validators.UnicodeString(not_empty=False)})
+    @validate(validators={'booking_id':validators.UnicodeString(not_empty=True), 'return_to_day':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
-    def edit_booked_booking(self,  return_to_day_id=None,  id=None,  **kw):
+    def edit_booked_booking(self,  return_to_day_id=None,  booking_id=None,  **kw):
         tmpl_context.form = create_edit_book_slot_form
         
         #...find booking day and booking row
-        booking_o = holly_couch[id] 
+        booking_o = holly_couch[booking_id] 
         booking_o['return_to_day_id'] = return_to_day_id
         
         booking_day_id = booking_o['booking_day_id']
@@ -1047,7 +1047,7 @@ class BookingDay(BaseController):
         
 
     @expose('hollyrosa.templates.edit_multi_book')
-    @validate(validators={'booking_id':validators.Int(not_empty=True)})
+    @validate(validators={'booking_id':validators.UnicodeString(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may use multibook functionality'))
     def multi_book(self,  booking_id=None,  **kw):
         booking_o = holly_couch[booking_id]

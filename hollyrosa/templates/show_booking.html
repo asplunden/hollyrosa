@@ -20,47 +20,68 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
 
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:hollyrosa="http://asplunden.org/guldkant/hollyrosa" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <xi:include href="master.html" />
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - ${activity.title} Booking</title>
+  <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
+  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true, debugAtAllCosts: true"></script>
+  <script>
+  
+require(["common_menu", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/on", "dojo/ready"], function(common_menu, array, Menu, MenuItem, PopupMenuItem, query, ioQuery, dom, on, ready) {
+  
+  
+  var menu = new Menu({
+   	targetNodeIds: ["booking_info"],
+      selector: "div.note"
+      });
+  
+  common_menu.add_booking_op_menu_item(menu, menu, "Edit booking", '${tg.url('/booking/edit_booked_booking')}');
+  common_menu.add_booking_op_menu_item(menu, menu, "Unschedule booking", '${tg.url('/booking/unschedule_booking')}');
+  common_menu.add_booking_op_menu_item(menu, menu, "Multi-book", '${tg.url('/booking/multi_book')}');
+	
+  var set_state_url = '${tg.url('/workflow/set_state')}';         
+  array.forEach(common_menu.state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(menu, menu, x['name'], x['state'], 0, set_state_url);});
+  
+  });
+  </script>
+  
+  
 </head>
-<body>
+<body class="tundra">
     <h2>${activity.title} booking</h2>
-    <h3>${booking.visiting_group_name}</h3> 
-    <p py:if="booking['slot_id'] != '' and booking['slot_id'] != None and booking_day != None">
-    <a href="${tg.url('day', params={'day_id':booking_day.id})}">${formatDate(booking_day.date)}</a> <b py:if="booking.slot_id !=None"> ${slot_position.time_from} to ${slot_position.time_to} </b>  <b py:if="booking.slot_id ==None">booking has no slot row position </b>
-    <p py:if="None !=booking_day"><span class="workflow_state_${str(booking.booking_state)}">${workflow_map[booking.booking_state]}</span></p>
-    </p>
-    <p py:if="'' == booking.get('slot_id','')">
-        <span class="workflow_state_unscheduled">unscheduled</span>
-        requested from ${booking.get('valid_from','-')} to ${booking.get('valid_to','-')} requested date ${booking.get('requested_date','-')}
-    </p>
-    
+    <h3>${booking.visiting_group_name}</h3>
+    <div id="booking_info"> 
+    	<p py:if="booking['slot_id'] != '' and booking['slot_id'] != None and booking_day != None">
+    		<a href="${tg.url('day', params={'day_id':booking_day.id})}">${formatDate(booking_day.date)}</a> <b py:if="booking.slot_id !=None"> ${slot_position.time_from} to ${slot_position.time_to} </b>  <b py:if="booking.slot_id ==None">booking has no slot row position </b>
+    		<p py:if="None !=booking_day"><span class="workflow_state_${str(booking.booking_state)}">${workflow_map[booking.booking_state]}</span></p>
+    	</p>
+    	<p py:if="'' == booking.get('slot_id','')">
+        	<span class="workflow_state_unscheduled">unscheduled</span>
+        	requested from ${booking.get('valid_from','-')} to ${booking.get('valid_to','-')} requested date ${booking.get('requested_date','-')}
+    	</p>
+    <!--
     <ul class="any_menu context_inline_menu">
                     <li py:if="None !=booking_day"><a href="${tg.url('/booking/edit_booked_booking', params={'return_to_day_id':booking.get('booking_day_id',''), 'id':booking.id})}">edit</a></li>
                     <li py:if="None ==booking_day"><a href="${tg.url('/booking/edit_booking', params={'return_to_day_id':booking.get('booking_day_id',''), 'id':booking.id})}">edit</a></li>
                     <li py:if="None !=booking_day"><a href="${tg.url('/booking/unschedule_booking', params={'booking_day_id':booking.get('booking_day_id',''), 'booking_id':booking.id})}">unschedule</a></li>
-                    <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', params={'booking_id':booking.id, 'state':0})}">preliminary</a></li>
-                    <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', params={'booking_id':booking.id, 'state':10})}">booked</a></li>
-                    <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', params={'booking_id':booking.id, 'state':20})}">approve</a></li>
-                    <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', params={'booking_id':booking.id, 'state':-10})}">disapprove</a></li>
                     <li py:if="None !=booking_day"><a href="${tg.url('/booking/multi_book', params={'booking_id':booking.id})}">multi-book</a></li>
                 </ul>
-    
-    <div class="note">${getRenderContent(booking)}</div>
-    
-    <!-- .strftime('%A %d %B') -->
+  -->  
+    <div class="note" hollyrosa:bid="${booking.id}" hollyrosa:bdayid="${booking.booking_day_id}">${getRenderContent(booking)}</div>
+   
+  
     <p>
     <span py:if="booking.get('valid_from','') !='' and booking.get('valid_to','') != ''">Valid in range <em>${booking.valid_from} to ${booking.valid_to}</em>, </span><span py:if="'' != booking.get('requested_date','')">Requested date <em>${booking.requested_date}</em></span>
     </p>
     <p>Last changed by: ${user_name_map.get(booking.last_changed_by_id,booking.last_changed_by_id)}</p>
     <p py:if="booking.get('hide_warn_on_suspect_booking',False)">hide_warn_on_suspect_booking</p>
     <p>gid: ${booking['_id']}</p>
+    </div>
     <div id="history" style="margin-top:3em;">
         <h3>History</h3>
         <table class="data">

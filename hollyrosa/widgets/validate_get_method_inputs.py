@@ -29,16 +29,16 @@ from tw.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString
 class ValidateScheduleBooking(TableForm):    
     show_errors = True
     class fields(WidgetsList):
-        booking_day_id = HiddenField(validator=Int)
-        booking_id = HiddenField(validator=Int)
+        return_to_day_id = HiddenField(validator=UnicodeString)
+        booking_id = HiddenField(validator=UnicodeString)
 
 
 class ValidateUnscheduleBooking(TableForm):
     show_errors = True
     class fields(WidgetsList):
-        booking_day_id = HiddenField(validator=Int)
-        booking_id = HiddenField(validator=Int)
-        slot_row_position_id = HiddenField(validator=Int)
+        return_to_day_id = HiddenField(validator=UnicodeString)
+        booking_id = HiddenField(validator=UnicodeString)
+        slot_row_position_id = HiddenField(validator=UnicodeString)
 
 create_validate_schedule_booking = ValidateScheduleBooking("create_validate_schedule_booking")
 create_validate_unschedule_booking = ValidateUnscheduleBooking("create_validate_unschedule_booking")
