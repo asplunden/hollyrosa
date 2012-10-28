@@ -104,6 +104,12 @@ ready(function() {
       	alert('helooo');
          }
       });
+      
+      
+	var cluster_menu = new Menu({
+   	targetNodeIds: ["clustered_booking_list"],
+      selector: "div.cluster_meta_info"
+      });
 
 
    /* create a list of possible booking state transistions, iterate over it and build (sub) menu */
@@ -157,7 +163,10 @@ ready(function() {
         	{name:"> Drop-in", state:30}, 
         	{name:"Delete booking", state:-100}
     ];
-    array.forEach(state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(menu, more, x['name'], x['state'], set_state_url);});
+    array.forEach(state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(menu, more, x['name'], x['state'], 0, set_state_url);});
+    array.forEach(state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(cluster_menu, cluster_menu, x['name'], x['state'], 1, set_state_url);});
+
+
 
 		//...setup menu for visiting group itself.
 		
@@ -223,30 +232,24 @@ ready(function() {
     </table>
     
     
-    </div> <!-- else if not show grouo -->
+    </div> <!-- end  show group info -->
     
     
     <h2 id="visiting_group_menu">Viewing all bookings for ${name}</h2>
-    <!--
-    <ul py:if="visiting_group_id!=None" class="any_menu context_inline_menu" style="padding-left:2em;">
-        <li><a href="${tg.url('/visiting_group/show_visiting_group', params={'id':visiting_group_id})}">show</a></li>
-        <li><a href="${tg.url('/visiting_group/edit_visiting_group', params={'id':visiting_group_id})}">edit</a></li>
-        <li><a href="${tg.url('/booking/edit_booking', params={'visiting_group_id':visiting_group_id})}">new booking request</a></li>
-    </ul>
-     -->        
+         
     <div id="clustered_booking_list">
                 
         <div py:for="cb in clustered_bookings">
           <h3><a href="${tg.url('/booking/view_activity', {'activity_id':cb[0].activity['_id']})}">${cb[0].activity.title}</a></h3>
-                <ul class="any_menu context_inline_menu" style="padding-left:2em;"> <!-- py:if="'pl' in request.identity['repoze.who.identity']['level']"  -->
+                <!-- <ul class="any_menu context_inline_menu" style="padding-left:2em;">  py:if="'pl' in request.identity['repoze.who.identity']['level']"  
                     <li><a href="${tg.url('/workflow/set_state', params={'booking_id':cb[0].id, 'state':10, 'all':1})}">booked ALL</a></li>
                     <li><a href="${tg.url('/workflow/set_state', params={'booking_id':cb[0].id, 'state':20, 'all':1})}">approve ALL</a></li>
                     <li><a href="${tg.url('/workflow/set_state', params={'booking_id':cb[0].id, 'state':-10, 'all':1})}">disapprove ALL</a></li>
                     <li><a href="${tg.url('/workflow/set_state', params={'booking_id':cb[0].id, 'state':0, 'all':1})}">preliminary ALL</a></li>
-                    <!-- <li><a href="${tg.url('/booking/unschedule_booking', booking_day_id=cb[0].booking_day_id, booking_id=cb[0].id)}">unschedule</a></li> -->
-                </ul>
+                    <li><a href="${tg.url('/booking/unschedule_booking', booking_day_id=cb[0].booking_day_id, booking_id=cb[0].id)}">unschedule</a></li> 
+                </ul> -->
 
-            <div style="margin-left:2em;">
+            <div style="margin-left:2em;" class="cluster_meta_info" hollyrosa:bid="${cb[0].id}">
                 <div class="note"> ${getRenderContent(cb[0])}</div>
            </div>
 

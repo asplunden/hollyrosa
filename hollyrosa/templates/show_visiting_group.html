@@ -81,7 +81,7 @@ ready(function() {
 </head>
 
 <body class="tundra">
-    <h2>${visiting_group.name}</h2>
+    <h2 id="visiting_group_menu">${visiting_group.name}</h2>
     
 <!-- <ul class="any_menu context_inline_menu ">
        <li><a href="${tg.url('delete_visiting_group', params={'id':visiting_group.id})}">delete</a></li>
@@ -92,7 +92,7 @@ ready(function() {
     
 
 
-    <div class="note" id="visiting_group_menu"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
+    <div class="note"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
 <a id="add_tag_href2" href="javascript:;">Add Tags</a>
 </form></div>
     <p>bok.nr: <b>${visiting_group.boknr}</b><br/>

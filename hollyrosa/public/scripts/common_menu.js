@@ -55,9 +55,9 @@
       add_redirect_menu_item(a_menu, a_sub_menu, a_name, l_params, a_url); 
 	}
 	
-	/****************/
+	/******* booking state menu *********/
 	
-	function add_change_booking_state_menu_item(a_menu, a_sub_menu, state_name, state_value, reload_url) {
+	function add_change_booking_state_menu_item(a_menu, a_sub_menu, state_name, state_value, a_all, a_url) {
       a_sub_menu.addChild(new MenuItem({
       	label: state_name,
          onClick: function(evt) {
@@ -66,9 +66,10 @@
            
             var ioq = {
                        booking_id: bid,
-                       state: state_value
+                       state: state_value,
+                       all: a_all
                    };        
-               window.location = reload_url + '?' + ioQuery.objectToQuery(ioq);
+               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
            }}));
    }    
 	
