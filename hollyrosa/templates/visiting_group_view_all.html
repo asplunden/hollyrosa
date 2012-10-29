@@ -34,7 +34,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
-require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr"], function(common_menu, registry, Menu, MenuItem, xq, ioQuery, dom, domConstruct, xhr) {
+require(["common_menu", "dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr"], function(common_menu, array, registry, Menu, MenuItem, PopupMenuItem, xq, ioQuery, dom, domConstruct, xhr) {
 
 
 function updateNotes(data) {
@@ -83,7 +83,46 @@ function loadNotesFor(id) {
            }
        }));
        
-      
+       
+   /* assemblingthe filter booking status menu */
+   var filter_menu = new Menu({
+       targetNodeIds: ["bokn_status_menu"],
+       leftClickToOpen: false
+       });
+       
+   var bokn_status_menu = new Menu();
+   filter_menu.addChild(new PopupMenuItem({
+   	label: "Program status...",
+      popup: bokn_status_menu
+   })); 
+   
+   var tag_menu = new Menu();
+   filter_menu.addChild(new PopupMenuItem({
+   	label: "Tags...",
+      popup: tag_menu
+   })); 
+
+   var date_range_menu = new Menu();
+   filter_menu.addChild(new PopupMenuItem({
+   	label: "Date range...",
+      popup: date_range_menu
+   })); 
+
+   
+   var l = ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in bokn_status_map.items()] ) +']' };
+  
+   
+   array.forEach(l, function(l) {     
+   	common_menu.add_redirect_menu_item(filter_menu, bokn_status_menu, l[1], {boknstatus:l[0]}, '${tg.url('view_boknstatus')}');   
+   });
+   
+   var all_tags = ${ '[' + ''.join(['"'+l+'", ' for l in all_tags]  ) +']' };
+   array.forEach(all_tags, function(l) { 
+       common_menu.add_redirect_menu_item(filter_menu, tag_menu, l, {tag:l}, '${tg.url('view_tags')}');   
+   });
+   /* assembling the filter tag menu */
+   
+   
    });
   
   </script>
@@ -130,6 +169,7 @@ function loadNotesFor(id) {
     Choose time period: <ul class="any_menu">
 
         <li><a href="${tg.url('view_today')}">today</a></li>
+        <li id="bokn_status_menu" >Filter booking status</li>
         <!-- <li><a href="${tg.url('view_at_date', at_date='2012-06-15')}">Miniscout I</a></li>
         <li><a href="${tg.url('view_at_date', at_date='2012-06-18')}">Miniscout II</a></li>
         <li><a href="${tg.url('view_at_date', at_date='2012-08-14')}">Miniscout III</a></li>
@@ -137,8 +177,6 @@ function loadNotesFor(id) {
         <li><a href="${tg.url('view_date_range', from_date='2012-08-04', to_date='2012-08-11')}">Boomerang</a></li>
     	  <li py:if="request.identity"><a href="${tg.url('/visiting_group/edit_visiting_group')}">New visiting group</a></li>-->
     
-        <li><span class="context_dropdown_menu">view by status<ul><li py:for="k,v in bokn_status_map.items()"><a href="${tg.url('view_boknstatus', params={'boknstatus':k})}">${v}</a></li></ul></span></li>
-        <li><span class="context_dropdown_menu">view by tag<ul><li py:for="tag in all_tags"><a href="${tg.url('view_tags', params={'tag':tag})}">${tag}</a></li></ul></span></li>
     </ul>
     <h2>Viewing visiting groups</h2>
     <table id="vgroup_listing">

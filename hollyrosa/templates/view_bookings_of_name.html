@@ -170,11 +170,11 @@ ready(function() {
                   ${workflow_map[b.booking_state]}</span>
             </div>
             <div py:if="None == b.booking_day" style="margin-left:2em;">
-                <span class="workflow_state_unscheduled">unscheduled requested from ${formatDate(b.valid_from)} to ${formatDate(b.valid_to)} <a href="${tg.url('/booking/day',day=b.requested_date)}">requested date ${formatDate(b.requested_date)}</a></span>
+                <span class="workflow_state_unscheduled">unscheduled requested from ${formatDate(b.valid_from)} to ${formatDate(b.valid_to)} <a href="${tg.url('/booking/day',params={'day':b.requested_date})}">requested date ${formatDate(b.requested_date)}</a></span>
                 <ul class="any_menu context_inline_menu" style="padding-left:2em;">
                     
-                    <li><a href="${tg.url('/booking/edit_booking', {'id':b.id})}">edit</a></li>
-                    <li><a href="${tg.url('/booking/view_booked_booking', {'id':b.id})}">view</a></li>
+                    <li><a href="${tg.url('/booking/edit_booking', params={'id':b.id})}">edit</a></li>
+                    <li><a href="${tg.url('/booking/view_booked_booking', params={'id':b.id})}">view</a></li>
                     
                 </ul>
             </div>
