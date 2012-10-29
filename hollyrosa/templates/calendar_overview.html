@@ -48,7 +48,7 @@ def makeDate(s):
    menu.addChild(new MenuItem({
        label: "Day schema",
        onClick: function(evt) {
-           var node = this.getParent().currentTarget;
+           var node = menu.currentTarget;
            var bdayid = node.attributes["hollyrosa:bdayid"].value;
            var ioq = {
                day_id: bdayid
@@ -60,18 +60,20 @@ def makeDate(s):
    menu.addChild(new MenuItem({
        label: "Visiting groups this day",
        onClick: function(evt) {
-           var node = this.getParent().currentTarget;
+           var node = menu.currentTarget;
            var bdate = node.attributes["hollyrosa:bdate"].value;
-           window.location = '${tg.url('/visiting_group/view_at_date', params={'at_date':''})}' + bdate;
+           var ioq = {
+               at_date: bdate
+               };
+           window.location = '${tg.url('/visiting_group/view_at_date')}' + '?' + ioQuery.objectToQuery(ioq);
            }
        }));
-       
        
        
    menu.addChild(new MenuItem({
        label: "Fladan schema",
        onClick: function(evt) {
-           var node = this.getParent().currentTarget;
+           var node = menu.currentTarget;
            var bdate = node.attributes["hollyrosa:bdate"].value;
            var ioq = {
                ag: "activity_group.6",
@@ -84,7 +86,7 @@ def makeDate(s):
    menu.addChild(new MenuItem({
        label: "Trapper schema",
        onClick: function(evt) {
-           var node = this.getParent().currentTarget;
+           var node = menu.currentTarget;
            var bdate = node.attributes["hollyrosa:bdate"].value;
            var ioq = {
                ag: "activity_group.1",
@@ -99,7 +101,7 @@ def makeDate(s):
    menu.addChild(new MenuItem({
        label: "All schema",
        onClick: function(evt) {
-           var node = this.getParent().currentTarget;
+           var node = menu.currentTarget;
            var bdate = node.attributes["hollyrosa:bdate"].value;
            var ioq = {
                day: bdate
