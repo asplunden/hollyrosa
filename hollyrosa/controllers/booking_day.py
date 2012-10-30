@@ -433,13 +433,13 @@ class BookingDay(BaseController):
         
     @expose()
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL may delete a booking request'))
-    @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'booking_id':validators.Int(not_empty=True)})
-    def delete_booking(self,  booking_day_id,  booking_id):
+    @validate(validators={'return_to_day_id':validators.UnicodeString(not_empty=True), 'booking_id':validators.UnicodeString(not_empty=True)})
+    def delete_booking(self,  return_to_day_id=None,  booking_id=None):
         tmp_booking = holly_couch[booking_id]
         tmp_activity_id = tmp_booking['activity_id']
         remember_delete_booking_request(holly_couch, booking=tmp_booking, changed_by='',  activity_title=holly_couch[tmp_activity_id]['title'])
         deleteBooking(holly_couch, tmp_booking)
-        raise redirect('/booking/day?day_id='+str(booking_day_id) + make_booking_day_activity_anchor(tmp_activity_id)) 
+        raise redirect('/booking/day?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id)) 
         
 
     @validate(create_validate_unschedule_booking)
