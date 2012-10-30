@@ -749,9 +749,9 @@ class BookingDay(BaseController):
      
         
     @expose('hollyrosa.templates.request_new_booking')
-    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'id':validators.UnicodeString(not_empty=False), 'visiting_group_id':validators.UnicodeString(not_empty=False)})
+    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'booking_id':validators.UnicodeString(not_empty=False), 'visiting_group_id':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change a booking'))
-    def edit_booking(self,  booking_day_id=None,  id=None, visiting_group_id='', **kw):
+    def edit_booking(self,  booking_day_id=None,  booking_id=None, visiting_group_id='', **kw):
         tmpl_context.form = create_edit_new_booking_request_form
         
         activities = [(a.doc['_id'],  a.doc['title'] ) for a in getAllActivities(holly_couch)]
@@ -783,13 +783,13 @@ class BookingDay(BaseController):
         
     @expose('hollyrosa.templates.move_booking')
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change a booking'))
-    @validate(validators={'return_to_day_id':validators.UnicodeString(not_empty=False), 'id':validators.UnicodeString(not_empty=False)})
-    def move_booking(self,  return_to_day_id=None,  id=None,  **kw):
+    @validate(validators={'return_to_day_id':validators.UnicodeString(not_empty=False), 'booking_id':validators.UnicodeString(not_empty=False)})
+    def move_booking(self,  return_to_day_id=None,  booking_id=None,  **kw):
         tmpl_context.form = create_move_booking_form
         activities = [(a.doc['_id'],  a.doc['title'] ) for a in getAllActivities(holly_couch)]
         
         #...patch since this is the way we will be called if validator for new will fail
-        booking_o = holly_couch[id]
+        booking_o = holly_couch[booking_id]
         booking_o.return_to_day_id = return_to_day_id
         activity_id,  slot_o = getSlotAndActivityIdOfBooking(holly_couch, booking_o)
         activity_o = holly_couch[booking_o['activity_id']]
@@ -902,13 +902,13 @@ class BookingDay(BaseController):
         
     
     @expose()
-    @validate(validators={'id':validators.UnicodeString(not_empty=True)})
+    @validate(validators={'return_to_day_id':validators.UnicodeString(not_empty=False), 'booking_id':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
-    def prolong(self,  id):
+    def prolong(self,  return_to_day_id=None, booking_id=None):
         # TODO: one of the problems with prolong that just must be sloved is what do we do if the day shema is different for the day after?
         
         #...first, find the slot to prolong to
-        old_booking = holly_couch[id] # move into model
+        old_booking = holly_couch[booking_id] # move into model
         booking_day_id = old_booking['booking_day_id']
         booking_day = holly_couch[booking_day_id]
         day_schema_id = booking_day['day_schema_id']

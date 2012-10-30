@@ -40,7 +40,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script>
 
 require(["dojo/dom", "dojo/query!css2", "dojo/dom-form", "dojo/dom-attr", "dojo/_base/array", "dojo/query", "dojo/cookie", "dojo/date", "dijit/Calendar", "dojo/on", "dojo/parser", "dojo/ready", "dojo/json"], function(dom, query, domForm, domAttr, array, query, cookie, date, calendar, on, parser, ready, json) {
-
+/* todo: move into its own dojo module so it doesent have to be loaded every time  */
 var jdata = {};
 
 function update_activity_group_visible_rows() {    
@@ -145,6 +145,59 @@ function navigation_calendar_clicked(x) {
   <script>
    require(["dijit/registry","dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem","dojo/query!css2", "dojo/io-query", "dojo/ready"], function(registry, Menu, MenuItem, PopupMenuItem, xq, ioQuery, ready) {
    
+   
+   function add_menu_entry_with_sid(a_menu, a_sub_menu, a_name, a_url) {
+   	a_sub_menu.addChild(new MenuItem({
+               label: a_name,
+               onClick: function(evt) {
+                   var node = a_menu.currentTarget;
+                   var sid = node.attributes["hollyrosa:slot_position_id"].value;
+                   var ioq = {
+                       'slot_position_id': sid,
+                       booking_day_id: '${booking_day.id}'
+                   };
+                        
+               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+   }
+   
+   
+   function add_menu_entry_with_bid(a_menu, a_sub_menu, a_name, a_url) {
+   	a_sub_menu.addChild(new MenuItem({
+               label: a_name,
+               onClick: function(evt) {
+                   var node = a_menu.currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       booking_id: bid,
+                       return_to_day_id: '${booking_day.id}'
+                   };
+                        
+               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+   }
+   
+   
+   function add_unschedule_menu_entry_with_bid(a_menu, a_sub_menu, a_name, a_url) {
+   	a_sub_menu.addChild(new MenuItem({
+               label: a_name,
+               onClick: function(evt) {
+                   var node = a_menu.currentTarget;
+                   var bid = node.attributes["hollyrosa:bid"].value;
+                   var ioq = {
+                       booking_id: bid,
+                       return_to_day_id: '${booking_day.id}'
+                   };
+                        
+               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+   }
+   
+   
+   
        ready(function() {
    
            var menu = new Menu({
@@ -155,6 +208,7 @@ function navigation_calendar_clicked(x) {
                }
            });
 
+/*
            menu.addChild(new MenuItem({
                label: "New booking",
                onClick: function(evt) {
@@ -168,7 +222,11 @@ function navigation_calendar_clicked(x) {
                window.location = '${tg.url('book_slot')}' + '?' + ioQuery.objectToQuery(ioq);
                }
            })); 
-           
+  */
+           add_menu_entry_with_sid(menu, menu, "New booking", '${tg.url('book_slot')}');
+           add_menu_entry_with_bid(menu, menu, "Edit booking", '${tg.url('edit_booked_booking')}');
+           add_menu_entry_with_bid(menu, menu, "View booking", '${tg.url('view_booked_booking')}');
+    /*              
            menu.addChild(new MenuItem({
                label: "Edit booking",
                onClick: function(evt) {
@@ -182,7 +240,8 @@ function navigation_calendar_clicked(x) {
                window.location = '${tg.url('edit_booked_booking')}' + '?' + ioQuery.objectToQuery(ioq);
                }
            })); 
-           
+      */ 
+      /*    
            menu.addChild(new MenuItem({
                label: "View booking",
                onClick: function(evt) {
@@ -196,7 +255,8 @@ function navigation_calendar_clicked(x) {
                window.location = '${tg.url('view_booked_booking')}' + '?' + ioQuery.objectToQuery(ioq);
                }
            })); 
-           
+        */   
+        /*
            menu.addChild(new MenuItem({
                label: "Unschedule booking",
                onClick: function(evt) {
@@ -209,10 +269,19 @@ function navigation_calendar_clicked(x) {
                window.location = '${tg.url('unschedule_booking')}' + '?' + ioQuery.objectToQuery(ioq);
                }
            })); 
+*/
+			add_unschedule_menu_entry_with_bid(menu, menu, "Unschedule booking", '${tg.url('unschedule_booking')}');
 
            /* add submenu with more entries  */
            
            var more = new Menu();
+           menu.addChild(new PopupMenuItem({
+               label: "more...",
+               popup: more
+               }));
+           
+           
+           /*
            more.addChild(new MenuItem({
                label: "Prolong",
                onClick: function(evt) {
@@ -224,7 +293,11 @@ function navigation_calendar_clicked(x) {
                window.location = '${tg.url('prolong')}' + '?' + ioQuery.objectToQuery(ioq);
                }
            })); 
+           */
+           add_menu_entry_with_bid(menu, more, "Prolong", '${tg.url('prolong')}');
+           add_menu_entry_with_bid(menu, more, "Move", '${tg.url('move_booking')}');
                       
+           /*           
            more.addChild(new MenuItem({
                label: "Move",
                onClick: function(evt) {
@@ -237,6 +310,8 @@ function navigation_calendar_clicked(x) {
                window.location = '${tg.url('move_booking')}' + '?' + ioQuery.objectToQuery(ioq);
                }
            })); 
+           */
+           
            
            more.addChild(new MenuItem({
                label: "> preliminary",
@@ -353,10 +428,7 @@ function navigation_calendar_clicked(x) {
                }
            })); 
            
-           menu.addChild(new PopupMenuItem({
-               label: "more...",
-               popup: more
-               }));
+           
        
        
        /*..........................*/
