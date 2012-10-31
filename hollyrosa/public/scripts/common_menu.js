@@ -88,6 +88,22 @@
                }
            })); 
 	}
+	
+	
+	function add_booking_op_menu_item_for_block(a_menu, a_sub_menu, a_name, a_url) {
+   	a_sub_menu.addChild(new MenuItem({
+               label: a_name,
+               onClick: function(evt) {
+                   var node = a_menu.currentTarget;
+                   var sid = node.attributes["hollyrosa:sid"].value;
+                   var ioq = {
+                       slot_id: sid,
+                       booking_day_id: node.attributes["hollyrosa:bdayid"].value
+                   };
+               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+	}
 
 /* The following fucntions can be made similar, becuae its only the dict that differs and the params read from the element */
 	function add_visiting_group_menu_item(a_menu, a_sub_menu, a_name, a_url) {
@@ -157,6 +173,7 @@
 	   add_list_bookings_redirect_menu_item:add_list_bookings_redirect_menu_item, 
 	add_change_booking_state_menu_item:add_change_booking_state_menu_item, state_change_list:state_change_list, add_booking_op_menu_item:add_booking_op_menu_item, add_visiting_group_menu_item:add_visiting_group_menu_item,
 	add_visiting_group_add_note_menu_item:add_visiting_group_add_note_menu_item, 
-	add_visiting_group_list_bookings_menu_item:add_visiting_group_list_bookings_menu_item };
+	add_visiting_group_list_bookings_menu_item:add_visiting_group_list_bookings_menu_item,
+	add_booking_op_menu_item_for_block:add_booking_op_menu_item_for_block };
 	});
 	

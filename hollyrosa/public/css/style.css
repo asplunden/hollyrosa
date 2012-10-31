@@ -815,3 +815,11 @@ ul.tag_list li {
 .booking_meta_info {
     margin-left:2em;	padding:0.2em;
 }
+
+
+.slot_booking {
+	margin-bottom: 0.5em; 
+	margin-top: 0.5em; 
+	padding-bottom:0.5em; 
+	border-bottom:1px dashed #ccc;
+}

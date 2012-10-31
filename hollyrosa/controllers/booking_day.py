@@ -529,9 +529,9 @@ class BookingDay(BaseController):
         
         
     @expose('hollyrosa.templates.edit_booked_booking')
-    @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'slot_position_id':validators.Int(not_empty=True)})
+    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may book a slot'))
-    def book_slot(self,  booking_day_id=None,  slot_position_id=None):
+    def book_slot(self,  booking_day_id=None,  slot_id=None):
         tmpl_context.form = create_edit_book_slot_form
          
         #...find booking day and booking row
@@ -551,9 +551,9 @@ class BookingDay(BaseController):
 #                    slot = tmp_slot
 #                    break
         slot_map= getSchemaSlotActivityMap(holly_couch, booking_day['day_schema_id'])
-        slot = slot_map[slot_position_id]        
+        slot = slot_map[slot_id]        
         activity = holly_couch[slot['activity_id']] 
-        booking_o = DataContainer(content='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_id=slot_position_id)
+        booking_o = DataContainer(content='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_id=slot_id)
         
         return dict(booking_day=booking_day, booking=booking_o, visiting_groups=visiting_groups, edit_this_visiting_group=0,  slot_position=slot)
         
@@ -1015,31 +1015,31 @@ class BookingDay(BaseController):
         
         
     @expose()
-    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_row_position_id':validators.UnicodeString(not_empty=True), 'level':validators.UnicodeString(not_empty=True)})
+    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True), 'level':validators.UnicodeString(not_empty=True)})
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
-    def block_slot(self, booking_day_id,  slot_row_position_id,  level = 1):
-        self.block_slot_helper(holly_couch, booking_day_id, slot_row_position_id, level=level)
-        activity_id = self.getActivityIdOfBooking(holly_couch, booking_day_id,  slot_row_position_id)
+    def block_slot(self, booking_day_id=None,  slot_id=None,  level = 1):
+        self.block_slot_helper(holly_couch, booking_day_id, slot_id, level=level)
+        activity_id = self.getActivityIdOfBooking(holly_couch, booking_day_id,  slot_id)
         raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(activity_id))
         
 
     @expose()
-    @validate(validators={'booking_day_id':validators.Int(not_empty=True), 'slot_row_position_id':validators.Int(not_empty=True)})
+    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True)})
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
-    def unblock_slot(self, booking_day_id,  slot_row_position_id):
+    def unblock_slot(self, booking_day_id=None,  slot_id=None):
         
         # todo: set state variable when it has been introduced
-        tmp_slot_states = self.getSlotStateOfBookingDayIdAndSlotId(holly_couch,  booking_day_id,  slot_row_position_id)
+        tmp_slot_states = self.getSlotStateOfBookingDayIdAndSlotId(holly_couch,  booking_day_id,  slot_id)
         for sl in tmp_slot_states:
             #print 'slot state:',sl, tmp_slot_states, sl.id
             # todo: optimize this, we shoud get the docs through the query above
             deleteme = holly_couch[sl.id]
             holly_couch.delete(deleteme)
-        #activity_id = self.getActivityIdOfBooking(booking_day_id,  slot_row_position_id)
+        #activity_id = self.getActivityIdOfBooking(booking_day_id,  slot_id)
         
         booking_day = holly_couch[booking_day_id]
         slot_map = getSchemaSlotActivityMap(holly_couch, booking_day['day_schema_id'])
-        slot = slot_map[slot_row_position_id]
+        slot = slot_map[slot_id]
         activity_id = slot['activity_id']
         remember_unblock_slot(holly_couch, slot_row_position=slot, booking_day=booking_day,  changed_by=getLoggedInUserId(request),  level=0,  activity_title=holly_couch[activity_id]['title'])
 
