@@ -144,36 +144,31 @@ function navigation_calendar_clicked(x) {
   </script>
   <script>
    require(["common_menu","dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem","dojo/query!css2", "dojo/io-query", "dojo/ready"], function(common_menu, array, Menu, MenuItem, PopupMenuItem, xq, ioQuery, ready) {
-   
-   /*
-   function add_menu_entry_with_sid(a_menu, a_sub_menu, a_name, a_url) {
-   	a_sub_menu.addChild(new MenuItem({
-               label: a_name,
-               onClick: function(evt) {
-                   var node = a_menu.currentTarget;
-                   var sid = node.attributes["hollyrosa:sid"].value;
-                   var ioq = {
-                       'slot_position_id': sid,
-                       booking_day_id: '${booking_day.id}'
-                   };
-                        
-               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
-               }
-           })); 
-   }
-   */
+ 
    
    ready(function() {
    
 		var menu = new Menu({
       	targetNodeIds: ["booking_day_overview"],
          selector: "div.slot_booking",
-         onShow: function(evt) {
-               alert('helooo');
-         }
+         onOpen: function(evt) {
+                   var node = menu.currentTarget;
+                   var locked = node.attributes["hollyrosa:lock"].value;
+               		console.log( locked );
+               		
+               	 if (locked == 'block') {
+                   	 menu_new_booking_choice.disabled=true;
+                      menu_block_slot_choice.disabled = true;
+                      menu_unblock_slot_choice.disabled = false;               	 
+               	 } else {
+                    	 menu_new_booking_choice.disabled=false;
+                      menu_block_slot_choice.disabled = false;
+                      menu_unblock_slot_choice.disabled = true;   
+               	 }
+           }
 		});
            
-      common_menu.add_booking_op_menu_item_for_block(menu, menu, "New booking", '${tg.url('book_slot')}');
+      var menu_new_booking_choice = common_menu.add_booking_op_menu_item_for_block(menu, menu, "New booking", '${tg.url('book_slot')}');
 
       common_menu.add_booking_op_menu_item(menu, menu, "View booking", '${tg.url('/booking/view_booked_booking')}');
 		common_menu.add_booking_op_menu_item(menu, menu, "Edit booking", '${tg.url('/booking/edit_booked_booking')}');
@@ -205,8 +200,8 @@ function navigation_calendar_clicked(x) {
            var slot_is_blocked = ('on' == 'slot_is_blocked_value');
            */
            
-		common_menu.add_booking_op_menu_item_for_block(menu, menu, "Block slot", '${tg.url('block_slot')}');
-      common_menu.add_booking_op_menu_item_for_block(menu, menu, "Unblock slot", '${tg.url('unblock_slot')}');
+		var menu_block_slot_choice = common_menu.add_booking_op_menu_item_for_block(menu, menu, "Block slot", '${tg.url('block_slot')}');
+      var menu_unblock_slot_choice = common_menu.add_booking_op_menu_item_for_block(menu, menu, "Unblock slot", '${tg.url('unblock_slot')}');
            
        
        /*..........................*/
