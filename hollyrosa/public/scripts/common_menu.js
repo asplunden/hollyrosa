@@ -91,8 +91,9 @@
 	
 	
 	function add_booking_op_menu_item_for_block(a_menu, a_sub_menu, a_name, a_url) {
-   	a_sub_menu.addChild(new MenuItem({
+   	var menu_item =new MenuItem({
                label: a_name,
+               onOpen: function(evt) { console.log(evt); },
                onClick: function(evt) {
                    var node = a_menu.currentTarget;
                    var sid = node.attributes["hollyrosa:sid"].value;
@@ -100,9 +101,13 @@
                        slot_id: sid,
                        booking_day_id: node.attributes["hollyrosa:bdayid"].value
                    };
+               console.log(a_url + '?' + ioQuery.objectToQuery(ioq));
                window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
                }
-           })); 
+           });
+           
+        a_sub_menu.addChild(menu_item);
+    	return menu_item; 
 	}
 
 /* The following fucntions can be made similar, becuae its only the dict that differs and the params read from the element */
@@ -143,6 +148,7 @@
                    var ioq = {
                        name: vgname
                    };
+                   
                window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
                }
            })); 

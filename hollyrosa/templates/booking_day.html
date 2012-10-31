@@ -207,98 +207,33 @@ function navigation_calendar_clicked(x) {
            
 		common_menu.add_booking_op_menu_item_for_block(menu, menu, "Block slot", '${tg.url('block_slot')}');
       common_menu.add_booking_op_menu_item_for_block(menu, menu, "Unblock slot", '${tg.url('unblock_slot')}');
-            
-            /*
-           menu.addChild(new MenuItem({
-               label: "Block slot",
-               disabled: false, 
-               onClick: function(evt) {
-                   var node = this.getParent().currentTarget;
-                   var sid = node.attributes["hollyrosa:slot_position_id"].value;
-                   var ioq = {
-                       slot_row_position_id: sid,
-                       booking_day_id: '${booking_day.id}'
-                   };    
-               window.location = '${tg.url('block_slot')}' + '?' + ioQuery.objectToQuery(ioq);
-               },
-               onShow: function(evt) {
-                   var node = this.getParent().currentTarget;
-                   alert(node);
-               }
-           })); 
            
-           
-           menu.addChild(new MenuItem({
-               label: "Unblock slot",
-               disabled: false, 
-               onClick: function(evt) {
-                   var node = this.getParent().currentTarget;
-                   var sid = node.attributes["hollyrosa:slot_position_id"].value;
-                   var ioq = {
-                       slot_row_position_id: sid,
-                       booking_day_id: '${booking_day.id}'
-                   };    
-                   window.location = '${tg.url('unblock_slot')}' + '?' + ioQuery.objectToQuery(ioq);
-               }
-           })); 
-           */
-           
-       
        
        /*..........................*/
       
            var book_menu = new Menu({
                targetNodeIds: ["booking_day_overview"],
-               selector: "div.slot_empty"
+               selector: "div.slot_empty",
+               onOpen: function(evt) {
+                   var node = book_menu.currentTarget;
+                   var locked = node.attributes["hollyrosa:lock"].value;
+               		console.log( locked );
+               		
+               	 if (locked == 'block') {
+                       book_menu_new_booking_choice.disabled=true;
+                       book_menu_block_slot_choice.disabled = true;
+                       book_menu_unblock_slot_choice.disabled = false;               	 
+               	 } else {
+                    	 book_menu_new_booking_choice.disabled=false;
+                       book_menu_block_slot_choice.disabled = false;
+                       book_menu_unblock_slot_choice.disabled = true;   
+               	 }
+              }
            });
            
-           common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "New booking", '${tg.url('book_slot')}');
-           common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "Block slot", '${tg.url('block_slot')}');
-		      common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "Unblock slot", '${tg.url('unblock_slot')}');
-      
-/*
-           book_menu.addChild(new MenuItem({
-               label: "New booking",
-               onClick: function(evt) {
-                   var node = this.getParent().currentTarget;
-                   var sid = node.attributes["hollyrosa:slot_position_id"].value;
-                   var ioq = {
-                       slot_position_id: sid,
-                       booking_day_id: '${booking_day.id}'
-                   };    
-               window.location = '${tg.url('book_slot')}' + '?' + ioQuery.objectToQuery(ioq);
-               }
-           })); 
-           
-           book_menu.addChild(new MenuItem({
-               label: "Block slot",
-               disabled: false,
-               onClick: function(evt) {
-                   var node = this.getParent().currentTarget;
-                   var sid = node.attributes["hollyrosa:slot_position_id"].value;
-                   var ioq = {
-                       slot_row_position_id: sid,
-                       booking_day_id: '${booking_day.id}'
-                   };    
-               window.location = '${tg.url('block_slot')}' + '?' + ioQuery.objectToQuery(ioq);
-               }
-           })); 
-           
-           book_menu.addChild(new MenuItem({
-               label: "Unblock slot",
-               disabled: false, // in the future we need a way to set this as the menu are about to be displayed, everytime. 
-               onClick: function(evt) {
-                   var node = this.getParent().currentTarget;
-                   var sid = node.attributes["hollyrosa:slot_position_id"].value;
-                   var ioq = {
-                       slot_row_position_id: sid,
-                       booking_day_id: '${booking_day.id}'
-                   };    
-               window.location = '${tg.url('unblock_slot')}' + '?' + ioQuery.objectToQuery(ioq);
-               }
-           }));
-           
-           */
+           var book_menu_new_booking_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "New booking", '${tg.url('book_slot')}');
+           var book_menu_block_slot_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "Block slot", '${tg.url('block_slot')}');
+		     var book_menu_unblock_slot_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "Unblock slot", '${tg.url('unblock_slot')}');
            
             
        }); /* end ready */
@@ -387,14 +322,6 @@ function navigation_calendar_clicked(x) {
                 </div>
             </div>
             <div py:if="not bookings.has_key(slot_position.id)" class="slot_empty" hollyrosa:bdayid="${booking_day.id}" hollyrosa:lock="${['off','block'][blockings_map.has_key(slot_position.id)]}" hollyrosa:sid="${slot_position.id}">&nbsp;</div>
-            
-            <!-- <div py:if="blockings_map.has_key(slot_position.id)"></div>
-            
-             <ul id="minimenu_${slot_position.id}" class="context_inline_menu any_menu">
-                <li><a  py:if="not blockings_map.has_key(slot_position.id)" href="${tg.url('book_slot', booking_day_id=booking_day.id, slot_position_id=slot_position.id)}">book</a></li>
-                <li><a py:if="not blockings_map.has_key(slot_position.id)" href="${tg.url('block_slot', booking_day_id=booking_day.id, slot_row_position_id=slot_position.id)}">block slot</a></li>
-                <li><a py:if="blockings_map.has_key(slot_position.id)" href="${tg.url('unblock_slot', booking_day_id=booking_day.id, slot_row_position_id=slot_position.id)}">unblock slot</a></li>
-            </ul> -->
             
         </div>
     </div> 
