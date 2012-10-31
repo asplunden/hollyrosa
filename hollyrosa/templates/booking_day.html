@@ -230,6 +230,33 @@ function navigation_calendar_clicked(x) {
            var book_menu_block_slot_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "Block slot", '${tg.url('block_slot')}');
 		     var book_menu_unblock_slot_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "Unblock slot", '${tg.url('unblock_slot')}');
            
+           
+           
+           /******************* unschedule menu ********************/
+           var unschedule_menu = new Menu({
+               targetNodeIds: ["unscheduled_bookings"],
+               selector: "li.unscheduled_booking"
+               //onOpen: function(evt) {
+                 //  var node = book_menu.currentTarget;
+                   //var locked = node.attributes["hollyrosa:lock"].value;
+               	//	console.log( locked );
+               		
+               	// if (locked == 'block') {
+                   //    book_menu_new_booking_choice.disabled=true;
+                    //   book_menu_block_slot_choice.disabled = true;
+                     //  book_menu_unblock_slot_choice.disabled = false;               	 
+               	 //} else {
+                   // 	 book_menu_new_booking_choice.disabled=false;
+                   //    book_menu_block_slot_choice.disabled = false;
+                    //   book_menu_unblock_slot_choice.disabled = true;   
+               	// }
+              });
+              
+          	 common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "View booking", '${tg.url('/booking/view_booked_booking')}');
+		    	 common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Edit booking", '${tg.url('/booking/edit_booking')}');
+             common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Delete", '${tg.url('delete_booking')}'); 
+              
+           
             
        }); /* end ready */
                  
@@ -271,22 +298,24 @@ function navigation_calendar_clicked(x) {
 
   
     <h3>Unscheduled bookings</h3>
+    <!--    
     <ul class="any_menu">
         <li><a href="${tg.url('edit_booking', params={'booking_day_id':booking_day.id})}">new booking request</a></li>
     </ul>
+    -->
     
-    
-    <ul>
-        <li py:for="booking in unscheduled_bookings" hollyrosa:acgid="${booking.activity_group_id}" class="unscheduled_booking">${booking.activity_title} <span class="group_info">${booking.visiting_group_name}</span>  ${getRenderContent(booking)}, <span class="requested_date">requested date ${booking.requested_date}</span> <span class="date_info">  [${booking.valid_from}  - ${booking.valid_to}]</span> 
-        <ul class="any_menu context_inline_menu">
+    <ul id="unscheduled_bookings">
+        <li py:for="booking in unscheduled_bookings" hollyrosa:acgid="${booking.activity_group_id}" class="unscheduled_booking" hollyrosa:bid="${booking.id}" hollyrosa:bdayid="${booking_day.id}"  >${booking.activity_title} 
+        <span class="group_info">${booking.visiting_group_name}</span>  ${getRenderContent(booking)}, <span class="requested_date">requested date ${booking.requested_date}</span> <span class="date_info">  [${booking.valid_from}  - ${booking.valid_to}]</span> 
+        <!-- <ul class="any_menu context_inline_menu">
             <li><a href="${tg.url('edit_booking', params={'booking_day_id':booking_day.id, 'id':booking.id})}">edit</a></li>
             <li><a href="${tg.url('view_booked_booking', params={'return_to_day_id':booking_day.id, 'id':booking.id})}">view</a></li>
            <li><a href="${tg.url('delete_booking', params={'booking_day_id':booking_day.id, 'booking_id':booking.id})}">delete</a></li>
-            
-            
+            -->
+            <ul>
             <li py:for="tt in [t for t in activity_slot_position_map.get(booking.activity_id,[])[1:]  if not blockings_map.has_key(t['slot_id'])]">
-        <a href="${tg.url('schedule_booking', params={'booking_id':booking.id, 'booking_day_id':booking_day.id, 'slot_row_position_id':tt.slot_id})}">[${tt.time_from} - ${tt.time_to}]</a></li>
-    </ul> 
+        			<a href="${tg.url('schedule_booking', params={'booking_id':booking.id, 'booking_day_id':booking_day.id, 'slot_row_position_id':tt.slot_id})}">[${tt.time_from} - ${tt.time_to}]</a></li>
+    			</ul>
     </li></ul>
     
     <h3>Scheduled bookings and daily overview</h3>

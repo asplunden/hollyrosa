@@ -749,16 +749,16 @@ class BookingDay(BaseController):
      
         
     @expose('hollyrosa.templates.request_new_booking')
-    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'booking_id':validators.UnicodeString(not_empty=False), 'visiting_group_id':validators.UnicodeString(not_empty=False)})
+    @validate(validators={'return_to_day_id':validators.UnicodeString(not_empty=False), 'booking_id':validators.UnicodeString(not_empty=True), 'visiting_group_id':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change a booking'))
-    def edit_booking(self,  booking_day_id=None,  booking_id=None, visiting_group_id='', **kw):
+    def edit_booking(self,  return_to_day_id=None,  booking_id=None, visiting_group_id='', **kw):
         tmpl_context.form = create_edit_new_booking_request_form
         
         activities = [(a.doc['_id'],  a.doc['title'] ) for a in getAllActivities(holly_couch)]
-        if booking_day_id == None: 
+        if return_to_day_id == None: 
             visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in getAllVisitingGroups(holly_couch)]
         else:
-            booking_day_o = holly_couch[booking_day_id]
+            booking_day_o = holly_couch[return_to_day_id]
             visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in getVisitingGroupsAtDate(holly_couch, booking_day_o['date'])]
             
         tmp_visiting_group = holly_couch[visiting_group_id]
@@ -767,17 +767,17 @@ class BookingDay(BaseController):
         #...patch since this is the way we will be called if validator for new will fail
         if (visiting_group_id != '') and (visiting_group_id != None):
             booking_o = DataContainer(id='', content='', visiting_group_id = visiting_group_id, visiting_group_name=tmp_visiting_group['name'])
-        elif id=='' or id==None:
+        elif booking_id=='' or booking_id==None:
             booking_o = DataContainer(id='', content='')
         else:
-            b = holly_couch[id]
-            booking_o = DataContainer(id=b['_id'], content=b['content'], visiting_group_id=b['visiting_group_id'], valid_from=b['valid_from'], valid_to=b['valid_to'], requested_date=b['requested_date'], activity_id=b['activity_id'], visiting_group_name=b['visiting_group_name']) #holly_couch[id] 
+            b = holly_couch[booking_id]
+            booking_o = DataContainer(id=b['_id'], content=b['content'], visiting_group_id=b['visiting_group_id'], valid_from=b['valid_from'], valid_to=b['valid_to'], requested_date=b['requested_date'], activity_id=b['activity_id'], visiting_group_name=b['visiting_group_name'])  
     
         # TODO: We still need to add some reasonable sorting on the activities abd the visiting groups
         
-        if booking_day_id != None and booking_day_id != '':
+        if return_to_day_id != None and return_to_day_id != '':
             booking_o.requested_date = booking_day_o['date']
-        booking_o.return_to_day_id = booking_day_id
+        booking_o.return_to_day_id = return_to_day_id
         return dict(visiting_groups=visiting_groups,  activities=activities, booking=booking_o)
         
         
