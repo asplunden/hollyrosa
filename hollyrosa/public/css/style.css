@@ -371,7 +371,6 @@ div.booking_day_overview_activity {
     padding:0em;
     top: 0%;
     border-right: 1px solid #ccc;
-    
 }
 
 td.td_booking_day_overview_activity {
@@ -390,6 +389,7 @@ div.booking_day_overview_slots {
     padding: 0.1em;
     top:0px;
     border-right: 1px solid #ccc;
+    // text-shadow: 2px 2px 2px #ccc;
 }
 
 td.td_booking_day_overview_slots {

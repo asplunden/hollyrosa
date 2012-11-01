@@ -17,11 +17,13 @@
  * along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
  **/
  
- define(["dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query"], function(Menu, MenuItem, query, ioQuery) {
+ define(["dijit/Menu","dijit/MenuItem","dijit/MenuSeparator", "dojo/query!css2", "dojo/io-query"], function(Menu, MenuItem, MenuSeparator, query, ioQuery) {
 		
-		//var node = a_menu.currentTarget;
-      //var vgid = node.attributes["hollyrosa:bid"].value;
-            
+    function add_menu_separator(menu) {
+    	menu.addChild(new MenuSeparator());
+    }
+    
+                
 	function add_redirect_menu_item(a_menu, a_sub_menu, a_name, a_params, a_url) {
       a_sub_menu.addChild(new MenuItem({
       	label: a_name,
@@ -180,6 +182,7 @@
 	add_change_booking_state_menu_item:add_change_booking_state_menu_item, state_change_list:state_change_list, add_booking_op_menu_item:add_booking_op_menu_item, add_visiting_group_menu_item:add_visiting_group_menu_item,
 	add_visiting_group_add_note_menu_item:add_visiting_group_add_note_menu_item, 
 	add_visiting_group_list_bookings_menu_item:add_visiting_group_list_bookings_menu_item,
-	add_booking_op_menu_item_for_block:add_booking_op_menu_item_for_block };
+	add_booking_op_menu_item_for_block:add_booking_op_menu_item_for_block,
+	add_menu_separator:add_menu_separator };
 	});
 	

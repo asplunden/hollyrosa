@@ -56,15 +56,22 @@ ready(function() {
    //var vgid = node.attributes["hollyrosa:bid"].value;
   	
    var menu = new Menu({
-       targetNodeIds: ["visiting_group_menu"],
+       targetNodeIds: ["visiting_group_menu", "note"],
        leftClickToOpen: false
        });
-    
-	common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit visiting group", '${visiting_group['id']}', '${tg.url('edit_visiting_group')}');
-   common_menu.add_list_bookings_redirect_menu_item(menu, menu, "List bookings", '${visiting_group['name']}', '${tg.url('/visiting_group/view_bookings_of_name')}');
-   common_menu.add_note_redirect_menu_item(menu, menu, "Add note", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history", '${visiting_group['id']}', '${tg.url('/history/show')}');
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request", '${visiting_group['id']}', '${tg.url('/booking/edit_booking')}');
+   
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request...", '${visiting_group['id']}', '${tg.url('/booking/edit_booking')}'); 
+   common_menu.add_menu_separator(menu);   
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit...", '${visiting_group['id']}', '${tg.url('edit_visiting_group')}');
+   common_menu.add_note_redirect_menu_item(menu, menu, "Add note...", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
+   common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
+   common_menu.add_menu_separator(menu);
+   common_menu.add_note_redirect_menu_item(menu, menu, "Change vodb status---", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
+   common_menu.add_note_redirect_menu_item(menu, menu, "Change program status---", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
+   common_menu.add_menu_separator(menu);
+   common_menu.add_list_bookings_redirect_menu_item(menu, menu, "List bookings of group...", '${visiting_group['name']}', '${tg.url('/visiting_group/view_bookings_of_name')}');
+   common_menu.add_menu_separator(menu);   
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history...", '${visiting_group['id']}', '${tg.url('/history/show')}');
       
    //...attach the add tag handler
 	var the_add_tag_href_elem = dom.byId('add_tag_href2');
@@ -81,18 +88,11 @@ ready(function() {
 </head>
 
 <body class="tundra">
-    <h2 id="visiting_group_menu">${visiting_group.name}</h2>
-    
-<!-- <ul class="any_menu context_inline_menu ">
-       <li><a href="${tg.url('delete_visiting_group', params={'id':visiting_group.id})}">delete</a></li>
-    </ul>
-   -->
-    
+    <h2 id="visiting_group_menu">${visiting_group.name}</h2> 
     <p>${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
     
 
-
-    <div class="note"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
+    <div class="note" id="note"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
 <a id="add_tag_href2" href="javascript:;">Add Tags</a>
 </form></div>
     <p>bok.nr: <b>${visiting_group.boknr}</b><br/>
