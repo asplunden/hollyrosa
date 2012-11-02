@@ -43,35 +43,16 @@ require(["dojo/dom", "dojo/query!css2", "dojo/dom-form", "dojo/dom-attr", "dojo/
 /* todo: move into its own dojo module so it doesent have to be loaded every time  */
 var jdata = {};
 
-function update_activity_group_visible_rows() {    
-    var odata = domForm.toObject('bday_hide_form');
-    var show_these_activity_group_ids = Object();
-    for (var param_name in odata) {
-        param_value = odata[param_name];
-        show_these_activity_group_ids[param_value] = 1;
-    }
-    
-    //...we now have a list of agc ids to show, all other should be hidden
-    var elems = query("[hollyrosa:acgid]");
-    array.forEach(elems, function(elem) {
-        var agc_val = domAttr.get(elem, 'hollyrosa:acgid');
-        if (show_these_activity_group_ids[agc_val]) {
-            dojo.style(elem, {display: 'block'});
-        }
-        else {
-            dojo.style(elem, {display: 'none'});
-        }
-    });
- }
  
-
+/*
 function save_visible_ag() {
     var cdata = domForm.toJson('bday_hide_form');
     cookie('visible_ag', cdata, {expires:5});
     update_activity_group_visible_rows();
 }
+ */
  
-
+/*
 function set_visible_ag_checkboxes(g) {
     var checkbox_element_value = domAttr.get(g, 'value');
     var checkbox_element_id = "show_activity_group_checkbox_" + checkbox_element_value;
@@ -94,7 +75,8 @@ function recall_visible_ag() {
       try
       {
       	jdata = json.parse(cdata);
-      }
+      }    var cdata = cookie('visible_ag');
+
       catch(SyntaxError)
       {
 			jdata = {};      
@@ -104,8 +86,8 @@ function recall_visible_ag() {
       array.forEach(visible_ag_checkboxes, set_visible_ag_checkboxes );  
     }
 }
-
- 
+*/
+ /*
 function set_save_visible_handlers() {
     array.forEach(
        query('[hollyrosa:show_ag]'), 
@@ -114,12 +96,12 @@ function set_save_visible_handlers() {
        }
     )
 }
-
+*/
 
 ready(function() {
-    recall_visible_ag();
+    /*recall_visible_ag();
     set_save_visible_handlers();
-    
+    */
     var e = dom.byId('navigation_calendar'); 
     domAttr.set(e, 'dojoType', 'dijit.Calendar'); 
     domAttr.set(e, 'onChange', 'navigation_calendar_clicked'); 
@@ -238,20 +220,6 @@ function navigation_calendar_clicked(x) {
            var unschedule_menu = new Menu({
                targetNodeIds: ["unscheduled_bookings"],
                selector: "li.unscheduled_booking"
-               //onOpen: function(evt) {
-                 //  var node = book_menu.currentTarget;
-                   //var locked = node.attributes["hollyrosa:lock"].value;
-               	//	console.log( locked );
-               		
-               	// if (locked == 'block') {
-                   //    book_menu_new_booking_choice.disabled=true;
-                    //   book_menu_block_slot_choice.disabled = true;
-                     //  book_menu_unblock_slot_choice.disabled = false;               	 
-               	 //} else {
-                   // 	 book_menu_new_booking_choice.disabled=false;
-                   //    book_menu_block_slot_choice.disabled = false;
-                    //   book_menu_unblock_slot_choice.disabled = true;   
-               	// }
               });
               
           	 common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "View...", '${tg.url('/booking/view_booked_booking')}');
@@ -260,7 +228,6 @@ function navigation_calendar_clicked(x) {
              common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Delete...", '${tg.url('delete_booking')}'); 
              
              
-              unschedule_menu.addChild(new CheckedMenuItem({label:"AG Trapper", checked:true}));
        
              
               
@@ -269,7 +236,23 @@ function navigation_calendar_clicked(x) {
                 label: "Schedule...",
         	       popup: schedule_more_menu
              }));
-            
+           
+         var agroups = ${"[" + ','.join( ['["'+a.id + '", "' + a.title +'"]' for a in activity_groups]   )   + "]"};           
+         
+  			var ag_status = common_menu.load_ag_checkbox_status();         
+           
+       	var view_ag_menu = new Menu({
+               targetNodeIds: ["view_ag_menu"],
+               });
+               
+         
+         array.forEach(agroups, function(a) {
+				common_menu.add_ag_checkbox_menu_item(view_ag_menu, a[1], a[0], ag_status);	         
+         });
+         
+         common_menu.update_activity_group_visible_rows(ag_status);
+         
+                   
        }); /* end ready */
                  
 }); /* end require */
@@ -285,6 +268,7 @@ function navigation_calendar_clicked(x) {
             <div dojoType="dijit.Calendar" id="navigation_calendar" value="${booking_day.date}">Calendar widget if dijit works</div>
         </li>
         <li>
+        <!-- 
         <form id="bday_hide_form" name="bday_hide_form" method="get" class="bday_hide_form">
         <fieldset>
             <legend>view activity groups</legend>
@@ -293,14 +277,13 @@ function navigation_calendar_clicked(x) {
             </ul>
             </fieldset>    
         </form>
-        </li>
+        </li>-->
+        
+        
         </ul>
     </div>
-    
-    
-
-    <!--<h2>${booking_day.date.strftime("%A %d %B %Y")}</h2>-->
-    <h2>${booking_day.date}</h2>
+   
+    <h2 id="view_ag_menu">${reFormatDate(booking_day.date)}</h2>
 
     <div class="note"><h2>${booking_day.get('title','')}</h2>
     <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day.events">$e</li></ul>${HTML(booking_day.note)}
@@ -311,7 +294,7 @@ function navigation_calendar_clicked(x) {
   
     <h3>Unscheduled bookings</h3>
     <!--    
-    <ul class="any_menu">
+    <ul>
         <li><a href="${tg.url('edit_booking', params={'booking_day_id':booking_day.id})}">new booking request</a></li>
     </ul>
     -->

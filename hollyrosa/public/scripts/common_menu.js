@@ -17,7 +17,7 @@
  * along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
  **/
  
- define(["dijit/Menu","dijit/MenuItem","dijit/MenuSeparator", "dojo/query!css2", "dojo/io-query"], function(Menu, MenuItem, MenuSeparator, query, ioQuery) {
+ define(["dojo/dom-attr", "dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/CheckedMenuItem", "dijit/MenuSeparator", "dojo/query", "dojo/io-query", "dojo/json", "dojo/cookie"], function(domAttr, array, Menu, MenuItem, CheckedMenuItem, MenuSeparator, query, ioQuery, json, cookie) {
 		
     function add_menu_separator(menu) {
     	menu.addChild(new MenuSeparator());
@@ -177,7 +177,73 @@
 	
 	
 
-       
+   function load_ag_checkbox_status(){
+   		var cdata = cookie('visible_ag');
+   		var jdata;
+   		
+   		if (cdata == undefined) {
+      		jdata = {};
+    	} else {
+      		try {
+      			console.log('parsing json');
+      			jdata = json.parse(cdata);
+      		}  
+      		catch(SyntaxError) {
+				jdata = {};      
+      		}
+		}
+		console.log('jdata='+jdata);
+		return jdata; 
+   	} 
+   		
+   		
+	function save_ag_checkbox_status(a_checkbox_status) {
+		cookie('visible_ag', json.stringify(a_checkbox_status), {expires:5});		
+		}
+		
+
+	function update_activity_group_visible_rows(a_ag_status) {    
+    //var odata = domForm.toObject('bday_hide_form');
+    //var show_these_activity_group_ids = Object();
+    //for (var param_name in odata) {
+    //    param_value = odata[param_name];
+    //    show_these_activity_group_ids[param_value] = 1;
+    //}
+    
+    //...we now have a list of agc ids to show, all other should be hidden
+    var elems = query("[hollyrosa:acgid]");
+    array.forEach(elems, function(elem) {
+        var agc_val = domAttr.get(elem, 'hollyrosa:acgid');
+        if (a_ag_status[agc_val]) {
+            dojo.style(elem, {display: 'block'});
+        }
+        else {
+            dojo.style(elem, {display: 'none'});
+        }
+    });
+ }
+	
+	
+	function add_ag_checkbox_menu_item(a_menu, a_name, a_id, a_ag_status) {
+		var l_is_checked = false;
+		if (a_id in a_ag_status) {
+			console.log('found key');
+			l_is_checked = a_ag_status[a_id];
+			}
+			
+		console.log(a_id + ' is checked: ' + l_is_checked);
+   		a_menu.addChild(new CheckedMenuItem({
+               label: a_name,
+               checked:  l_is_checked,
+               onChange: function(selected) {
+					//...create new ag_status. well, map ag id to true/false
+					
+					a_ag_status[a_id] = selected;
+					save_ag_checkbox_status(a_ag_status);
+            		update_activity_group_visible_rows(a_ag_status);
+               }}
+           ))} 
+	
        
        
 
@@ -197,11 +263,15 @@
 	   add_vgid_redirect_menu_item:add_vgid_redirect_menu_item, 
 	   add_note_redirect_menu_item:add_note_redirect_menu_item, 
 	   add_list_bookings_redirect_menu_item:add_list_bookings_redirect_menu_item, 
-	add_change_booking_state_menu_item:add_change_booking_state_menu_item, state_change_list:state_change_list, add_booking_op_menu_item:add_booking_op_menu_item, add_visiting_group_menu_item:add_visiting_group_menu_item,
-	add_visiting_group_add_note_menu_item:add_visiting_group_add_note_menu_item, 
-	add_visiting_group_list_bookings_menu_item:add_visiting_group_list_bookings_menu_item,
-	add_booking_op_menu_item_for_block:add_booking_op_menu_item_for_block,
-	add_menu_separator:add_menu_separator,
-	add_visiting_group_edit_note_menu_item:add_visiting_group_edit_note_menu_item };
+		add_change_booking_state_menu_item:add_change_booking_state_menu_item, state_change_list:state_change_list, 
+		add_booking_op_menu_item:add_booking_op_menu_item, add_visiting_group_menu_item:add_visiting_group_menu_item,
+		add_visiting_group_add_note_menu_item:add_visiting_group_add_note_menu_item, 
+		add_visiting_group_list_bookings_menu_item:add_visiting_group_list_bookings_menu_item,
+		add_booking_op_menu_item_for_block:add_booking_op_menu_item_for_block,
+		add_menu_separator:add_menu_separator,
+		add_visiting_group_edit_note_menu_item:add_visiting_group_edit_note_menu_item,
+		add_ag_checkbox_menu_item:add_ag_checkbox_menu_item, 
+		load_ag_checkbox_status:load_ag_checkbox_status,
+		update_activity_group_visible_rows:update_activity_group_visible_rows  };
 	});
 	
