@@ -185,31 +185,22 @@
       		jdata = {};
     	} else {
       		try {
-      			console.log('parsing json');
       			jdata = json.parse(cdata);
       		}  
       		catch(SyntaxError) {
 				jdata = {};      
       		}
 		}
-		console.log('jdata='+jdata);
 		return jdata; 
-   	} 
+   } 
    		
    		
 	function save_ag_checkbox_status(a_checkbox_status) {
 		cookie('visible_ag', json.stringify(a_checkbox_status), {expires:5});		
-		}
+	}
 		
 
 	function update_activity_group_visible_rows(a_ag_status) {    
-    //var odata = domForm.toObject('bday_hide_form');
-    //var show_these_activity_group_ids = Object();
-    //for (var param_name in odata) {
-    //    param_value = odata[param_name];
-    //    show_these_activity_group_ids[param_value] = 1;
-    //}
-    
     //...we now have a list of agc ids to show, all other should be hidden
     var elems = query("[hollyrosa:acgid]");
     array.forEach(elems, function(elem) {
@@ -227,11 +218,8 @@
 	function add_ag_checkbox_menu_item(a_menu, a_name, a_id, a_ag_status) {
 		var l_is_checked = false;
 		if (a_id in a_ag_status) {
-			console.log('found key');
 			l_is_checked = a_ag_status[a_id];
 			}
-			
-		console.log(a_id + ' is checked: ' + l_is_checked);
    		a_menu.addChild(new CheckedMenuItem({
                label: a_name,
                checked:  l_is_checked,
@@ -254,8 +242,8 @@
         	{name:"> Stand-by", state:5},
         	{name:"> Booked", state:10}, 
         	{name:"> Approve", state:20}, 
-        	{name:"> Drop-in", state:30}, 
-        	{name:"Delete booking", state:-100}
+        	{name:"> Drop-in", state:30} //, 
+//        	{name:"Delete booking", state:-100}
     ];
 	
 	return {
