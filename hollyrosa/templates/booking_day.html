@@ -143,7 +143,7 @@ function navigation_calendar_clicked(x) {
     
   </script>
   <script>
-   require(["common_menu","dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem","dojo/query!css2", "dojo/io-query", "dojo/ready"], function(common_menu, array, Menu, MenuItem, PopupMenuItem, xq, ioQuery, ready) {
+   require(["common_menu","dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dijit/CheckedMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/ready"], function(common_menu, array, Menu, MenuItem, PopupMenuItem, CheckedMenuItem, xq, ioQuery, ready) {
  
    
    ready(function() {
@@ -258,6 +258,11 @@ function navigation_calendar_clicked(x) {
           	 common_menu.add_visiting_group_list_bookings_menu_item(unschedule_menu, unschedule_menu, "List bookings of group", '${tg.url('/visiting_group/view_bookings_of_name')}');
 		    	 common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Edit...", '${tg.url('/booking/edit_booking')}');
              common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Delete...", '${tg.url('delete_booking')}'); 
+             
+             
+              unschedule_menu.addChild(new CheckedMenuItem({label:"AG Trapper", checked:true}));
+       
+             
               
              var schedule_more_menu = new Menu();
     	          unschedule_menu.addChild(new PopupMenuItem({

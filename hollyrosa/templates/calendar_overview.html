@@ -38,7 +38,7 @@ def makeDate(s):
 
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
-   require(["dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query"], function(registry, Menu, MenuItem, xq, ioQuery) {
+   require(["dijit/registry","common_menu","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query"], function(registry, common_menu, Menu, MenuItem, xq, ioQuery) {
    var menu = new Menu({
        targetNodeIds: ["calendar_listing"],
        selector: "tr.calendar_overview",
@@ -56,7 +56,7 @@ def makeDate(s):
            window.location = '${tg.url('/booking/day')}' + '?' + ioQuery.objectToQuery(ioq);
            }
        }));
-       
+   common_menu.add_menu_separator(menu);
    menu.addChild(new MenuItem({
        label: "Visiting groups this day",
        onClick: function(evt) {
@@ -68,7 +68,8 @@ def makeDate(s):
            window.location = '${tg.url('/visiting_group/view_at_date')}' + '?' + ioQuery.objectToQuery(ioq);
            }
        }));
-       
+   
+   common_menu.add_menu_separator(menu);    
        
    menu.addChild(new MenuItem({
        label: "Fladan schema",

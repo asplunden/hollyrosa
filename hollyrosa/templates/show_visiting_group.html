@@ -20,7 +20,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
 
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:hollyrosa="http://asplunden.org/guldkant/hollyrosa" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <xi:include href="master.html" />
 
@@ -51,10 +51,7 @@ ready(function() {
 	//...load all tags for visiting group
 	tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group._id}");
 
-   //...setup main menu for visiting group
-   //var node = a_menu.currentTarget;
-   //var vgid = node.attributes["hollyrosa:bid"].value;
-  	
+   //...setup main menu for visiting group  	
    var menu = new Menu({
        targetNodeIds: ["visiting_group_menu", "note"],
        leftClickToOpen: false
@@ -80,6 +77,18 @@ ready(function() {
 	//...link delete tag handler to any element with class .tag in document.
 	on(win.doc, '.tag:click', deleteTagHelper);
 	});
+	
+	//...create menu for add/edit/show/delete note
+	var note_menu = new Menu({
+       targetNodeIds: ["content"],
+       selector: "div.note2",
+       leftClickToOpen: false
+       });
+       
+    common_menu.add_note_redirect_menu_item(note_menu, note_menu, "Add note...", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
+    common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Edit note...",  '${tg.url('/note/edit_note')}');
+    common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Delete note...", '${tg.url('/note/delete_note')}');
+  
   });
   </script>
   
@@ -100,12 +109,14 @@ ready(function() {
     camping location: <b>${visiting_group.camping_location}</b></p>${HTML(visiting_group.info)}</div>
     <div py:for="n in notes" >
             
-        <div class="note2"><i>${n.timestamp} ${n.last_changed_by}</i><br/>
-        <ul class="any_menu context_inline_menu ">
+        <div class="note2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i>${n.timestamp} ${n.last_changed_by}</i><br/><br/>
+        
+        <!-- <ul class="any_menu context_inline_menu ">
            <li><a href="${tg.url('/note/edit_note', params={'_id':n._id})}">edit</a></li>
            <li><a href="${tg.url('/note/add_note', params={'target_id':visiting_group._id})}">add note</a></li>
            <li><a href="${tg.url('/note/delete_note', params={'_id':n._id})}">delete</a></li>
-        </ul>${HTML(n.text)}</div>
+        </ul>--> 
+        ${HTML(n.text)}</div>
                 
     </div>
     

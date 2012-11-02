@@ -141,6 +141,24 @@
            })); 
 	}
 	
+	
+	function add_visiting_group_edit_note_menu_item(a_menu, a_sub_menu, a_name, a_url) {
+   	a_sub_menu.addChild(new MenuItem({
+               label: a_name,
+               onClick: function(evt) {
+                   var node = a_menu.currentTarget;
+                   var vgid = node.attributes["hollyrosa:vgid"].value;
+                   var nid = node.attributes["hollyrosa:nid"].value;
+                   var ioq = {
+                       visiting_group_id: vgid,
+                       note_id: nid
+                   };
+               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+	}
+	
+	
 	function add_visiting_group_list_bookings_menu_item(a_menu, a_sub_menu, a_name, a_url) {
    	a_sub_menu.addChild(new MenuItem({
                label: a_name,
@@ -183,6 +201,7 @@
 	add_visiting_group_add_note_menu_item:add_visiting_group_add_note_menu_item, 
 	add_visiting_group_list_bookings_menu_item:add_visiting_group_list_bookings_menu_item,
 	add_booking_op_menu_item_for_block:add_booking_op_menu_item_for_block,
-	add_menu_separator:add_menu_separator };
+	add_menu_separator:add_menu_separator,
+	add_visiting_group_edit_note_menu_item:add_visiting_group_edit_note_menu_item };
 	});
 	

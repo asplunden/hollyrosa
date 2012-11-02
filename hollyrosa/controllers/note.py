@@ -52,12 +52,12 @@ class Note(BaseController):
         
    
     @expose('hollyrosa.templates.edit_note')    
-    def edit_note(self, _id):
+    def edit_note(self, note_id=None, visiting_group_id=None):
         tmpl_context.form = create_edit_note_form
-        if _id == '':
+        if note_id == '':
             note_o = DataContainer(text='', target_id=target_id, _id='')
         else:
-            note_o = holly_couch[_id] 
+            note_o = holly_couch[note_id] 
         return dict(note=note_o)
         
     @expose("json")
