@@ -835,3 +835,17 @@ ul.tag_list li {
 	padding-bottom:0.5em; 
 	border-bottom:1px dashed #ccc;
 }
+
+
+
+
+table.visiting_group_info_table tr td.legend {
+	//text-shadow: 1px 1px 1px #000, -1px -1px 1px #fff;
+	//opacity: 0.5;
+	color: #999;
+	}
+
+table.visiting_group_info_table tr td.info {
+	font-weight: bold;
+	color: #000;	
+	}
