@@ -24,6 +24,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch,  genUID
+from formencode import validators
 
 import datetime,  StringIO,  time
 
@@ -31,10 +32,14 @@ import datetime,  StringIO,  time
 from tg import tmpl_context
 
 from hollyrosa.widgets.edit_note_form import create_edit_note_form
+from hollyrosa.widgets.edit_attachment_form import create_edit_attachment_form
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId
 
 from hollyrosa.model.booking_couch import genUID, getNotesForTarget
 from hollyrosa.controllers.booking_history import remember_note_change
+
+from tg import request, response
+from tg.controllers import CUSTOM_CONTENT_TYPE
 
 __all__ = ['note']
 
@@ -50,6 +55,16 @@ class Note(BaseController):
         tmpl_context.form = create_edit_note_form
         note_o = DataContainer(text='', target_id=target_id, _id='')
         return dict(note=note_o)
+        
+        
+        
+        
+    @expose('hollyrosa.templates.edit_attachment')
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))  
+    def add_attachment(self, target_id):
+        tmpl_context.form = create_edit_attachment_form
+        attachment_o = DataContainer(text='', target_id=target_id, _id='')
+        return dict(attachment=attachment_o)
         
    
     @expose('hollyrosa.templates.edit_note')
@@ -96,5 +111,52 @@ class Note(BaseController):
         # TODO: where do we go from here?
         redirect_to = '/'
         if 'visiting_group' in note_o['target_id']:
-            redirect_to = '/visiting_group/show_visiting_group?id='+note_o['target_id']
+            redirect_to = '/visiting_group/show_visiting_group?visiting_group_id='+note_o['target_id']
         raise redirect(redirect_to)
+        
+        
+    @expose()
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def save_attachment(self, target_id, _id, text, attachment):
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        if _id == '':
+            attachment_o = dict(type='attachment', _id=genUID(type='attachment'), target_id=target_id, attachment_state=0, tags=list(), history=list(), text='')
+            attachment_change='new'
+        else:
+            attachment_o = holly_couch[_id]
+            history = attachment_o['history']
+            if history == None:
+                history = list()
+            else:
+                history.append([timestamp, attachment_o['text']])
+            attachment_o['history'] = history
+            attachment_change = 'changed'
+            
+        attachment_o['timestamp'] = timestamp
+        attachment_o['last_changed_by'] = getLoggedInUserId(request)
+        attachment_o['text'] = text
+        holly_couch[attachment_o['_id']] = attachment_o
+        
+        file = request.POST['attachment']
+        holly_couch.put_attachment(attachment_o, attachment.file, filename=attachment.filename)
+        
+        # TODO FIX BELOW
+        #remember_attachment_change(holly_couch, target_id=target_id, attachment_id=attachment_o['_id'], changed_by=getLoggedInUserId(request), attachment_change=attachment_change)
+
+        # TODO: where do we go from here?
+        redirect_to = '/'
+        if 'visiting_group' in attachment_o['target_id']:
+            redirect_to = '/visiting_group/show_visiting_group?visiting_group_id='+attachment_o['target_id']
+        raise redirect(redirect_to)
+        
+        
+    @expose(content_type=CUSTOM_CONTENT_TYPE)
+    @validate(validators={"attachment_id":validators.UnicodeString(), "doc_id":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_level('pl'), has_level('staff'), msg='Only staff members may view visiting group attachments'))   
+    def download_attachment(self, attachment_id, doc_id):
+        response.content_type='x-application/download'
+        response.headerlist.append(('Content-Disposition','attachment;filename=%s' % doc_id))        
+                
+        return holly_couch.get_attachment(attachment_id, doc_id).read()
+
+

@@ -39,12 +39,12 @@ function deleteTagHelper(evt) {
    var tag_elem = evt.srcElement.parentElement;
    var inner_text = tag_elem.innerText;
    inner_text = inner_text.replace(' (X)',''); 
-   tags.deleteTag("${tg.url('/tag/delete_tag')}", "${visiting_group['_id']}", inner_text);
+   tags.deleteTag("${tg.url('/tag/delete_tag')}", "${visiting_group.id}", inner_text);
 }
 
 
 function addTagHelper() {
-   tags.addTags("${tg.url('/tag/add_tags')}", "${visiting_group['_id']}", tag_input);
+   tags.addTags("${tg.url('/tag/add_tags')}", "${visiting_group.id}", tag_input);
 }
 
 
@@ -60,14 +60,14 @@ function startup() {
        
 
 	//...load all tags for visiting group
-	tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group._id}");
+	tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group.id}");
    
    
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request...", '${visiting_group['id']}', '${tg.url('/booking/edit_booking')}'); 
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request...", '${visiting_group.id}', '${tg.url('/booking/edit_booking')}'); 
    common_menu.add_menu_separator(menu);   
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit...", '${visiting_group['id']}', '${tg.url('edit_visiting_group')}');
-   common_menu.add_note_redirect_menu_item(menu, menu, "Add note...", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
-   common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit...", '${visiting_group.id}', '${tg.url('edit_visiting_group')}');
+   common_menu.add_note_redirect_menu_item(menu, menu, "Add note...", '${visiting_group.id}', '${tg.url('/note/add_note')}');
+   common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${visiting_group.id}', '${tg.url('/note/add_attachment')}');
    common_menu.add_menu_separator(menu);
    common_menu.add_list_bookings_redirect_menu_item(menu, menu, "List bookings of group...", '${visiting_group['name']}', '${tg.url('/visiting_group/view_bookings_of_name')}');
       
@@ -86,7 +86,7 @@ function startup() {
        leftClickToOpen: common_menu.load_left_click_menu()
        });
        
-    common_menu.add_note_redirect_menu_item(note_menu, note_menu, "Add note...", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
+    common_menu.add_note_redirect_menu_item(note_menu, note_menu, "Add note...", '${visiting_group.id}', '${tg.url('/note/add_note')}');
     common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Edit note...",  '${tg.url('/note/edit_note')}');
     common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Delete note...", '${tg.url('/note/delete_note')}');
     
@@ -145,7 +145,13 @@ function startup() {
     <div py:for="n in notes" >
             
         <div class="note2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i>${n.timestamp} ${n.last_changed_by}</i><br/><br/>
-        ${HTML(n.text)}</div>
+        <em>type: ${n.type}</em>
+        <div py:if="'note' == n.type">${HTML(n.text)}</div>
+        <div py:if="('attachment' == n.type)">
+        	<div py:for="at in n.get('_attachments',[''])">${n.text} <a href="${tg.url('/note/download_attachment', params={'attachment_id':n.id,'doc_id':at})}">${at} ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>
+        	 
+        	</div>
+        </div>
                 
     </div>
     
@@ -163,7 +169,7 @@ function startup() {
     </table>
     
     <h4>attachments:</h4>
-    <ul py:for="at in visiting_group.get('_attachments',[])"><li><a href="${tg.url('download_attachment', params={'visiting_group_id':visiting_group._id, 'doc_id':at})}">${at}</a></li></ul>
+    <ul py:for="at in visiting_group.get('_attachments',[])"><li><a href="${tg.url('download_attachment', params={'visiting_group_id':visiting_group.id, 'doc_id':at})}">${at}</a></li></ul>
     <form method="post" action="upload_attachment" enctype="multipart/form-data">
         <input type="file" name="file"/>
         <input type="hidden" name="vgrpid" value="${visiting_group.id}"/> 

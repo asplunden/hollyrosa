@@ -213,11 +213,11 @@ class VisitingGroup(BaseController):
     def show_visiting_group(self,  visiting_group_id=None,  **kw):
         
         if None == visiting_group_id:
-            visiting_group = DataContainer(name='',  id=None,  info='')
+            visiting_group = DataContainer(name='', id=None,  info='')
             bookings=[]
             notes=[]
         elif visiting_group_id=='':
-            visiting_group = DataContainer(name='',  id=None,  info='')
+            visiting_group = DataContainer(name='', id=None,  info='')
             bookings=[]
             notes=[]
         else:
