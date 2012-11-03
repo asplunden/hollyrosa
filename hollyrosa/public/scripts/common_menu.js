@@ -233,7 +233,22 @@
            ))} 
 	
        
-       
+    function load_left_click_menu(){
+   		var cdata = cookie('left_click_menu');
+   		var jdata;
+   		
+   		if (cdata == undefined) {
+      		jdata = false;
+    		} else {
+      		try {
+      			jdata = json.parse(cdata);
+      		}  
+      		catch(SyntaxError) {
+				jdata = false;      
+      		}
+			}
+			return jdata; 
+   	}	 
 
    
    var state_change_list = [
@@ -260,6 +275,7 @@
 		add_visiting_group_edit_note_menu_item:add_visiting_group_edit_note_menu_item,
 		add_ag_checkbox_menu_item:add_ag_checkbox_menu_item, 
 		load_ag_checkbox_status:load_ag_checkbox_status,
-		update_activity_group_visible_rows:update_activity_group_visible_rows  };
+		update_activity_group_visible_rows:update_activity_group_visible_rows,
+		load_left_click_menu:load_left_click_menu  };
 	});
 	

@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright 2010, 2011, 2012 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - settings</title>
+  
+   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
+   <script>
+   require(["common_menu", "dojo/dom","dojo/dom-attr", "dojo/cookie", "dojo/query", "dojo/ready", "dojo/on", "dojo/json"], function(common_menu, dom, domAttr, cookie, query, ready, on, json) {
+   	
+   	
+   	
+   		
+   		
+	function save_left_click_menu(a_left_click_status) {
+		cookie('left_click_menu', json.stringify(a_left_click_status), {expires:5, path:'/'});		
+	}
+		
+   	ready(function(){
+   		var menu_cookie = common_menu.load_left_click_menu();
+				
+			var node = dom.byId("left_click_menu_input_checkbox");
+   		
+   		if (true == menu_cookie) {
+				node.checked = true;	
+   		} else {
+				node.checked = false;
+   		}
+   		
+   		on(node, 'change', function(evt){
+   		   var chk = node.checked; 		
+     			save_left_click_menu(chk);
+   			});
+   		});
+   	
+   	});
+   
+  
+   
+   
+   
+   </script>
+</head>
+
+<body>
+    <h2>Your Settings ${request.identity['user']['display_name']}</h2>
+    <p>
+    <fieldset>
+    <form>
+		<legend>Left click context menu: </legend><input type="checkbox" id="left_click_menu_input_checkbox" name="left_click_context_menu"></input>    
+    </form>
+    </fieldset>
+    </p>
+</body>
+</html>

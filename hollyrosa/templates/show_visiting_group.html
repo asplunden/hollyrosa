@@ -48,13 +48,16 @@ function addTagHelper() {
 }
 
 ready(function() {
+
+	var use_left_click_menu = common_menu.load_left_click_menu();
+
 	//...load all tags for visiting group
 	tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group._id}");
 
    //...setup main menu for visiting group  	
    var menu = new Menu({
        targetNodeIds: ["visiting_group_menu", "note"],
-       leftClickToOpen: false
+       leftClickToOpen: use_left_click_menu
        });
    
    common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request...", '${visiting_group['id']}', '${tg.url('/booking/edit_booking')}'); 
@@ -82,7 +85,7 @@ ready(function() {
 	var note_menu = new Menu({
        targetNodeIds: ["content"],
        selector: "div.note2",
-       leftClickToOpen: false
+       leftClickToOpen: common_menu.load_left_click_menu()
        });
        
     common_menu.add_note_redirect_menu_item(note_menu, note_menu, "Add note...", '${visiting_group['id']}', '${tg.url('/note/add_note')}');

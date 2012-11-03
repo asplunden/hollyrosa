@@ -17,6 +17,8 @@ from genshi import HTML, XML
     <meta py:replace="select('*')"/>
     <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/style.css')}" />
     <link rel="stylesheet" type="text/css" media="print" href="${tg.url('/css/print.css')}" />
+    <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
+
 </head>
 
 <body py:match="body" py:attrs="select('@*')">
@@ -27,6 +29,8 @@ from genshi import HTML, XML
         <li py:if="request.identity"><a href="${tg.url('/tools/show')}" id="toolslink">Tools</a></li>
 	<!-- <li py:if="request.identity"><a href="${tg.url('/visiting_group/edit_visiting_group')}">New visiting group</a></li>
         <li py:if="request.identity"><a href="${tg.url('/booking/edit_booking')}">New booking</a></li>-->
+
+		<li py:if="request.identity"><a href="${tg.url('/me/settings')}">Me</a></li>
 
     <span py:if="tg.auth_stack_enabled" py:strip="True">
         <li><a href="${tg.url('/about')}" class="${('', 'active')[defined('page') and page==page=='about']}">About</a></li>

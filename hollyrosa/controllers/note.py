@@ -44,14 +44,16 @@ class Note(BaseController):
         """Abort the request with a 404 HTTP status code."""
         abort(404)
    
-    @expose('hollyrosa.templates.edit_note')    
+    @expose('hollyrosa.templates.edit_note')
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))  
     def add_note(self, target_id):
         tmpl_context.form = create_edit_note_form
         note_o = DataContainer(text='', target_id=target_id, _id='')
         return dict(note=note_o)
         
    
-    @expose('hollyrosa.templates.edit_note')    
+    @expose('hollyrosa.templates.edit_note')
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def edit_note(self, note_id=None, visiting_group_id=None):
         tmpl_context.form = create_edit_note_form
         if note_id == '':
@@ -61,12 +63,14 @@ class Note(BaseController):
         return dict(note=note_o)
         
     @expose("json")
+    #@require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def get_notes_for_visiting_group(self, id):
         notes = [n.doc for n in getNotesForTarget(holly_couch, id)]
         return dict(notes=notes, id=id)
 
 
     @expose()
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def save_note(self, target_id, _id, text):
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         if _id == '':
