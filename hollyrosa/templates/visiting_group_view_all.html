@@ -133,7 +133,7 @@ function loadNotesFor(id) {
    })); 
 
    
-   var l = ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in bokn_status_map.items()] ) +']' };
+   var l = ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in program_state_map.items()] ) +']' };
   
    
    array.forEach(l, function(l) {     
@@ -211,7 +211,8 @@ function loadNotesFor(id) {
             <td class="info data">
             <div class="note"><ul class="tag_list" py:for="tag in visiting_group.get('tags',[])"><li>$tag</li></ul>
             <p>bok.nr: <b>${visiting_group.boknr}</b> <br/>
-            bokn.status: <b>${bokn_status_map.get(visiting_group.boknstatus, '')}</b><br/>
+            vodb status: <b>${vodb_state_map.get(visiting_group.get('vodbstatus','-'), '')}</b><br/>
+            program status: <b>${program_state_map.get(visiting_group.boknstatus, '')}</b><br/>
             camping location: <b>${visiting_group.camping_location}</b></p>${HTML(visiting_group.info)}</div>
             
             <div id="notes_for_${visiting_group._id}"><!-- <a py:if="has_notes_map.has_key(visiting_group._id)" id="load_notes_for_${visiting_group._id}" hollyrosa:loadnotes="${visiting_group._id}">--> <span py:if="has_notes_map.has_key(visiting_group._id)" id="load_notes_for_${visiting_group._id}">has notes, load using the context menu</span></div>            

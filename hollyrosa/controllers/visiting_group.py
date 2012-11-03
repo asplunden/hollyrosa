@@ -109,7 +109,7 @@ class VisitingGroup(BaseController):
         visiting_groups = [v.doc for v in getAllVisitingGroups(holly_couch)] 
         remaining_visiting_groups_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups)        
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
+        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=remaining_visiting_groups_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
 
 
     @expose('hollyrosa.templates.visiting_group_view_all')
@@ -270,17 +270,20 @@ class VisitingGroup(BaseController):
     @expose()
     @validate(create_edit_visiting_group_form, error_handler=edit_visiting_group)
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change visiting group properties'))
-    def save_visiting_group_properties(self,  id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr='', boknstatus=0):
+    def save_visiting_group_properties(self,  id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr=''):
         # TODO: does not work?
         if None == id or id == '':
             is_new = True
+            program_state = 0
+            vodb_state = 0
             visiting_group_c = dict(type='visiting_group')
             id_c = genUID(type='visiting_group')
         elif 'visiting_group' not in id:
             is_new = True
             visiting_group_c = dict(type='visiting_group')
             id_c = 'visiting_group.'+id
-            
+            program_state = 0
+            vodb_state = 0
         else:
             id_c = id
             visiting_group_c = holly_couch[id_c]
@@ -295,7 +298,9 @@ class VisitingGroup(BaseController):
         visiting_group_c['contact_person_email'] = contact_person_email
         visiting_group_c['contact_person_phone'] = contact_person_phone
         visiting_group_c['boknr'] = boknr
-        visiting_group_c['boknstatus'] = boknstatus
+        if is_new:
+            visiting_group_c['boknstatus'] = program_state
+            visiting_group_c['vodbstatus'] = vodb_state
         visiting_group_c['camping_location'] = camping_location
         
         visiting_group_property_c = dict()
