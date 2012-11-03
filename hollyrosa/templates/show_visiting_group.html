@@ -87,8 +87,22 @@ function startup() {
        });
        
     common_menu.add_note_redirect_menu_item(note_menu, note_menu, "Add note...", '${visiting_group.id}', '${tg.url('/note/add_note')}');
+    common_menu.add_note_redirect_menu_item(note_menu, note_menu, "Add attachment...", '${visiting_group.id}', '${tg.url('/note/add_attachment')}');
     common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Edit note...",  '${tg.url('/note/edit_note')}');
     common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Delete note...", '${tg.url('/note/delete_note')}');
+    
+    
+    //...create menu for add/edit/show/delete note
+	var attachment_menu = new Menu({
+       targetNodeIds: ["content"],
+       selector: "div.attachment2",
+       leftClickToOpen: common_menu.load_left_click_menu()
+       });
+       
+    common_menu.add_note_redirect_menu_item(attachment_menu, attachment_menu, "Add note...", '${visiting_group.id}', '${tg.url('/note/add_note')}');
+    common_menu.add_note_redirect_menu_item(attachment_menu, attachment_menu, "Add attachment...", '${visiting_group.id}', '${tg.url('/note/add_attachment')}');
+    common_menu.add_visiting_group_edit_note_menu_item(attachment_menu, attachment_menu, "Edit attachment...",  '${tg.url('/note/edit_attachment')}');
+    common_menu.add_visiting_group_edit_note_menu_item(attachment_menu, attachment_menu, "Delete attachment...", '${tg.url('/note/delete_note')}');
     
     /**** assembling change program state and vodb state menus ***/
     common_menu.add_menu_separator(menu);   
@@ -144,11 +158,10 @@ function startup() {
     camping location: <b>${visiting_group.camping_location}</b></p>${HTML(visiting_group.info)}</div>
     <div py:for="n in notes" >
             
-        <div class="note2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i>${n.timestamp} ${n.last_changed_by}</i><br/><br/>
-        <em>type: ${n.type}</em>
+        <div class="${n.type}2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i><b>${n.timestamp}</b> ${n.type} by ${n.last_changed_by}</i><br/><br/>
         <div py:if="'note' == n.type">${HTML(n.text)}</div>
-        <div py:if="('attachment' == n.type)">
-        	<div py:for="at in n.get('_attachments',[''])">${n.text} <a href="${tg.url('/note/download_attachment', params={'attachment_id':n.id,'doc_id':at})}">${at} ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>
+        <div py:if="('attachment' == n.type)">${n.text}<br/><br/>
+        	<div py:for="at in n.get('_attachments',[''])"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n.id,'doc_id':at})}"><b>${at}</b> ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>
         	 
         	</div>
         </div>
@@ -168,14 +181,14 @@ function startup() {
         </tr>
     </table>
     
-    <h4>attachments:</h4>
+    <h4>attachments: DEPRECATED</h4>
     <ul py:for="at in visiting_group.get('_attachments',[])"><li><a href="${tg.url('download_attachment', params={'visiting_group_id':visiting_group.id, 'doc_id':at})}">${at}</a></li></ul>
-    <form method="post" action="upload_attachment" enctype="multipart/form-data">
+    <!-- <form method="post" action="upload_attachment" enctype="multipart/form-data">
         <input type="file" name="file"/>
         <input type="hidden" name="vgrpid" value="${visiting_group.id}"/> 
         <input type="submit"/>
     </form>
-
+-->
   
 </body>
 </html>

@@ -77,6 +77,18 @@ class Note(BaseController):
             note_o = holly_couch[note_id] 
         return dict(note=note_o)
         
+        
+    @expose('hollyrosa.templates.edit_attachment')
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def edit_attachment(self, note_id=None, visiting_group_id=None):
+        attachment_id=note_id
+        tmpl_context.form = create_edit_attachment_form
+        if attachment_id == '':
+            attachment_o = DataContainer(text='', target_id=target_id, _id='')
+        else:
+            attachment_o = holly_couch[attachment_id] 
+        return dict(attachment=attachment_o)
+        
     @expose("json")
     #@require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def get_notes_for_visiting_group(self, id):
@@ -91,6 +103,7 @@ class Note(BaseController):
         if _id == '':
             note_o = dict(type='note', _id=genUID(type='note'), target_id=target_id, note_state=0, tags=list(), history=list(), text='')
             note_change='new'
+            note_o['timestamp'] = timestamp
         else:
             note_o = holly_couch[_id]
             history = note_o['history']
@@ -101,7 +114,7 @@ class Note(BaseController):
             note_o['history'] = history
             note_change = 'changed'
             
-        note_o['timestamp'] = timestamp
+        
         note_o['last_changed_by'] = getLoggedInUserId(request)
         note_o['text'] = text
         holly_couch[note_o['_id']] = note_o
@@ -122,6 +135,7 @@ class Note(BaseController):
         if _id == '':
             attachment_o = dict(type='attachment', _id=genUID(type='attachment'), target_id=target_id, attachment_state=0, tags=list(), history=list(), text='')
             attachment_change='new'
+            attachment_o['timestamp'] = timestamp
         else:
             attachment_o = holly_couch[_id]
             history = attachment_o['history']
@@ -131,14 +145,16 @@ class Note(BaseController):
                 history.append([timestamp, attachment_o['text']])
             attachment_o['history'] = history
             attachment_change = 'changed'
-            
-        attachment_o['timestamp'] = timestamp
+                    
         attachment_o['last_changed_by'] = getLoggedInUserId(request)
         attachment_o['text'] = text
         holly_couch[attachment_o['_id']] = attachment_o
         
+        
         file = request.POST['attachment']
-        holly_couch.put_attachment(attachment_o, attachment.file, filename=attachment.filename)
+        print '****', file
+        if file != '':
+            holly_couch.put_attachment(attachment_o, attachment.file, filename=attachment.filename)
         
         # TODO FIX BELOW
         #remember_attachment_change(holly_couch, target_id=target_id, attachment_id=attachment_o['_id'], changed_by=getLoggedInUserId(request), attachment_change=attachment_change)
