@@ -309,7 +309,8 @@
 		update_activity_group_visible_rows:update_activity_group_visible_rows,
 		load_left_click_menu:load_left_click_menu,
 		add_change_program_state_menu_item:add_change_program_state_menu_item,
-		program_state_change_list:program_state_change_list
+		program_state_change_list:program_state_change_list,
+		vodb_state_change_list:program_state_change_list
 		  };
 	});
 	

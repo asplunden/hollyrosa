@@ -216,7 +216,7 @@ class VisitingGroup(BaseController):
             # TODO: see below
             bookings = [] 
             notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)]
-        return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent, bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, notes=notes)
+        return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent, program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, notes=notes)
 
 
     @expose('hollyrosa.templates.edit_visiting_group')
@@ -540,16 +540,22 @@ class VisitingGroup(BaseController):
         ##holly_couch[booking_id] = booking_o
         ##remember_workflow_state_change(holly_couch, booking=booking_o, state=state,  booking_day_date=booking_day['date'],  activity_title=activity['title'])
 
+    def do_set_vodb_state(self, holly_couch, visiting_group_id, visiting_group_o, state):
+        visiting_group_o['vodbstatus'] = state
+        holly_couch[visiting_group_id] = visiting_group_o
 
     @expose()
     @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True), 'state':validators.Int(not_empty=True)})    
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def set_program_state(self, visiting_group_id=None,  state=0):
         visiting_group_o = holly_couch[visiting_group_id] 
-        self.do_set_program_state(holly_couch, visiting_group_id,  visiting_group_o, int(state))
-            
-        
-        #if 'booking/day' in request.referrer:
-        #    raise redirect(request.referrer + '#activity_row_id_' + booking_o['activity_id'])
-            
+        self.do_set_program_state(holly_couch, visiting_group_id,  visiting_group_o, int(state))            
+        raise redirect(request.referrer)
+
+    @expose()
+    @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True), 'state':validators.Int(not_empty=True)})    
+    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
+    def set_vodb_state(self, visiting_group_id=None,  state=0):
+        visiting_group_o = holly_couch[visiting_group_id] 
+        self.do_set_vodb_state(holly_couch, visiting_group_id,  visiting_group_o, int(state))            
         raise redirect(request.referrer)
