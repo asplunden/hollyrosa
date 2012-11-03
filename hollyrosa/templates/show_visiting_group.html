@@ -32,7 +32,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true, debugAtAllCosts: true"></script>
   <script>
 
-require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window"], function(ready, tags, common_menu, Menu, dom, array, query, on, win) {
+require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window"], function(ready, tags, common_menu, Menu, PopupMenuItem, dom, array, query, on, win) {
 
 
 function deleteTagHelper(evt) {
@@ -47,18 +47,21 @@ function addTagHelper() {
    tags.addTags("${tg.url('/tag/add_tags')}", "${visiting_group['_id']}", tag_input);
 }
 
-ready(function() {
 
+function startup() {
+	//...setup main menu for visiting group  	
 	var use_left_click_menu = common_menu.load_left_click_menu();
-
-	//...load all tags for visiting group
-	tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group._id}");
-
-   //...setup main menu for visiting group  	
-   var menu = new Menu({
+   	var change_program_status_menu = new Menu();
+   
+   	var menu = new Menu({
        targetNodeIds: ["visiting_group_menu", "note"],
        leftClickToOpen: use_left_click_menu
        });
+       
+
+	//...load all tags for visiting group
+	tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group._id}");
+   
    
    common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request...", '${visiting_group['id']}', '${tg.url('/booking/edit_booking')}'); 
    common_menu.add_menu_separator(menu);   
@@ -67,7 +70,9 @@ ready(function() {
    common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
    common_menu.add_menu_separator(menu);
    common_menu.add_note_redirect_menu_item(menu, menu, "Change vodb status---", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
-   common_menu.add_note_redirect_menu_item(menu, menu, "Change program status---", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
+   
+   
+   
    common_menu.add_menu_separator(menu);
    common_menu.add_list_bookings_redirect_menu_item(menu, menu, "List bookings of group...", '${visiting_group['name']}', '${tg.url('/visiting_group/view_bookings_of_name')}');
    common_menu.add_menu_separator(menu);   
@@ -79,7 +84,7 @@ ready(function() {
 	
 	//...link delete tag handler to any element with class .tag in document.
 	on(win.doc, '.tag:click', deleteTagHelper);
-	});
+	
 	
 	//...create menu for add/edit/show/delete note
 	var note_menu = new Menu({
@@ -91,8 +96,26 @@ ready(function() {
     common_menu.add_note_redirect_menu_item(note_menu, note_menu, "Add note...", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
     common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Edit note...",  '${tg.url('/note/edit_note')}');
     common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Delete note...", '${tg.url('/note/delete_note')}');
-  
-  });
+    
+    /**** assembling change program state and vodb state menus ***/
+    common_menu.add_menu_separator(menu);   
+    var change_program_status_menu = new Menu();
+    menu.addChild(new PopupMenuItem({
+   	label: "Change program status",
+      popup: change_program_status_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+   })); 
+   
+   var set_program_state_url = '${tg.url('/visiting_group/set_program_state')}';       
+    
+   array.forEach(common_menu.program_state_change_list, function(x) {console.log(x); common_menu.add_change_program_state_menu_item(menu, change_program_status_menu, x['name'], x['state'], 0, set_program_state_url);});
+	
+	};
+	
+	ready(function() {
+		startup();
+		});  
+ });
   </script>
   
 
@@ -100,11 +123,11 @@ ready(function() {
 </head>
 
 <body class="tundra">
-    <h2 id="visiting_group_menu">${visiting_group.name}</h2> 
+    <h2 id="visiting_group_menu" hollyrosa:vgid="${visiting_group.id}">${visiting_group.name}</h2> 
     <p>${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
     
 
-    <div class="note" id="note"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
+    <div class="note" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
 <a id="add_tag_href2" href="javascript:;">Add Tags</a>
 </form></div>
     <p>bok.nr: <b>${visiting_group.boknr}</b><br/>
@@ -113,12 +136,6 @@ ready(function() {
     <div py:for="n in notes" >
             
         <div class="note2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i>${n.timestamp} ${n.last_changed_by}</i><br/><br/>
-        
-        <!-- <ul class="any_menu context_inline_menu ">
-           <li><a href="${tg.url('/note/edit_note', params={'_id':n._id})}">edit</a></li>
-           <li><a href="${tg.url('/note/add_note', params={'target_id':visiting_group._id})}">add note</a></li>
-           <li><a href="${tg.url('/note/delete_note', params={'_id':n._id})}">delete</a></li>
-        </ul>--> 
         ${HTML(n.text)}</div>
                 
     </div>
@@ -127,8 +144,6 @@ ready(function() {
     </p> 
 
     
-    
-
     <table class="data">
         <tr>
             <th>Property = Value Unit</th><th>Description</th><th>From date</th><th>To date</th>

@@ -205,9 +205,11 @@ class VisitingGroup(BaseController):
         if None == visiting_group_id:
             visiting_group = DataContainer(name='',  id=None,  info='')
             bookings=[]
+            notes=[]
         elif visiting_group_id=='':
             visiting_group = DataContainer(name='',  id=None,  info='')
             bookings=[]
+            notes=[]
         else:
             visiting_group = holly_couch[str(visiting_group_id)]
 
@@ -354,7 +356,7 @@ class VisitingGroup(BaseController):
         holly_couch[id_c] = visiting_group_c
         
         if visiting_group_c.has_key('_id'):
-            raise redirect('/visiting_group/show_visiting_group?id='+visiting_group_c['_id'])
+            raise redirect('/visiting_group/show_visiting_group?visiting_group_id='+visiting_group_c['_id'])
         raise redirect('/visiting_group/view_all')
 
 
@@ -508,3 +510,46 @@ class VisitingGroup(BaseController):
         vgroup = holly_couch[id]
         return dict(visiting_group=vgroup)
         
+        
+    def do_set_program_state(self, holly_couch, visiting_group_id,  visiting_group_o,  state):
+        visiting_group_o['boknstatus'] = state
+        holly_couch[visiting_group_id] = visiting_group_o
+        
+        #..TODO: remember state change
+                
+        #...only PL can set state=20 (approved) or -10 (disapproved)
+        
+        ##if state=='20' or state=='-10' or booking_o['booking_state'] == 20 or booking_o['booking_state']==-10:
+            #ok = False
+            #for group in getLoggedInUserId(request):
+            #    if group.group_name == 'pl':
+            #        ok = True
+            ##ok = has_level('pl').check_authorization(request.environ)
+            
+            # TODO: fix
+            
+#            if not ok:
+#                flash('Only PL can do that. %s' % request.referrer, 'warning')
+#                raise redirect(request.referrer)
+        ##activity = holly_couch[booking_o['activity_id']]
+        ##booking_day = holly_couch[booking_o['booking_day_id']]
+        
+        ##booking_o['booking_state'] = state
+        ##booking_o['last_changed_by_id'] = getLoggedInUserId(request)
+        
+        ##holly_couch[booking_id] = booking_o
+        ##remember_workflow_state_change(holly_couch, booking=booking_o, state=state,  booking_day_date=booking_day['date'],  activity_title=activity['title'])
+
+
+    @expose()
+    @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True), 'state':validators.Int(not_empty=True)})    
+    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
+    def set_program_state(self, visiting_group_id=None,  state=0):
+        visiting_group_o = holly_couch[visiting_group_id] 
+        self.do_set_program_state(holly_couch, visiting_group_id,  visiting_group_o, int(state))
+            
+        
+        #if 'booking/day' in request.referrer:
+        #    raise redirect(request.referrer + '#activity_row_id_' + booking_o['activity_id'])
+            
+        raise redirect(request.referrer)

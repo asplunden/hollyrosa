@@ -108,25 +108,28 @@ function loadNotesFor(id) {
    /* assemblingthe filter booking status menu */
    var filter_menu = new Menu({
        targetNodeIds: ["bokn_status_menu"],
-       leftClickToOpen: false
+       leftClickToOpen: common_menu.load_left_click_menu()
        });
        
    var bokn_status_menu = new Menu();
    filter_menu.addChild(new PopupMenuItem({
    	label: "Program status...",
-      popup: bokn_status_menu
+      popup: bokn_status_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
    })); 
    
    var tag_menu = new Menu();
    filter_menu.addChild(new PopupMenuItem({
    	label: "Tags...",
-      popup: tag_menu
+      popup: tag_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
    })); 
 
    var date_range_menu = new Menu();
    filter_menu.addChild(new PopupMenuItem({
    	label: "Date range...",
-      popup: date_range_menu
+      popup: date_range_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
    })); 
 
    
@@ -143,6 +146,7 @@ function loadNotesFor(id) {
    });
    /* assembling the filter tag menu */
    
+      
    
    });
   

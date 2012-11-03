@@ -39,11 +39,20 @@ workflow_map[-100] ='deleted'
 bokn_status_map = dict()
 bokn_status_map[-100] ='deleted'
 bokn_status_map[-10] ='canceled'
-bokn_status_map[0] ='created'
-bokn_status_map[5] ='new'
+bokn_status_map[0] ='new'
+bokn_status_map[5] ='created'
 bokn_status_map[10] ='preliminary'
 bokn_status_map[20] ='confirmed'
 bokn_status_map[50] ='island'
+
+vodb_status_map = dict()
+vodb_status_map[-100] ='deleted'
+vodb_status_map[-10] ='canceled'
+vodb_status_map[0] ='new'
+vodb_status_map[5] ='created'
+vodb_status_map[10] ='preliminary'
+vodb_status_map[20] ='confirmed'
+vodb_status_map[50] ='island'
 
 bokn_status_options = list()
 for k, v in bokn_status_map.items():

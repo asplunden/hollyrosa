@@ -260,6 +260,37 @@
         	{name:"> Drop-in", state:30} //, 
 //        	{name:"Delete booking", state:-100}
     ];
+    
+    /*** program status code ****/
+    
+    var program_state_change_list = [
+         {name:"> Canceled", state:-10}, 
+    		{name:"> New", state:0},
+        	{name:"> Created", state:5},
+        	{name:"> Preliminary", state:10}, 
+        	{name:"> Confirmed", state:20}, 
+        	{name:"> Island", state:50} //, 
+//        	{name:"Delete booking", state:-100}
+    ];
+
+
+
+	function add_change_program_state_menu_item(a_menu, a_sub_menu, a_state_name, state_value, a_all, a_url) {
+      a_sub_menu.addChild(new MenuItem({
+      	label: a_state_name,
+         onClick: function(evt) {
+            var node = a_menu.currentTarget;
+            var vgid = node.attributes["hollyrosa:vgid"].value;
+           
+            var ioq = {
+                       visiting_group_id: vgid,
+                       state: state_value
+                   };        
+               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+           }}));
+   }    	
+	
+	
 	
 	return {
 		add_redirect_menu_item:add_redirect_menu_item, 
@@ -276,6 +307,9 @@
 		add_ag_checkbox_menu_item:add_ag_checkbox_menu_item, 
 		load_ag_checkbox_status:load_ag_checkbox_status,
 		update_activity_group_visible_rows:update_activity_group_visible_rows,
-		load_left_click_menu:load_left_click_menu  };
+		load_left_click_menu:load_left_click_menu,
+		add_change_program_state_menu_item:add_change_program_state_menu_item,
+		program_state_change_list:program_state_change_list
+		  };
 	});
 	
