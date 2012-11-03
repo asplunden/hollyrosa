@@ -48,7 +48,26 @@ function updateNotes(data) {
         var notes_for_id = 'notes_for_' + note['target_id'];
         
         e = dom.byId(notes_for_id);
-        domConstruct.create("div", {innerHTML: note['text'], class:'note2'}, e);
+        var note_div = domConstruct.create("div", {innerHTML: note['text'], class:note['type']+'2'}, e);
+		  if (note['type'] == 'attachment') {        
+        		var note_div2 = domConstruct.create("div", {}, note_div);
+			        
+        		var attachments = note['_attachments'];
+        		var keys = Object.keys(attachments); 
+        		array.forEach(keys, function(key) {
+					var ioq = {
+                       attachment_id: note._id,
+                       doc_id: key
+                   };        
+                
+					var ul = domConstruct.create("ul", {}, note_div2);
+					var li = domConstruct.create("li", {}, ul);
+					  
+					domConstruct.create("a", {href:'${tg.url('/note/download_attachment')}' + '?' + ioQuery.objectToQuery(ioq), innerHTML: key}, li);
+					 
+        			}); 
+        		 
+			}
     }
 }
 
