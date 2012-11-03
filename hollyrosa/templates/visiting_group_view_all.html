@@ -64,7 +64,7 @@ function loadNotesFor(id) {
    var menu = new Menu({
        targetNodeIds: ["vgroup_listing"],
        selector: "tr.name_menu",
-       leftClickToOpen: false,
+       leftClickToOpen: common_menu.load_left_click_menu(),
        onOpen: function(evt) {
        	var node = menu.currentTarget;
          var has_notes = node.attributes["hollyrosa:has_notes"].value;

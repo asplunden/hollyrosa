@@ -66,7 +66,7 @@ addPrintLink.addEvent(window, 'load', function(){addPrintLink.init('print-on-dem
 <body>
     <h2>Kort beskrivning av ${activity.title}</h2>
     <ul class="any_menu context_inline_menu ">
-       <li><a href="${tg.url('edit_activity', activity_id=activity.id)}">edit</a></li>
+       <li><a href="${tg.url('edit_activity', params={'activity_id':activity.id})}">edit</a></li>
        <li><a href="${activity.external_link}">external link</a></li>
        <li><a href="${activity.internal_link}">internal link</a></li>
        <li><div id="print-on-demand-link"/></li>   <!-- http://www.frontpagewebmaster.com/m-395890/tm.htm -->
@@ -80,6 +80,6 @@ addPrintLink.addEvent(window, 'load', function(){addPrintLink.init('print-on-dem
     
     <!-- <p>GPS: ${activity.gps_lat} - ${activity.gps_long} Add google map</p> -->
    <em><span py:if="True==activity.equipment_needed">Equipment needed</span> <span py:if="True==activity.education_needed">Education needed</span> <span py:if="True==activity.certificate_needed">Certificate needed</span> </em>
-    <p>Speical info note: <a href="${tg.url('/note/edit_note', _id=activity.get('booking_info_id',''))}">${activity.get('booking_info_id','')}</a></p>
+    <p>Speical info note: <a href="${tg.url('/note/edit_note', params={'_id':activity.get('booking_info_id','')})}">${activity.get('booking_info_id','')}</a></p>
 </body>
 </html>

@@ -37,7 +37,8 @@ require(["common_menu", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit
   
   var menu = new Menu({
    	targetNodeIds: ["booking_info"],
-      selector: "div.note"
+      selector: "div.note",
+      leftClickToOpen: common_menu.load_left_click_menu()
       });
   
   common_menu.add_booking_op_menu_item(menu, menu, "Edit booking", '${tg.url('/booking/edit_booked_booking')}');

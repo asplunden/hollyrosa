@@ -42,7 +42,7 @@ def makeDate(s):
    var menu = new Menu({
        targetNodeIds: ["calendar_listing"],
        selector: "tr.calendar_overview",
-       leftClickToOpen: true
+       leftClickToOpen: common_menu.load_left_click_menu()
        });
 
    menu.addChild(new MenuItem({

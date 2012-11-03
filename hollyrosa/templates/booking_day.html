@@ -80,6 +80,7 @@ function navigation_calendar_clicked(x) {
 		var menu = new Menu({
       	targetNodeIds: ["booking_day_overview"],
          selector: "div.slot_booking",
+         leftClickToOpen: common_menu.load_left_click_menu(),
          onOpen: function(evt) {
                    var node = menu.currentTarget;
                    var locked = node.attributes["hollyrosa:lock"].value;
@@ -109,6 +110,7 @@ function navigation_calendar_clicked(x) {
       var more = new Menu();
     	menu.addChild(new PopupMenuItem({
          label: "More...",
+         leftClickToOpen: common_menu.load_left_click_menu(),
         	popup: more
       }));
            
@@ -141,6 +143,7 @@ function navigation_calendar_clicked(x) {
            var book_menu = new Menu({
                targetNodeIds: ["booking_day_overview"],
                selector: "div.slot_empty",
+               leftClickToOpen: common_menu.load_left_click_menu(),
                onOpen: function(evt) {
                    var node = book_menu.currentTarget;
                    var locked = node.attributes["hollyrosa:lock"].value;
@@ -168,7 +171,8 @@ function navigation_calendar_clicked(x) {
            /******************* unschedule menu ********************/
            var unschedule_menu = new Menu({
                targetNodeIds: ["unscheduled_bookings"],
-               selector: "li.unscheduled_booking"
+               selector: "li.unscheduled_booking",
+               leftClickToOpen: common_menu.load_left_click_menu()
               });
               
           	 common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "View...", '${tg.url('/booking/view_booked_booking')}');
@@ -183,6 +187,7 @@ function navigation_calendar_clicked(x) {
              var schedule_more_menu = new Menu();
     	          unschedule_menu.addChild(new PopupMenuItem({
                 label: "Schedule...",
+                leftClickToOpen: common_menu.load_left_click_menu(),
         	       popup: schedule_more_menu
              }));
            
@@ -192,6 +197,7 @@ function navigation_calendar_clicked(x) {
            
        	var view_ag_menu = new Menu({
                targetNodeIds: ["view_ag_menu"],
+               leftClickToOpen: common_menu.load_left_click_menu()
                });
                
          

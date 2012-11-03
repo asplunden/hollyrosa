@@ -48,27 +48,35 @@ ready(function() {
    //...setup menu for each little booking
 	var menu = new Menu({
    	targetNodeIds: ["clustered_booking_list"],
-      selector: "div.booking_meta_info"
+      selector: "div.booking_meta_info",
+      leftClickToOpen: common_menu.load_left_click_menu()
       });
       
 	var cluster_menu = new Menu({
    	targetNodeIds: ["clustered_booking_list"],
-      selector: "div.cluster_meta_info"
+      selector: "div.cluster_meta_info",
+      leftClickToOpen: common_menu.load_left_click_menu()
       });
 
 
    /* refactor  show booked booking adding menus to it, then attack booking day add menus to it, then attack the clanedar overview...list visiting groups */
    
-	common_menu.add_booking_op_menu_item(menu, menu, "Edit booking", '${tg.url('/booking/edit_booked_booking')}');
+	
 	common_menu.add_booking_op_menu_item(menu, menu, "View booking", '${tg.url('/booking/view_booked_booking')}');
+	common_menu.add_booking_op_menu_item(menu, menu, "Edit booking", '${tg.url('/booking/edit_booked_booking')}');
 	common_menu.add_booking_op_menu_item(menu, menu, "Unschedule booking", '${tg.url('/booking/unschedule_booking')}');
-   common_menu.add_booking_op_menu_item(menu, menu, "Multi-book", '${tg.url('/booking/multi_book')}');
+	common_menu.add_menu_separator(menu);
 	                    
    var more = new Menu();
    menu.addChild(new PopupMenuItem({
    	label: "more...",
+   	leftClickToOpen: common_menu.load_left_click_menu(),
       popup: more
    }));  
+
+	common_menu.add_menu_separator(menu);
+   common_menu.add_booking_op_menu_item(menu, menu, "Multi-book", '${tg.url('/booking/multi_book')}');
+
     
     var set_state_url = '${tg.url('/workflow/set_state')}';       
     
@@ -78,14 +86,18 @@ ready(function() {
 	//...setup menu for visiting group itself.
 	var vgroup_menu = new Menu({
    	targetNodeIds: ["visiting_group_menu"],
-   	leftClickToOpen: false
+   	leftClickToOpen: common_menu.load_left_click_menu()
    });
     
-	common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Show visiting group", '${visiting_group['id']}', '${tg.url('show_visiting_group')}');
-   common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Edit visiting group", '${visiting_group['id']}', '${tg.url('edit_visiting_group')}');  
-   common_menu.add_note_redirect_menu_item(vgroup_menu, vgroup_menu, "Add note", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
-   common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Show history", '${visiting_group['id']}', '${tg.url('/history/show')}');
    common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "New booking request", '${visiting_group['id']}', '${tg.url('/booking/edit_booking')}');
+   common_menu.add_menu_separator(vgroup_menu);
+	common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "View visiting group", '${visiting_group['id']}', '${tg.url('show_visiting_group')}');   
+   common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Edit visiting group", '${visiting_group['id']}', '${tg.url('edit_visiting_group')}');
+   common_menu.add_menu_separator(vgroup_menu);
+   common_menu.add_note_redirect_menu_item(vgroup_menu, vgroup_menu, "Add note", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
+   common_menu.add_menu_separator(vgroup_menu);
+   common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Show history", '${visiting_group['id']}', '${tg.url('/history/show')}');
+   
 
 	
 	//...attach the add tag handler, wont work if show_group is 0 so I disable it here
