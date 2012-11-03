@@ -118,6 +118,13 @@ function loadNotesFor(id) {
       leftClickToOpen: common_menu.load_left_click_menu()
    })); 
    
+   var vodb_state_menu = new Menu();
+   filter_menu.addChild(new PopupMenuItem({
+   	label: "VODB status...",
+      popup: vodb_state_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+   })); 
+   
    var tag_menu = new Menu();
    filter_menu.addChild(new PopupMenuItem({
    	label: "Tags...",
@@ -133,11 +140,15 @@ function loadNotesFor(id) {
    })); 
 
    
-   var l = ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in program_state_map.items()] ) +']' };
-  
+   var l1 = ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in program_state_map.items()] ) +']' };
+   var l2 = ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in vodb_state_map.items()] ) +']' };
    
-   array.forEach(l, function(l) {     
-   	common_menu.add_redirect_menu_item(filter_menu, bokn_status_menu, l[1], {boknstatus:l[0]}, '${tg.url('view_boknstatus')}');   
+   array.forEach(l1, function(l) {     
+   	common_menu.add_redirect_menu_item(filter_menu, bokn_status_menu, l[1], {program_state:l[0]}, '${tg.url('view_program_state')}');   
+   });
+   
+   array.forEach(l2, function(l) {     
+   	common_menu.add_redirect_menu_item(filter_menu, vodb_state_menu, l[1], {'vodb_state':l[0]}, '${tg.url('view_vodb_state')}');   
    });
    
    var all_tags = ${ '[' + ''.join(['"'+l+'", ' for l in all_tags]  ) +']' };

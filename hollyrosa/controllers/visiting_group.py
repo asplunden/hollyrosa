@@ -25,7 +25,7 @@ from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
 from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus, getNotesForTarget, getBookingInfoNotesOfUsedActivities
-from hollyrosa.model.booking_couch import getBookingDays,  getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap
+from hollyrosa.model.booking_couch import getBookingDays,  getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap, getVisitingGroupsByVodbState
 import datetime
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
@@ -113,15 +113,25 @@ class VisitingGroup(BaseController):
 
 
     @expose('hollyrosa.templates.visiting_group_view_all')
-    @validate(validators={'boknstatus':validators.Int(not_empty=False)})
+    @validate(validators={'program_state':validators.Int(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def view_boknstatus(self,  boknstatus=None):
+    def view_program_state(self,  program_state=None):
         #boknstatus=boknstatus[:4] # amateurish quick sanitation
         #visiting_groups = get_visiting_groups_with_boknstatus(boknstatus) 
-        visiting_groups =[v.doc for v in getVisitingGroupsByBoknstatus(holly_couch, boknstatus)]
+        visiting_groups =[v.doc for v in getVisitingGroupsByBoknstatus(holly_couch, program_state)]
         v_group_map = dict()
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)  
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
+        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=v_group_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
+
+
+    @expose('hollyrosa.templates.visiting_group_view_all')
+    @validate(validators={'vodb_state':validators.Int(not_empty=True)})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def view_vodb_state(self,  vodb_state=None):
+        visiting_groups =[v.doc for v in getVisitingGroupsByVodbState(holly_couch, vodb_state)]
+        v_group_map = dict()
+        has_notes_map = getTargetNumberOfNotesMap(holly_couch)  
+        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=v_group_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
 
         
     @expose('hollyrosa.templates.visiting_group_view_all')

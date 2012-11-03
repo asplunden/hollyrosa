@@ -139,7 +139,7 @@ function startup() {
 <a id="add_tag_href2" href="javascript:;">Add Tags</a>
 </form></div>
     <p>bok.nr: <b>${visiting_group.boknr}</b><br/>
-    vodb status: <b>${vodb_state_map.get(visiting_group.vodbstatus,'')}</b><br/>
+    vodb status: <b>${vodb_state_map.get(visiting_group.get('vodbstatus','-'))}</b><br/>
     program status: <b>${program_state_map.get(visiting_group.boknstatus,'')}</b><br/>
     camping location: <b>${visiting_group.camping_location}</b></p>${HTML(visiting_group.info)}</div>
     <div py:for="n in notes" >
