@@ -253,7 +253,7 @@ function loadNotesFor(id) {
     <h2>Visiting group names used that not is in any registered group</h2>
     <p><a class="unbound_names" href="javascript:getUnboundNames();">load unbound names</a></p>
     <ul id="unbound_names">
-        <li py:for="v in remaining_visiting_group_names">"${v}" <a href="${tg.url('view_bookings_of_name', name=v)};">List all activities</a></li>
+        <li py:for="v in remaining_visiting_group_names">"${v}" <a href="${tg.url('view_bookings_of_name', params={'name':v})};">List all activities</a></li>
     </ul>
 </body>
 </html>

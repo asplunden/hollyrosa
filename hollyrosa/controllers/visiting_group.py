@@ -37,7 +37,7 @@ from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
 from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
 from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
 from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
-from hollyrosa.controllers.common import workflow_map,  bokn_status_map,  bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId
+from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId
 from hollyrosa.controllers.booking_history import remember_tag_change
 
 from tg import request, response
@@ -171,8 +171,8 @@ class VisitingGroup(BaseController):
         at_date = datetime.datetime.today().strftime('%Y-%m-%d')
         visiting_groups = [v.doc for v in getVisitingGroupsAtDate(holly_couch, at_date)] 
         v_group_map = self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=at_date,  to_date=at_date)        
-        
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)])
+        has_notes_map = getTargetNumberOfNotesMap(holly_couch)         
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map, program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, has_notes_map=has_notes_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)])
 
 
     @expose('hollyrosa.templates.visiting_group_view_all')
@@ -182,7 +182,7 @@ class VisitingGroup(BaseController):
         visiting_groups = [v.doc for v in getVisitingGroupsAtDate(holly_couch, at_date)] 
         v_group_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=at_date,  to_date=at_date)
         has_notes_map = getTargetNumberOfNotesMap(holly_couch) 
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map, program_state_map=bokn_status_map)
 
 
     @expose("json")
