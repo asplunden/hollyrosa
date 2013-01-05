@@ -39,6 +39,7 @@ my_js = JSLink(link='/scripts/div_widget.js', javascript=[dojo_js])
 
 my_css = CSSLink(link='/css/div_widget.css')
 ext_dojo_css = CSSLink(link='/scripts/dojo-release-1.8.0/dojox/grid/resources/tundraGrid.css')
+#more_css = CSSLink(link='/scrips/dojo-release-1.8.0/dojox/resources/dojo.css";')
 
 #modname='hollyrosa', filename='/static/css/div_widget.css', 
 
@@ -46,7 +47,7 @@ ext_dojo_css = CSSLink(link='/scripts/dojo-release-1.8.0/dojox/grid/resources/tu
 class DivWidget(FormField):
     template = """<div id="${id}">${value} HELOOOOOOOO lts insert some dojo grid here, right?</div>"""
     javascript = [my_js]
-    css = [ext_dojo_css, my_css]
+    css = [ext_dojo_css, my_css ] #, more_css]
     id ="age_group_div"
 	
     def __init__(self, id=None, parent=None, children=[], **kw):

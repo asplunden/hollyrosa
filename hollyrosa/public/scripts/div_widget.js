@@ -3,8 +3,23 @@
  **/
 
 
-require(['dojo/_base/lang', 'dojox/grid/DataGrid' , 'dojo/data/ItemFileWriteStore' , 'dojo/dom' , 'dojo/domReady!'],
-  function(lang, DataGrid, ItemFileWriteStore, Button, dom){
+require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/domReady!'],
+  function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, ready){
+    
+      function formatDate(datum){
+        /*Format the value in store, so as to be displayed.*/
+        
+        
+        var d = stamp.fromISOString(datum);
+        return locale.format(d, {selector: 'date', formatLength: 'short'});
+      }
+
+    function getDateValue(){
+        /*Override the default getValue function for dojox.grid.cells.DateTextBox   */
+        return stamp.toISOString(this.widget.get('value'));
+    }
+    
+  
     /*set up data store*/
     var data = {
       identifier: "id",
@@ -45,8 +60,8 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid' , 'dojo/data/ItemFileWriteStor
     var layout = [[
       {'name': 'Age group', 'field': 'ag', 'width': '200px'},
       {'name': 'Number of participants', 'field': 'col2', 'width': '150px', editable: true},
-      {'name': 'From date', 'field': 'col3', 'width': '100px', editable: true},
-      {'name': 'To date', 'field': 'col4', 'width': '100px', editable: true, type: dojox.grid.cells.DateTextBox}
+      {'name': 'From date', 'field': 'col3', 'width': '100px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+      {'name': 'To date', 'field': 'col4', 'width': '100px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue}
     ]];
 
     /*create a new grid*/
@@ -54,7 +69,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid' , 'dojo/data/ItemFileWriteStor
         id: 'grid',
         store: store,
         structure: layout,
-        rowSelector: '20px'});
+        rowSelector: '10px'});
 
     /*append the new grid to the div*/
     grid.placeAt("age_group_div");
