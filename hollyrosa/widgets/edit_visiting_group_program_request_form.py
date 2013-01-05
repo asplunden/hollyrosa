@@ -21,6 +21,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 from tw.api import WidgetsList
 from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea,  HiddenField,  CheckBox
+
+from hollyrosa.widgets.visiting_group_program_request_widget import VisitingGroupProgramRequestWidget
 from hollyrosa.widgets.div_widget import DivWidget
 
 #...for form validation
@@ -45,9 +47,12 @@ class EditVisitingGroupProgramRequestForm(TableForm):
         contact_person_email = TextField(validator=UnicodeString())
         contact_person_phone = TextField(validator=UnicodeString())
         from_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
-        grid_a = DivWidget(value='xyz')
+        
         to_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
         
+        
+        grid_a = DivWidget(value='xyz')
+        grid_b = VisitingGroupProgramRequestWidget(value='xxx')
         
 
 create_edit_visiting_group_program_request_form = EditVisitingGroupProgramRequestForm("create_edit_visiting_group_program_request_form")
