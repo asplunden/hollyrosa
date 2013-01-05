@@ -26,7 +26,7 @@ from repoze.what import predicates
 
 from hollyrosa.lib.base import BaseController
 from hollyrosa.controllers.error import ErrorController
-from hollyrosa.controllers import booking_day,  booking_history, workflow, visiting_group, tools, note, tag, user, me
+from hollyrosa.controllers import booking_day,  booking_history, workflow, visiting_group, tools, note, tag, user, me, visiting_group_program_request
 
 from hollyrosa import model
 from hollyrosa.controllers.secure import SecureController
@@ -73,6 +73,8 @@ class RootController(BaseController):
     user = user.User()
     
     me = me.Me()
+    
+    visiting_group_program_request = visiting_group_program_request.VisitingGroupProgramRequest()
     
     
     @expose('hollyrosa.templates.index')
