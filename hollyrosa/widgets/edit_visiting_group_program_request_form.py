@@ -36,7 +36,7 @@ class EditVisitingGroupProgramRequestForm(TableForm):
 
     class fields(WidgetsList):
         id = HiddenField(validator=UnicodeString())
-        title = TextField(validator=UnicodeString(min=1),  css_class="edit_name")
+        agegroup_store = HiddenField(validator=UnicodeString())
         info = TinyMCE(validator=MarkupConverter, mce_options = dict(theme='advanced',  
                                                                    theme_advanced_toolbar_align ="left",  
                                                                    theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat", 
@@ -46,13 +46,13 @@ class EditVisitingGroupProgramRequestForm(TableForm):
         contact_person = TextField(validator=UnicodeString())
         contact_person_email = TextField(validator=UnicodeString())
         contact_person_phone = TextField(validator=UnicodeString())
-        from_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
+        #from_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
         
-        to_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
+        #to_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
         
         
-        grid_a = DivWidget(value='xyz')
-        grid_b = VisitingGroupProgramRequestWidget(value='xxx')
+        age_groups = DivWidget(value='xyz')
+        program_requests = VisitingGroupProgramRequestWidget(value='xxx')
         
 
 create_edit_visiting_group_program_request_form = EditVisitingGroupProgramRequestForm("create_edit_visiting_group_program_request_form")
@@ -62,18 +62,12 @@ create_edit_visiting_group_program_request_form = EditVisitingGroupProgramReques
 # deltar i miniscout ?
 # deltar i 60 degrees north ? 
 #
-# skriv ut ref.nr.
+# skriv ut ref.nr. from date ,todate. Why not some kind of Info Widget ?
 #
-# fromdate
-# todate
-# ---
-# age group matrix with dates and numbers and names
-#
-# ---
 # 
 # program request rows ...
 # 
-# datum - fm/em/kvall/annat - age-groups (crosses) - activity // how do we confirm this ???
+# datum - fm/em/kvall/annat - age-groups (crosses?) - activity // how do we confirm this ???
 #
 # We will use this system one or two years, then move on, but we need your help,
 #
@@ -81,6 +75,5 @@ create_edit_visiting_group_program_request_form = EditVisitingGroupProgramReques
 # Handcrafted form ?
 # How to add Dojo form to python form ??? 
 # Maybe we need to write a custom dojo grid widget and use it as widget in widget ?
-
 #
 #

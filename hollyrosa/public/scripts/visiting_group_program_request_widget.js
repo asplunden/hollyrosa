@@ -42,10 +42,16 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
 
     /*set up layout*/
     var layout = [[
-      {'name': 'Date', 'field': 'col_date', 'width': '100px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'Time', 'field': 'col_time', 'width': '100px', editable:true, type: dojox.grid.cells.Select, options: [ 'FM', 'EM', 'Evening' ], values: [ '0', '1', '2' ]},      
-      {'name': 'Age group', 'field': 'col_ag', 'width': '200px', editable:true, type: dojox.grid.cells.Select, options: [ 'Småbarn', 'Spårare', 'Upptäckare','Äventyrare','Utmanare','Rover','Ledare' ]},
-      {'name': 'Program', 'field': 'col_program', 'width': '150px', editable: true, type: dojox.grid.cells.Select, options: [ 'Trapper', 'Sammarbetsgläntan', 'Storbåt','Optimist','Kanot','Flottbygge','Hinderbana'], values: [ '0', '1', '2','3','4','5','6' ]}
+      {'name': 'Date', 'field': 'col_date', 'width': '50px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+      {'name': 'Time', 'field': 'col_time', 'width': '50px', editable:true, type: dojox.grid.cells.Select, options: [ 'FM', 'EM', 'Evening' ], values: [ '0', '1', '2' ]},      
+      {'name': 'Program', 'field': 'col_program', 'width': '100px', editable: true, type: dojox.grid.cells.Select, options: ['-', 'Trapper', 'Sammarbetsgläntan', 'Storbåt','Optimist','Kanot','Flottbygge','Hinderbana'], values: [ '0', '1', '2','3','4','5','6' ]},
+      {'name': 'Småbarn', 'field': 'col_sma', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},  
+      {'name': 'Spårare', 'field': 'col_spar', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
+      {'name': 'Upptäckare', 'field': 'col_uppt', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
+      {'name': 'Äventyrare', 'field': 'col_aven', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
+      {'name': 'Utmanare', 'field': 'col_utm', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},  
+      {'name': 'Rover', 'field': 'col_rov', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
+      {'name': 'Note', 'field': 'col_note', 'width': '200px', editable:true}
     ]];
 
     /*create a new grid*/
@@ -53,7 +59,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
         id: 'visiting_group_program_request_gridx',
         store: store,
         structure: layout,
-        rowSelector: '40px'});
+        rowSelector: '10px'});
 
     /*append the new grid to the div*/
     grid2.placeAt("program_request_div");
