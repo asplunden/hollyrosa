@@ -43,7 +43,7 @@ ext_dojo_css = CSSLink(link='/scripts/dojo-release-1.8.0/dojox/grid/resources/tu
 
 
 class VisitingGroupProgramRequestWidget(FormField):
-    template = """<div id="${id}">Program Request goes HERE</div>"""
+    template = """<div id="${id}">Program Request goes HERE<input type="hidden" name="${id}_input" id="${id}_input" value=""/></div>"""
     javascript = [my_js]
     css = [ext_dojo_css, my_css ]
     id ="program_request_div"

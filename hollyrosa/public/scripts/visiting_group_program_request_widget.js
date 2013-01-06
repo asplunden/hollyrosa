@@ -3,8 +3,8 @@
  **/
 
 
-require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/domReady!'],
-  function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, ready){
+require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on', 'dojo/domReady!'],
+  function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready){
     
       function formatDate(datum){
         /*Format the value in store, so as to be displayed.*/
@@ -19,6 +19,16 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
         return stamp.toISOString(this.widget.get('value'));
     }
     
+    
+    function saveCompleteCallback(){
+    	alert('save done');
+    	}
+
+
+	 function saveFailedCallback() {
+		alert('save failed');
+		}
+  
   
     /*set up data store*/
     var data = {
@@ -38,7 +48,19 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     for(var i = 0, l = data_list_2.length; i < 35; i++){
       data.items.push(lang.mixin({ id: i+1 }, data_list_2[i%l]));
     }
-    var store = new ItemFileWriteStore({data: data});
+    var store = new ItemFileWriteStore({
+    	data: data
+      });
+      
+      
+    store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
+                                a_saveFailedCallback /*Your callback to call if save fails*/,
+                                a_newFileContentString /*The generated JSON data to send somewhere*/){
+                                	alert(a_newFileContentString);
+                                	var inp = dom.byId('program_request_div_input');
+                                	inp.value = a_newFileContentString;
+                                	a_saveCompleteCallback();
+                                	}   
 
     /*set up layout*/
     var layout = [[
@@ -61,9 +83,19 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
         structure: layout,
         rowSelector: '10px'});
 
-    /*append the new grid to the div*/
-    grid2.placeAt("program_request_div");
 
-    /*Call startup() to render the grid*/
+    function on_save_grid_to_input() {
+    	//...find dojo store and serialize it. Should be simple. Then write serialized data into 
+    	alert('storing 2...');
+    	store.save(saveCompleteCallback, saveFailedCallback);
+    	
+    	//   somef input div. Wonder if the div widget can be accompanyed by an input widget?
+    	};
+    	
+    grid2.placeAt("program_request_div");
     grid2.startup();
+    
+    alert('ready in div_widget  2');
+    var submitt_button = dom.byId('create_edit_visiting_group_program_request_form_submit');
+    on(submitt_button, 'click', on_save_grid_to_input);
 });

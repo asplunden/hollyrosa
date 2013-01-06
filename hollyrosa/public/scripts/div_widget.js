@@ -3,8 +3,8 @@
  **/
 
 
-require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/domReady!'],
-  function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, ready ){
+require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on','dojo/domReady!'],
+  function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready ){
     
     function formatDate(datum) {
         var d = stamp.fromISOString(datum);
@@ -16,6 +16,14 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
         return stamp.toISOString(this.widget.get('value'));
     }
     
+    
+    function saveCompleteCallback(){
+    	alert('save done');
+    	}
+
+	function saveFailedCallback() {
+		alert('save failed');
+		}
   
  
     var data = {
@@ -25,7 +33,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     
     
     var data_list_2 = [
-      { col_age: '0-7', col_group: 'Smabarn',       col_: 0, col3: '', col4: ''},
+      { col_age: '0-7', col_group: 'Smabarn',       col2: 0, col3: '', col4: ''},
       { col_age: '8-9',  col_group: 'Sparare',      col2: 0, col3: '', col4: ''},
       { col_age: '10-11',  col_group: 'Upptackare', col2: 0, col3: '', col4: ''},
       { col_age: '12-15',  col_group: 'Aventyrare', col2: 0, col3: '', col4: ''},
@@ -40,8 +48,18 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     }
     
     
-    var store = new ItemFileWriteStore({data: data});
+    var store = new ItemFileWriteStore({
+    	data: data
+      });
 
+    store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
+                                a_saveFailedCallback /*Your callback to call if save fails*/,
+                                a_newFileContentString /*The generated JSON data to send somewhere*/){
+                                	alert(a_newFileContentString);
+                                	var inp = dom.byId('age_group_div_input');
+                                	inp.value = a_newFileContentString;
+                                	a_saveCompleteCallback();
+                                	}   
     
     var layout = [[
       {'name': 'Age',                    field: 'col_age', 'width': '100px'},
@@ -58,9 +76,21 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
         structure: layout,
         rowSelector: '10px'});
 
+    function on_save_grid_to_input() {
+    	//...find dojo store and serialize it. Should be simple. Then write serialized data into 
+    	alert('storing...');
+    	store.save(saveCompleteCallback, saveFailedCallback);
+    	
+    	//   somef input div. Wonder if the div widget can be accompanyed by an input widget?
+    	};
+    	
+    grid.placeAt('age_group_div');
+    grid.startup();
     
-    	grid.placeAt('age_group_div');
-      grid.startup();
-    
+    //alert('ready in div_widget');
+    //var age_group_div = dom.byId('save_age_group_grid');
+    var submitt_button = dom.byId('create_edit_visiting_group_program_request_form_submit');
+    //on(age_group_div, 'click', on_save_grid_to_input);
+    on(submitt_button, 'click', on_save_grid_to_input);
       
 });

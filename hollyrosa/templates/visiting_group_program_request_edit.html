@@ -32,15 +32,16 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script>
 // I need to attach a hook to the submit on-click and readout the dojo data grids before doing the form.submit. This is going to be interesting...
 
-require(["dojo/ready", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window"], function(ready, dom, array, query, on, win) {
+require(["dojo/ready", "dojo/dom", "dojo/dom-attr", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window"], function(ready, dom, domAttr, array, query, on, win) {
 
   function on_submit() {
       alert('submit');
       
       //...readout the data stores
       
-      var age_group_grid = dom.byId('age_group_grid');
-      var visiting_group_program_request_grid = visiting_group_program_request_gridx = dom.byId('visiting_group_program_request_gridx');
+      
+//var age_group_grid = dom.byId('age_group_grid');
+//      var visiting_group_program_request_grid = visiting_group_program_request_gridx = dom.byId('visiting_group_program_request_gridx');
   }
 
 
@@ -48,6 +49,7 @@ require(["dojo/ready", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/
   
    
     var submit_button = dom.byId('create_edit_visiting_group_program_request_form_submit');
+    // domAttr.set(submit_button, 'hidden', 'true');
     on(submit_button,'click', on_submit );
     });
   
