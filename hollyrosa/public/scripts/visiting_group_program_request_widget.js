@@ -56,7 +56,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
                                 a_saveFailedCallback /*Your callback to call if save fails*/,
                                 a_newFileContentString /*The generated JSON data to send somewhere*/){
-                                	alert(a_newFileContentString);
+                                	//alert(a_newFileContentString);
                                 	var inp = dom.byId('program_request_div_input');
                                 	inp.value = a_newFileContentString;
                                 	a_saveCompleteCallback();
@@ -64,7 +64,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
 
     /*set up layout*/
     var layout = [[
-      {'name': 'Date', 'field': 'col_date', 'width': '50px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+      {'name': 'Date', 'field': 'col_date', 'width': '100px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
       {'name': 'Time', 'field': 'col_time', 'width': '50px', editable:true, type: dojox.grid.cells.Select, options: [ 'FM', 'EM', 'Evening' ], values: [ '0', '1', '2' ]},      
       {'name': 'Program', 'field': 'col_program', 'width': '100px', editable: true, type: dojox.grid.cells.Select, options: ['-', 'Trapper', 'Sammarbetsgläntan', 'Storbåt','Optimist','Kanot','Flottbygge','Hinderbana'], values: [ '0', '1', '2','3','4','5','6' ]},
       {'name': 'Småbarn', 'field': 'col_sma', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},  
@@ -86,7 +86,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
 
     function on_save_grid_to_input() {
     	//...find dojo store and serialize it. Should be simple. Then write serialized data into 
-    	alert('storing 2...');
+    	//alert('storing 2...');
     	store.save(saveCompleteCallback, saveFailedCallback);
     	
     	//   somef input div. Wonder if the div widget can be accompanyed by an input widget?
@@ -95,7 +95,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     grid2.placeAt("program_request_div");
     grid2.startup();
     
-    alert('ready in div_widget  2');
+    //alert('ready in div_widget  2');
     var submitt_button = dom.byId('create_edit_visiting_group_program_request_form_submit');
     on(submitt_button, 'click', on_save_grid_to_input);
 });

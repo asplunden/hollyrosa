@@ -45,7 +45,7 @@ ext_dojo_css = CSSLink(link='/scripts/dojo-release-1.8.0/dojox/grid/resources/tu
 
 
 class DivWidget(FormField):
-    template = """<div id="${id}">${value} HELOOOOOOOO lts insert some dojo grid here, right?<input type="hidden" name="${id}_input" id="${id}_input" value=""/><a id="save_age_group_grid">SAVE</a></div>"""
+    template = """<div id="${id}">${value} <input type="hidden" name="${id}_input" id="${id}_input" value=""/></div>"""
     javascript = [my_js]
     css = [ext_dojo_css, my_css ] #, more_css]
     id ="age_group_div"

@@ -54,6 +54,93 @@ class VisitingGroupProgramRequest(BaseController):
         tmpl_context.form = create_edit_visiting_group_program_request_form
         vgpr = dict()
         vgpr['name'] = 'test vgroup'
+        vgpr['info'] = 'this is some info text'
+        vgpr['contact_person'] = 'john doe'
+        vgpr['from_date'] = '2012-06-01' 
+        vgpr['to_date'] = '2012-06-06'
+        
+        #...construct the age group list. It's going to be a json document. Hard coded.
+        #... if we are to partially load from database and check that we can process it, we do need to go from python to json. (and back)
+        
+        age_group_data = """{
+	"identifier": "id",
+	"items": [
+		{
+			"id": 1,
+			"property": "barn",
+			"unit": "smabarn",
+			"age": "0-7",
+			"age_group": "Smabarn",
+			"value": 0,
+			"from_date": "",
+			"to_date": ""
+		},
+		{
+			"id": 2,
+			"property": "spar",
+			"unit": "spar",
+			"age": "8-9",
+			"age_group": "Sparare",
+			"value": 0,
+			"from_date": "",
+			"to_date": ""
+		},
+		{
+			"id": 3,
+			"property": "uppt",
+			"unit": "uppt",
+			"age": "10-11",
+			"age_group": "Upptackare",
+			"value": 0,
+			"from_date": "",
+			"to_date": ""
+		},
+		{
+			"id": 4,
+			"property": "aven",
+			"unit": "aven",
+			"age": "12-15",
+			"age_group": "Aventyrare",
+			"value": 10,
+			"from_date": "",
+			"to_date": ""
+		},
+		{
+			"id": 5,
+			"property": "utm",
+			"unit": "utm",
+			"age": "16-18",
+			"age_group": "Utmanare",
+			"value": 0,
+			"from_date": "",
+			"to_date": ""
+		},
+		{
+			"id": 6,
+			"property": "rover",
+			"unit": "rover",
+			"age": "18-25",
+			"age_group": "Rover",
+			"value": 0,
+			"from_date": "",
+			"to_date": ""
+		},
+		{
+			"id": 7,
+			"property": "led",
+			"unit": "ledare",
+			"age": "---",
+			"age_group": "Ledare",
+			"value": 0,
+			"from_date": "",
+			"to_date": ""
+		}
+	]
+}"""
+        vgpr['age_group_data'] = age_group_data
+        
+        #...construct a program request template. It's going to be a json document. Hard coded.
+        
         return dict(visiting_group_program_request=vgpr)
         
         

@@ -27,19 +27,19 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
   
  
     var data = {
-      identifier: "id",
+      identifier: "property",
       items: []
     };
     
     
     var data_list_2 = [
-      { col_age: '0-7', col_group: 'Smabarn',       col2: 0, col3: '', col4: ''},
-      { col_age: '8-9',  col_group: 'Sparare',      col2: 0, col3: '', col4: ''},
-      { col_age: '10-11',  col_group: 'Upptackare', col2: 0, col3: '', col4: ''},
-      { col_age: '12-15',  col_group: 'Aventyrare', col2: 0, col3: '', col4: ''},
-      { col_age: '16-18',  col_group: 'Utmanare',   col2: 0, col3: '', col4: ''},
-      { col_age: '18-25',  col_group: 'Rover',      col2: 0, col3: '', col4: ''},
-      { col_age: '---',  col_group: 'Ledare',       col2: 0, col3: '', col4: ''}
+      { property: 'barn', unit:'smabarn',  age: '0-7',  age_group: 'Smabarn',      value: 0, from_date: '', to_date: ''},
+      { property: 'spar', unit:'spar',     age: '8-9',  age_group: 'Sparare',      value: 0, from_date: '', to_date: ''},
+      { property: 'uppt', unit:'uppt',     age: '10-11',  age_group: 'Upptackare', value: 0, from_date: '', to_date: ''},
+      { property: 'aven', unit:'aven',     age: '12-15',  age_group: 'Aventyrare', value: 0, from_date: '', to_date: ''},
+      { property: 'utm',  unit:'utm',      age: '16-18',  age_group: 'Utmanare',   value: 0, from_date: '', to_date: ''},
+      { property: 'rover', unit:'rover',   age: '18-25',  age_group: 'Rover',      value: 0, from_date: '', to_date: ''},
+      { property: 'led', unit:'ledare',    age: '---',  age_group: 'Ledare',       value: 0, from_date: '', to_date: ''}
     ];
 
     
@@ -55,18 +55,18 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
                                 a_saveFailedCallback /*Your callback to call if save fails*/,
                                 a_newFileContentString /*The generated JSON data to send somewhere*/){
-                                	alert(a_newFileContentString);
+                                	//alert(a_newFileContentString);
                                 	var inp = dom.byId('age_group_div_input');
                                 	inp.value = a_newFileContentString;
                                 	a_saveCompleteCallback();
                                 	}   
     
     var layout = [[
-      {'name': 'Age',                    field: 'col_age', 'width': '100px'},
-      {'name': 'Group',                  field: 'col_group', 'width': '100px'},
-      {'name': 'Number of participants', field: 'col2', 'width': '150px', editable: true},
-      {'name': 'From date',              field: 'col3', 'width': '100px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'To date',                field: 'col4', 'width': '100px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue}
+      {'name': 'Age',                    field: 'age', 'width': '100px'},
+      {'name': 'Group',                  field: 'age_group', 'width': '100px'},
+      {'name': 'Number of participants', field: 'value', 'width': '150px', editable: true},
+      {'name': 'From date',              field: 'from_date', 'width': '100px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+      {'name': 'To date',                field: 'to_date', 'width': '100px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue}
     ]];
 
     /*create a new grid*/
@@ -78,7 +78,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
 
     function on_save_grid_to_input() {
     	//...find dojo store and serialize it. Should be simple. Then write serialized data into 
-    	alert('storing...');
+    	//alert('storing...');
     	store.save(saveCompleteCallback, saveFailedCallback);
     	
     	//   somef input div. Wonder if the div widget can be accompanyed by an input widget?
