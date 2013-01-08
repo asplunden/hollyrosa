@@ -144,6 +144,21 @@ class VisitingGroupProgramRequest(BaseController):
         return dict(visiting_group_program_request=vgpr)
         
         
+        
+    @expose('hollyrosa.templates.visiting_group_program_request_edit2')
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
+    def edit_request(self):
+        vgpr = dict()
+        vgpr['name'] = 'test vgroup'
+        vgpr['info'] = 'this is some info text'
+        vgpr['contact_person'] = 'john doe'
+        vgpr['from_date'] = '2012-06-01' 
+        vgpr['to_date'] = '2012-06-06'
+        
+        #...construct a program request template. It's going to be a json document. Hard coded.
+        
+        return dict(visiting_group_program_request=vgpr)
+        
     @expose('hollyrosa.templates.visiting_group_program_request_edit')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
     def view2(self):

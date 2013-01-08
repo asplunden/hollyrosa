@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Program ${visiting_group_program_request.name}</title>
+  
+  <script>dojoConfig = {parseOnLoad: true}</script>
+  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true"></script>
+   
+  <script>
+// I need to attach a hook to the submit on-click and readout the dojo data grids before doing the form.submit. This is going to be interesting...
+
+require(["dojo/ready", "dojo/dom", "dojo/dom-attr", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window"], function(ready, dom, domAttr, array, query, on, win) {
+
+});
+</script>
+
+<script>
+require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/ValidationTextBox", "dijit/form/DateTextBox"]);
+</script>
+</head>
+
+<body class="tundra">
+    <h2>Program Request for ${visiting_group_program_request.name}</h2>
+    <p> from ${visiting_group_program_request.from_date} to ${visiting_group_program_request.to_date}</p>
+    
+    
+    
+    <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="" method="">
+    <script type="dojo/on" data-dojo-event="reset">
+        return confirm('Press OK to reset widget values');
+    </script>
+
+    <script type="dojo/on" data-dojo-event="submit">
+        if(this.validate()){
+            return confirm('Form is valid, press OK to submit');
+        }else{
+            alert('Form contains invalid data.  Please correct first');
+            return false;
+        }
+        return true;
+    </script>
+
+    <table style="border: 1px solid #9f9f9f;" cellspacing="10">
+        <tr>
+            <td>
+                <label for="name">Name:</label>
+            </td>
+            <td>
+                <input type="text" id="name" name="name" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="dob">Date of birth:</label>
+            </td>
+            <td>
+                <input type="text" id="dob" name="dob" data-dojo-type="dijit/form/DateTextBox"/>
+            </td>
+        </tr>
+    </table>
+
+    <button data-dojo-type="dijit/form/Button" type="button" onClick="console.log(myForm.getValues())">Get Values from form!</button>
+    <button data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Submit">Submit</button>
+    <button data-dojo-type="dijit/form/Button" type="reset">Reset</button>
+</div>
+
+
+
+        <div>Dojo form here...</div>
+    
+</body>
+</html>
