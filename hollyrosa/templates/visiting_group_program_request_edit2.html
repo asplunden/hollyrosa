@@ -36,8 +36,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
    
   <script>
 
-require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on','dojo/domReady!'],
-  function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready ){
+require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on','dojo/ready', 'dojo/domReady!'],
+  function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready, domReady ){
     
     function formatDate(datum) {
         var d = stamp.fromISOString(datum);
@@ -122,9 +122,33 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     
     alert('ready in div_widget');
     
-    var submitt_button = dom.byId('submit_button');
+    //var submit_button = dom.byId('submit_button');
    
-    on(submitt_button, 'click', on_save_grid_to_input);
+    //on(submit_button, 'click', on_save_grid_to_input);
+    
+    function on_ready(){
+      //...validate form
+    	var myForm = dijit.byId('myForm');
+      var submit_button = dijit.byId('submit_button');
+      
+      on( submit_button , 'click', on_save_grid_to_input );
+		on( submit_button , 'click', function() {
+    
+      	if(myForm.validate()){
+            var result = confirm('Form is valid, press OK to submit');
+            
+            return result;
+        } else {
+            alert('Form contains invalid data.  Please correct first');
+            return false;
+        }
+        return true;
+    	});  
+    }
+    	
+      ready(on_ready);
+      
+        
       
 });
 
@@ -142,19 +166,20 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
     
     
     <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="" method="">
-    <script type="dojo/on" data-dojo-event="reset">
-        return confirm('Press OK to reset widget values');
-    </script>
-
+    
+<!--
     <script type="dojo/on" data-dojo-event="submit">
         if(this.validate()){
-            return confirm('Form is valid, press OK to submit');
+            var result = confirm('Form is valid, press OK to submit');
+            
+            return result;
         }else{
             alert('Form contains invalid data.  Please correct first');
             return false;
         }
         return true;
     </script>
+-->
 
     <table style="border: 1px solid #9f9f9f;" cellspacing="10">
         <tr>
@@ -175,13 +200,13 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
         </tr>
         <tr>
         		<td><label for="age_group_grid">Age groups:</label></td>
-        		<td><div id="age_group_div" style="height:20em;width:50em;">Age group div<input type="hidden" id="age_group_input" name="age_group_input"/></div></td>
+        		<td><div id="age_group_div" style="height:20em;width:50em;">Age group div<input type="hidden" id="age_group_div_input" name="age_group_input"/></div></td>
         </tr>
     </table>
 
     <button data-dojo-type="dijit/form/Button" type="button" onClick="console.log(myForm.getValues())">Get Values from form!</button>
     <button data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Submit" id="submit_button">Submit</button>
-    <button data-dojo-type="dijit/form/Button" type="reset">Reset</button>
+
 </div>
 
 
