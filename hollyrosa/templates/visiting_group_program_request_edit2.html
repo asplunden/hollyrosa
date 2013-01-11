@@ -59,13 +59,43 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
 		}
   
  
-    var data = {
+    var age_group_data = {
       identifier: "property",
       items: []
     };
     
+    var program_request_data = {
+      identifier: "id",
+      items: []
+    };
     
-    var data_list_2 = [
+    var program_request_data = {
+      identifier: "id",
+      items: []
+    };
+    
+    
+        
+
+    var program_request_data_list = [
+      { col_date: '', col_time:'', col_ag: '', col_program: ''}
+    ];
+
+
+    
+    for(var i = 0, l = program_request_data_list.length; i != 35; i++){
+      program_request_data.items.push(lang.mixin({ id: i+1 }, program_request_data_list[i%l]));
+    }
+    
+    var program_request_store = new ItemFileWriteStore({
+    	data: program_request_data
+      });
+      
+      
+    
+
+    
+    var age_group_data_list = [
       { property: 'barn', unit:'smabarn',  age: '0-7',  age_group: 'Smabarn',      value: 0, from_date: '', to_date: ''},
       { property: 'spar', unit:'spar',     age: '8-9',  age_group: 'Sparare',      value: 0, from_date: '', to_date: ''},
       { property: 'uppt', unit:'uppt',     age: '10-11',  age_group: 'Upptackare', value: 0, from_date: '', to_date: ''},
@@ -76,25 +106,50 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     ];
 
     
-    for(var i = 0, l = data_list_2.length; i != l; i++){
-      data.items.push(lang.mixin({ id: i+1 }, data_list_2[i%l]));
+    // TODO: fix
+    for(var i = 0, l = age_group_data_list.length; i != l; i++){
+      age_group_data.items.push(lang.mixin({ id: i+1 }, age_group_data_list[i%l]));
     }
     
     
-    var store = new ItemFileWriteStore({
-    	data: data
+    var age_group_store = new ItemFileWriteStore({
+    	data: age_group_data
       });
 
-    store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
+    age_group_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
                                 a_saveFailedCallback /*Your callback to call if save fails*/,
                                 a_newFileContentString /*The generated JSON data to send somewhere*/){
-                                	//alert(a_newFileContentString);
+                                
                                 	var inp = dom.byId('age_group_div_input');
                                 	inp.value = a_newFileContentString;
                                 	a_saveCompleteCallback();
-                                	}   
+    										};
     
-    var layout = [[
+    program_request_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
+                                a_saveFailedCallback /*Your callback to call if save fails*/,
+                                a_newFileContentString /*The generated JSON data to send somewhere*/){
+                                	//alert(a_newFileContentString);
+                                	var inp = dom.byId('program_request_div_input');
+                                	inp.value = a_newFileContentString;
+                                	a_saveCompleteCallback();
+                                	};   
+
+    /*set up layout*/
+    var program_request_layout = [[
+      {'name': 'Date', 'field': 'col_date', 'width': '100px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+      {'name': 'Time', 'field': 'col_time', 'width': '50px', editable:true, type: dojox.grid.cells.Select, options: [ 'FM', 'EM', 'Evening' ], values: [ '0', '1', '2' ]},      
+      {'name': 'Program', 'field': 'col_program', 'width': '100px', editable: true, type: dojox.grid.cells.Select, options: ['-', 'Trapper', 'Sammarbetsgläntan', 'Storbåt','Optimist','Kanot','Flottbygge','Hinderbana'], values: [ '0', '1', '2','3','4','5','6' ]},
+      {'name': 'Småbarn', 'field': 'col_sma', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},  
+      {'name': 'Spårare', 'field': 'col_spar', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
+      {'name': 'Upptäckare', 'field': 'col_uppt', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
+      {'name': 'Äventyrare', 'field': 'col_aven', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
+      {'name': 'Utmanare', 'field': 'col_utm', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},  
+      {'name': 'Rover', 'field': 'col_rov', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
+      {'name': 'Note', 'field': 'col_note', 'width': '200px', editable:true}
+    ]];
+                            	
+    
+    var age_group_layout = [[
       {'name': 'Age',                    field: 'age', 'width': '100px'},
       {'name': 'Group',                  field: 'age_group', 'width': '100px'},
       {'name': 'Number of participants', field: 'value', 'width': '150px', editable: true},
@@ -103,28 +158,37 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     ]];
 
     /*create a new grid*/
-    var grid = new DataGrid({
+    var age_group_grid = new DataGrid({
         id: 'age_group_gridx',
-        store: store,
-        structure: layout,
+        store: age_group_store,
+        structure: age_group_layout,
         rowSelector: '10px'});
+
+
+	 var program_request_grid = new DataGrid({
+        id: 'program_request_gridx',
+        store: program_request_store,
+        structure: program_request_layout,
+        rowSelector: '10px'});
+
+
 
     function on_save_grid_to_input() {
     	//...find dojo store and serialize it. Should be simple. Then write serialized data into 
     	alert('storing...');
-    	store.save(saveCompleteCallback, saveFailedCallback);
+    	age_group_store.save(saveCompleteCallback, saveFailedCallback);
+    	program_request_store.save(saveCompleteCallback, saveFailedCallback);
     	
-    	//   somef input div. Wonder if the div widget can be accompanyed by an input widget?
+    	//   some input div. Wonder if the div widget can be accompanyed by an input widget?
     	};
     	
-    grid.placeAt('age_group_div');
-    grid.startup();
+    age_group_grid.placeAt('age_group_div');
+    age_group_grid.startup();
+    program_request_grid.placeAt('age_group_div');
+    program_request_grid.startup();
     
-    alert('ready in div_widget');
+    alert('ready in age_group_div_widget');
     
-    //var submit_button = dom.byId('submit_button');
-   
-    //on(submit_button, 'click', on_save_grid_to_input);
     
     function on_ready(){
       //...validate form
@@ -201,13 +265,17 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
             <td>
                 <!-- <input type="text" id="dob" name="dob" data-dojo-type="dijit/form/DateTextBox"/> -->
                 <div data-dojo-type="dijit/Editor" id="myEditor">
-    <p>This is the initial content.</p>
-</div>
+    					<p>This is the initial content.</p>
+					</div>
             </td>
         </tr>
         <tr>
-        		<td><label for="age_group_grid">Age groups:</label></td>
+        		<td><label for="age_group_div">Age groups:</label></td>
         		<td><div id="age_group_div" style="height:20em;width:50em;">Age group div<input type="hidden" id="age_group_div_input" name="age_group_input"/></div></td>
+        </tr>
+        <tr>
+        		<td><label for="program_request_div">Program request:</label></td>
+        		<td><div id="program_request_div" style="height:30em;width:50em;">Program request...<input type="hidden" id="program_request_div_input" name="program_request_input"/></div></td>
         </tr>
     </table>
 
