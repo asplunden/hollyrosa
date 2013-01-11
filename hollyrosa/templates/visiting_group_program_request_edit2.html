@@ -167,35 +167,42 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
     
     <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="" method="">
     
-<!--
-    <script type="dojo/on" data-dojo-event="submit">
-        if(this.validate()){
-            var result = confirm('Form is valid, press OK to submit');
-            
-            return result;
-        }else{
-            alert('Form contains invalid data.  Please correct first');
-            return false;
-        }
-        return true;
-    </script>
--->
+
 
     <table style="border: 1px solid #9f9f9f;" cellspacing="10">
         <tr>
             <td>
-                <label for="name">Name:</label>
+                <label for="contact_name">Name:</label>
             </td>
             <td>
-                <input type="text" id="name" name="name" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
+                <input type="text" id="contact_name" name="contact_name" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
             </td>
         </tr>
         <tr>
             <td>
-                <label for="dob">Date of birth:</label>
+                <label for="contact_email">Email:</label>
             </td>
             <td>
-                <input type="text" id="dob" name="dob" data-dojo-type="dijit/form/DateTextBox"/>
+                <input type="text" id="contact_email" name="contact_email" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="contact_phone">Phone (mobile):</label>
+            </td>
+            <td>
+                <input type="text" id="contact_phone" name="contact_phone" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="myEditor">Info:</label>
+            </td>
+            <td>
+                <!-- <input type="text" id="dob" name="dob" data-dojo-type="dijit/form/DateTextBox"/> -->
+                <div data-dojo-type="dijit/Editor" id="myEditor">
+    <p>This is the initial content.</p>
+</div>
             </td>
         </tr>
         <tr>
