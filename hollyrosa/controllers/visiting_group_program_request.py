@@ -27,7 +27,7 @@ from hollyrosa.model import holly_couch
 from hollyrosa.widgets.edit_visiting_group_program_request_form import create_edit_visiting_group_program_request_form
 from tg import tmpl_context
 
-import datetime,logging
+import datetime,logging, json
 
 log = logging.getLogger()
 
@@ -62,11 +62,30 @@ class VisitingGroupProgramRequest(BaseController):
         #...construct the age group list. It's going to be a json document. Hard coded.
         #... if we are to partially load from database and check that we can process it, we do need to go from python to json. (and back)
         
+        
+        #vgpr['age_group_data'] = age_group_data
+        
+        #...construct a program request template. It's going to be a json document. Hard coded.
+        
+        return dict(visiting_group_program_request=vgpr)
+        
+        
+        
+    @expose('hollyrosa.templates.visiting_group_program_request_edit2')
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
+    def edit_request(self, visiting_group_id=''):     	
+        visiting_group_o = holly_couch[str(visiting_group_id)] 
+        visiting_group_o.program_request_info = 'grpinfo'
+        visiting_group_o.program_request_have_skippers = visiting_group_o.get('program_request_have_skippers',0)
+        visiting_group_o.program_request_miniscout = visiting_group_o.get('program_request_miniscout',0)
+        
+        #...construct a program request template. It's going to be a json document. Hard coded.
+        #...supply booking request if it exists
+        
         age_group_data = """{
-	"identifier": "id",
+	identifier: "property",
 	"items": [
 		{
-			"id": 1,
 			"property": "barn",
 			"unit": "smabarn",
 			"age": "0-7",
@@ -76,7 +95,6 @@ class VisitingGroupProgramRequest(BaseController):
 			"to_date": ""
 		},
 		{
-			"id": 2,
 			"property": "spar",
 			"unit": "spar",
 			"age": "8-9",
@@ -86,7 +104,6 @@ class VisitingGroupProgramRequest(BaseController):
 			"to_date": ""
 		},
 		{
-			"id": 3,
 			"property": "uppt",
 			"unit": "uppt",
 			"age": "10-11",
@@ -96,7 +113,6 @@ class VisitingGroupProgramRequest(BaseController):
 			"to_date": ""
 		},
 		{
-			"id": 4,
 			"property": "aven",
 			"unit": "aven",
 			"age": "12-15",
@@ -106,7 +122,6 @@ class VisitingGroupProgramRequest(BaseController):
 			"to_date": ""
 		},
 		{
-			"id": 5,
 			"property": "utm",
 			"unit": "utm",
 			"age": "16-18",
@@ -116,7 +131,6 @@ class VisitingGroupProgramRequest(BaseController):
 			"to_date": ""
 		},
 		{
-			"id": 6,
 			"property": "rover",
 			"unit": "rover",
 			"age": "18-25",
@@ -126,7 +140,6 @@ class VisitingGroupProgramRequest(BaseController):
 			"to_date": ""
 		},
 		{
-			"id": 7,
 			"property": "led",
 			"unit": "ledare",
 			"age": "---",
@@ -137,27 +150,9 @@ class VisitingGroupProgramRequest(BaseController):
 		}
 	]
 }"""
-        vgpr['age_group_data'] = age_group_data
+        visiting_group_o.program_request_age_group = visiting_group_o.get('program_request_age_group', age_group_data)
         
-        #...construct a program request template. It's going to be a json document. Hard coded.
-        
-        return dict(visiting_group_program_request=vgpr)
-        
-        
-        
-    @expose('hollyrosa.templates.visiting_group_program_request_edit2')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
-    def edit_request(self):
-        vgpr = dict()
-        vgpr['name'] = 'test vgroup'
-        vgpr['info'] = 'this is some info text'
-        vgpr['contact_person'] = 'john doe'
-        vgpr['from_date'] = '2012-06-01' 
-        vgpr['to_date'] = '2012-06-06'
-        
-        #...construct a program request template. It's going to be a json document. Hard coded.
-        
-        return dict(visiting_group_program_request=vgpr)
+        return dict(visiting_group_program_request=visiting_group_o)
         
     @expose('hollyrosa.templates.visiting_group_program_request_edit')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
@@ -167,13 +162,29 @@ class VisitingGroupProgramRequest(BaseController):
         
     @expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def update_visiting_group_program_request(self, info='', contact_person='', contact_person_email='', contact_person_phone='', program_request_div_input='', id='', age_group_div_input='', agegroup_store=''):
+    def update_visiting_group_program_request(self, info='', contact_name='', contact_email='', contact_phone='', program_request_input='', have_skippers=False, miniscout=False, ready_to_process=False, age_group_input='', saveButton='', submitButton=''):
         log.debug('update')
         log.debug(info)
-        log.debug(contact_person)
-        log.debug(contact_person_email)
-        log.debug(contact_person_phone)
+        log.debug(contact_name)
+        log.debug(contact_email)
+        log.debug(contact_phone)
 
-        log.debug('program request:'+program_request_div_input)
-        log.debug('age group:' + age_group_div_input)
-        log.debug(agegroup_store)        
+        log.debug('program request:'+program_request_input)
+        log.debug('program_json: ' + str( json.loads(program_request_input) ) )
+        
+        log.debug('age group:' + age_group_input)
+        log.debug('age_json: ' + str( json.loads(age_group_input) ) )
+        
+        #...how can we convert age group data into the visiting group data?
+        
+        #...how can we covert the saved program request into a preliminary program request?
+        #   the text is going to be according to the true/false of the matrix
+        #   the comment is going to be about requested 23/1 FM
+        #   the date is the age group time span, unless it's unreasonable. 
+        #   the requested date is the date as indicated by the date choice, unless its unreasonable
+        #
+        # visiting group name, and dates are according to preliminary booking
+        #
+        # info is made into a note and added to the visiting group.
+        #
+        #

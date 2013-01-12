@@ -59,26 +59,17 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
 		}
   
  
-    var age_group_data = {
-      identifier: "property",
-      items: []
-    };
+    var age_group_data = ${visiting_group_program_request.program_request_age_group};
     
     var program_request_data = {
       identifier: "id",
       items: []
     };
-    
-    var program_request_data = {
-      identifier: "id",
-      items: []
-    };
-    
     
         
 
     var program_request_data_list = [
-      { col_date: '', col_time:'', col_ag: '', col_program: ''}
+      { requested_date: '', requested_time:'', requested_activity: '', age_sma:false, age_spar:false, age_uppt:false, age_aven:false, age_utm:false, age_rov:false, age_led:false, note:''}
     ];
 
 
@@ -91,26 +82,6 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     	data: program_request_data
       });
       
-      
-    
-
-    
-    var age_group_data_list = [
-      { property: 'barn', unit:'smabarn',  age: '0-7',  age_group: 'Smabarn',      value: 0, from_date: '', to_date: ''},
-      { property: 'spar', unit:'spar',     age: '8-9',  age_group: 'Sparare',      value: 0, from_date: '', to_date: ''},
-      { property: 'uppt', unit:'uppt',     age: '10-11',  age_group: 'Upptackare', value: 0, from_date: '', to_date: ''},
-      { property: 'aven', unit:'aven',     age: '12-15',  age_group: 'Aventyrare', value: 0, from_date: '', to_date: ''},
-      { property: 'utm',  unit:'utm',      age: '16-18',  age_group: 'Utmanare',   value: 0, from_date: '', to_date: ''},
-      { property: 'rover', unit:'rover',   age: '18-25',  age_group: 'Rover',      value: 0, from_date: '', to_date: ''},
-      { property: 'led', unit:'ledare',    age: '---',  age_group: 'Ledare',       value: 0, from_date: '', to_date: ''}
-    ];
-
-    
-    // TODO: fix
-    for(var i = 0, l = age_group_data_list.length; i != l; i++){
-      age_group_data.items.push(lang.mixin({ id: i+1 }, age_group_data_list[i%l]));
-    }
-    
     
     var age_group_store = new ItemFileWriteStore({
     	data: age_group_data
@@ -135,17 +106,26 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
                                 	};   
 
     /*set up layout*/
+    
+    // fix column names of program request. 
+    // fix the empty note column... ist kind of missing
+    // add checkbox 'we are done' or a button 'take care of our requests'
+    // add some kind on status indication of how things are going
+    // see if we can send data to the form (ajax perhaps...)
+    // fix gandi
+    // fix dustin
+    
     var program_request_layout = [[
-      {'name': 'Date', 'field': 'col_date', 'width': '100px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'Time', 'field': 'col_time', 'width': '50px', editable:true, type: dojox.grid.cells.Select, options: [ 'FM', 'EM', 'Evening' ], values: [ '0', '1', '2' ]},      
-      {'name': 'Program', 'field': 'col_program', 'width': '100px', editable: true, type: dojox.grid.cells.Select, options: ['-', 'Trapper', 'Sammarbetsgläntan', 'Storbåt','Optimist','Kanot','Flottbygge','Hinderbana'], values: [ '0', '1', '2','3','4','5','6' ]},
-      {'name': 'Småbarn', 'field': 'col_sma', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},  
-      {'name': 'Spårare', 'field': 'col_spar', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
-      {'name': 'Upptäckare', 'field': 'col_uppt', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
-      {'name': 'Äventyrare', 'field': 'col_aven', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
-      {'name': 'Utmanare', 'field': 'col_utm', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},  
-      {'name': 'Rover', 'field': 'col_rov', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
-      {'name': 'Note', 'field': 'col_note', 'width': '200px', editable:true}
+      {'name': 'Date', 'field': 'requested_date', 'width': '100px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+      {'name': 'Time', 'field': 'requested_time', 'width': '50px', editable:true, type: dojox.grid.cells.Select, options: [ 'FM', 'EM', 'Evening' ], values: [ '0', '1', '2' ]},      
+      {'name': 'Program', 'field': 'requested_activity', 'width': '100px', editable: true, type: dojox.grid.cells.Select, options: ['-', 'Trapper', 'Sammarbetsgläntan', 'Storbåt','Optimist','Kanot','Flottbygge','Hinderbana'], values: [ '0', '1', '2','3','4','5','6' ]},
+      {'name': 'Småbarn', 'field': 'age_sma', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},  
+      {'name': 'Spårare', 'field': 'age_spar', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
+      {'name': 'Upptäckare', 'field': 'age_uppt', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
+      {'name': 'Äventyrare', 'field': 'age_aven', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
+      {'name': 'Utmanare', 'field': 'age_utm', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},  
+      {'name': 'Rover', 'field': 'age_rov', 'width': '60px', editable:true, type: dojox.grid.cells.Bool},
+      {'name': 'Note', 'field': 'cnote', 'width': '200px', editable:true}
     ]];
                             	
     
@@ -175,7 +155,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
 
     function on_save_grid_to_input() {
     	//...find dojo store and serialize it. Should be simple. Then write serialized data into 
-    	alert('storing...');
+    	//alert('storing...');
     	age_group_store.save(saveCompleteCallback, saveFailedCallback);
     	program_request_store.save(saveCompleteCallback, saveFailedCallback);
     	
@@ -187,7 +167,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     program_request_grid.placeAt('age_group_div');
     program_request_grid.startup();
     
-    alert('ready in age_group_div_widget');
+    //alert('ready in age_group_div_widget');
     
     
     function on_ready(){
@@ -229,7 +209,7 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
     
     
     
-    <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="" method="">
+    <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_visiting_group_program_request" method="post">
     
 
 
@@ -239,7 +219,7 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
                 <label for="contact_name">Name:</label>
             </td>
             <td>
-                <input type="text" id="contact_name" name="contact_name" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
+                <input type="text" id="contact_person" name="contact_person" value="$visiting_group_program_request.contact_person" data-dojo-type="dijit/form/ValidationTextBox"/>
             </td>
         </tr>
         <tr>
@@ -247,7 +227,7 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
                 <label for="contact_email">Email:</label>
             </td>
             <td>
-                <input type="text" id="contact_email" name="contact_email" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
+                <input type="text" id="contact_person_email" name="contact_person_email" value="$visiting_group_program_request.contact_person_email" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
             </td>
         </tr>
         <tr>
@@ -255,7 +235,7 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
                 <label for="contact_phone">Phone (mobile):</label>
             </td>
             <td>
-                <input type="text" id="contact_phone" name="contact_phone" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
+                <input type="text" id="contact_person_phone" name="contact_person_phone" value="$visiting_group_program_request.contact_person_phone" data-dojo-type="dijit/form/ValidationTextBox"/>
             </td>
         </tr>
         <tr>
@@ -265,7 +245,7 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
             <td>
                 <!-- <input type="text" id="dob" name="dob" data-dojo-type="dijit/form/DateTextBox"/> -->
                 <div data-dojo-type="dijit/Editor" id="myEditor">
-    					<p>This is the initial content.</p>
+    					$visiting_group_program_request.program_request_info
 					</div>
             </td>
         </tr>
@@ -275,12 +255,37 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
         </tr>
         <tr>
         		<td><label for="program_request_div">Program request:</label></td>
-        		<td><div id="program_request_div" style="height:30em;width:50em;">Program request...<input type="hidden" id="program_request_div_input" name="program_request_input"/></div></td>
+        		<td><div id="program_request_div" style="height:20em;width:50em;">Program request...<input type="hidden" id="program_request_div_input" name="program_request_input"/></div></td>
+        </tr>
+        <tr>
+            <td>
+                <label for="ready_to_process">ready-to-process:</label>
+            </td>
+            <td>
+                <input type="text" id="ready_to_process" name="ready_to_process" required="true" data-dojo-type="dijit/form/CheckBox"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="have_skippers">have skippers:</label>
+            </td>
+            <td>
+                <input type="text" id="have_skippers" name="have_skippers" py:attrs="['',{'checked':True}][visiting_group_program_request.program_request_have_skippers]" data-dojo-type="dijit/form/CheckBox"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="miniscout">Miniscout:</label>
+            </td>
+            <td>
+                <input type="text" id="miniscout" name="miniscout"  py:attrs="['',{'checked':True}][visiting_group_program_request.program_request_miniscout]" data-dojo-type="dijit/form/CheckBox"/>
+            </td>
         </tr>
     </table>
-
-    <button data-dojo-type="dijit/form/Button" type="button" onClick="console.log(myForm.getValues())">Get Values from form!</button>
-    <button data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Submit" id="submit_button">Submit</button>
+	<input type="hidden" name="vgroup_id" value="$visiting_group_program_request._id"/>
+    <!-- <button data-dojo-type="dijit/form/Button" type="button" onClick="console.log(myForm.getValues())">Get Values from form!</button> -->
+    <button data-dojo-type="dijit/form/Button" type="submit" name="saveButton" value="Save" id="save_button">save</button>
+    <button data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Finalize-and-send" id="submit_button">Finalize-and-send</button>
 
 </div>
 
