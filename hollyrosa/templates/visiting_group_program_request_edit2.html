@@ -69,7 +69,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
         
 
     var program_request_data_list = [
-      { requested_date: '', requested_time:'', requested_activity: '', age_sma:false, age_spar:false, age_uppt:false, age_aven:false, age_utm:false, age_rov:false, age_led:false, note:''}
+      { requested_date: '$visiting_group_program_request.from_date', requested_time:'', requested_activity: '', age_sma:false, age_spar:false, age_uppt:false, age_aven:false, age_utm:false, age_rov:false, age_led:false, note:''}
     ];
 
 
@@ -169,16 +169,9 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     
     //alert('ready in age_group_div_widget');
     
-    
-    function on_ready(){
-      //...validate form
-    	var myForm = dijit.byId('myForm');
-      var submit_button = dijit.byId('submit_button');
-      
-      on( submit_button , 'click', on_save_grid_to_input );
-		on( submit_button , 'click', function() {
-    
-      	if(myForm.validate()){
+    function on_validate() {
+      var myForm = dijit.byId('myForm');
+    	if(myForm.validate()){
             var result = confirm('Form is valid, press OK to submit');
             
             return result;
@@ -187,7 +180,24 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
             return false;
         }
         return true;
-    	});  
+    }
+    
+    
+    function on_ready(){
+      //...validate form
+    	
+      var submit_button = dijit.byId('submit_button');
+      var save_button = dijit.byId('save_button');
+      
+      on( submit_button , 'click', on_save_grid_to_input );
+      on( save_button , 'click', on_save_grid_to_input );
+      on( submit_button , 'click', function() {
+      
+			dom.byId('ready_to_process').value = 'True';      
+      });
+        
+		on( submit_button , 'click', on_validate);  
+		on( save_button , 'click', on_validate);  
     }
     	
       ready(on_ready);
@@ -257,14 +267,7 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
         		<td><label for="program_request_div">Program request:</label></td>
         		<td><div id="program_request_div" style="height:20em;width:50em;">Program request...<input type="hidden" id="program_request_div_input" name="program_request_input"/></div></td>
         </tr>
-        <tr>
-            <td>
-                <label for="ready_to_process">ready-to-process:</label>
-            </td>
-            <td>
-                <input type="text" id="ready_to_process" name="ready_to_process" required="true" data-dojo-type="dijit/form/CheckBox"/>
-            </td>
-        </tr>
+        
         <tr>
             <td>
                 <label for="have_skippers">have skippers:</label>
@@ -283,6 +286,7 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
         </tr>
     </table>
 	<input type="hidden" name="vgroup_id" value="$visiting_group_program_request._id"/>
+	<input type="hidden" id="ready_to_process" name="ready_to_process" value="False"/>
     <!-- <button data-dojo-type="dijit/form/Button" type="button" onClick="console.log(myForm.getValues())">Get Values from form!</button> -->
     <button data-dojo-type="dijit/form/Button" type="submit" name="saveButton" value="Save" id="save_button">save</button>
     <button data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Finalize-and-send" id="submit_button">Finalize-and-send</button>

@@ -82,8 +82,8 @@ class VisitingGroupProgramRequest(BaseController):
         #...construct a program request template. It's going to be a json document. Hard coded.
         #...supply booking request if it exists
         
-        age_group_data = """{
-	identifier: "property",
+        age_group_data_raw = """{
+	"identifier": "property",
 	"items": [
 		{
 			"property": "barn",
@@ -117,7 +117,7 @@ class VisitingGroupProgramRequest(BaseController):
 			"unit": "aven",
 			"age": "12-15",
 			"age_group": "Aventyrare",
-			"value": 10,
+			"value": 0,
 			"from_date": "",
 			"to_date": ""
 		},
@@ -150,6 +150,13 @@ class VisitingGroupProgramRequest(BaseController):
 		}
 	]
 }"""
+        age_group_data_tmp = json.loads(age_group_data_raw)
+        for tmp_item in age_group_data_tmp['items']:
+        	log.debug('TMP ITEM' + str( tmp_item ))
+        	tmp_item['from_date'] = visiting_group_o['from_date']
+        	tmp_item['to_date'] = visiting_group_o['to_date']
+        
+        age_group_data = json.dumps(age_group_data_tmp)
         visiting_group_o.program_request_age_group = visiting_group_o.get('program_request_age_group', age_group_data)
         
         return dict(visiting_group_program_request=visiting_group_o)
@@ -162,12 +169,13 @@ class VisitingGroupProgramRequest(BaseController):
         
     @expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def update_visiting_group_program_request(self, info='', contact_name='', contact_email='', contact_phone='', program_request_input='', have_skippers=False, miniscout=False, ready_to_process=False, age_group_input='', saveButton='', submitButton=''):
+    def update_visiting_group_program_request(self, info='', contact_person='', contact_person_email='', contact_person_phone='', vgroup_id='', program_request_input='', have_skippers=False, miniscout=False, ready_to_process=False, age_group_input='', saveButton='', submitButton=''):
         log.debug('update')
         log.debug(info)
-        log.debug(contact_name)
-        log.debug(contact_email)
-        log.debug(contact_phone)
+        log.debug(contact_person)
+        log.debug(contact_person_email)
+        log.debug(contact_person_phone)
+        log.debug(ready_to_process)
 
         log.debug('program request:'+program_request_input)
         log.debug('program_json: ' + str( json.loads(program_request_input) ) )
