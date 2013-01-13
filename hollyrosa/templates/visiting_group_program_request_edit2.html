@@ -61,22 +61,23 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
  
     var age_group_data = ${visiting_group_program_request.program_request_age_group};
     
-    var program_request_data = {
-      identifier: "id",
-      items: []
-    };
+    var program_request_data = ${visiting_group_program_request.program_request};
+    //{
+    //  identifier: "id",
+    //  items: []
+    //};
     
         
 
-    var program_request_data_list = [
-      { requested_date: '$visiting_group_program_request.from_date', requested_time:'', requested_activity: '', age_sma:false, age_spar:false, age_uppt:false, age_aven:false, age_utm:false, age_rov:false, age_led:false, note:''}
-    ];
+    //var program_request_data_list = [
+    //  { requested_date: '$visiting_group_program_request.from_date', requested_time:'', requested_activity: '', age_sma:false, age_spar:false, age_uppt:false, age_aven:false, age_utm:false, age_rov:false, age_led:false, note:''}
+    //];
 
 
     
-    for(var i = 0, l = program_request_data_list.length; i != 35; i++){
-      program_request_data.items.push(lang.mixin({ id: i+1 }, program_request_data_list[i%l]));
-    }
+    //for(var i = 0, l = program_request_data_list.length; i != 35; i++){
+    //  program_request_data.items.push(lang.mixin({ id: i+1 }, program_request_data_list[i%l]));
+    //}
     
     var program_request_store = new ItemFileWriteStore({
     	data: program_request_data
@@ -105,15 +106,6 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
                                 	a_saveCompleteCallback();
                                 	};   
 
-    /*set up layout*/
-    
-    // fix column names of program request. 
-    // fix the empty note column... ist kind of missing
-    // add checkbox 'we are done' or a button 'take care of our requests'
-    // add some kind on status indication of how things are going
-    // see if we can send data to the form (ajax perhaps...)
-    // fix gandi
-    // fix dustin
     
     var program_request_layout = [[
       {'name': 'Date', 'field': 'requested_date', 'width': '100px', editable: true, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
@@ -158,8 +150,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     	//alert('storing...');
     	age_group_store.save(saveCompleteCallback, saveFailedCallback);
     	program_request_store.save(saveCompleteCallback, saveFailedCallback);
-    	
-    	//   some input div. Wonder if the div widget can be accompanyed by an input widget?
+    	dom.byId('program_request_info').value = dijit.byId('program_request_info_editor').value;
     	};
     	
     age_group_grid.placeAt('age_group_div');
@@ -250,11 +241,11 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
         </tr>
         <tr>
             <td>
-                <label for="myEditor">Info:</label>
+                <label for="program_request_info_editor">Info:</label>
             </td>
             <td>
                 <!-- <input type="text" id="dob" name="dob" data-dojo-type="dijit/form/DateTextBox"/> -->
-                <div data-dojo-type="dijit/Editor" id="myEditor">
+                <div data-dojo-type="dijit/Editor" id="program_request_info_editor">
     					$visiting_group_program_request.program_request_info
 					</div>
             </td>
@@ -273,7 +264,7 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
                 <label for="have_skippers">have skippers:</label>
             </td>
             <td>
-                <input type="text" id="have_skippers" name="have_skippers" py:attrs="['',{'checked':True}][visiting_group_program_request.program_request_have_skippers]" data-dojo-type="dijit/form/CheckBox"/>
+                <input type="text" id="have_skippers" name="have_skippers" py:attrs="['',{'checked':True}][visiting_group_program_request.program_request_have_skippers != '']" data-dojo-type="dijit/form/CheckBox"/>
             </td>
         </tr>
         <tr>
@@ -281,12 +272,13 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
                 <label for="miniscout">Miniscout:</label>
             </td>
             <td>
-                <input type="text" id="miniscout" name="miniscout"  py:attrs="['',{'checked':True}][visiting_group_program_request.program_request_miniscout]" data-dojo-type="dijit/form/CheckBox"/>
+                <input type="text" id="miniscout" name="miniscout"  py:attrs="['',{'checked':True}][visiting_group_program_request.program_request_miniscout != '']" data-dojo-type="dijit/form/CheckBox"/>
             </td>
         </tr>
     </table>
 	<input type="hidden" name="vgroup_id" value="$visiting_group_program_request._id"/>
 	<input type="hidden" id="ready_to_process" name="ready_to_process" value="False"/>
+	<input type="hidden" name="program_request_info" id="program_request_info" />
     <!-- <button data-dojo-type="dijit/form/Button" type="button" onClick="console.log(myForm.getValues())">Get Values from form!</button> -->
     <button data-dojo-type="dijit/form/Button" type="submit" name="saveButton" value="Save" id="save_button">save</button>
     <button data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Finalize-and-send" id="submit_button">Finalize-and-send</button>

@@ -75,7 +75,7 @@ class VisitingGroupProgramRequest(BaseController):
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
     def edit_request(self, visiting_group_id=''):     	
         visiting_group_o = holly_couch[str(visiting_group_id)] 
-        visiting_group_o.program_request_info = 'grpinfo'
+        visiting_group_o.program_request_info = visiting_group_o.get('program_request_info','message to program!')
         visiting_group_o.program_request_have_skippers = visiting_group_o.get('program_request_have_skippers',0)
         visiting_group_o.program_request_miniscout = visiting_group_o.get('program_request_miniscout',0)
         
@@ -159,6 +159,13 @@ class VisitingGroupProgramRequest(BaseController):
         age_group_data = json.dumps(age_group_data_tmp)
         visiting_group_o.program_request_age_group = visiting_group_o.get('program_request_age_group', age_group_data)
         
+        program_request_data_dict = {'identifier': 'id', 'items': [ {'id':0, 'requested_date': visiting_group_o['from_date'], 'requested_time':'', 'requested_activity': '', 'age_sma':False, 'age_spar':False, 'age_uppt':False, 'age_aven':False, 'age_utm':False, 'age_rov':False, 'age_led':False, 'note':''} ]}
+    
+        
+        
+        program_request_data = json.dumps(program_request_data_dict)
+        visiting_group_o.program_request = visiting_group_o.get('program_request', program_request_data)
+        
         return dict(visiting_group_program_request=visiting_group_o)
         
     @expose('hollyrosa.templates.visiting_group_program_request_edit')
@@ -169,19 +176,34 @@ class VisitingGroupProgramRequest(BaseController):
         
     @expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def update_visiting_group_program_request(self, info='', contact_person='', contact_person_email='', contact_person_phone='', vgroup_id='', program_request_input='', have_skippers=False, miniscout=False, ready_to_process=False, age_group_input='', saveButton='', submitButton=''):
+    def update_visiting_group_program_request(self, program_request_info='', contact_person='', contact_person_email='', contact_person_phone='', vgroup_id='', program_request_input='', have_skippers=False, miniscout=False, ready_to_process=False, age_group_input='', saveButton='', submitButton=''):
         log.debug('update')
-        log.debug(info)
         log.debug(contact_person)
         log.debug(contact_person_email)
         log.debug(contact_person_phone)
+        log.debug(program_request_info)
         log.debug(ready_to_process)
 
-        log.debug('program request:'+program_request_input)
-        log.debug('program_json: ' + str( json.loads(program_request_input) ) )
+        #log.debug('program request:'+program_request_input)
+        #log.debug('program_json: ' + str( json.loads(program_request_input) ) )
         
-        log.debug('age group:' + age_group_input)
-        log.debug('age_json: ' + str( json.loads(age_group_input) ) )
+        #log.debug('age group:' + age_group_input)
+        #log.debug('age_json: ' + str( json.loads(age_group_input) ) )
+        
+        
+        visiting_group_o = holly_couch[str(vgroup_id)] 
+        visiting_group_o['contact_person'] = contact_person
+        visiting_group_o['program_request_info'] = program_request_info
+        visiting_group_o['contact_person_email'] = contact_person_email
+        visiting_group_o['contact_person_phone'] = contact_person_phone
+        visiting_group_o['program_request_miniscout'] = miniscout
+        visiting_group_o['program_request_have_skippers'] = have_skippers
+        visiting_group_o['program_request_age_group'] = age_group_input
+        visiting_group_o['program_request'] = program_request_input
+        holly_couch[str(vgroup_id)] = visiting_group_o
+        
+        
+              
         
         #...how can we convert age group data into the visiting group data?
         
