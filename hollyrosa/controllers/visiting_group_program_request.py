@@ -159,7 +159,7 @@ class VisitingGroupProgramRequest(BaseController):
         age_group_data = json.dumps(age_group_data_tmp)
         visiting_group_o.program_request_age_group = visiting_group_o.get('program_request_age_group', age_group_data)
         
-        program_request_data_dict = {'identifier': 'id', 'items': [ {'id':0, 'requested_date': visiting_group_o['from_date'], 'requested_time':'', 'requested_activity': '', 'age_sma':False, 'age_spar':False, 'age_uppt':False, 'age_aven':False, 'age_utm':False, 'age_rov':False, 'age_led':False, 'note':''} ]}
+        program_request_data_dict = {'identifier': 'id', 'items': [[{'id':0, 'requested_date': visiting_group_o['from_date'], 'requested_time':'', 'requested_activity': '', 'age_sma':False, 'age_spar':False, 'age_uppt':False, 'age_aven':False, 'age_utm':False, 'age_rov':False, 'age_led':False, 'note':''} for i in range(35)]] }
     
         
         
@@ -182,6 +182,8 @@ class VisitingGroupProgramRequest(BaseController):
         log.debug(contact_person_email)
         log.debug(contact_person_phone)
         log.debug(program_request_info)
+        log.debug(miniscout)
+        log.debug(have_skippers)
         log.debug(ready_to_process)
 
         #log.debug('program request:'+program_request_input)
@@ -191,30 +193,91 @@ class VisitingGroupProgramRequest(BaseController):
         #log.debug('age_json: ' + str( json.loads(age_group_input) ) )
         
         
-        visiting_group_o = holly_couch[str(vgroup_id)] 
+        visiting_group_o = holly_couch[str(vgroup_id)]
+        
+        
+        may_change_request_data = (0  == visiting_group_o['boknstatus'])
         visiting_group_o['contact_person'] = contact_person
-        visiting_group_o['program_request_info'] = program_request_info
         visiting_group_o['contact_person_email'] = contact_person_email
         visiting_group_o['contact_person_phone'] = contact_person_phone
-        visiting_group_o['program_request_miniscout'] = miniscout
-        visiting_group_o['program_request_have_skippers'] = have_skippers
-        visiting_group_o['program_request_age_group'] = age_group_input
-        visiting_group_o['program_request'] = program_request_input
-        holly_couch[str(vgroup_id)] = visiting_group_o
+
+        if may_change_request_data:    
+            visiting_group_o['program_request_info'] = program_request_info
+            visiting_group_o['program_request_miniscout'] = miniscout
+            visiting_group_o['program_request_have_skippers'] = have_skippers
+            visiting_group_o['program_request_age_group'] = age_group_input
+            visiting_group_o['program_request'] = program_request_input
+            
+            #...SOME PROCESSING SHOULD ONLY BE DONE IF READY TO SHIP
+            if 'on' == ready_to_process:
+                visiting_group_o['boknstatus'] = 5 # todo: use constant
         
         
+        #...load properties dict:
+        log.debug(visiting_group_o['visiting_group_properties'])        
+        
+        #...iterate through age_group_data, items is a list of dicts...
+        age_group_data = json.loads(age_group_input)
+        age_group_data_items = age_group_data['items']
+        
+        #...WE should process the properties of the submitted form, not the other way around
+        
+        for tmp_vgroup_property in visiting_group_o['visiting_group_properties'].values():
+            log.debug('processing property:' + str(tmp_vgroup_property['property']) )
+            tmp_property_prop = tmp_vgroup_property['property']
+            log.debug('old: ' + str(tmp_property_prop) + '=' + str(tmp_vgroup_property['value']))
+            property_found = False
+            for tmp_new_prop in age_group_data_items:
+                if tmp_new_prop['property'] == tmp_property_prop:
+                    property_found = True                    
+                    break
+                    #...IF we dont find it ?? and if value is null ?
+            if property_found:
+                tmp_vgroup_property['value'] = tmp_new_prop['value']
+                log.debug('new: ' + str(tmp_property_prop) + '=' + str(tmp_vgroup_property['value']))
+                #...ALSO MOVE DATES!
+            else:
+                log.debug('property not found, what do we do?')
+                
+                if 0 == tmp_new_prop['value']:
+                    log.debug('never mind, value is zero')
+                else:
+                    #...we need to add an entry in the dict, first we need to know the lowest key number
+                    lowest_key_number = 0
+                    for tmp_key in visiting_group_o['visiting_group_properties'].keys():
+                        if tmp_key > lowest_key_number:
+                            lowest_key_number = tmp_key
+                    lowest_key_number +=1
+                            
+                    new_property_row = {u'description': tmp_new_prop['age_group'], u'value': tmp_new_prop['value'], u'from_date': tmp_new_prop['from_date'], u'to_date': tmp_new_prop['to_date'], u'property': tmp_new_prop['property'], u'unit': tmp_new_prop['unit']}
+                    visiting_group_o['visiting_group_properties'][lowest_key_number] = new_property_row
+                
+            # SAVE and make sure values are propagated
+            
+        
+        # what do we do when the group finalizes its data (and what isnt alllowed after finalize. Its only state new that they can edit in. really.)
+        #
+        #
+        # first, be ready to SANITIZE things like DATE RANGES 
+        # 
+        # for the program request , iterate through it
+        #
+        # for each entry create a new booking object. Cant be that hard, we now the valid_from and valid_to.
+        # we have a reuested_date as well as note.
+        # for each checkbox we know the propery , like age_spar is spar so write $$spar
+        # 
+        # $$spar + $$uppt (onskar <activity> <date> <time>) - SIMPLE!
+        # 
+        # just store list of booking requests to db and we are ready to schedule!
+        #
+        #
+        # it would be really cool if I actually could put them in as preliminary bookings from the start. For that I need to look up slot_id and booking_day_id
+        # booking_day_id can be looked up from date, and slot_id is trickier. first the schema of booking_day has to be found, 
+        # then we need to look up the activity_id of activity and then we need to find slot_id as a function of time and activity_id. But if it can be done
+        # it would be really really cool.
+        #
+        # It would be a great step towards 2014 version with the improved 4-1 schedule view
+        #
               
+        #...raise...redirect referer...
         
-        #...how can we convert age group data into the visiting group data?
-        
-        #...how can we covert the saved program request into a preliminary program request?
-        #   the text is going to be according to the true/false of the matrix
-        #   the comment is going to be about requested 23/1 FM
-        #   the date is the age group time span, unless it's unreasonable. 
-        #   the requested date is the date as indicated by the date choice, unless its unreasonable
-        #
-        # visiting group name, and dates are according to preliminary booking
-        #
-        # info is made into a note and added to the visiting group.
-        #
-        #
