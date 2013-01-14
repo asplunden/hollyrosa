@@ -40,49 +40,7 @@ from formencode import validators
 
 __all__ = ['visiting_group_program_request']
 
-
-class VisitingGroupProgramRequest(BaseController):
-    @expose('hollyrosa.templates.visiting_group_program_request_login')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))    
-    def login(self):
-        return dict()    
-        
-    
-    @expose('hollyrosa.templates.visiting_group_program_request_edit')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
-    def edit(self):
-        tmpl_context.form = create_edit_visiting_group_program_request_form
-        vgpr = dict()
-        vgpr['name'] = 'test vgroup'
-        vgpr['info'] = 'this is some info text'
-        vgpr['contact_person'] = 'john doe'
-        vgpr['from_date'] = '2012-06-01' 
-        vgpr['to_date'] = '2012-06-06'
-        
-        #...construct the age group list. It's going to be a json document. Hard coded.
-        #... if we are to partially load from database and check that we can process it, we do need to go from python to json. (and back)
-        
-        
-        #vgpr['age_group_data'] = age_group_data
-        
-        #...construct a program request template. It's going to be a json document. Hard coded.
-        
-        return dict(visiting_group_program_request=vgpr)
-        
-        
-        
-    @expose('hollyrosa.templates.visiting_group_program_request_edit2')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
-    def edit_request(self, visiting_group_id=''):     	
-        visiting_group_o = holly_couch[str(visiting_group_id)] 
-        visiting_group_o.program_request_info = visiting_group_o.get('program_request_info','message to program!')
-        visiting_group_o.program_request_have_skippers = visiting_group_o.get('program_request_have_skippers',0)
-        visiting_group_o.program_request_miniscout = visiting_group_o.get('program_request_miniscout',0)
-        
-        #...construct a program request template. It's going to be a json document. Hard coded.
-        #...supply booking request if it exists
-        
-        age_group_data_raw = """{
+age_group_data_raw = """{
 	"identifier": "property",
 	"items": [
 		{
@@ -150,6 +108,55 @@ class VisitingGroupProgramRequest(BaseController):
 		}
 	]
 }"""
+
+
+#property_list = []
+#for tmp in age_group_data_raw['items']:
+#    property_list.append(tmp['property'])
+
+
+class VisitingGroupProgramRequest(BaseController):
+    @expose('hollyrosa.templates.visiting_group_program_request_login')
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))    
+    def login(self):
+        return dict()
+        
+    
+    @expose('hollyrosa.templates.visiting_group_program_request_edit')
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
+    def edit(self):
+        tmpl_context.form = create_edit_visiting_group_program_request_form
+        vgpr = dict()
+        vgpr['name'] = 'test vgroup'
+        vgpr['info'] = 'this is some info text'
+        vgpr['contact_person'] = 'john doe'
+        vgpr['from_date'] = '2012-06-01' 
+        vgpr['to_date'] = '2012-06-06'
+        
+        #...construct the age group list. It's going to be a json document. Hard coded.
+        #... if we are to partially load from database and check that we can process it, we do need to go from python to json. (and back)
+        
+        
+        #vgpr['age_group_data'] = age_group_data
+        
+        #...construct a program request template. It's going to be a json document. Hard coded.
+        
+        return dict(visiting_group_program_request=vgpr)
+        
+        
+        
+    @expose('hollyrosa.templates.visiting_group_program_request_edit2')
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
+    def edit_request(self, visiting_group_id=''):     	
+        visiting_group_o = holly_couch[str(visiting_group_id)] 
+        visiting_group_o.program_request_info = visiting_group_o.get('program_request_info','message to program!')
+        visiting_group_o.program_request_have_skippers = visiting_group_o.get('program_request_have_skippers',0)
+        visiting_group_o.program_request_miniscout = visiting_group_o.get('program_request_miniscout',0)
+        
+        #...construct a program request template. It's going to be a json document. Hard coded.
+        #...supply booking request if it exists
+        
+        
         age_group_data_tmp = json.loads(age_group_data_raw)
         for tmp_item in age_group_data_tmp['items']:
         	log.debug('TMP ITEM' + str( tmp_item ))
@@ -209,62 +216,68 @@ class VisitingGroupProgramRequest(BaseController):
             visiting_group_o['program_request'] = program_request_input
             
             #...SOME PROCESSING SHOULD ONLY BE DONE IF READY TO SHIP
-            if 'on' == ready_to_process:
+            if 'True' == ready_to_process:
                 visiting_group_o['boknstatus'] = 5 # todo: use constant
         
         
-        #...load properties dict:
-        log.debug(visiting_group_o['visiting_group_properties'])        
+            #...load properties dict:
+            log.debug(visiting_group_o['visiting_group_properties'])        
         
-        #...iterate through age_group_data, items is a list of dicts...
-        age_group_data = json.loads(age_group_input)
-        age_group_data_items = age_group_data['items']
+            #...iterate through age_group_data, items is a list of dicts...
+            age_group_data = json.loads(age_group_input)
+            age_group_data_items = age_group_data['items']
         
-        #...WE should process the properties of the submitted form, not the other way around
+            #...We should process the properties of the submitted form, not the other way around
         
-        for tmp_vgroup_property in visiting_group_o['visiting_group_properties'].values():
-            log.debug('processing property:' + str(tmp_vgroup_property['property']) )
-            tmp_property_prop = tmp_vgroup_property['property']
-            log.debug('old: ' + str(tmp_property_prop) + '=' + str(tmp_vgroup_property['value']))
-            property_found = False
-            for tmp_new_prop in age_group_data_items:
-                if tmp_new_prop['property'] == tmp_property_prop:
-                    property_found = True                    
-                    break
-                    #...IF we dont find it ?? and if value is null ?
-            if property_found:
-                tmp_vgroup_property['value'] = tmp_new_prop['value']
-                log.debug('new: ' + str(tmp_property_prop) + '=' + str(tmp_vgroup_property['value']))
-                #...ALSO MOVE DATES!
-            else:
-                log.debug('property not found, what do we do?')
-                
-                if 0 == tmp_new_prop['value']:
-                    log.debug('never mind, value is zero')
-                else:
-                    #...we need to add an entry in the dict, first we need to know the lowest key number
-                    lowest_key_number = 0
-                    for tmp_key in visiting_group_o['visiting_group_properties'].keys():
-                        if tmp_key > lowest_key_number:
-                            lowest_key_number = tmp_key
-                    lowest_key_number +=1
-                            
-                    new_property_row = {u'description': tmp_new_prop['age_group'], u'value': tmp_new_prop['value'], u'from_date': tmp_new_prop['from_date'], u'to_date': tmp_new_prop['to_date'], u'property': tmp_new_prop['property'], u'unit': tmp_new_prop['unit']}
-                    visiting_group_o['visiting_group_properties'][lowest_key_number] = new_property_row
-                
-            # SAVE and make sure values are propagated
+            for tmp_age_group in age_group_data_items:
+                process_property = tmp_age_group['property']
+                log.debug('processing property:' + process_property )
+
+                tmp_vgroup_property = None
+                property_found = False
+                for tmp_vgroup_property in visiting_group_o['visiting_group_properties'].values():
+                    if tmp_vgroup_property['property'] == process_property:
+                        property_found = True                    
+                        break
             
-        
-        # what do we do when the group finalizes its data (and what isnt alllowed after finalize. Its only state new that they can edit in. really.)
-        #
-        #
+                if property_found:
+                    log.debug('old: ' + str(process_property) + '=' + str(tmp_vgroup_property['value']))
+            
+                    tmp_vgroup_property['value'] = tmp_age_group['value']
+                    tmp_vgroup_property['from_date'] = tmp_age_group['from_date']
+                    tmp_vgroup_property['to_date'] = tmp_age_group['to_date']
+                    
+                    log.debug('new: ' + process_property + '=' + str(tmp_age_group['value']))
+                    #...ALSO MOVE DATES!
+                else:
+                    log.debug('property not found, what do we do?')
+                
+                    if 0 == tmp_age_group['value']:
+                        log.debug('never mind, value is zero')
+                    else:
+                        #...we need to add an entry in the dict, first we need to know the lowest key number
+                        lowest_key_number = 0
+                        for tmp_key in visiting_group_o['visiting_group_properties'].keys():
+                            if tmp_key > lowest_key_number:
+                                lowest_key_number = int(tmp_key)
+                        lowest_key_number +=1
+                        log.debug('lowest_key_number: ' + str(lowest_key_number))
+                        new_property_row = {u'description': tmp_age_group['age_group'], u'value': tmp_age_group['value'], u'from_date': tmp_age_group['from_date'], u'to_date': tmp_age_group['to_date'], u'property': tmp_age_group['property'], u'unit': tmp_age_group['unit']}
+                        x = visiting_group_o['visiting_group_properties']
+                        x[str(lowest_key_number)] = new_property_row
+                        visiting_group_o['visiting_group_properties'] = x
+                        log.debug(str(x))                        
+            
+            holly_couch[str(vgroup_id)] = visiting_group_o
+            
+        # We need to sanitize the dates that dojo/dijit supplies, they are not on the string form we preferre.
         # first, be ready to SANITIZE things like DATE RANGES 
         # 
         # for the program request , iterate through it
         #
         # for each entry create a new booking object. Cant be that hard, we now the valid_from and valid_to.
-        # we have a reuested_date as well as note.
-        # for each checkbox we know the propery , like age_spar is spar so write $$spar
+        # we have a requested_date as well as note.
+        # for each checkbox we know the property , like age_spar is spar so write $$spar
         # 
         # $$spar + $$uppt (onskar <activity> <date> <time>) - SIMPLE!
         # 
