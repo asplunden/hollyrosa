@@ -274,7 +274,26 @@ class VisitingGroupProgramRequest(BaseController):
         # first, be ready to SANITIZE things like DATE RANGES 
         # 
         # for the program request , iterate through it
-        #
+        if may_change_request_data:
+            if 'True' == ready_to_process or True:
+                program_request_list = json.loads(program_request_input)
+                for tmp_request in program_request_list['items']:
+                    log.debug('found request...' + str(tmp_request))
+                    request_for_age_groups = [x[4:] for x in ['age_sma','age_spar','age_uppt','age_aven','age_utm','age_rov','age_led'] if tmp_request[x]]
+                    if len(request_for_age_groups) > 0:                    
+                        log.debug('age groups: ' + str(request_for_age_groups))
+                        log.debug('txt: '+tmp_request['note'])
+                        log.debug('requested_date: ' + tmp_request['requested_date'])
+                        log.debug('requested_time: ' + tmp_request['requested_time'])
+                        log.debug('requested_activity: ' + tmp_request['requested_activity'])
+                        
+                        #...now that we have all the data:
+                        #...look up the day id of the date
+                        
+                        #...given fm/em/evening, look up the matching slot_id. Probably the schema will be needed (and maybe index 0,1,2,3...)
+                        
+                        #...that should be everything we need to create a new booking  
+                        
         # for each entry create a new booking object. Cant be that hard, we now the valid_from and valid_to.
         # we have a requested_date as well as note.
         # for each checkbox we know the property , like age_spar is spar so write $$spar

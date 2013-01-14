@@ -95,8 +95,8 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     
     var program_request_layout = [[
       {'name': 'Date', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'Time', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed, type: dojox.grid.cells.Select, options: [ 'FM', 'EM', 'Evening' ], values: [ '0', '1', '2' ]},      
-      {'name': 'Program', 'field': 'requested_activity', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.Select, options: ['-', 'Trapper', 'Sammarbetsgläntan', 'Storbåt','Optimist','Kanot','Flottbygge','Hinderbana'], values: [ '0', '1', '2','3','4','5','6' ]},
+      {'name': 'Time', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed, type: dojox.grid.cells.Select, options: [ 'FM', 'EM', 'Evening' ], values: [ 'fm', 'em', 'evening' ]},      
+      {'name': 'Program', 'field': 'requested_activity', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.Select, options: ['-', 'Trapper', 'Sammarbetsgläntan', 'Storbåt','Optimist','Kanot','Flottbygge','Hinderbana','Naturstigen (utb)'], values: [ '', 'activity.1', 'activity.19','activity.30','activity.34','activity.35','activity.40','activity.41','activity.3' ]},
       {'name': 'Småbarn', 'field': 'age_sma', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},  
       {'name': 'Spårare', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
       {'name': 'Upptäckare', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
