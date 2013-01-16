@@ -136,9 +136,9 @@ def computeCacheContent(visiting_group, content):
             tmp_value = tmp_property['value']
             if tmp_value == None:
                 tmp_value = ''
-            cache_content = cache_content.replace('$$'+tmp_property['property'],  tmp_value + " " + tmp_unit)
-            cache_content = cache_content.replace('$#'+tmp_property['property'],  tmp_value + " " + tmp_unit)
-            cache_content = cache_content.replace('$'+tmp_property['property'],  tmp_value)
+            cache_content = cache_content.replace('$$'+tmp_property['property'],  str(tmp_value) + " " + tmp_unit)
+            cache_content = cache_content.replace('$#'+tmp_property['property'],  str(tmp_value) + " " + tmp_unit)
+            cache_content = cache_content.replace('$'+tmp_property['property'],  str(tmp_value))
             cache_content = cache_content.replace('#'+tmp_property['property'],  tmp_unit)
     else:
         cache_content = content

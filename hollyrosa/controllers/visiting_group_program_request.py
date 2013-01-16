@@ -34,8 +34,10 @@ log = logging.getLogger()
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId
 
-from hollyrosa.model.booking_couch import genUID 
+from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap
 from hollyrosa.controllers.booking_history import remember_tag_change
+from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate
+
 from formencode import validators
 
 __all__ = ['visiting_group_program_request']
@@ -199,8 +201,8 @@ class VisitingGroupProgramRequest(BaseController):
         #log.debug('age group:' + age_group_input)
         #log.debug('age_json: ' + str( json.loads(age_group_input) ) )
         
-        
-        visiting_group_o = holly_couch[str(vgroup_id)]
+        visiting_group_id = str(vgroup_id)
+        visiting_group_o = holly_couch[visiting_group_id]
         
         
         may_change_request_data = (0  == visiting_group_o['boknstatus'])
@@ -283,16 +285,62 @@ class VisitingGroupProgramRequest(BaseController):
                     if len(request_for_age_groups) > 0:                    
                         log.debug('age groups: ' + str(request_for_age_groups))
                         log.debug('txt: '+tmp_request['note'])
-                        log.debug('requested_date: ' + tmp_request['requested_date'])
+                        requested_date = tmp_request['requested_date'][:10]
+                        log.debug('requested_date: ' + requested_date)
                         log.debug('requested_time: ' + tmp_request['requested_time'])
-                        log.debug('requested_activity: ' + tmp_request['requested_activity'])
+                        requested_activity_id = tmp_request['requested_activity']
+                        log.debug('activity_id: ' + requested_activity_id)
                         
                         #...now that we have all the data:
                         #...look up the day id of the date
+                        booking_day_o = getBookingDayOfDate(holly_couch, tmp_request['requested_date'][:10]) # NEED TO SANITIZE...
+                        log.debug(booking_day_o)
+                        day_schema_id = booking_day_o['day_schema_id']
+                        log.debug('day_schema id: ' + day_schema_id)
+                        schema_o = holly_couch[day_schema_id]                        
+                        
                         
                         #...given fm/em/evening, look up the matching slot_id. Probably the schema will be needed (and maybe index 0,1,2,3...)
+                        tmp_activity_row = schema_o['schema'][requested_activity_id]
                         
-                        #...that should be everything we need to create a new booking  
+                        log.debug('tmp_activity_row: ' + str(tmp_activity_row))
+                        #...look through the list, lets say we have a time and we need the slot id matching that time
+                        #   then the reasonable way is too look through all list entries being dicts and return slot id when time match found
+                        for tmp_slot_info in tmp_activity_row[1:]:
+                            if (tmp_slot_info['time_from'] < '10:00:00') and (tmp_slot_info['time_to'] > '10:00:00'):
+                                match_slot_id = tmp_slot_info['slot_id']
+                                log.debug('match for slot_id: ' + match_slot_id)
+                                
+                                # lets create a booking!   
+                                
+                                
+                                
+                                new_booking = dict(type='booking',  valid_from='',  valid_to='',  requested_date=requested_date, slot_id=match_slot_id, booking_day_id=booking_day_o['_id'])
+                                new_booking['visiting_group_id'] = str(vgroup_id)
+                                new_booking['valid_from'] = visiting_group_o['from_date']
+                                new_booking['valid_to'] = visiting_group_o['to_date']
+                                new_booking['visiting_group_name'] = visiting_group_o['name']
+                                new_booking['last_changed_by_id'] = getLoggedInUserId(request)
+                                
+                                activity_o = holly_couch[requested_activity_id]
+                                content = '%s (onskar %s %s %s)' % ( ' '.join(['$$%s'%a for a in request_for_age_groups ]) ,activity_o['title'], tmp_request['requested_time'], requested_date)                                 
+                                
+                                new_booking['content'] = content
+                                new_booking['cache_content'] = computeCacheContent(holly_couch[visiting_group_id], content)
+                                new_booking['activity_id'] = requested_activity_id
+            
+                                
+                                new_booking['booking_state'] = activity_o['default_booking_state']                                
+                                                             
+                                slot_map  = getSchemaSlotActivityMap(holly_couch, day_schema_id)
+                                slot = slot_map[match_slot_id]
+                                new_uid = genUID(type='booking')            
+                                holly_couch[new_uid] = new_booking
+                                
+            
+                        
+                        #...that should be everything we need to create a new booking
+                        
                         
         # for each entry create a new booking object. Cant be that hard, we now the valid_from and valid_to.
         # we have a requested_date as well as note.
