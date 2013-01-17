@@ -27,7 +27,7 @@ from hollyrosa.model import holly_couch
 from hollyrosa.widgets.edit_visiting_group_program_request_form import create_edit_visiting_group_program_request_form
 from tg import tmpl_context
 
-import datetime,logging, json
+import datetime,logging, json, time
 
 log = logging.getLogger()
 
@@ -286,8 +286,10 @@ class VisitingGroupProgramRequest(BaseController):
                         log.debug('age groups: ' + str(request_for_age_groups))
                         log.debug('txt: '+tmp_request['note'])
                         requested_date = tmp_request['requested_date'][:10]
+                        requested_date_o = time.strptime(requested_date, "%Y-%M-%d" )
                         log.debug('requested_date: ' + requested_date)
-                        log.debug('requested_time: ' + tmp_request['requested_time'])
+                        requested_time = tmp_request['requested_time']
+                        log.debug('requested_time: ' + requested_time)
                         requested_activity_id = tmp_request['requested_activity']
                         log.debug('activity_id: ' + requested_activity_id)
                         
@@ -306,8 +308,20 @@ class VisitingGroupProgramRequest(BaseController):
                         log.debug('tmp_activity_row: ' + str(tmp_activity_row))
                         #...look through the list, lets say we have a time and we need the slot id matching that time
                         #   then the reasonable way is too look through all list entries being dicts and return slot id when time match found
+                        activity_selection_map = dict()
+                        activity_selection_map['activity.30'] = u'Storbåt'
+                        
+                        time_selection_lookup = dict(FM='10:00:00', EM='15:00:00', EVENING='20:00:00')
+                        
+                        #...EVENING should be called Kväll
+                        #   It should be possible to book just 'any' water program
+                        #   these maps with id-text transaltion should maybe be available in the templating engine
+                        #   dont forget to give the date formatter to the templating engine
+                        
+                        time_selection_translator = dict(EVENING=u'kväll')
+                                          
                         for tmp_slot_info in tmp_activity_row[1:]:
-                            if (tmp_slot_info['time_from'] < '10:00:00') and (tmp_slot_info['time_to'] > '10:00:00'):
+                            if (tmp_slot_info['time_from'] < time_selection_lookup[requested_time]) and (tmp_slot_info['time_to'] > time_selection_lookup[requested_time]):
                                 match_slot_id = tmp_slot_info['slot_id']
                                 log.debug('match for slot_id: ' + match_slot_id)
                                 
@@ -323,7 +337,7 @@ class VisitingGroupProgramRequest(BaseController):
                                 new_booking['last_changed_by_id'] = getLoggedInUserId(request)
                                 
                                 activity_o = holly_couch[requested_activity_id]
-                                content = '%s (onskar %s %s %s)' % ( ' '.join(['$$%s'%a for a in request_for_age_groups ]) ,activity_o['title'], tmp_request['requested_time'], requested_date)                                 
+                                content = '%s (onskar %s %s %s)' % ( ' '.join(['$$%s'%a for a in request_for_age_groups ]) ,activity_selection_map.get(requested_activity_id, activity_o['title']), time.strftime("%d/%M", requested_date_o).replace('0',''), time_selection_translator.get(requested_time, requested_time) )                                 
                                 
                                 new_booking['content'] = content
                                 new_booking['cache_content'] = computeCacheContent(holly_couch[visiting_group_id], content)
@@ -342,19 +356,7 @@ class VisitingGroupProgramRequest(BaseController):
                         #...that should be everything we need to create a new booking
                         
                         
-        # for each entry create a new booking object. Cant be that hard, we now the valid_from and valid_to.
-        # we have a requested_date as well as note.
-        # for each checkbox we know the property , like age_spar is spar so write $$spar
-        # 
-        # $$spar + $$uppt (onskar <activity> <date> <time>) - SIMPLE!
-        # 
-        # just store list of booking requests to db and we are ready to schedule!
-        #
-        #
-        # it would be really cool if I actually could put them in as preliminary bookings from the start. For that I need to look up slot_id and booking_day_id
-        # booking_day_id can be looked up from date, and slot_id is trickier. first the schema of booking_day has to be found, 
-        # then we need to look up the activity_id of activity and then we need to find slot_id as a function of time and activity_id. But if it can be done
-        # it would be really really cool.
+        
         #
         # It would be a great step towards 2014 version with the improved 4-1 schedule view
         #
