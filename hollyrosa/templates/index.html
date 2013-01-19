@@ -41,6 +41,19 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <br/><br/>
   -- Pablo Picasso, in In Search of Genius, 1982, by William Fifeld, p 140 and p. 40.
   </p></em>
+  <div style="margin:8em; background: #eea">
+  <h2>Direkt till programönskemål</h2>
+  <p>Hej! För att skicka in programönskemål via vårt webbaserade system, börja med att fylla i ert referensnummer/bokningsnummer nedan. Nummret ser ut ungefär så här: "13-122".
+  Om du inte har ett bokningsnummer eller inte har fått ditt lösenord för programönskemål, kontakta scoutkansliet.</p>
+  <p>Du kommer (om du inte redan är inloggad) till ett litet inloggningsformulär och sedan till programönskemålssidan.</p>
+  
+  <form method="post" action="${tg.url('visiting_group_program_request/login_vgroup')}">
+  	  	<input type="text" value="" name="boknr"></input>
+  		<input type="submit" value="Fortsätt..." />
+  </form>
+	  
+  
+  </div>
   <div style="margin:8em;">
   <h2>Calendar Overview</h2>
   <a href="${tg.url('calendar/overview')}"><img src="${tg.url('images/calendar_skiss-m.png')}" alt="calendar skiss icon" style="border:0px;" width="100px;"/></a><br/>

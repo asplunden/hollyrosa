@@ -32,11 +32,11 @@ import datetime,logging, json, time
 log = logging.getLogger()
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
-from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId
+from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, reFormatDate
 
-from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap
+from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr
 from hollyrosa.controllers.booking_history import remember_tag_change
-from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate
+from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map
 
 from formencode import validators
 
@@ -118,12 +118,20 @@ age_group_data_raw = """{
 
 
 class VisitingGroupProgramRequest(BaseController):
-    @expose('hollyrosa.templates.visiting_group_program_request_login')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))    
-    def login(self):
+    @expose()
+    def login_vgroup(self, boknr=''):
+        
+        #lookup vgroup of boknr
+        vgroup_list = getVisitingGroupByBoknr(holly_couch, boknr)
+        if len(vgroup_list) == 0:
+            flash(u"Det finns ingen grupp i systemet än med det bokningsnummer du angav.",'warning')
+            raise redirect('/')
+        else:
+            raise redirect('edit_request', visiting_group_id=vgroup_list[0]['id'])
         return dict()
         
     
+    	
     @expose('hollyrosa.templates.visiting_group_program_request_edit')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
     def edit(self):
@@ -148,7 +156,7 @@ class VisitingGroupProgramRequest(BaseController):
         
         
     @expose('hollyrosa.templates.visiting_group_program_request_edit2')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg='Only logged in users may view me properties'))    
     def edit_request(self, visiting_group_id=''):     	
         visiting_group_o = holly_couch[str(visiting_group_id)] 
         visiting_group_o.program_request_info = visiting_group_o.get('program_request_info','message to program!')
@@ -175,7 +183,7 @@ class VisitingGroupProgramRequest(BaseController):
         program_request_data = json.dumps(program_request_data_dict)
         visiting_group_o.program_request = visiting_group_o.get('program_request', program_request_data)
         
-        return dict(visiting_group_program_request=visiting_group_o)
+        return dict(visiting_group_program_request=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=bokn_status_map)
         
     @expose('hollyrosa.templates.visiting_group_program_request_edit')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
@@ -337,7 +345,7 @@ class VisitingGroupProgramRequest(BaseController):
                                 new_booking['last_changed_by_id'] = getLoggedInUserId(request)
                                 
                                 activity_o = holly_couch[requested_activity_id]
-                                content = '%s (onskar %s %s %s)' % ( ' '.join(['$$%s'%a for a in request_for_age_groups ]) ,activity_selection_map.get(requested_activity_id, activity_o['title']), time.strftime("%d/%M", requested_date_o).replace('0',''), time_selection_translator.get(requested_time, requested_time) )                                 
+                                content = u'%s (önskar %s %s %s)' % ( ' '.join(['$$%s'%a for a in request_for_age_groups ]) ,activity_selection_map.get(requested_activity_id, activity_o['title']), time.strftime("%d/%M", requested_date_o).replace('0',''), time_selection_translator.get(requested_time, requested_time) )                                 
                                 
                                 new_booking['content'] = content
                                 new_booking['cache_content'] = computeCacheContent(holly_couch[visiting_group_id], content)

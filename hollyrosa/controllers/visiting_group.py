@@ -235,10 +235,13 @@ class VisitingGroup(BaseController):
     def edit_visiting_group(self,  visiting_group_id=None,  **kw):
         tmpl_context.form = create_edit_visiting_group_form
         
-        new_empty_visiting_group_property = [DataContainer(property='spar',  value='0',  unit=u'spår',  description=u'antal deltagare 8 till 9 år'), 
+        new_empty_visiting_group_property = [DataContainer(property='sma',  value='0',  unit=u'småbarn',  description=u'antal deltagare 0 till 8 år'),
+                                             DataContainer(property='spar',  value='0',  unit=u'spår',  description=u'antal deltagare 8 till 9 år'), 
                                              DataContainer(property='uppt',  value='0',  unit=u'uppt',  description=u'antal deltagare 10 till 11 år'), 
                                              DataContainer(property='aven',  value='0',  unit=u'aven',  description=u'antal deltagare 12 till 15 år'), 
-                                             DataContainer(property='utm',  value='0',  unit=u'utm',  description=u'antal deltagare 16 till 18 år')]
+                                             DataContainer(property='utm',  value='0',  unit=u'utm',  description=u'antal deltagare 16 till 18 år'),
+                                             DataContainer(property='rov',  value='0',  unit=u'rover',  description=u'antal roverscouter'),
+                                             DataContainer(property='led',  value='0',  unit=u'ledare',  description=u'antal ledare')]
  
  
         if None == visiting_group_id:
@@ -271,7 +274,7 @@ class VisitingGroup(BaseController):
             # TODO: DataContainerFromDictLikeObject(fields=)
             visiting_group = DataContainer(name=visiting_group_c['name'],  id=visiting_group_c['_id'],  info=visiting_group_c['info'],  visiting_group_properties=vgps
                                            ,  contact_person=visiting_group_c['contact_person'],  contact_person_email=visiting_group_c['contact_person_email'],  contact_person_phone=visiting_group_c['contact_person_phone'], 
-                                           boknr=visiting_group_c['boknr'],  boknstatus=visiting_group_c['boknstatus'],  camping_location=visiting_group_c['camping_location'],  from_date=datetime.datetime.strptime(visiting_group_c['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(visiting_group_c['to_date'], '%Y-%m-%d'))
+                                           boknr=visiting_group_c['boknr'], password=visiting_group_c.get('password',''), boknstatus=visiting_group_c['boknstatus'],  camping_location=visiting_group_c['camping_location'],  from_date=datetime.datetime.strptime(visiting_group_c['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(visiting_group_c['to_date'], '%Y-%m-%d'))
             
         return dict(visiting_group=visiting_group,  bokn_status_map=bokn_status_options)
         
@@ -280,7 +283,7 @@ class VisitingGroup(BaseController):
     @expose()
     @validate(create_edit_visiting_group_form, error_handler=edit_visiting_group)
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change visiting group properties'))
-    def save_visiting_group_properties(self,  id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr=''):
+    def save_visiting_group_properties(self,  id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr='', password=''):
         # TODO: does not work?
         if None == id or id == '':
             is_new = True
@@ -308,6 +311,7 @@ class VisitingGroup(BaseController):
         visiting_group_c['contact_person_email'] = contact_person_email
         visiting_group_c['contact_person_phone'] = contact_person_phone
         visiting_group_c['boknr'] = boknr
+        visiting_group_c['password'] = password
         if is_new:
             visiting_group_c['boknstatus'] = program_state
             visiting_group_c['vodbstatus'] = vodb_state

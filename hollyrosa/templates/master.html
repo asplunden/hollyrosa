@@ -35,7 +35,7 @@ from genshi import HTML, XML
     <span py:if="tg.auth_stack_enabled" py:strip="True">
         <li><a href="${tg.url('/about')}" class="${('', 'active')[defined('page') and page==page=='about']}">About</a></li>
         <li py:if="not request.identity" id="login" class="loginlogout"><a href="${tg.url('/login')}">Login</a></li>
-        <li py:if="request.identity" id="login" class="loginlogout"><a href="${tg.url('/logout_handler')}">Logout <em>${request.identity['user']['display_name']}</em></a></li>
+        <li py:if="request.identity" id="login" class="loginlogout"><a href="${tg.url('/logout_handler')}">Logout <em py:if="request.identity['user'].has_key('display_name')">${request.identity['user'].get('display_name','')}</em><em py:if="request.identity['user'].has_key('name')">${request.identity['user'].get('name','')}</em></a></li>
     </span>
   </ul>
   <div id="content">

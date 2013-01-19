@@ -94,8 +94,8 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     var global_edit_allowed = ( ${visiting_group_program_request.boknstatus} == 0 ); 
     
     var program_request_layout = [[
-      {'name': 'Date', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'Time', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed, type: dojox.grid.cells.Select, options: [ 'FM', 'EM', 'Kväll' ], values: [ 'FM', 'EM', 'EVENING' ]},      
+      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed, type: dojox.grid.cells.Select, options: [ 'FM', 'EM', 'Kväll' ], values: [ 'FM', 'EM', 'EVENING' ]},      
       {'name': 'Program', 'field': 'requested_activity', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.Select, options: ['-', 'Trapper', 'Sammarbetsgläntan', 'Storbåt','Optimist','Kanot','Flottbygge','Hinderbana','Naturstigen (utb)'], values: [ '', 'activity.1', 'activity.19','activity.30','activity.34','activity.35','activity.40','activity.41','activity.3' ]},
       {'name': 'Småbarn', 'field': 'age_sma', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},  
       {'name': 'Spårare', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
@@ -108,11 +108,11 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
                             	
     
     var age_group_layout = [[
-      {'name': 'Age',                    field: 'age', 'width': '100px'},
-      {'name': 'Group',                  field: 'age_group', 'width': '100px'},
-      {'name': 'Number of participants', field: 'value', 'width': '150px', editable: global_edit_allowed},
-      {'name': 'From date',              field: 'from_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'To date',                field: 'to_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue}
+      {'name': 'Ålder',                    field: 'age', 'width': '100px'},
+      {'name': 'Grupp',                  field: 'age_group', 'width': '100px'},
+      {'name': 'Antal deltagare', field: 'value', 'width': '150px', editable: global_edit_allowed},
+      {'name': 'Från datum',              field: 'from_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+      {'name': 'Till datum',                field: 'to_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue}
     ]];
 
     /*create a new grid*/
@@ -205,45 +205,65 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
 </head>
 
 <body class="tundra">
-    <h2>Program Request for ${visiting_group_program_request.name}</h2>
-    <p> from ${visiting_group_program_request.from_date} to ${visiting_group_program_request.to_date}</p>
+    <h2>Programönskemål för ${visiting_group_program_request.name}</h2>
+
+	<p>Lägertid: <b>${reFormatDate(visiting_group_program_request.from_date)} - ${reFormatDate(visiting_group_program_request.to_date)}</b><br/>
+    Boknings status: <b>${bokn_status_map[visiting_group_program_request.boknstatus]}</b></p>
     
-    <p>${visiting_group_program_request.boknstatus}</p>
+    <div style="padding-left:2em; background:#ffc;">
+    <p>Hej och tack för att du vågar prova vårt it-system!<br/>
+    Den här anmälan ersätter programönskemålen du skickar in på papper. Om du känner att dina programönskemål inte passar in i mallen nedan så skicka in dom på papper.
+    Om du känner att mallen nästan stämmer så skriv dina extra önskemål/modifieringar i info-fältet.
+    </p>
+    <p>
+    Det finns i grunden fyra sorters information du behöver mata in:
+    <ul>
+		<li>Kontaktinfo och speciellt info</li>
+		<li>Övrig programönskemåls info</li>
+		<li>Antal och lägertid per åldersgrupp. Passar er grupp inte mallen, använd hellre vårt pappers-formulär</li>
+		<li>Programönskemål. Välj dag, tid och kryssa sedan i vilka åldersgrupper det gäller.</li>   
+    </ul>
+    </p>
+    <p>Sist av allt tryck "spara utkasst". <b>OBS! du kan alltid spara som utkasst och fortsätta fylla i formuläret tills dess att du har bestämt dig, men du måste tillslut välja att "spara och processa". Efter att du valt "spara och processa" så tar vi hand om era programönskemål</b>
+    men det är också så att efter att du tryckt "spara och processa" så kan du inte ändra i annat än kontaktinfo.
+    </p>
+</div>    
+    
     
     <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_visiting_group_program_request" method="post">
     
 
 
-    <table style="border: 1px solid #9f9f9f;" cellspacing="10">
+    <table cellspacing="10" style="width:100%;">
         <tr>
             <td>
-                <label for="contact_name">Name:</label>
-            </td>
-            <td>
+                <label for="contact_name">Kontaktperson för program:</label>
+<!--            </td>
+            <td> -->
                 <input type="text" id="contact_person" name="contact_person" value="$visiting_group_program_request.contact_person" data-dojo-type="dijit/form/ValidationTextBox"/>
             </td>
         </tr>
         <tr>
             <td>
                 <label for="contact_email">Email:</label>
-            </td>
-            <td>
+<!--            </td>
+            <td> -->
                 <input type="text" id="contact_person_email" name="contact_person_email" value="$visiting_group_program_request.contact_person_email" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
             </td>
         </tr>
         <tr>
             <td>
-                <label for="contact_phone">Phone (mobile):</label>
-            </td>
-            <td>
+                <label for="contact_phone">Mobil:</label>
+<!--            </td>
+            <td> -->
                 <input type="text" id="contact_person_phone" name="contact_person_phone" value="$visiting_group_program_request.contact_person_phone" data-dojo-type="dijit/form/ValidationTextBox"/>
             </td>
         </tr>
         <tr>
             <td>
                 <label for="program_request_info_editor">Info:</label>
-            </td>
-            <td>
+            <!--</td>
+            <td> -->
                 <!-- <input type="text" id="dob" name="dob" data-dojo-type="dijit/form/DateTextBox"/> -->
                 <div data-dojo-type="dijit/Editor" id="program_request_info_editor">
     					$visiting_group_program_request.program_request_info
@@ -251,27 +271,28 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
             </td>
         </tr>
         <tr>
-        		<td><label for="age_group_div">Age groups:</label></td>
-        		<td><div id="age_group_div" style="height:20em;width:50em;"><input type="hidden" id="age_group_div_input" name="age_group_input"/></div></td>
+        		<td><label for="age_group_div">Åldersgrupper:</label>  <!-- </td>
+        		<td> -->
+        		<div id="age_group_div" style="height:15em;"><input type="hidden" id="age_group_div_input" name="age_group_input"/></div></td>
         </tr>
         <tr>
-        		<td><label for="program_request_div">Program request:</label></td>
-        		<td><div id="program_request_div" style="height:20em;width:50em;">Program request...<input type="hidden" id="program_request_div_input" name="program_request_input"/></div></td>
+        		<td><label for="program_request_div">Programönskemål:</label> <!-- </td>
+        		<td> --> <div id="program_request_div" style="height:20em;">Program request...<input type="hidden" id="program_request_div_input" name="program_request_input"/></div></td>
         </tr>
         
         <tr>
             <td>
-                <label for="have_skippers">have skippers:</label>
-            </td>
-            <td>
+                <label for="have_skippers">Har egna skeppare:</label>
+           <!--  </td>
+            <td> -->
                 <input type="checkbox" id="have_skippers" name="have_skippers" py:attrs="['',{'checked':'true'}][visiting_group_program_request.program_request_have_skippers == 'on']" data-dojo-type="dijit/form/CheckBox"/>
             </td>
         </tr>
         <tr>
             <td>
-                <label for="miniscout">Miniscout:</label>
-            </td>
-            <td>
+                <label for="miniscout">Önskar deltaga i Miniscout (om det är aktuellt)</label>
+          <!--   </td>
+            <td> -->
                 <input type="checkbox" id="miniscout" name="miniscout"  py:attrs="['',{'checked':'true'}][visiting_group_program_request.program_request_miniscout == 'on']" data-dojo-type="dijit/form/CheckBox"/>
             </td>
         </tr>
@@ -280,8 +301,8 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
 	<input type="hidden" id="ready_to_process" name="ready_to_process" value="False"/>
 	<input type="hidden" name="program_request_info" id="program_request_info" />
     <!-- <button data-dojo-type="dijit/form/Button" type="button" onClick="console.log(myForm.getValues())">Get Values from form!</button> -->
-    <button data-dojo-type="dijit/form/Button" type="submit" name="saveButton" value="Save" id="save_button">save</button>
-    <button data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Finalize-and-send" id="submit_button">Finalize-and-send</button>
+    <button data-dojo-type="dijit/form/Button" type="submit" name="saveButton" value="Save" id="save_button">Spara som utkasst</button>
+    <button data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Finalize-and-send" id="submit_button">Spara och processa</button>
 
 </div>
 

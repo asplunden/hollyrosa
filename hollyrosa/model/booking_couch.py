@@ -115,6 +115,10 @@ def getVisitingGroupsInDatePeriod(holly_couch, from_date,  to_date):
     
 def getVisitingGroupsByBoknstatus(holly_couch, status):
     return holly_couch.view("visiting_groups/all_visiting_groups_by_boknstatus",  startkey=[status,  None],  endkey=[status,  '9999-99-99'],  include_docs =True) # keys=[[s, None]  for s in statuses],  
+
+ 
+def getVisitingGroupByBoknr(holly_couch, boknr):
+    return list( holly_couch.view("visiting_groups/visiting_group_by_boknr", keys=[boknr], include_docs =True) )
     
 
 def getVisitingGroupsByVodbState(holly_couch, state):

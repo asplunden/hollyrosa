@@ -60,6 +60,7 @@ class EditVisitingGroupForm(TableForm):
         contact_person_email = TextField(validator=Email(resolve_domain=False))
         contact_person_phone = TextField(validator=UnicodeString())
         boknr = TextField(validator=UnicodeString())
+        password = TextField(validator=UnicodeString())
         #boknstatus = SingleSelectField(validator=Int())
         camping_location = TextField(validator=UnicodeString())
         

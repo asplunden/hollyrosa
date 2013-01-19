@@ -22,7 +22,7 @@ from repoze.who.plugins.auth_tkt import AuthTktCookiePlugin
 from repoze.who.middleware import PluggableAuthenticationMiddleware
 
 import hollyrosa
-#from hollyrosa.model import holly_couch
+from hollyrosa.model.booking_couch import getVisitingGroupByBoknr
 from hollyrosa import model
 from hollyrosa.lib import app_globals, helpers 
 from hollyrosa.controllers.common import DataContainer
@@ -44,15 +44,22 @@ class CouchAuthenticatorPlugin(object):
             return None
  
         login = identity.get('login')
-        ###raise IOError, str(dir(db))
-        ###user = db.users.find_one({'user_name':login})
         user = model.holly_couch.get('user.'+login)
         
         if user and validate_password(user, identity.get('password')):
             return identity['login']
-
+        else:
+            vgroup_list = getVisitingGroupByBoknr(model.holly_couch, login)
+            if len(vgroup_list) > 0:
+                #raise IOError, str(vgroup[0])
+                vgroup = vgroup_list[0].doc
+                if vgroup.has_key('password'):
+                    #raise IOError, 'xxx'
+                    if vgroup['password'] == identity.get('password'):
+                        return identity['login']
+           
         #...raise authentication error ???
-        
+        return None
 
 
 class CouchUserMDPlugin(object):
@@ -63,9 +70,20 @@ class CouchUserMDPlugin(object):
         ###identity['user'] = db.users.find_one(user_data)
         user_name = identity['repoze.who.userid']
         user_doc = model.holly_couch.get('user.'+user_name)
-        identity['user'] = user_doc
-        identity['user_level'] = user_doc['level']
-        
+        if user_doc:
+            identity['user'] = user_doc
+            identity['user_level'] = user_doc['level']
+            return True
+        else:
+            vgroup_list = getVisitingGroupByBoknr(model.holly_couch, user_name)
+            if len(vgroup_list) > 0:
+                vgroup = vgroup_list[0].doc
+            
+                identity['user'] = vgroup # should we fabricate? 
+                identity['user_level'] = "vgroup"
+                return True
+        return None 
+               
 
 class MyAppConfig(AppConfig):
     auth_backend = 'sqlalchemy' #this is a fake, but it's needed to enable
