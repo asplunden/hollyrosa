@@ -28,11 +28,12 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Show Visiting Group ${visiting_group.name}</title>
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
+  <link rel="stylesheet" type="text/css" href="/scripts/dojo-release-1.8.0/dojox/grid/resources/tundraGrid.css" />
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true, debugAtAllCosts: true"></script>
   <script>
 
-require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window"], function(ready, tags, common_menu, Menu, PopupMenuItem, dom, array, query, on, win) {
+require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window", 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore'], function(ready, tags, common_menu, Menu, PopupMenuItem, dom, array, query, on, win, DataGrid, ItemFileWriteStore) {
 
 
 function deleteTagHelper(evt) {
@@ -135,8 +136,88 @@ function startup() {
 	};
 	
 	
+	//...grid functions
+	var live_grid_data = {  
+   	identifier: "rid",
+            items: [
+                {rid:0, requested_date: '2010-01-01', requested_time:"fm"},
+                {rid:1, requested_date: '2010-01-01', requested_time:"em"}
+                	]
+	}; 
+	
+	var eat_grid_data = {  
+   	identifier: "rid",
+            items: [
+                {rid:0, requested_date: '2010-01-01', requested_time:"frukost"},
+                {rid:1, requested_date: '2010-01-01', requested_time:"lunch"},
+                {rid:2, requested_date: '2010-01-01', requested_time:"middag"},
+                {rid:3, requested_date: '2010-01-01', requested_time:"kvällsfika"},
+                {rid:4, requested_date: '2010-01-02', requested_time:"frukost"},
+                {rid:5, requested_date: '2010-01-02', requested_time:"lunch"}
+                	]
+	}; 
+	
+   var live_grid_store = new ItemFileWriteStore({
+    	data: live_grid_data
+   });
+   
+   
+   var eat_grid_store = new ItemFileWriteStore({
+    	data: eat_grid_data
+   });
+   
+      
+    var global_edit_allowed = false;
+    
+    var live_layout = [[
+      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed},
+      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed},      
+      {'name': 'Bo tält', 'field': 'requested_activity', 'width': '100px', editable: global_edit_allowed},
+      {'name': 'Bo inne', 'field': 'age_sma', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},  
+      {'name': 'Bo dagsbesök', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool}
+      
+    ]];
+    
+    
+var eat_layout = [[
+      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed},
+      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed},      
+      {'name': 'Ute', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      {'name': 'Inne', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      {'name': 'Egen', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool}
+   
+    ]];
+	
+	
+	//... create a new grid
+   
+
+	 var live_grid_grid = new DataGrid({
+        id: 'live_grid',
+        store: live_grid_store,
+        structure: live_layout,
+        rowSelector: '10px'});
+        
+        
+    var eat_grid_grid = new DataGrid({
+        id: 'eat_grid',
+        store: eat_grid_store,
+        structure: eat_layout,
+        rowSelector: '10px'});
+
+
+
+    	
+    
 	ready(function() {
 		startup();
+
+      // startup grid
+		live_grid_grid.placeAt('live_grid_div');
+      live_grid_grid.startup();
+      eat_grid_grid.placeAt('eat_grid_div');
+      eat_grid_grid.startup();
+    
 		});  
  });
   </script>
@@ -177,6 +258,15 @@ function startup() {
     <p>${visiting_group.contact_person}<br/>$visiting_group.contact_person_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.contact_person_email</a><br/>
     </p> 
 
+<h4>Live grid</h4>
+<div id="live_grid_div" style="height:10em;">Live grid here</div>
+
+<p>text text text text</p>
+<h4>Eat grid</h4>
+<div id="eat_grid_div" style="height:30em;">Eat grid here</div>
+
+
+<h4>Program properties</h4>
     
     <table class="data">
         <tr>
@@ -186,15 +276,14 @@ function startup() {
             <td class="info">$$$prop.property = $prop.value $prop.unit</td><td class="info">$prop.description</td><td class="info">$prop.from_date</td><td class="info">$prop.to_date</td>
         </tr>
     </table>
+
+
+<p></p>
+
+<p></p>
+<h2>Property Grid from Properties</h2>
     
-    <h4>attachments: DEPRECATED</h4>
-    <ul py:for="at in visiting_group.get('_attachments',[])"><li><a href="${tg.url('download_attachment', params={'visiting_group_id':visiting_group.id, 'doc_id':at})}">${at}</a></li></ul>
-    <!-- <form method="post" action="upload_attachment" enctype="multipart/form-data">
-        <input type="file" name="file"/>
-        <input type="hidden" name="vgrpid" value="${visiting_group.id}"/> 
-        <input type="submit"/>
-    </form>
--->
+    
   
 </body>
 </html>

@@ -2,7 +2,7 @@
 """
 Main Controller
 
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -26,7 +26,7 @@ from repoze.what import predicates
 
 from hollyrosa.lib.base import BaseController
 from hollyrosa.controllers.error import ErrorController
-from hollyrosa.controllers import booking_day,  booking_history, workflow, visiting_group, tools, note, tag, user, me, visiting_group_program_request
+from hollyrosa.controllers import booking_day,  booking_history, workflow, visiting_group, tools, note, tag, user, me, visiting_group_program_request, vodb_group
 
 from hollyrosa import model
 from hollyrosa.controllers.secure import SecureController
@@ -50,8 +50,6 @@ class RootController(BaseController):
     """
     secc = SecureController()
     
-    ##admin = Catwalk(model, DBSession)
-    
     error = ErrorController()
     
     booking = booking_day.BookingDay()
@@ -73,6 +71,8 @@ class RootController(BaseController):
     user = user.User()
     
     me = me.Me()
+    
+    vodb_group = vodb_group.VODBGroup()
     
     visiting_group_program_request = visiting_group_program_request.VisitingGroupProgramRequest()
     

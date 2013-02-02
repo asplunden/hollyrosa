@@ -232,71 +232,39 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
     
     <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_visiting_group_program_request" method="post">
     
-
-
-    <table cellspacing="10" style="width:100%;">
-        <tr>
-            <td>
-                <label for="contact_name">Kontaktperson för program:</label>
-<!--            </td>
-            <td> -->
-                <input type="text" id="contact_person" name="contact_person" value="$visiting_group_program_request.contact_person" data-dojo-type="dijit/form/ValidationTextBox"/>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="contact_email">Email:</label>
-<!--            </td>
-            <td> -->
-                <input type="text" id="contact_person_email" name="contact_person_email" value="$visiting_group_program_request.contact_person_email" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="contact_phone">Mobil:</label>
-<!--            </td>
-            <td> -->
-                <input type="text" id="contact_person_phone" name="contact_person_phone" value="$visiting_group_program_request.contact_person_phone" data-dojo-type="dijit/form/ValidationTextBox"/>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="program_request_info_editor">Info:</label>
-            <!--</td>
-            <td> -->
-                <!-- <input type="text" id="dob" name="dob" data-dojo-type="dijit/form/DateTextBox"/> -->
-                <div data-dojo-type="dijit/Editor" id="program_request_info_editor">
-    					$visiting_group_program_request.program_request_info
-					</div>
-            </td>
-        </tr>
-        <tr>
-        		<td><label for="age_group_div">Åldersgrupper:</label>  <!-- </td>
-        		<td> -->
-        		<div id="age_group_div" style="height:15em;"><input type="hidden" id="age_group_div_input" name="age_group_input"/></div></td>
-        </tr>
-        <tr>
-        		<td><label for="program_request_div">Programönskemål:</label> <!-- </td>
-        		<td> --> <div id="program_request_div" style="height:20em;">Program request...<input type="hidden" id="program_request_div_input" name="program_request_input"/></div></td>
-        </tr>
-        
-        <tr>
-            <td>
-                <label for="have_skippers">Har egna skeppare:</label>
-           <!--  </td>
-            <td> -->
-                <input type="checkbox" id="have_skippers" name="have_skippers" py:attrs="['',{'checked':'true'}][visiting_group_program_request.program_request_have_skippers == 'on']" data-dojo-type="dijit/form/CheckBox"/>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="miniscout">Önskar deltaga i Miniscout (om det är aktuellt)</label>
-          <!--   </td>
-            <td> -->
-                <input type="checkbox" id="miniscout" name="miniscout"  py:attrs="['',{'checked':'true'}][visiting_group_program_request.program_request_miniscout == 'on']" data-dojo-type="dijit/form/CheckBox"/>
-            </td>
-        </tr>
-    </table>
+    <p>
+    <label for="contact_name">Kontaktperson för program:</label><br/>
+    <input type="text" id="contact_person" name="contact_person" value="$visiting_group_program_request.contact_person" data-dojo-type="dijit/form/ValidationTextBox"/>
+    </p>
+    <p> 
+    <label for="contact_email">Email:</label><br/>
+    <input type="text" id="contact_person_email" name="contact_person_email" value="$visiting_group_program_request.contact_person_email" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
+    </p>
+    <p>
+    <label for="contact_phone">Mobil:</label><br/>
+    <input type="text" id="contact_person_phone" name="contact_person_phone" value="$visiting_group_program_request.contact_person_phone" data-dojo-type="dijit/form/ValidationTextBox"/>
+    </p>
+    <div> 
+    <label for="program_request_info_editor">Info:</label><br/>
+    <div data-dojo-type="dijit/Editor" id="program_request_info_editor">$visiting_group_program_request.program_request_info</div>
+    </div> 
+    <div>
+    <label for="age_group_div">Åldersgrupper:</label><br/>        		
+    	<div id="age_group_div" style="height:300px;"><input type="hidden" id="age_group_div_input" name="age_group_input"/></div>
+    </div>
+    
+    <div>    
+    <label for="program_request_div">Programönskemål:</label><br/>
+    <div id="program_request_div" style="height:300px;">Program request...<input type="hidden" id="program_request_div_input" name="program_request_input"/></div>
+    </div>
+    <p>
+    <label for="have_skippers">Har egna skeppare:</label>
+    <input type="checkbox" id="have_skippers" name="have_skippers" py:attrs="['',{'checked':'true'}][visiting_group_program_request.program_request_have_skippers == 'on']" data-dojo-type="dijit/form/CheckBox"/>
+    </p>
+    <p>
+    <label for="miniscout">Önskar deltaga i Miniscout (om det är aktuellt)</label>
+    <input type="checkbox" id="miniscout" name="miniscout"  py:attrs="['',{'checked':'true'}][visiting_group_program_request.program_request_miniscout == 'on']" data-dojo-type="dijit/form/CheckBox"/>
+    </p>    
 	<input type="hidden" name="vgroup_id" value="$visiting_group_program_request._id"/>
 	<input type="hidden" id="ready_to_process" name="ready_to_process" value="False"/>
 	<input type="hidden" name="program_request_info" id="program_request_info" />

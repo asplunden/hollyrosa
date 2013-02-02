@@ -201,7 +201,7 @@ class VisitingGroup(BaseController):
             visiting_group = holly_couch[id] 
             
             # TODO: refactor make DataContainer from visiting group
-            
+                
             properties=[p for p in visiting_group['visiting_group_properties'].values()]
             
         return dict(visiting_group=visiting_group, properties=properties)

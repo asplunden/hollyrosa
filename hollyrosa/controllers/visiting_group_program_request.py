@@ -37,6 +37,7 @@ from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUs
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr
 from hollyrosa.controllers.booking_history import remember_tag_change
 from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map
+from hollyrosa.controllers.booking_history import remember_new_booking_request
 
 from formencode import validators
 
@@ -156,7 +157,7 @@ class VisitingGroupProgramRequest(BaseController):
         
         
     @expose('hollyrosa.templates.visiting_group_program_request_edit2')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg='Only logged in users may view me properties'))    
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få ändra i dina programönskemål'))    
     def edit_request(self, visiting_group_id=''):     	
         visiting_group_o = holly_couch[str(visiting_group_id)] 
         visiting_group_o.program_request_info = visiting_group_o.get('program_request_info','message to program!')
@@ -192,7 +193,7 @@ class VisitingGroupProgramRequest(BaseController):
         
         
     @expose()
-    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
+    @require(Any(has_level('pl'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få spara programönskemål'))
     def update_visiting_group_program_request(self, program_request_info='', contact_person='', contact_person_email='', contact_person_phone='', vgroup_id='', program_request_input='', have_skippers=False, miniscout=False, ready_to_process=False, age_group_input='', saveButton='', submitButton=''):
         log.debug('update')
         log.debug(contact_person)
@@ -345,7 +346,7 @@ class VisitingGroupProgramRequest(BaseController):
                                 new_booking['last_changed_by_id'] = getLoggedInUserId(request)
                                 
                                 activity_o = holly_couch[requested_activity_id]
-                                content = u'%s (önskar %s %s %s)' % ( ' '.join(['$$%s'%a for a in request_for_age_groups ]) ,activity_selection_map.get(requested_activity_id, activity_o['title']), time.strftime("%d/%M", requested_date_o).replace('0',''), time_selection_translator.get(requested_time, requested_time) )                                 
+                                content = u'%s (önskar %s %s %s) %s' % ( ' '.join(['$$%s'%a for a in request_for_age_groups ]) ,activity_selection_map.get(requested_activity_id, activity_o['title']), time.strftime("%d/%M", requested_date_o).replace('0',''), time_selection_translator.get(requested_time, requested_time), tmp_request['note'] )                                 
                                 
                                 new_booking['content'] = content
                                 new_booking['cache_content'] = computeCacheContent(holly_couch[visiting_group_id], content)
@@ -356,9 +357,15 @@ class VisitingGroupProgramRequest(BaseController):
                                                              
                                 slot_map  = getSchemaSlotActivityMap(holly_couch, day_schema_id)
                                 slot = slot_map[match_slot_id]
-                                new_uid = genUID(type='booking')            
+                                new_uid = genUID(type='booking')
+                                
+                                #...here we create the booking
                                 holly_couch[new_uid] = new_booking
                                 
+                                #...remember the created booking
+                                
+                                remember_new_booking_request(holly_couch, booking=new_booking, changed_by=getLoggedInUserId())
+                                break
             
                         
                         #...that should be everything we need to create a new booking
