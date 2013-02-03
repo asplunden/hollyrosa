@@ -87,6 +87,17 @@ class VODBGroup(BaseController):
         return dict(vodb_group=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
         
         
+    def dateGen(self, from_date, to_date):
+        tmp_result = datetime.datetime.strptime(from_date, "%Y-%m-%d")
+        
+        yield from_date
+        delta = datetime.timedelta(1) #).strftime('%Y-%m-%d')        
+        tmp_result_str = from_date        
+        while tmp_result_str != to_date:
+            tmp_result = tmp_result + delta
+            tmp_result_str = tmp_result.strftime('%Y-%m-%d')
+            yield tmp_result_str
+        
         
         
     # the expression del referrs to Data Eat Live. LED was too confusing so I choose DEL :)    
@@ -107,6 +118,21 @@ class VODBGroup(BaseController):
         for k in ['vodb_contact_name', 'vodb_contact_email', 'vodb_contact_phone', 'vodb_contact_address']:
             if not visiting_group_o.has_key(k):
                 visiting_group_o[k] = ''
+        
+        #...step 1 - create some random data just to show you know what it looks like
+        r1_items = list()
+        rid = 0
+        for tmp_date in self.dateGen(visiting_group_o['from_date'], visiting_group_o['to_date']):
+            r1_items.append(dict(date=tmp_date, time='fm', rid=rid, inne=10, ute=20, egen=0))
+            rid += 1
+            r1_items.append(dict(date=tmp_date, time='em', rid=rid, inne=10, ute=20, egen=0))
+            rid += 1
+            r1_items.append(dict(date=tmp_date, time='kväll', rid=rid, inne=10, ute=20, egen=0))
+            rid += 1
+        r1 = dict(identifier='rid', items=r1_items)
+        r1_json = json.dumps(r1)
+        
+        visiting_group_o.vodb_eat_table = r1_json
         
         return dict(vodb_group=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
         

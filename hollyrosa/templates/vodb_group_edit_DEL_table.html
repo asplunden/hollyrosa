@@ -59,8 +59,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
 		}
   
  
-    var eat_grid_data = { identifier: 'rid',
-    items: []  }; //{vodb_group.program_request_age_group}; 
+    var eat_grid_data = ${vodb_group.vodb_eat_table}; 
     var live_grid_data = {identifier: 'rid', items:[]}; //{vodb_group.program_request};
     var occu_grid_data = {identifier: 'rid', items:[]}; //{vodb_group.occu_request};
    
@@ -120,11 +119,11 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     
     
 var eat_layout = [[
-      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed},
-      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed},      
-      {'name': 'Ute', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Inne', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Egen', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+      {'name': 'Tid', 'field': 'time', 'width': '50px', editable: false},      
+      {'name': 'Ute', 'field': 'inne', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Int},
+      {'name': 'Inne', 'field': 'ute', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Int},
+      {'name': 'Egen', 'field': 'egen', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Int},
       
    
     ]];
@@ -243,6 +242,8 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
     <b>$vodb_group.vodb_contact_email</b><br/>
     <b>$vodb_group.vodb_contact_phone</b><br/>
     <b>$vodb_group.vodb_contact_address</b><br/>
+    
+    <p>SKAPA KORRIGERA DEFAULT DATA FOR TABELLER SOM VISAS. OM DATA INTE FINNS: SKAPA FM EM KVALL etc. OM DATA OUT OF DATE RANGE EXIST and all data zero ta bort</p>
     
     <p>${HTML(vodb_group.info)}</p>
 </div>    
