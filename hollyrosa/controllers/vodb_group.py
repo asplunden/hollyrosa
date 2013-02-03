@@ -25,6 +25,7 @@ from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch
 from hollyrosa.widgets.edit_visiting_group_program_request_form import create_edit_visiting_group_program_request_form
+from hollyrosa.widgets.edit_vodb_group_form import create_edit_vodb_group_form
 from tg import tmpl_context
 
 import datetime,logging, json, time
@@ -36,7 +37,7 @@ from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUs
 
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget
 from hollyrosa.controllers.booking_history import remember_tag_change
-from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map
+from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, make_object_of_vgdictionary
 from hollyrosa.controllers.booking_history import remember_new_booking_request
 
 from formencode import validators
@@ -64,14 +65,62 @@ class VODBGroup(BaseController):
   
     @expose('hollyrosa.templates.vodb_group_edit')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
-    def edit_group_data(self, vgroup_id=''):
-        visiting_group_o = holly_couch[vgroup_id]
+    def edit_group_data(self, visiting_group_id=''):
+        visiting_group_x = holly_couch[visiting_group_id]
+        tmpl_context.form = create_edit_vodb_group_form
         
         #...construct the age group list. It's going to be a json document. Hard coded.
         #... if we are to partially load from database and check that we can process it, we do need to go from python to json. (and back)
         #...construct a program request template. It's going to be a json document. Hard coded.
         
-        return dict(visiting_group=visiting_group_o)
+        
+        
+        if not visiting_group_x.has_key('vodb_status'):
+            visiting_group_x['vodb_status'] = 0
+        
+        for k in ['vodb_contact_name', 'vodb_contact_email', 'vodb_contact_phone', 'vodb_contact_address']:
+            if not visiting_group_x.has_key(k):
+                visiting_group_x[k] = ''
+                
+        visiting_group_o = make_object_of_vgdictionary(visiting_group_x)
+        
+        log.debug('vgroup prop:' + str(visiting_group_o.visiting_group_properties))
+                
+        
+        return dict(vodb_group=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
+        
+        
+        
+        
+    # the expression del referrs to Data Eat Live. LED was too confusing so I choose DEL :)    
+        
+    @expose('hollyrosa.templates.vodb_group_edit')
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
+    def edit_group_del(self, visiting_group_id=''):
+        visiting_group_x = holly_couch[visiting_group_id]
+        tmpl_context.form = create_edit_vodb_group_form
+        
+        #...construct the age group list. It's going to be a json document. Hard coded.
+        #... if we are to partially load from database and check that we can process it, we do need to go from python to json. (and back)
+        #...construct a program request template. It's going to be a json document. Hard coded.
+        
+        
+        
+        if not visiting_group_x.has_key('vodb_status'):
+            visiting_group_x['vodb_status'] = 0
+        
+        for k in ['vodb_contact_name', 'vodb_contact_email', 'vodb_contact_phone', 'vodb_contact_address']:
+            if not visiting_group_x.has_key(k):
+                visiting_group_x[k] = ''
+                
+        visiting_group_o = make_object_of_vgdictionary(visiting_group_x)
+        
+        log.debug('vgroup prop:' + str(visiting_group_o.visiting_group_properties))
+                
+        
+        return dict(vodb_group=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
+        
+        
         
         
     @expose('hollyrosa.templates.vodb_group_view')

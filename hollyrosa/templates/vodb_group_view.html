@@ -131,7 +131,7 @@ function startup() {
 	
 	common_menu.add_menu_separator(menu);   
    common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history...", '${visiting_group['id']}', '${tg.url('/history/show')}');
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb data...", '${visiting_group['id']}', '${tg.url('/vodb_group/edit_data', params={'vgroup_id':visiting_group['id']})}');
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb data...", '${visiting_group['id']}', '${tg.url('/vodb_group/edit_group_data', params={'vgroup_id':visiting_group['id']})}');
 
 	};
 	
@@ -141,7 +141,11 @@ function startup() {
    	identifier: "rid",
             items: [
                 {rid:0, requested_date: '2010-01-01', requested_time:"fm"},
-                {rid:1, requested_date: '2010-01-01', requested_time:"em"}
+                {rid:1, requested_date: '2010-01-01', requested_time:"em"},
+                {rid:2, requested_date: '2010-01-01', requested_time:"kväll"},
+                {rid:3, requested_date: '2010-01-02', requested_time:"fm"},
+                {rid:4, requested_date: '2010-01-02', requested_time:"em"},
+                {rid:5, requested_date: '2010-01-02', requested_time:"kväll"}
                 	]
 	}; 
 	
@@ -157,6 +161,19 @@ function startup() {
                 	]
 	}; 
 	
+	
+	var occu_grid_data = {  
+   	identifier: "rid",
+            items: [
+                {rid:0, requested_date: '2010-01-01', requested_time:"fm"},
+                {rid:1, requested_date: '2010-01-01', requested_time:"em"},
+                {rid:2, requested_date: '2010-01-01', requested_time:"kväll"},
+                {rid:3, requested_date: '2010-01-02', requested_time:"fm"},
+                {rid:4, requested_date: '2010-01-02', requested_time:"em"},
+                {rid:5, requested_date: '2010-01-02', requested_time:"kväll"}
+                	]
+	}; 
+	
    var live_grid_store = new ItemFileWriteStore({
     	data: live_grid_data
    });
@@ -164,6 +181,11 @@ function startup() {
    
    var eat_grid_store = new ItemFileWriteStore({
     	data: eat_grid_data
+   });
+   
+   
+   var occu_grid_store = new ItemFileWriteStore({
+    	data: occu_grid_data
    });
    
       
@@ -184,10 +206,20 @@ var eat_layout = [[
       {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed},      
       {'name': 'Ute', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
       {'name': 'Inne', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Egen', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool}
+      {'name': 'Egen', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      
    
     ]];
 	
+var occu_layout = [[
+      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed},
+      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed},      
+      {'name': 'Doktor', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      {'name': 'Program', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      {'name': 'Kursdelt vö', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      {'name': 'Kursdelt SSRS', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool}
+    ]];
+		
 	
 	//... create a new grid
    
@@ -204,6 +236,13 @@ var eat_layout = [[
         store: eat_grid_store,
         structure: eat_layout,
         rowSelector: '10px'});
+        
+        
+   var occu_grid_grid = new DataGrid({
+        id: 'occu_grid',
+        store: occu_grid_store,
+        structure: occu_layout,
+        rowSelector: '10px'});
 
 
 
@@ -217,6 +256,8 @@ var eat_layout = [[
       live_grid_grid.startup();
       eat_grid_grid.placeAt('eat_grid_div');
       eat_grid_grid.startup();
+      occu_grid_grid.placeAt('occu_grid_div');
+      occu_grid_grid.startup();
     
 		});  
  });
@@ -259,12 +300,14 @@ var eat_layout = [[
     </p> 
 
 <h4>Live grid</h4>
-<div id="live_grid_div" style="height:10em;">Live grid here</div>
+<div id="live_grid_div" style="height:20em;">Live grid here</div>
 
 <p>text text text text</p>
 <h4>Eat grid</h4>
-<div id="eat_grid_div" style="height:30em;">Eat grid here</div>
+<div id="eat_grid_div" style="height:20em;">Eat grid here</div>
 
+<h4>Occupation Grid</h4>
+<div id="occu_grid_div" style="height:20em;">Occupational grid here</div>
 
 <h4>Program properties</h4>
     

@@ -37,7 +37,7 @@ from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
 from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
 from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
 from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
-from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId
+from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, make_object_of_vgdictionary
 from hollyrosa.controllers.booking_history import remember_tag_change
 
 from tg import request, response
@@ -254,28 +254,30 @@ class VisitingGroup(BaseController):
 #            visiting_group_c['to_date'] = datetime.datetime.strptime(visiting_group_c['to_date'],'%Y-%m-%d')
             
             #...HERE MAKE OBJECT OF DICTIONARY OR IT WONT WORK WITH THE FORMS
-            vgps = []
-            for id,  vgp in visiting_group_c['visiting_group_properties'].items():
-                try:
-                    
-                    tmp_to_date = datetime.datetime.strptime(vgp['to_date'],'%Y-%m-%d')
-                except ValueError:
-                    tmp_to_date = None
-                
-                try:
-                    tmp_from_date = datetime.datetime.strptime(vgp['from_date'],'%Y-%m-%d')
-                except ValueError:
-                    tmp_from_date = None
-                
-                
-                vgpx = DataContainer(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=tmp_from_date,  to_date=tmp_to_date,  id=str(id))
-                vgps.append(vgpx)
-
-            # TODO: DataContainerFromDictLikeObject(fields=)
-            visiting_group = DataContainer(name=visiting_group_c['name'],  id=visiting_group_c['_id'],  info=visiting_group_c['info'],  visiting_group_properties=vgps
-                                           ,  contact_person=visiting_group_c['contact_person'],  contact_person_email=visiting_group_c['contact_person_email'],  contact_person_phone=visiting_group_c['contact_person_phone'], 
-                                           boknr=visiting_group_c['boknr'], password=visiting_group_c.get('password',''), boknstatus=visiting_group_c['boknstatus'],  camping_location=visiting_group_c['camping_location'],  from_date=datetime.datetime.strptime(visiting_group_c['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(visiting_group_c['to_date'], '%Y-%m-%d'))
             
+            #vgps = []
+            #for id,  vgp in visiting_group_c['visiting_group_properties'].items():
+            #    try:
+            #        
+            #        tmp_to_date = datetime.datetime.strptime(vgp['to_date'],'%Y-%m-%d')
+            #    except ValueError:
+            #        tmp_to_date = None
+            #    
+            #    try:
+            #        tmp_from_date = datetime.datetime.strptime(vgp['from_date'],'%Y-%m-%d')
+            #    except ValueError:
+            #        tmp_from_date = None
+            #    
+            #    
+            #    vgpx = DataContainer(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=tmp_from_date,  to_date=tmp_to_date,  id=str(id))
+            #    vgps.append(vgpx)
+#
+            # TODO: DataContainerFromDictLikeObject(fields=)
+#            visiting_group = DataContainer(name=visiting_group_c['name'],  id=visiting_group_c['_id'],  info=visiting_group_c['info'],  visiting_group_properties=vgps
+#                                           ,  contact_person=visiting_group_c['contact_person'],  contact_person_email=visiting_group_c['contact_person_email'],  contact_person_phone=visiting_group_c['contact_person_phone'], 
+#                                           boknr=visiting_group_c['boknr'], password=visiting_group_c.get('password',''), boknstatus=visiting_group_c['boknstatus'],  camping_location=visiting_group_c['camping_location'],  from_date=datetime.datetime.strptime(visiting_group_c['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(visiting_group_c['to_date'], '%Y-%m-%d'))
+ #
+        visiting_group = make_object_of_vgdictionary(visiting_group_c)       
         return dict(visiting_group=visiting_group,  bokn_status_map=bokn_status_options)
         
         

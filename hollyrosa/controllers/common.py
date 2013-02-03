@@ -173,3 +173,32 @@ class has_level(Predicate):
 
 
 
+
+def make_object_of_vgdictionary(visiting_group_c):
+    """
+    This function is for making an object that tw forms understands from a couchdb dict like object    
+    """
+    vgps = []
+    for id, vgp in visiting_group_c['visiting_group_properties'].items():
+        try:
+            tmp_to_date = datetime.datetime.strptime(vgp['to_date'],'%Y-%m-%d')
+        except ValueError:
+            tmp_to_date = None
+                
+        try:
+            tmp_from_date = datetime.datetime.strptime(vgp['from_date'],'%Y-%m-%d')
+        except ValueError:
+            tmp_from_date = None
+                
+                
+        vgpx = DataContainer(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=tmp_from_date,  to_date=tmp_to_date,  id=str(id))
+        vgps.append(vgpx)
+
+    # TODO: DataContainerFromDictLikeObject(fields=)
+    visiting_group = DataContainer(name=visiting_group_c['name'],  id=visiting_group_c['_id'],  info=visiting_group_c['info'],  visiting_group_properties=vgps
+                                   ,  contact_person=visiting_group_c['contact_person'],  contact_person_email=visiting_group_c['contact_person_email'],  contact_person_phone=visiting_group_c['contact_person_phone'], 
+                                   boknr=visiting_group_c['boknr'], password=visiting_group_c.get('password',''), boknstatus=visiting_group_c['boknstatus'],  camping_location=visiting_group_c['camping_location'],  from_date=datetime.datetime.strptime(visiting_group_c['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(visiting_group_c['to_date'], '%Y-%m-%d'))
+            
+    return visiting_group
+            
+
