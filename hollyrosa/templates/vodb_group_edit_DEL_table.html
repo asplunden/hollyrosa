@@ -59,75 +59,106 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
 		}
   
  
-    var age_group_data = { identifier: 'rid',
+    var eat_grid_data = { identifier: 'rid',
     items: []  }; //{vodb_group.program_request_age_group}; 
-    var program_request_data = {identifier: 'rid', items=[]}; //{vodb_group.program_request};
+    var live_grid_data = {identifier: 'rid', items:[]}; //{vodb_group.program_request};
+    var occu_grid_data = {identifier: 'rid', items:[]}; //{vodb_group.occu_request};
    
-    var program_request_store = new ItemFileWriteStore({
-    	data: program_request_data
-      });
-      
-    
-    var age_group_store = new ItemFileWriteStore({
-    	data: age_group_data
-      });
+    var live_grid_store = new ItemFileWriteStore({
+    	data: live_grid_data
+   });
+   
+   
+   var eat_grid_store = new ItemFileWriteStore({
+    	data: eat_grid_data
+   });
+   
+   
+   var occu_grid_store = new ItemFileWriteStore({
+    	data: occu_grid_data
+   });
 
-    age_group_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
+    live_grid_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
                                 a_saveFailedCallback /*Your callback to call if save fails*/,
                                 a_newFileContentString /*The generated JSON data to send somewhere*/){
                                 
-                                	var inp = dom.byId('age_group_div_input');
+                                	var inp = dom.byId('live_div_input');
                                 	inp.value = a_newFileContentString;
                                 	a_saveCompleteCallback();
     										};
     
-    program_request_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
+    eat_grid_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
                                 a_saveFailedCallback /*Your callback to call if save fails*/,
                                 a_newFileContentString /*The generated JSON data to send somewhere*/){
                                 	//alert(a_newFileContentString);
-                                	var inp = dom.byId('program_request_div_input');
+                                	var inp = dom.byId('eat_div_input');
+                                	inp.value = a_newFileContentString;
+                                	a_saveCompleteCallback();
+                                	};
+                                	
+    occu_grid_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
+                                a_saveFailedCallback /*Your callback to call if save fails*/,
+                                a_newFileContentString /*The generated JSON data to send somewhere*/){
+                                	//alert(a_newFileContentString);
+                                	var inp = dom.byId('occu_div_input');
                                 	inp.value = a_newFileContentString;
                                 	a_saveCompleteCallback();
                                 	};   
 
 
     
-    var global_edit_allowed = true; //( {visiting_group.boknstatus} == 0 ); 
+    var global_edit_allowed = true;
     
-    var program_request_layout = [[
-      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed, type: dojox.grid.cells.Select, options: [ 'FM', 'EM', 'Kväll' ], values: [ 'FM', 'EM', 'EVENING' ]},      
-      {'name': 'Program', 'field': 'requested_activity', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.Select, options: ['-', 'Trapper', 'Sammarbetsgläntan', 'Storbåt','Optimist','Kanot','Flottbygge','Hinderbana','Naturstigen (utb)'], values: [ '', 'activity.1', 'activity.19','activity.30','activity.34','activity.35','activity.40','activity.41','activity.3' ]},
-      {'name': 'Småbarn', 'field': 'age_sma', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},  
-      {'name': 'Spårare', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Upptäckare', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Äventyrare', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Utmanare', 'field': 'age_utm', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},  
-      {'name': 'Rover', 'field': 'age_rov', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Note', 'field': 'cnote', 'width': '200px', editable:global_edit_allowed}
+    var live_layout = [[
+      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed},
+      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed},      
+      {'name': 'Bo tält', 'field': 'requested_activity', 'width': '100px', editable: global_edit_allowed},
+      {'name': 'Bo inne', 'field': 'age_sma', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},  
+      {'name': 'Bo dagsbesök', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool}
+      
     ]];
-                            	
     
-    var age_group_layout = [[
-      {'name': 'Ålder',                    field: 'age', 'width': '100px'},
-      {'name': 'Grupp',                  field: 'age_group', 'width': '100px'},
-      {'name': 'Antal deltagare', field: 'value', 'width': '150px', editable: global_edit_allowed},
-      {'name': 'Från datum',              field: 'from_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'Till datum',                field: 'to_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue}
+    
+var eat_layout = [[
+      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed},
+      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed},      
+      {'name': 'Ute', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      {'name': 'Inne', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      {'name': 'Egen', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      
+   
+    ]];
+	
+var occu_layout = [[
+      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed},
+      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed},      
+      {'name': 'Doktor', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      {'name': 'Program', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      {'name': 'Kursdelt vö', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      {'name': 'Kursdelt SSRS', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool}
     ]];
 
-    /*create a new grid*/
-    var age_group_grid = new DataGrid({
-        id: 'age_group_gridx',
-        store: age_group_store,
-        structure: age_group_layout,
+    //... create a new grid
+   
+
+	 var live_grid_grid = new DataGrid({
+        id: 'live_grid',
+        store: live_grid_store,
+        structure: live_layout,
         rowSelector: '10px'});
-
-
-	 var program_request_grid = new DataGrid({
-        id: 'program_request_gridx',
-        store: program_request_store,
-        structure: program_request_layout,
+        
+        
+    var eat_grid_grid = new DataGrid({
+        id: 'eat_grid',
+        store: eat_grid_store,
+        structure: eat_layout,
+        rowSelector: '10px'});
+        
+        
+   var occu_grid_grid = new DataGrid({
+        id: 'occu_grid',
+        store: occu_grid_store,
+        structure: occu_layout,
         rowSelector: '10px'});
 
 
@@ -135,9 +166,10 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     function on_save_grid_to_input() {
     	//...find dojo store and serialize it. Should be simple. Then write serialized data into 
     	//alert('storing...');
-    	age_group_store.save(saveCompleteCallback, saveFailedCallback);
-    	program_request_store.save(saveCompleteCallback, saveFailedCallback);
-    	dom.byId('program_request_info').value = dijit.byId('program_request_info_editor').value;
+    	live_grid_store.save(saveCompleteCallback, saveFailedCallback);
+    	eat_grid_store.save(saveCompleteCallback, saveFailedCallback);
+    	occu_grid_store.save(saveCompleteCallback, saveFailedCallback);
+    	
     	};
     	
     
@@ -177,10 +209,13 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
       on( save_button , 'click', on_save_grid_to_input );
 		on( save_button , 'click', on_validate); 
 		
-    age_group_grid.placeAt('age_group_div');
-    age_group_grid.startup();
-    program_request_grid.placeAt('age_group_div');
-    program_request_grid.startup();
+      // startup grid
+		live_grid_grid.placeAt('live_grid_div');
+      live_grid_grid.startup();
+      eat_grid_grid.placeAt('eat_grid_div');
+      eat_grid_grid.startup();
+      occu_grid_grid.placeAt('occu_grid_div');
+      occu_grid_grid.startup();
      
     }
     	
@@ -200,39 +235,34 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
 <body class="tundra">
     <h2>Edit vodb group ${vodb_group.name}</h2>
 
-	<p>Stays: <b>${reFormatDate(vodb_group.from_date)} - ${reFormatDate(vodb_group.to_date)}</b><br/>
+	<p>Stays: <b>${reFormatDate(vodb_group.from_date)} - ${reFormatDate(vodb_group.to_date)}</b></p>
+	<div class="note">
     Vodb status: <b>${bokn_status_map[vodb_group.vodb_status]}</b><br/>
+    Contact info:<br/>
+    <b>$vodb_group.vodb_contact_name</b><br/>
+    <b>$vodb_group.vodb_contact_email</b><br/>
+    <b>$vodb_group.vodb_contact_phone</b><br/>
+    <b>$vodb_group.vodb_contact_address</b><br/>
     
-    </p>
-     
-    
+    <p>${HTML(vodb_group.info)}</p>
+</div>    
     <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_visiting_group_program_request" method="post">
-    
-    <p>
-    <label for="contact_name">Contact person:</label><br/>
-    <input type="text" id="contact_person" name="contact_person" value="$vodb_group.contact_person" data-dojo-type="dijit/form/ValidationTextBox"/>
-    </p>
-    <p> 
-    <label for="contact_email">Email:</label><br/>
-    <input type="text" id="contact_person_email" name="contact_person_email" value="$vodb_group.contact_person_email" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
-    </p>
-    <p>
-    <label for="contact_phone">Mobile:</label><br/>
-    <input type="text" id="contact_person_phone" name="contact_person_phone" value="$vodb_group.contact_person_phone" data-dojo-type="dijit/form/ValidationTextBox"/>
-    </p>
-    <div> 
-    <label for="program_request_info_editor">Info:</label><br/>
-    <div data-dojo-type="dijit/Editor" id="program_request_info_editor">$vodb_group.info</div>
-    </div> 
+
     <div>
-    	<label for="age_group_div">Live:</label><br/>        		
-    	<div id="age_group_div" style="height:300px;"><input type="hidden" id="age_group_div_input" name="age_group_input"/></div>
+    	<label for="live_grid_div">Live:</label><br/>        		
+    	<div id="live_grid_div" style="height:300px;"><input type="hidden" id="live_grid_div_input" name="live_grid_input"/></div>
     	</div>
     
     	<div>    
-    	<label for="program_request_div">Eat:</label><br/>
-    	<div id="program_request_div" style="height:400px;">Program request...<input type="hidden" id="program_request_div_input" name="program_request_input"/></div>
+    	<label for="eat_grid_div">Eat:</label><br/>
+    	<div id="eat_grid_div" style="height:400px;"><input type="hidden" id="eat_grid_div_input" name="eat_grid_input"/></div>
     	</div>
+
+    	<div>    
+    	<label for="occu_grid_div">Occu:</label><br/>
+    	<div id="occu_grid_div" style="height:400px;"><input type="hidden" id="occu_grid_div_input" name="occu_grid_input"/></div>
+    	</div>
+
     
 		<input type="hidden" name="vgroup_id" value="$vodb_group._id"/>
 		<input type="hidden" name="program_request_info" id="program_request_info" />

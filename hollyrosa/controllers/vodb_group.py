@@ -83,10 +83,7 @@ class VODBGroup(BaseController):
                 visiting_group_x[k] = ''
                 
         visiting_group_o = make_object_of_vgdictionary(visiting_group_x)
-        
-        log.debug('vgroup prop:' + str(visiting_group_o.visiting_group_properties))
-                
-        
+         
         return dict(vodb_group=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
         
         
@@ -94,10 +91,10 @@ class VODBGroup(BaseController):
         
     # the expression del referrs to Data Eat Live. LED was too confusing so I choose DEL :)    
         
-    @expose('hollyrosa.templates.vodb_group_edit')
+    @expose('hollyrosa.templates.vodb_group_edit_DEL_table')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
-    def edit_group_del(self, visiting_group_id=''):
-        visiting_group_x = holly_couch[visiting_group_id]
+    def edit_group_DEL(self, visiting_group_id=''):
+        visiting_group_o = holly_couch[visiting_group_id]
         tmpl_context.form = create_edit_vodb_group_form
         
         #...construct the age group list. It's going to be a json document. Hard coded.
@@ -105,18 +102,11 @@ class VODBGroup(BaseController):
         #...construct a program request template. It's going to be a json document. Hard coded.
         
         
-        
-        if not visiting_group_x.has_key('vodb_status'):
-            visiting_group_x['vodb_status'] = 0
-        
+        if not visiting_group_o.has_key('vodb_status'):
+            visiting_group_o['vodb_status'] = 0
         for k in ['vodb_contact_name', 'vodb_contact_email', 'vodb_contact_phone', 'vodb_contact_address']:
-            if not visiting_group_x.has_key(k):
-                visiting_group_x[k] = ''
-                
-        visiting_group_o = make_object_of_vgdictionary(visiting_group_x)
-        
-        log.debug('vgroup prop:' + str(visiting_group_o.visiting_group_properties))
-                
+            if not visiting_group_o.has_key(k):
+                visiting_group_o[k] = ''
         
         return dict(vodb_group=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
         
