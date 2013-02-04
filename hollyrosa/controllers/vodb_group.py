@@ -98,6 +98,46 @@ class VODBGroup(BaseController):
             tmp_result_str = tmp_result.strftime('%Y-%m-%d')
             yield tmp_result_str
         
+    
+        
+    def make_empty_vodb_table(self, from_date, to_date, lowest_rid, times, cols):
+        """
+        makes an empty table with all date-times for the live table
+        """
+    
+        r1_items = list()
+        rid = lowest_rid
+        for tmp_date in self.dateGen(from_date, to_date):
+            for tmp_time in times:
+                it = dict(date=tmp_date, time=tmp_time, rid=rid)
+                for tmp_col in cols:
+                    it[tmp_col] = 0
+                    
+                r1_items.append(it)
+                rid += 1
+
+        return dict(identifier='rid', items=r1_items)
+        
+        
+    def make_empty_vodb_live_table(self, from_date, to_date, lowest_rid):
+        return self.make_empty_vodb_table(from_date, to_date, lowest_rid, [u'fm',u'em',u'kväll'], ['inne','ute','daytrip'])
+        
+        
+    def find_lowest_row_id(self, rows):
+        rid = 0
+        for tmp_row in rows:
+            if tmp_row['rid'] > rid:
+                rid = tmp_row['rid']
+                
+        return rid
+    
+    
+    def get_composite_key(self, row):
+        return row['date'] + u'_' + row['time']
+        
+        
+    def fn_cmp_composite_key(self, a, b):
+        return cmp(self.get_composite_key(a), self.get_composite_key(b))
         
         
     # the expression del referrs to Data Eat Live. LED was too confusing so I choose DEL :)    
@@ -120,22 +160,97 @@ class VODBGroup(BaseController):
                 visiting_group_o[k] = ''
         
         #...step 1 - create some random data just to show you know what it looks like
-        r1_items = list()
+        # the real tricky part is to construct that merge part that does two things:
+        # 1. we cant have rows with dates outside the range
+        # 2. if we miss rows with certain dates, we should insert them
+        live_data = visiting_group_o.get('vodb_live_table', dict(identifier='rid', items=[]))
+        lowest_rid = self.find_lowest_row_id(live_data['items'])
+        empty_vodb_live_table = self.make_empty_vodb_live_table(visiting_group_o['from_date'], visiting_group_o['to_date'], lowest_rid)
+        row_lookup = dict()
+        for tmp_row in empty_vodb_live_table['items']:
+            composite_key = self.get_composite_key(tmp_row) #['date']+u'_'+tmp_row['time']
+            row_lookup[composite_key] = tmp_row
+        #if not visiting_group_o.has_key('vodb_live_table'):
+        #    live_data = empty_vodb_live_table
+        #else:
+        #    #items = visiting_group_o['vodb_live_table']['items']
+        for tmp_row in live_data['items']:
+            composite_key = self.get_composite_key(tmp_row) # ['date']+u'_'+tmp_row['time']
+            if row_lookup.has_key(composite_key):
+                del row_lookup[composite_key]
+        log.debug('rows left:')
+            
+        for row_left in row_lookup.values():
+            live_data['items'].append(row_left)
+            
+        #...re-sort the rows!
+        live_data_items = live_data['items']
+        live_data_items.sort(self.fn_cmp_composite_key)
+        live_data['items'] = live_data_items
+        
+        # refactor
+            
+            
+        
+        
+        visiting_group_o['vodb_live_table'] = json.dumps( live_data )
+        
+        #...add eat
+        r2_items = list()
         rid = 0
         for tmp_date in self.dateGen(visiting_group_o['from_date'], visiting_group_o['to_date']):
-            r1_items.append(dict(date=tmp_date, time='fm', rid=rid, inne=10, ute=20, egen=0))
+            r2_items.append(dict(date=tmp_date, time='frukost', rid=rid, inne=10, ute=20, egen=0))
             rid += 1
-            r1_items.append(dict(date=tmp_date, time='em', rid=rid, inne=10, ute=20, egen=0))
+            r2_items.append(dict(date=tmp_date, time='lunch', rid=rid, inne=10, ute=20, egen=0))
             rid += 1
-            r1_items.append(dict(date=tmp_date, time='kväll', rid=rid, inne=10, ute=20, egen=0))
+            r2_items.append(dict(date=tmp_date, time='middag', rid=rid, inne=10, ute=20, egen=0))
             rid += 1
-        r1 = dict(identifier='rid', items=r1_items)
-        r1_json = json.dumps(r1)
+            r2_items.append(dict(date=tmp_date, time='kvällsfika', rid=rid, inne=10, ute=20, egen=0))
+            rid += 1
+            
+        r2 = dict(identifier='rid', items=r2_items)
+        r2_json = json.dumps(r2)
         
-        visiting_group_o.vodb_eat_table = r1_json
+        visiting_group_o.vodb_eat_table = r2_json
+        
+        
+        
+        #...add eat
+        r3_items = list()
+        rid = 0
+        for tmp_date in self.dateGen(visiting_group_o['from_date'], visiting_group_o['to_date']):
+            r3_items.append(dict(date=tmp_date, time='fm', rid=rid, inne=10, ute=20, egen=0))
+            rid += 1
+            r3_items.append(dict(date=tmp_date, time='em', rid=rid, inne=10, ute=20, egen=0))
+            rid += 1
+            r3_items.append(dict(date=tmp_date, time='kväll', rid=rid, inne=10, ute=20, egen=0))
+            rid += 1
+            
+        r3 = dict(identifier='rid', items=r3_items)
+        r3_json = json.dumps(r3)
+        
+        visiting_group_o.vodb_occu_table = r3_json
         
         return dict(vodb_group=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
         
+        
+    @expose()
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
+    def update_group_tables(self, vgroup_id='', occu_table=None, eat_table=None, live_table=None, saveButton=''):
+        # todo: accessor function making sure the type really is visiting_group
+        visiting_group_o = holly_couch[vgroup_id] 
+        
+        if occu_table != None:
+            visiting_group_o['vodb_occu_table'] = json.loads(occu_table)
+
+        if eat_table != None:
+            visiting_group_o['vodb_eat_table'] = json.loads(eat_table)
+
+        if live_table != None:
+            visiting_group_o['vodb_live_table'] = json.loads(live_table)
+            	        
+        holly_couch[vgroup_id] = visiting_group_o
+        return
         
         
         

@@ -60,8 +60,8 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
   
  
     var eat_grid_data = ${vodb_group.vodb_eat_table}; 
-    var live_grid_data = {identifier: 'rid', items:[]}; //{vodb_group.program_request};
-    var occu_grid_data = {identifier: 'rid', items:[]}; //{vodb_group.occu_request};
+    var live_grid_data = ${vodb_group.vodb_live_table};
+    var occu_grid_data = ${vodb_group.vodb_occu_table};
    
     var live_grid_store = new ItemFileWriteStore({
     	data: live_grid_data
@@ -81,7 +81,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
                                 a_saveFailedCallback /*Your callback to call if save fails*/,
                                 a_newFileContentString /*The generated JSON data to send somewhere*/){
                                 
-                                	var inp = dom.byId('live_div_input');
+                                	var inp = dom.byId('live_grid_div_input');
                                 	inp.value = a_newFileContentString;
                                 	a_saveCompleteCallback();
     										};
@@ -90,7 +90,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
                                 a_saveFailedCallback /*Your callback to call if save fails*/,
                                 a_newFileContentString /*The generated JSON data to send somewhere*/){
                                 	//alert(a_newFileContentString);
-                                	var inp = dom.byId('eat_div_input');
+                                	var inp = dom.byId('eat_grid_div_input');
                                 	inp.value = a_newFileContentString;
                                 	a_saveCompleteCallback();
                                 	};
@@ -99,7 +99,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
                                 a_saveFailedCallback /*Your callback to call if save fails*/,
                                 a_newFileContentString /*The generated JSON data to send somewhere*/){
                                 	//alert(a_newFileContentString);
-                                	var inp = dom.byId('occu_div_input');
+                                	var inp = dom.byId('occu_grid_div_input');
                                 	inp.value = a_newFileContentString;
                                 	a_saveCompleteCallback();
                                 	};   
@@ -109,11 +109,11 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     var global_edit_allowed = true;
     
     var live_layout = [[
-      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed},
-      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed},      
-      {'name': 'Bo tält', 'field': 'requested_activity', 'width': '100px', editable: global_edit_allowed},
-      {'name': 'Bo inne', 'field': 'age_sma', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},  
-      {'name': 'Bo dagsbesök', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool}
+      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+      {'name': 'Tid', 'field': 'time', 'width': '50px', editable:false},      
+      {'name': 'Bo tält', 'field': 'ute', 'width': '100px', editable: global_edit_allowed},
+      {'name': 'Bo inne', 'field': 'inne', 'width': '60px', editable:global_edit_allowed},  
+      {'name': 'Bo dagsbesök', 'field': 'daytrip', 'width': '60px', editable:global_edit_allowed}
       
     ]];
     
@@ -121,20 +121,20 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
 var eat_layout = [[
       {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
       {'name': 'Tid', 'field': 'time', 'width': '50px', editable: false},      
-      {'name': 'Ute', 'field': 'inne', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Int},
-      {'name': 'Inne', 'field': 'ute', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Int},
-      {'name': 'Egen', 'field': 'egen', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Int},
+      {'name': 'Ute', 'field': 'inne', 'width': '60px', editable:global_edit_allowed},
+      {'name': 'Inne', 'field': 'ute', 'width': '60px', editable:global_edit_allowed},
+      {'name': 'Egen', 'field': 'egen', 'width': '60px', editable:global_edit_allowed},
       
    
     ]];
 	
 var occu_layout = [[
-      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed},
-      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed},      
-      {'name': 'Doktor', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Program', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Kursdelt vö', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Kursdelt SSRS', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool}
+      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+      {'name': 'Tid', 'field': 'time', 'width': '50px', editable: false},      
+      {'name': 'Doktor', 'field': 'funk_doctor', 'width': '60px', editable:global_edit_allowed},
+      {'name': 'Program', 'field': 'funk_program', 'width': '60px', editable:global_edit_allowed},
+      {'name': 'Kursdelt vö', 'field': 'delt_course', 'width': '60px', editable:global_edit_allowed},
+      {'name': 'Kursdelt SSRS', 'field': 'delt_course', 'width': '60px', editable:global_edit_allowed}
     ]];
 
     //... create a new grid
@@ -247,26 +247,25 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
     
     <p>${HTML(vodb_group.info)}</p>
 </div>    
-    <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_visiting_group_program_request" method="post">
+    <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_group_tables" method="post">
 
     <div>
     	<label for="live_grid_div">Live:</label><br/>        		
-    	<div id="live_grid_div" style="height:300px;"><input type="hidden" id="live_grid_div_input" name="live_grid_input"/></div>
+    	<div id="live_grid_div" style="height:600px;"><input type="hidden" id="live_grid_div_input" name="live_table"/></div>
     	</div>
     
     	<div>    
     	<label for="eat_grid_div">Eat:</label><br/>
-    	<div id="eat_grid_div" style="height:400px;"><input type="hidden" id="eat_grid_div_input" name="eat_grid_input"/></div>
+    	<div id="eat_grid_div" style="height:600px;"><input type="hidden" id="eat_grid_div_input" name="eat_table"/></div>
     	</div>
 
     	<div>    
     	<label for="occu_grid_div">Occu:</label><br/>
-    	<div id="occu_grid_div" style="height:400px;"><input type="hidden" id="occu_grid_div_input" name="occu_grid_input"/></div>
+    	<div id="occu_grid_div" style="height:600px;"><input type="hidden" id="occu_grid_div_input" name="occu_table"/></div>
     	</div>
 
     
 		<input type="hidden" name="vgroup_id" value="$vodb_group._id"/>
-		<input type="hidden" name="program_request_info" id="program_request_info" />
     	<button data-dojo-type="dijit/form/Button" type="submit" name="saveButton" value="Save" id="save_button">Save</button>
 	</div>
 </body>
