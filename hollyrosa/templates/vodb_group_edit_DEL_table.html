@@ -36,8 +36,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
    
   <script>
 
-require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on','dojo/ready', 'dojo/domReady!'],
-  function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready, domReady ){
+require(['dojo/_base/array', 'dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on','dojo/ready', 'dojo/domReady!'],
+  function(array, lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready, domReady ){
     
     function formatDate(datum) {
         var d = stamp.fromISOString(datum);
@@ -127,15 +127,16 @@ var eat_layout = [[
       
    
     ]];
-	
-var occu_layout = [[
+
+var occu_layout_inner = [
       {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'Tid', 'field': 'time', 'width': '50px', editable: false},      
-      {'name': 'Doktor', 'field': 'funk_doctor', 'width': '60px', editable:global_edit_allowed},
-      {'name': 'Program', 'field': 'funk_program', 'width': '60px', editable:global_edit_allowed},
-      {'name': 'Kursdelt vö', 'field': 'delt_course', 'width': '60px', editable:global_edit_allowed},
-      {'name': 'Kursdelt SSRS', 'field': 'delt_course', 'width': '60px', editable:global_edit_allowed}
-    ]];
+      {'name': 'Tid', 'field': 'time', 'width': '50px', editable: false}];
+
+array.forEach($occu_layout_tags, function(entry, i) {
+	occu_layout_inner.push({'name': entry, 'field': entry, 'width': '60px', editable:global_edit_allowed});
+
+	}); 
+var occu_layout = [occu_layout_inner];      
 
     //... create a new grid
    
@@ -246,6 +247,7 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
     <p>SKAPA KORRIGERA DEFAULT DATA FOR TABELLER SOM VISAS. OM DATA INTE FINNS: SKAPA FM EM KVALL etc. OM DATA OUT OF DATE RANGE EXIST and all data zero ta bort</p>
     
     <p>${HTML(vodb_group.info)}</p>
+    <li py:for="t in vodb_group.tags">$t</li>
 </div>    
     <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_group_tables" method="post">
 

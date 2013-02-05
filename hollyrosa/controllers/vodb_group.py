@@ -126,14 +126,7 @@ class VODBGroup(BaseController):
     def make_empty_vodb_eat_table(self, from_date, to_date):
         return self.make_empty_vodb_table(from_date, to_date, [u'frukost',u'lunch',u'middag',u'kvällsfika'], ['inne','ute','egen'])
         
-        
-    def find_lowest_row_id(self, rows):
-        rid = 0
-        for tmp_row in rows:
-            if tmp_row['rid'] > rid:
-                rid = tmp_row['rid']
-                
-        return rid
+
     
     
     def get_composite_key(self, row):
@@ -179,18 +172,15 @@ class VODBGroup(BaseController):
         # 1. we cant have rows with dates outside the range
         # 2. if we miss rows with certain dates, we should insert them
         live_data = visiting_group_o.get('vodb_live_table', dict(identifier='rid', items=[]))
-        ##lowest_rid = self.find_lowest_row_id(live_data['items'])
         empty_vodb_live_table = self.make_empty_vodb_live_table(visiting_group_o['from_date'], visiting_group_o['to_date'])
         row_lookup = dict()
         for tmp_row in empty_vodb_live_table['items']:
-            ##composite_key = self.get_composite_key(tmp_row)
             row_lookup[tmp_row['rid']] = tmp_row
         
         for tmp_row in live_data['items']:
             composite_key = tmp_row['rid']  ##self.get_composite_key(tmp_row) 
             if row_lookup.has_key(composite_key):
                 del row_lookup[composite_key]
-        log.debug('rows left:')
             
         for row_left in row_lookup.values():
             live_data['items'].append(row_left)
@@ -232,46 +222,59 @@ class VODBGroup(BaseController):
             
         
         
+        #...fix the occu table
+        occu_data = visiting_group_o.get('vodb_occu_table', dict(identifier='rid', items=[]))     
+        empty_vodb_occu_table = self.make_empty_vodb_table(visiting_group_o['from_date'], visiting_group_o['to_date'],[u'fm',u'em',u'kväll'], visiting_group_o['tags']) 
+        row_lookup = dict()
+        for tmp_row in empty_vodb_occu_table['items']:
+            row_lookup[tmp_row['rid']] = tmp_row
+        
+        for tmp_row in occu_data['items']:
+            composite_key = tmp_row['rid'] 
+            if row_lookup.has_key(composite_key):
+                del row_lookup[composite_key]
+            
+        for row_left in row_lookup.values():
+            occu_data['items'].append(row_left)
+            
+        #...re-sort the rows!
+        occu_data_items = occu_data['items']
+        occu_data_items.sort(self.fn_cmp_composite_key)
+        occu_data['items'] = occu_data_items
+        
+        
+        
+        
+        
         visiting_group_o['vodb_live_table'] = json.dumps( live_data )
         visiting_group_o.vodb_eat_table = json.dumps( eat_data )
-        #
-        #...add eat
-        #r2_items = list()
+        visiting_group_o.vodb_occu_table = json.dumps( occu_data )
+        
+        
+        #...we also must fix the occu_grid layout since its dynamic
+        
+        occu_layout_tags = json.dumps(visiting_group_o['tags'])
+    
+        
+        
+        #...add occu table. which is becoming a tag value table
+        
+        #r3_items = list()
         #
         #for tmp_date in self.dateGen(visiting_group_o['from_date'], visiting_group_o['to_date']):
-        #    r2_items.append(dict(date=tmp_date, time='frukost', rid=rid, inne=10, ute=20, egen=0))
+        #    r3_items.append(dict(date=tmp_date, time='fm', rid=rid, inne=10, ute=20, egen=0))
         #    rid += 1
-        #    r2_items.append(dict(date=tmp_date, time='lunch', rid=rid, inne=10, ute=20, egen=0))
+        #    r3_items.append(dict(date=tmp_date, time='em', rid=rid, inne=10, ute=20, egen=0))
         #    rid += 1
-        #    r2_items.append(dict(date=tmp_date, time='middag', rid=rid, inne=10, ute=20, egen=0))
+        #    r3_items.append(dict(date=tmp_date, time='kväll', rid=rid, inne=10, ute=20, egen=0))
         #    rid += 1
-        #    r2_items.append(dict(date=tmp_date, time='kvällsfika', rid=rid, inne=10, ute=20, egen=0))
-        #   rid += 1
         #    
-        #r2 = dict(identifier='rid', items=r2_items)
-        #r2_json = json.dumps(r2)
+        #r3 = dict(identifier='rid', items=r3_items)
+        #r3_json = json.dumps(r3)
         #
+        #visiting_group_o.vodb_occu_table = r3_json
         
-        
-        
-        
-        #...add eat
-        r3_items = list()
-        rid = 0
-        for tmp_date in self.dateGen(visiting_group_o['from_date'], visiting_group_o['to_date']):
-            r3_items.append(dict(date=tmp_date, time='fm', rid=rid, inne=10, ute=20, egen=0))
-            rid += 1
-            r3_items.append(dict(date=tmp_date, time='em', rid=rid, inne=10, ute=20, egen=0))
-            rid += 1
-            r3_items.append(dict(date=tmp_date, time='kväll', rid=rid, inne=10, ute=20, egen=0))
-            rid += 1
-            
-        r3 = dict(identifier='rid', items=r3_items)
-        r3_json = json.dumps(r3)
-        
-        visiting_group_o.vodb_occu_table = r3_json
-        
-        return dict(vodb_group=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
+        return dict(vodb_group=visiting_group_o, occu_layout_tags=occu_layout_tags, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
         
         
     @expose()
