@@ -28,7 +28,7 @@ from hollyrosa.widgets.edit_visiting_group_program_request_form import create_ed
 from hollyrosa.widgets.edit_vodb_group_form import create_edit_vodb_group_form
 from tg import tmpl_context
 
-import datetime,logging, json, time
+import datetime,logging, json, time, types
 
 log = logging.getLogger()
 
@@ -43,6 +43,12 @@ from hollyrosa.controllers.booking_history import remember_new_booking_request
 from formencode import validators
 
 __all__ = ['VODBGroup']
+
+
+vodb_eat_times = [u'frukost',u'lunch',u'middag',u'kvällsfika']
+vodb_eat_times_options = ['inne','ute','egen']
+vodb_live_times_options = ['inne','ute','daytrip']
+#vodb_live_cols = 
 
 class VODBGroup(BaseController):
     
@@ -124,7 +130,7 @@ class VODBGroup(BaseController):
         return self.make_empty_vodb_table(from_date, to_date, [u'fm',u'em',u'kväll'], ['inne','ute','daytrip'])
         
     def make_empty_vodb_eat_table(self, from_date, to_date):
-        return self.make_empty_vodb_table(from_date, to_date, [u'frukost',u'lunch',u'middag',u'kvällsfika'], ['inne','ute','egen'])
+        return self.make_empty_vodb_table(from_date, to_date, vodb_eat_times, vodb_eat_times_options)
         
 
     
@@ -191,15 +197,21 @@ class VODBGroup(BaseController):
         live_data['items'] = live_data_items
 
         # todo        
-        # refactor
+        # tags in yellow box
+        # What do we do with tag data when a tag is deleted?
+        # What do we do with tag data when a tag is added
+        # Data for non existing tag, shouldnt it be shown anyway? 
+        # Can we purge data that has no tag associated?
         #
-        # for the occu table, we need some globab lookup because we need to know which occu_cols to show.
-        # probably there is some list of occu_cols to show stored with the vodb group :)
-        # from the list of occu_cols (which really are ids) we can lookup the cols name and possibly data type
+        # When later saving all this, we should compute a cache content that can be used in future queries / views so we 
+        # can start compute collected information
         #
-        # Now I have come up with an idea...the occu grid is really the tag grid :)
         #
-        # Step 1. List all tags in yellow box
+        # first of all, a general mega overview...
+        #
+        # we also soon will need som kind of subtyping
+        
+        
              
         eat_data = visiting_group_o.get('vodb_eat_table', dict(identifier='rid', items=[]))     
         empty_vodb_eat_table = self.make_empty_vodb_eat_table(visiting_group_o['from_date'], visiting_group_o['to_date'])
@@ -224,7 +236,19 @@ class VODBGroup(BaseController):
         
         #...fix the occu table
         occu_data = visiting_group_o.get('vodb_occu_table', dict(identifier='rid', items=[]))     
-        empty_vodb_occu_table = self.make_empty_vodb_table(visiting_group_o['from_date'], visiting_group_o['to_date'],[u'fm',u'em',u'kväll'], visiting_group_o['tags']) 
+                
+        all_current_vgroup_tags = dict()
+        for tmp_key in visiting_group_o['tags']:
+            all_current_vgroup_tags[tmp_key] = 1
+            
+        for tmp_row in occu_data['items']:
+            for tmp_key in tmp_row.keys():
+                if ((tmp_key != 'date') and (tmp_key != 'time')):
+                    if not all_current_vgroup_tags.has_key(tmp_key):
+                        all_current_vgroup_tags[tmp_key] = 1
+        
+        empty_vodb_occu_table = self.make_empty_vodb_table(visiting_group_o['from_date'], visiting_group_o['to_date'],[u'fm',u'em',u'kväll'], all_current_vgroup_tags.keys()) 
+        
         row_lookup = dict()
         for tmp_row in empty_vodb_occu_table['items']:
             row_lookup[tmp_row['rid']] = tmp_row
@@ -257,25 +281,39 @@ class VODBGroup(BaseController):
     
         
         
-        #...add occu table. which is becoming a tag value table
         
-        #r3_items = list()
-        #
-        #for tmp_date in self.dateGen(visiting_group_o['from_date'], visiting_group_o['to_date']):
-        #    r3_items.append(dict(date=tmp_date, time='fm', rid=rid, inne=10, ute=20, egen=0))
-        #    rid += 1
-        #    r3_items.append(dict(date=tmp_date, time='em', rid=rid, inne=10, ute=20, egen=0))
-        #    rid += 1
-        #    r3_items.append(dict(date=tmp_date, time='kväll', rid=rid, inne=10, ute=20, egen=0))
-        #    rid += 1
-        #    
-        #r3 = dict(identifier='rid', items=r3_items)
-        #r3_json = json.dumps(r3)
-        #
-        #visiting_group_o.vodb_occu_table = r3_json
         
         return dict(vodb_group=visiting_group_o, occu_layout_tags=occu_layout_tags, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
-        
+    
+    
+                    
+    def vodb_table_property_substitution(self, rows, headers, properties):
+        """
+        WEE NEED TO TRIGGER THIS IF ANY PROPERTIES EVER CHANGE
+        """
+        for row in rows:
+            for k in headers:
+                #log.debug('headers:'+str(type(k)))
+                original_value = row.get(k,0)
+                log.debug('original value: ' + str(original_value))
+                if type(original_value) == types.StringType or type(original_value) == types.UnicodeType:
+                    log.debug('IS STRING TYPE')
+                    for prop in properties.values():
+                        log.debug(str(prop))
+                        prop_prop = prop['property']
+                        # todo: WARN IF DATE IS OUTSIDE RANGE
+                        
+                        new_value = original_value.replace(u'$'+prop_prop, prop['value']) 
+                        
+                        try:
+                            new_value = int(new_value)
+                        except ValueError:
+                        	 pass
+                        original_value = new_value # sadly no better idea
+                        log.debug(str(original_value))                        
+                        break
+                        
+                row[k] = original_value
         
     @expose()
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
@@ -283,14 +321,30 @@ class VODBGroup(BaseController):
         # todo: accessor function making sure the type really is visiting_group
         visiting_group_o = holly_couch[vgroup_id] 
         
-        if occu_table != None:
-            visiting_group_o['vodb_occu_table'] = json.loads(occu_table)
-
         if eat_table != None:
-            visiting_group_o['vodb_eat_table'] = json.loads(eat_table)
+            vodb_eat_table = json.loads(eat_table)
+            visiting_group_o['vodb_eat_table'] = vodb_eat_table
+                        
+            #...create cache content. Substitute properties and make sure we have at least zeros in all columns
+            vodb_eat_computed = vodb_eat_table['items']            
+            self.vodb_table_property_substitution(vodb_eat_computed, vodb_eat_times_options, visiting_group_o['visiting_group_properties'])
+            
+            visiting_group_o['vodb_eat_computed'] = vodb_eat_computed
 
         if live_table != None:
-            visiting_group_o['vodb_live_table'] = json.loads(live_table)
+            vodb_live_table = json.loads(live_table)
+            visiting_group_o['vodb_live_table'] = vodb_live_table
+            vodb_live_computed = vodb_live_table['items']
+            self.vodb_table_property_substitution(vodb_live_computed, vodb_live_times_options, visiting_group_o['visiting_group_properties'])
+            visiting_group_o['vodb_live_computed'] = vodb_live_computed
+              
+            
+
+        if occu_table != None:
+            vodb_occu_table = json.loads(occu_table)
+            visiting_group_o['vodb_occu_table'] = vodb_occu_table
+            vodb_occu_computed = vodb_occu_table['items']
+            visiting_group_o['vodb_occu_computed'] = vodb_occu_computed
             	        
         holly_couch[vgroup_id] = visiting_group_o
         return
