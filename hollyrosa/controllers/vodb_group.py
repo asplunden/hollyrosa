@@ -35,7 +35,7 @@ log = logging.getLogger()
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, reFormatDate
 
-from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget
+from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup
 from hollyrosa.controllers.booking_history import remember_tag_change
 from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, make_object_of_vgdictionary
 from hollyrosa.controllers.booking_history import remember_new_booking_request
@@ -91,6 +91,120 @@ class VODBGroup(BaseController):
         visiting_group_o = make_object_of_vgdictionary(visiting_group_x)
          
         return dict(vodb_group=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
+
+
+    def newOrExistingVgroupId(self, a_id):
+        is_new = False
+        r_id = a_id
+                 
+        if None == a_id or a_id == '':
+            is_new = True
+            r_id = genUID(type='visiting_group')
+        #elif 'visiting_group' not in id:
+        #    is_new = True
+        #    r_id = 'visiting_group.'+id 
+            
+        return is_new, r_id
+    
+
+    @expose()
+    @validate(create_edit_vodb_group_form, error_handler=edit_group_data)
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change visiting group properties'))
+    def save_vodb_group_properties(self, id='', boknr='', name='', info='', camping_location='', vodb_contact_name='', vodb_contact_phone='', vodb_contact_email='', vodb_contact_address='', from_date='', to_date='', visiting_group_properties=None):
+        #...how do we handle new groups? Like new visiting_group, right?
+        #   better have type=visiting_group for all groups and then have subtypes=group, course, daytrip, funk, etc for filtering/deciding on additional capabillities
+        #
+        is_new, vgroup_id = self.newOrExistingVgroupId(id) 
+                
+                
+        if is_new:
+            program_state = 0
+            vodb_state = 0
+            visiting_group_o = dict(type='visiting_group')
+      
+        else:
+            visiting_group_o = holly_couch[vgroup_id]
+
+        #...fill in data
+        visiting_group_o['name'] = name
+        visiting_group_o['info'] = info
+        visiting_group_o['from_date'] = str(from_date)
+        visiting_group_o['to_date'] = str(to_date)
+        visiting_group_o['vodb_contact_name'] = vodb_contact_name
+        visiting_group_o['vodb_contact_email'] = vodb_contact_email
+        visiting_group_o['vodb_contact_phone'] = vodb_contact_phone
+        visiting_group_o['vodb_contact_address'] = vodb_contact_address
+        
+        visiting_group_o['boknr'] = boknr
+        #visiting_group_o['password'] = password
+        if is_new:
+            visiting_group_o['boknstatus'] = program_state
+            visiting_group_o['vodbstatus'] = vodb_state
+        visiting_group_o['camping_location'] = camping_location
+        
+        visiting_group_property_o = dict()
+            
+            
+        #...populate / change properties
+
+
+
+        # TODO: refactor        
+        #...remove non-used params !!!! Make a dict and see which are used, remove the rest
+        unused_params = {}        
+        used_param_ids = []
+        if  visiting_group_o.has_key('visiting_group_properties'):
+            used_param_ids = visiting_group_o['visiting_group_properties'].keys()
+        
+        for param in visiting_group_properties:
+            is_new_param = False
+            if param['property'] != '' and param['property'] != None:
+                if param['id'] != '' and param['id'] != None:
+                    visiting_group_property_o[param['id']] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
+                else:
+                    #...compute new unsued id
+                    # TODO: these ids are not perfectly unique. It could be a problem with dojo grid
+                    
+                    new_id_int = 1
+                    while str(new_id_int) in used_param_ids:
+                        new_id_int += 1
+                    used_param_ids.append(str(new_id_int))
+                    
+                    visiting_group_property_o[str(new_id_int)] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
+                    
+        # no need to delete old params, but we need to add to history how params are changed and what it affects
+        
+        #...now we have to update all cached content, so we need all bookings that belong to this visiting group
+        
+        visiting_group_o['visiting_group_properties'] = visiting_group_property_o
+        
+        # TODO: IMPORTANT TO FIX LATER
+        # TODO: refactor
+        bookings = getBookingsOfVisitingGroup(holly_couch, vgroup_id,  None)
+        for tmp in bookings:
+            tmp_booking = tmp.doc
+            
+            new_content = computeCacheContent(visiting_group_o, tmp_booking['content'])
+            if new_content != tmp_booking['cache_content'] :
+            
+                tmp_booking['cache_content'] = new_content
+                tmp_booking['last_changed_by'] = getLoggedInUserId(request)
+                
+                # TODO: change booking status (from whatever, since the text has changed)
+                
+                
+                # TODO: remember booking history change
+                
+                
+                holly_couch[tmp_booking['_id']] = tmp_booking
+            
+        
+        holly_couch[vgroup_id] = visiting_group_o
+        
+        if visiting_group_o.has_key('_id'):
+            raise redirect('/vodb_group/view_vodb_group?visiting_group_id='+visiting_group_o['_id'])
+        raise redirect('/vodb_group/view_all')
+        
         
         
     def dateGen(self, from_date, to_date):
@@ -155,6 +269,19 @@ class VODBGroup(BaseController):
         
         
     # the expression del referrs to Data Eat Live. LED was too confusing so I choose DEL :)    
+
+    def compute_all_used_vgroup_tags(self, tags, rows):
+        all_current_vgroup_tags = dict()
+        for tmp_key in tags:
+            all_current_vgroup_tags[tmp_key] = 1
+            
+        for tmp_row in rows:
+            for tmp_key in tmp_row.keys():
+                if ((tmp_key != 'date') and (tmp_key != 'time')):
+                    if not all_current_vgroup_tags.has_key(tmp_key):
+                        all_current_vgroup_tags[tmp_key] = 1
+        return all_current_vgroup_tags
+
         
     @expose('hollyrosa.templates.vodb_group_edit_DEL_table')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
@@ -236,16 +363,18 @@ class VODBGroup(BaseController):
         
         #...fix the occu table
         occu_data = visiting_group_o.get('vodb_occu_table', dict(identifier='rid', items=[]))     
-                
-        all_current_vgroup_tags = dict()
-        for tmp_key in visiting_group_o['tags']:
-            all_current_vgroup_tags[tmp_key] = 1
-            
-        for tmp_row in occu_data['items']:
-            for tmp_key in tmp_row.keys():
-                if ((tmp_key != 'date') and (tmp_key != 'time')):
-                    if not all_current_vgroup_tags.has_key(tmp_key):
-                        all_current_vgroup_tags[tmp_key] = 1
+        
+        all_current_vgroup_tags = self.compute_all_used_vgroup_tags(visiting_group_o['tags'], occu_data['items'])
+        #all_current_vgroup_tags = dict()
+        #for tmp_key in visiting_group_o['tags']:
+        #    all_current_vgroup_tags[tmp_key] = 1
+        #    
+        #
+        #for tmp_row in occu_data['items']:
+        #    for tmp_key in tmp_row.keys():
+        #        if ((tmp_key != 'date') and (tmp_key != 'time')):
+        #            if not all_current_vgroup_tags.has_key(tmp_key):
+        #                all_current_vgroup_tags[tmp_key] = 1
         
         empty_vodb_occu_table = self.make_empty_vodb_table(visiting_group_o['from_date'], visiting_group_o['to_date'],[u'fm',u'em',u'kväll'], all_current_vgroup_tags.keys()) 
         
@@ -344,6 +473,8 @@ class VODBGroup(BaseController):
             vodb_occu_table = json.loads(occu_table)
             visiting_group_o['vodb_occu_table'] = vodb_occu_table
             vodb_occu_computed = vodb_occu_table['items']
+            vodb_occu_times_tags = self.compute_all_used_vgroup_tags(visiting_group_o['tags'], vodb_occu_table['items'])
+            self.vodb_table_property_substitution(vodb_occu_computed, vodb_occu_times_tags, visiting_group_o['visiting_group_properties'])
             visiting_group_o['vodb_occu_computed'] = vodb_occu_computed
             	        
         holly_couch[vgroup_id] = visiting_group_o
@@ -360,7 +491,14 @@ class VODBGroup(BaseController):
         #... if we are to partially load from database and check that we can process it, we do need to go from python to json. (and back)
         #...construct a program request template. It's going to be a json document. Hard coded.
         notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)]
-        return dict(visiting_group=visiting_group_o, reFormatDate=reFormatDate, vodb_state_map=bokn_status_map, program_state_map=bokn_status_map, notes=notes)
+        
+        visiting_group_o.show_vodb_live_table = json.dumps(dict(identifier='rid', items=visiting_group_o.get('vodb_live_computed', list())))
+        visiting_group_o.show_vodb_eat_table = json.dumps(dict(identifier='rid', items=visiting_group_o.get('vodb_eat_computed', list())))
+        visiting_group_o.show_vodb_occu_table = json.dumps(dict(identifier='rid', items=visiting_group_o.get('vodb_occu_computed', list())))
+
+        
+        occu_layout_tags = json.dumps(visiting_group_o['tags'])
+        return dict(visiting_group=visiting_group_o, reFormatDate=reFormatDate, vodb_state_map=bokn_status_map, program_state_map=bokn_status_map, notes=notes, occu_layout_tags=occu_layout_tags)
         
         
         

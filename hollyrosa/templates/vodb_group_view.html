@@ -131,11 +131,15 @@ function startup() {
 	
 	common_menu.add_menu_separator(menu);   
    common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history...", '${visiting_group['id']}', '${tg.url('/history/show')}');
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb data...", '${visiting_group['id']}', '${tg.url('/vodb_group/edit_group_data', params={'vgroup_id':visiting_group['id']})}');
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb data...", '${visiting_group['id']}', '${tg.url('/vodb_group/edit_group_data')}');
 
 	};
 	
-	
+	 var eat_grid_data = ${visiting_group.show_vodb_eat_table}; 
+    var live_grid_data = ${visiting_group.show_vodb_live_table};
+    var occu_grid_data = ${visiting_group.show_vodb_occu_table};
+   
+   /* 
 	//...grid functions
 	var live_grid_data = {  
    	identifier: "rid",
@@ -173,6 +177,7 @@ function startup() {
                 {rid:5, requested_date: '2010-01-02', requested_time:"kväll"}
                 	]
 	}; 
+	*/
 	
    var live_grid_store = new ItemFileWriteStore({
     	data: live_grid_data
@@ -192,34 +197,48 @@ function startup() {
     var global_edit_allowed = false;
     
     var live_layout = [[
-      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed},
-      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed},      
-      {'name': 'Bo tält', 'field': 'requested_activity', 'width': '100px', editable: global_edit_allowed},
-      {'name': 'Bo inne', 'field': 'age_sma', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},  
-      {'name': 'Bo dagsbesök', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool}
+      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: global_edit_allowed},
+      {'name': 'Tid', 'field': 'time', 'width': '50px', editable:global_edit_allowed},      
+      {'name': 'Bo tält', 'field': 'ute', 'width': '100px', editable: global_edit_allowed},
+      {'name': 'Bo inne', 'field': 'inne', 'width': '60px', editable:global_edit_allowed},  
+      {'name': 'Bo dagsbesök', 'field': 'daytrip', 'width': '60px', editable:global_edit_allowed}
       
     ]];
     
     
 var eat_layout = [[
-      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed},
-      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed},      
-      {'name': 'Ute', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Inne', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Egen', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: global_edit_allowed},
+      {'name': 'Tid', 'field': 'time', 'width': '50px', editable:global_edit_allowed},      
+      {'name': 'Ute', 'field': 'ute', 'width': '60px', editable:global_edit_allowed},
+      {'name': 'Inne', 'field': 'inne', 'width': '60px', editable:global_edit_allowed},
+      {'name': 'Egen', 'field': 'egen', 'width': '60px', editable:global_edit_allowed},
       
    
     ]];
-	
+	/*
 var occu_layout = [[
-      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed},
-      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed},      
+      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: global_edit_allowed},
+      {'name': 'Tid', 'field': 'time', 'width': '50px', editable:global_edit_allowed},      
       {'name': 'Doktor', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
       {'name': 'Program', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
       {'name': 'Kursdelt vö', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
       {'name': 'Kursdelt SSRS', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool}
     ]];
+		*/
 		
+		// copied:
+		var occu_layout_inner = [
+      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false},
+      {'name': 'Tid', 'field': 'time', 'width': '50px', editable: false}];
+
+array.forEach($occu_layout_tags, function(entry, i) {
+	occu_layout_inner.push({'name': entry, 'field': entry, 'width': '60px', editable:global_edit_allowed});
+
+	}); 
+var occu_layout = [occu_layout_inner];     
+
+// end copied
+
 	
 	//... create a new grid
    
@@ -281,6 +300,9 @@ var occu_layout = [[
 
 <tr><td class="legend">vodb status:</td><td class="info">${vodb_state_map.get(visiting_group.get('vodbstatus','-'))}</td></tr>
 <tr><td class="legend">program status:</td><td class="info">${program_state_map.get(visiting_group.boknstatus,'')}</td></tr>
+
+
+
 <tr><td class="legend">camping location:</td><td class="info">${visiting_group.camping_location}</td></tr>
 </table>
 <p>${HTML(visiting_group.info)}</p></div>
@@ -296,7 +318,7 @@ var occu_layout = [[
                 
     </div>
     
-    <p>${visiting_group.contact_person}<br/>$visiting_group.contact_person_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.contact_person_email</a><br/>
+    <p>${visiting_group.vodb_contact_name}<br/>$visiting_group.vodb_contact_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.vodb_contact_email</a><br/>
     </p> 
 
 <h4>Live grid</h4>
