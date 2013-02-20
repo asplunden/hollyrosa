@@ -348,7 +348,55 @@ var occu_layout = [occu_layout_inner];
 
 </ul>
 <p></p>
-<h2>Property Grid from Properties</h2>
+<h2>Note and attachments, Hello :)</h2>
+
+<h2>HTML grids</h2>
+<h3>Live grid</h3>
+<table class="data">
+  <tr class="data">
+      <th>Date</th><th>Time</th>
+      <th>Bo ute</th>
+      <th>Bo inne</th>
+      <th>Dagsbesok</th>
+  </tr>
+  <tr py:for="live_row in visiting_group['vodb_live_computed']">
+      <td class="info data">${live_row['date']}</td>
+      <td class="info data">${live_row['time']}</td>
+      <td class="info data">${live_row['ute']}</td>
+      <td class="info data">${live_row['inne']}</td>
+      <td class="info data">${live_row['daytrip']}</td>
+  </tr>
+</table>
+
+<h3>Eat grid</h3>
+<table class="data">
+  <tr class="data">
+      <th>Date</th><th>Time</th>
+      <th>Ute</th>
+      <th>Inne</th>
+      <th>Egen</th>
+  </tr>
+  <tr py:for="eat_row in visiting_group['vodb_eat_computed']">
+      <td class="info data">${eat_row['date']}</td>
+      <td class="info data">${eat_row['time']}</td>
+      <td class="info data">${eat_row['ute']}</td>
+      <td class="info data">${eat_row['inne']}</td>
+      <td class="info data">${eat_row['egen']}</td>
+  </tr>
+</table>
+
+<h3>Occu grid</h3>
+<table class="data">
+  <tr class="data">
+      <th>Date</th><th>Time</th>
+      <th py:for="tag in visiting_group.tags">$tag</th> 
+  </tr>
+  <tr py:for="occu_row in visiting_group['vodb_occu_computed']">
+      <td class="info data">${occu_row['date']}</td>
+      <td class="info data">${occu_row['time']}</td>
+      <td class="info data" py:for="tag in visiting_group.tags">${occu_row[tag]}</td>
+  </tr>
+</table>
     
     
   
