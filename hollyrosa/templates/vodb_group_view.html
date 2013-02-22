@@ -135,133 +135,7 @@ function startup() {
 
 	};
 	
-	 var eat_grid_data = ${visiting_group.show_vodb_eat_table}; 
-    var live_grid_data = ${visiting_group.show_vodb_live_table};
-    var occu_grid_data = ${visiting_group.show_vodb_occu_table};
-   
-   /* 
-	//...grid functions
-	var live_grid_data = {  
-   	identifier: "rid",
-            items: [
-                {rid:0, requested_date: '2010-01-01', requested_time:"fm"},
-                {rid:1, requested_date: '2010-01-01', requested_time:"em"},
-                {rid:2, requested_date: '2010-01-01', requested_time:"kväll"},
-                {rid:3, requested_date: '2010-01-02', requested_time:"fm"},
-                {rid:4, requested_date: '2010-01-02', requested_time:"em"},
-                {rid:5, requested_date: '2010-01-02', requested_time:"kväll"}
-                	]
-	}; 
-	
-	var eat_grid_data = {  
-   	identifier: "rid",
-            items: [
-                {rid:0, requested_date: '2010-01-01', requested_time:"frukost"},
-                {rid:1, requested_date: '2010-01-01', requested_time:"lunch"},
-                {rid:2, requested_date: '2010-01-01', requested_time:"middag"},
-                {rid:3, requested_date: '2010-01-01', requested_time:"kvällsfika"},
-                {rid:4, requested_date: '2010-01-02', requested_time:"frukost"},
-                {rid:5, requested_date: '2010-01-02', requested_time:"lunch"}
-                	]
-	}; 
-	
-	
-	var occu_grid_data = {  
-   	identifier: "rid",
-            items: [
-                {rid:0, requested_date: '2010-01-01', requested_time:"fm"},
-                {rid:1, requested_date: '2010-01-01', requested_time:"em"},
-                {rid:2, requested_date: '2010-01-01', requested_time:"kväll"},
-                {rid:3, requested_date: '2010-01-02', requested_time:"fm"},
-                {rid:4, requested_date: '2010-01-02', requested_time:"em"},
-                {rid:5, requested_date: '2010-01-02', requested_time:"kväll"}
-                	]
-	}; 
-	*/
-	
-   var live_grid_store = new ItemFileWriteStore({
-    	data: live_grid_data
-   });
-   
-   
-   var eat_grid_store = new ItemFileWriteStore({
-    	data: eat_grid_data
-   });
-   
-   
-   var occu_grid_store = new ItemFileWriteStore({
-    	data: occu_grid_data
-   });
-   
-      
-    var global_edit_allowed = false;
-    
-    var live_layout = [[
-      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: global_edit_allowed},
-      {'name': 'Tid', 'field': 'time', 'width': '50px', editable:global_edit_allowed},      
-      {'name': 'Bo tält', 'field': 'ute', 'width': '100px', editable: global_edit_allowed},
-      {'name': 'Bo inne', 'field': 'inne', 'width': '60px', editable:global_edit_allowed},  
-      {'name': 'Bo dagsbesök', 'field': 'daytrip', 'width': '60px', editable:global_edit_allowed}
-      
-    ]];
-    
-    
-var eat_layout = [[
-      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: global_edit_allowed},
-      {'name': 'Tid', 'field': 'time', 'width': '50px', editable:global_edit_allowed},      
-      {'name': 'Ute', 'field': 'ute', 'width': '60px', editable:global_edit_allowed},
-      {'name': 'Inne', 'field': 'inne', 'width': '60px', editable:global_edit_allowed},
-      {'name': 'Egen', 'field': 'egen', 'width': '60px', editable:global_edit_allowed},
-      
-   
-    ]];
-	/*
-var occu_layout = [[
-      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: global_edit_allowed},
-      {'name': 'Tid', 'field': 'time', 'width': '50px', editable:global_edit_allowed},      
-      {'name': 'Doktor', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Program', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Kursdelt vö', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Kursdelt SSRS', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool}
-    ]];
-		*/
-		
-		// copied:
-		var occu_layout_inner = [
-      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false},
-      {'name': 'Tid', 'field': 'time', 'width': '50px', editable: false}];
-
-array.forEach($occu_layout_tags, function(entry, i) {
-	occu_layout_inner.push({'name': entry, 'field': entry, 'width': '60px', editable:global_edit_allowed});
-
-	}); 
-var occu_layout = [occu_layout_inner];     
-
-// end copied
-
-	
-	//... create a new grid
-   
-
-	 var live_grid_grid = new DataGrid({
-        id: 'live_grid',
-        store: live_grid_store,
-        structure: live_layout,
-        rowSelector: '10px'});
-        
-        
-    var eat_grid_grid = new DataGrid({
-        id: 'eat_grid',
-        store: eat_grid_store,
-        structure: eat_layout,
-        rowSelector: '10px'});
-        
-        
-   var occu_grid_grid = new DataGrid({
-        id: 'occu_grid',
-        store: occu_grid_store,
-        structure: occu_layout,
-        rowSelector: '10px'});
+	 
 
 
 
@@ -270,13 +144,7 @@ var occu_layout = [occu_layout_inner];
 	ready(function() {
 		startup();
 
-      // startup grid
-		live_grid_grid.placeAt('live_grid_div');
-      live_grid_grid.startup();
-      eat_grid_grid.placeAt('eat_grid_div');
-      eat_grid_grid.startup();
-      occu_grid_grid.placeAt('occu_grid_div');
-      occu_grid_grid.startup();
+     
     
 		});  
  });
@@ -319,17 +187,10 @@ var occu_layout = [occu_layout_inner];
     </div>
     
     <p>${visiting_group.vodb_contact_name}<br/>$visiting_group.vodb_contact_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.vodb_contact_email</a><br/>
-    </p> 
+    </p>
+    <p><pre>${visiting_group.vodb_contact_address}</pre></p> 
 
-<h4>Live grid</h4>
-<div id="live_grid_div" style="height:20em;">Live grid here</div>
 
-<p>text text text text</p>
-<h4>Eat grid</h4>
-<div id="eat_grid_div" style="height:20em;">Eat grid here</div>
-
-<h4>Occupation Grid</h4>
-<div id="occu_grid_div" style="height:20em;">Occupational grid here</div>
 
 <h4>Program properties</h4>
     
