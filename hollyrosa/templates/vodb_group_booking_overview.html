@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:hollyrosa="http://asplunden.org/guldkant/hollyrosa" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Booking Overview</title>
+  <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
+  <link rel="stylesheet" type="text/css" href="/scripts/dojo-release-1.8.0/dojox/grid/resources/tundraGrid.css" />
+  <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
+  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true, debugAtAllCosts: true"></script>
+  <script>
+
+require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window", 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore'], function(ready, tags, common_menu, Menu, PopupMenuItem, dom, array, query, on, win, DataGrid, ItemFileWriteStore) {
+
+
+
+function startup() {
+	//...setup main menu for visiting group  	
+	var use_left_click_menu = common_menu.load_left_click_menu();
+   	var change_program_status_menu = new Menu();
+   
+   	var menu = new Menu({
+       targetNodeIds: ["title"],
+       leftClickToOpen: use_left_click_menu
+       });
+       
+
+	
+   	
+	//...create menu for add/edit/show/delete note
+	var note_menu = new Menu({
+       targetNodeIds: ["content"],
+       selector: "div.note2",
+       leftClickToOpen: common_menu.load_left_click_menu()
+       });
+       
+    common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Edit note...",  '${tg.url('/note/edit_note')}');
+    common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Delete note...", '${tg.url('/note/delete_note')}');
+    
+    
+    //...create menu for add/edit/show/delete note
+	var attachment_menu = new Menu({
+       targetNodeIds: ["content"],
+       selector: "div.attachment2",
+       leftClickToOpen: common_menu.load_left_click_menu()
+       });
+       
+    
+    /**** assembling change program state and vodb state menus ***/
+    common_menu.add_menu_separator(menu);   
+    var change_program_status_menu = new Menu();
+    menu.addChild(new PopupMenuItem({
+   	label: "Change program status",
+      popup: change_program_status_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+   })); 
+   
+   var set_program_state_url = '${tg.url('/visiting_group/set_program_state')}';       
+    
+   array.forEach(common_menu.program_state_change_list, function(x) {console.log(x); common_menu.add_change_program_state_menu_item(menu, change_program_status_menu, x['name'], x['state'], 0, set_program_state_url);});
+	
+	var change_vodb_status_menu = new Menu();
+    menu.addChild(new PopupMenuItem({
+   	label: "Change vodb status",
+      popup: change_vodb_status_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+   })); 
+   
+   var set_vodb_state_url = '${tg.url('/visiting_group/set_vodb_state')}';       
+    
+   array.forEach(common_menu.vodb_state_change_list, function(x) {console.log(x); common_menu.add_change_program_state_menu_item(menu, change_vodb_status_menu, x['name'], x['state'], 0, set_vodb_state_url);});
+	
+	
+	};
+	
+	 
+
+
+
+    	
+    
+	ready(function() {
+		startup();
+
+     
+    
+		});  
+ });
+  </script>
+  
+
+
+</head>
+
+<body class="tundra">
+    <h2 id="title">Booking Overview</h2> 
+<p>From TO</p>
+
+<div style="overflow:scroll;">
+<table class="data" style="overflow:scroll;">
+  <tr class="data">
+      <!-- DATE -->
+      <th py:for="d in header_dates" colspan="${d[1]}">${d[0]}</th>
+  </tr>  
+  <tr class="data">      
+      <!-- TIME -->
+      <th py:for="d in header_times" colspan="${d[1]}">${d[0]}</th>
+  </tr>
+  
+  
+  <!-- For each vodb state... ? -->
+  <!-- For each visiting group also, leftmost col should indicate state and visiting group -->
+  
+  <tr py:for="vo in vgroup_opts">
+      <td py:if="vo[3] > 0" rowspan="${vo[3]}">${vo[0].vodbstatus}</td>
+      <td py:if="vo[3] > 0" rowspan="${vo[3]}">${vo[0].boknr} ${vo[0].name}</td>
+      <td py:if="vo[3] > 0" rowspan="${vo[3]}">${vo[0].from_date} - ${vo[0].to_date}</td>
+      <td>${vo[1]}</td>
+      <!-- lookup date-time-opt-value -->
+      <td py:for="do in vo[2]">${values.get(do,'-')}</td>
+      
+  </tr>
+  
+  <tr py:for="s in ['booking states']">
+    
+  
+  </tr>
+</table>
+</div>
+
+    
+  
+</body>
+</html>

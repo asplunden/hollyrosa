@@ -35,7 +35,7 @@ log = logging.getLogger()
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, reFormatDate
 
-from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup
+from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview
 from hollyrosa.controllers.booking_history import remember_tag_change
 from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, make_object_of_vgdictionary
 from hollyrosa.controllers.booking_history import remember_new_booking_request
@@ -45,7 +45,7 @@ from formencode import validators
 __all__ = ['VODBGroup']
 
 
-vodb_eat_times = [u'frukost',u'lunch',u'middag',u'kvällsfika']
+vodb_eat_times = [u'frukost',u'lunch',u'middag',u'kvÃ¤llsfika']
 vodb_eat_times_options = ['inne','ute','egen']
 vodb_live_times_options = ['inne','ute','daytrip']
 #vodb_live_cols = 
@@ -241,7 +241,7 @@ class VODBGroup(BaseController):
         
         
     def make_empty_vodb_live_table(self, from_date, to_date):
-        return self.make_empty_vodb_table(from_date, to_date, [u'fm',u'em',u'kväll'], ['inne','ute','daytrip'])
+        return self.make_empty_vodb_table(from_date, to_date, [u'fm',u'em',u'kvÃ¤ll'], ['inne','ute','daytrip'])
         
     def make_empty_vodb_eat_table(self, from_date, to_date):
         return self.make_empty_vodb_table(from_date, to_date, vodb_eat_times, vodb_eat_times_options)
@@ -255,11 +255,11 @@ class VODBGroup(BaseController):
         d = dict()
         d[u'fm']=u'1'
         d[u'em']=u'2'
-        d[u'kväll']=u'3'
+        d[u'kvÃ¤ll']=u'3'
         d[u'frukost'] = u'10'
         d[u'lunch'] = u'11'
         d[u'middag'] = u'12'
-        d[u'kvällsfika'] = u'13'
+        d[u'kvÃ¤llsfika'] = u'13'
         
         return row['date'] + u'_' +d[row['time']]
         
@@ -376,7 +376,7 @@ class VODBGroup(BaseController):
         #            if not all_current_vgroup_tags.has_key(tmp_key):
         #                all_current_vgroup_tags[tmp_key] = 1
         
-        empty_vodb_occu_table = self.make_empty_vodb_table(visiting_group_o['from_date'], visiting_group_o['to_date'],[u'fm',u'em',u'kväll'], all_current_vgroup_tags.keys()) 
+        empty_vodb_occu_table = self.make_empty_vodb_table(visiting_group_o['from_date'], visiting_group_o['to_date'],[u'fm',u'em',u'kvÃ¤ll'], all_current_vgroup_tags.keys()) 
         
         row_lookup = dict()
         for tmp_row in empty_vodb_occu_table['items']:
@@ -503,7 +503,7 @@ class VODBGroup(BaseController):
         
         
     @expose('hollyrosa.templates.visiting_group_program_request_edit2')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få ändra i dina programönskemål'))    
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'Du mÃ¥ste vara inloggad fÃ¶r att fÃ¥ Ã¤ndra i dina programÃ¶nskemÃ¥l'))    
     def edit_request(self, visiting_group_id=''):     	
         visiting_group_o = holly_couch[str(visiting_group_id)] 
         visiting_group_o.program_request_info = visiting_group_o.get('program_request_info','message to program!')
@@ -538,4 +538,77 @@ class VODBGroup(BaseController):
         #
               
         #...raise...redirect referer...
+        
+    @expose('hollyrosa.templates.vodb_group_booking_overview')
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'fff'))    
+    def vodb_overview(self):
+        overview_o = getBookingOverview(holly_couch, None, None, reduce=False)
+        overview_value_map = dict()
+        
+        vodb_statuses = [-100, -10, 0, 5, 10, 20, 50]
+        used_dates = dict()
+        used_times = dict()
+        used_vgroup_ids = dict()
+        for tmp_status in vodb_statuses:
+            used_vgroup_ids[tmp_status] = dict()
+                       
+        for row in overview_o:
+            log.debug('ROW'+str(row))
+            used_dates[row.key[0]] = True
+            used_times[row.key[1]] = True
+            tmp_status = row.key[2]
+            tmp_id = row.id
+            if not used_vgroup_ids[tmp_status].has_key(tmp_id):             
+                used_vgroup_ids[tmp_status][tmp_id] = holly_couch[row.id]
+                log.debug('row.doc ' + str(row.doc))
+                
+            overview_value_map['%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], row.key[3])] = row.value
+            try:
+                overview_value_map['%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], 'SUM')] = overview_value_map.get('%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], 'SUM'),0)+int(row.value)
+            except ValueError:
+                pass
+                
+        #...build a list of dates, starting with headers 'status' and 'vgroup'
+        times = ['fm','em', u'kväll','fru','lun','mid','fika']
+        header_block = [(t,1) for t in times] #[('fm',1),('em',1),('kvall',1),('fru',1),('lun',1),('mid',1),('fika',1)]
+        header_block_len = len(header_block)        
+        dates = used_dates.keys()
+        dates.sort()
+        header_dates = [(h, header_block_len) for h in dates]        
+        
+        #...check if any date is missing
+        #...add header to dates
+        vgroup_header = [('status',1), ('group',1),('date',1),('opt',1)]                 
+        header_dates = vgroup_header + header_dates
+        
+        header_times = used_times.keys()
+        
+        #...cheat.
+        header_times = [('',1)] * len(vgroup_header) + header_block * len(used_dates.keys())
+        date_colspan = len(header_block)
+        
+        row_choices = ['inne','ute','daytrip','SUM']
+        row_span = len(row_choices)
+        
+        
+        #..........................................................
+        
+        #...Each vgroup can be represented as
+        #   [(status,4), (name,4), (refnr,4), (opt1,1) ]  + fm/inne + em/inne + kvall/inne + fru/inne + lu/inne + midd/inne + kvall/inne * dates
+        vgroups = []
+        for tmp_status in vodb_statuses:
+            for tmp_vgroup in used_vgroup_ids[tmp_status].values():
+                log.debug('tmp_vgroup ' + str(tmp_vgroup))
+                rowspan = len(row_choices)
+                for tmp_opt in row_choices:
+                    #for d in dates:
+                    #    for t in times:
+                    date_opts = ['%s:%s:%s:%s' % (tmp_vgroup.id, d, t, tmp_opt) for d in dates for t in times]
+                    vgroups.append(  (tmp_vgroup, tmp_opt, date_opts, rowspan )  )
+                    
+                    if rowspan > 1:
+                        rowspan=0                    
+                    
+            
+        return dict(header_dates=header_dates, header_times=header_times, row_choices=row_choices, vgroup_opts=vgroups, values=overview_value_map)
         
