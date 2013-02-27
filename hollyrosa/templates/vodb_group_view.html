@@ -223,8 +223,8 @@ function startup() {
   <tr py:for="live_row in visiting_group['vodb_live_computed']">
       <td class="info data">${live_row['date']}</td>
       <td class="info data">${live_row['time']}</td>
-      <td class="info data">${live_row['ute']}</td>
-      <td class="info data">${live_row['inne']}</td>
+      <td class="info data">${live_row['outdoor']}</td>
+      <td class="info data">${live_row['indoor']}</td>
       <td class="info data">${live_row['daytrip']}</td>
   </tr>
 </table>
@@ -240,9 +240,9 @@ function startup() {
   <tr py:for="eat_row in visiting_group['vodb_eat_computed']">
       <td class="info data">${eat_row['date']}</td>
       <td class="info data">${eat_row['time']}</td>
-      <td class="info data">${eat_row['ute']}</td>
-      <td class="info data">${eat_row['inne']}</td>
-      <td class="info data">${eat_row['egen']}</td>
+      <td class="info data">${eat_row['outdoor']}</td>
+      <td class="info data">${eat_row['indoor']}</td>
+      <td class="info data">${eat_row['own']}</td>
   </tr>
 </table>
 

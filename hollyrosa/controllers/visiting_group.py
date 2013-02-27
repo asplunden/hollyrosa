@@ -100,7 +100,7 @@ class VisitingGroup(BaseController):
         visiting_groups = [v.doc for v in getDocumentsByTag(holly_couch, tag)] 
         remaining_visiting_groups_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups)
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  vodb_state_map=bokn_status_map,  program_state_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
 
     
     @expose('hollyrosa.templates.visiting_group_view_all')

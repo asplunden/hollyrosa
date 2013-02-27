@@ -35,7 +35,7 @@ log = logging.getLogger()
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, reFormatDate
 
-from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview
+from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview
 from hollyrosa.controllers.booking_history import remember_tag_change
 from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, make_object_of_vgdictionary
 from hollyrosa.controllers.booking_history import remember_new_booking_request
@@ -44,10 +44,10 @@ from formencode import validators
 
 __all__ = ['VODBGroup']
 
-
-vodb_eat_times = [u'frukost',u'lunch',u'middag',u'kvällsfika']
-vodb_eat_times_options = ['inne','ute','egen']
-vodb_live_times_options = ['inne','ute','daytrip']
+vodb_live_times = [u'fm', u'em', u'evening']
+vodb_eat_times = [u'breakfast', u'lunch', u'lunch_arrive', u'lunch_depart', u'dinner']
+vodb_eat_times_options = [u'indoor', u'outdoor', u'own']
+vodb_live_times_options = [u'indoor',u'outdoor',u'daytrip']
 #vodb_live_cols = 
 
 class Obj(object):
@@ -244,7 +244,7 @@ class VODBGroup(BaseController):
         
         
     def make_empty_vodb_live_table(self, from_date, to_date):
-        return self.make_empty_vodb_table(from_date, to_date, [u'fm',u'em',u'kväll'], ['inne','ute','daytrip'])
+        return self.make_empty_vodb_table(from_date, to_date, vodb_live_times, vodb_live_times_options)
         
     def make_empty_vodb_eat_table(self, from_date, to_date):
         return self.make_empty_vodb_table(from_date, to_date, vodb_eat_times, vodb_eat_times_options)
@@ -258,11 +258,12 @@ class VODBGroup(BaseController):
         d = dict()
         d[u'fm']=u'1'
         d[u'em']=u'2'
-        d[u'kväll']=u'3'
-        d[u'frukost'] = u'10'
+        d[u'evening']=u'3'
+        d[u'breakfast'] = u'10'
         d[u'lunch'] = u'11'
-        d[u'middag'] = u'12'
-        d[u'kvällsfika'] = u'13'
+        d[u'lunch_arrive'] = u'12'
+        d[u'lunch_depart'] = u'13'
+        d[u'dinner'] = u'18'
         
         return row['date'] + u'_' +d.get(row['time'],'unknown')
         
@@ -314,7 +315,7 @@ class VODBGroup(BaseController):
             row_lookup[tmp_row['rid']] = tmp_row
         
         for tmp_row in live_data['items']:
-            composite_key = tmp_row['rid']  ##self.get_composite_key(tmp_row) 
+            composite_key = tmp_row['rid'] 
             if row_lookup.has_key(composite_key):
                 del row_lookup[composite_key]
             
@@ -379,7 +380,7 @@ class VODBGroup(BaseController):
         #            if not all_current_vgroup_tags.has_key(tmp_key):
         #                all_current_vgroup_tags[tmp_key] = 1
         
-        empty_vodb_occu_table = self.make_empty_vodb_table(visiting_group_o['from_date'], visiting_group_o['to_date'],[u'fm',u'em',u'kväll'], all_current_vgroup_tags.keys()) 
+        empty_vodb_occu_table = self.make_empty_vodb_table(visiting_group_o['from_date'], visiting_group_o['to_date'],vodb_live_times, all_current_vgroup_tags.keys()) 
         
         row_lookup = dict()
         for tmp_row in empty_vodb_occu_table['items']:
@@ -570,10 +571,13 @@ class VODBGroup(BaseController):
                 overview_value_map['%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], 'SUM')] = overview_value_map.get('%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], 'SUM'),0)+int(row.value)
             except ValueError:
                 pass
+            except TypeError:
+                pass
                 
         status_level_overview_o = getBookingOverview(holly_couch, None, None, reduce=True)
+        status_level_eat_overview = getBookingEatOverview(holly_couch, None, None, reduce=True)
         #...copy paste!
-        for row in status_level_overview_o:
+        for row in list(status_level_overview_o) + list(status_level_eat_overview):
             log.debug('ROW'+str(row))
             tmp_status = row.key[2]
             tmp_id = 'sum.%d' % tmp_status
@@ -598,8 +602,8 @@ class VODBGroup(BaseController):
 
                 
         #...build a list of dates, starting with headers 'status' and 'vgroup'
-        times = ['fm','em', u'kväll','fru','lun','mid','fika']
-        header_block = [(t,1) for t in times] #[('fm',1),('em',1),('kvall',1),('fru',1),('lun',1),('mid',1),('fika',1)]
+        times = vodb_live_times + vodb_eat_times
+        header_block = [(t,1) for t in times] 
         header_block_len = len(header_block)        
         dates = used_dates.keys()
         dates.sort()
@@ -616,7 +620,7 @@ class VODBGroup(BaseController):
         header_times = [('',1)] * len(vgroup_header) + header_block * len(used_dates.keys())
         date_colspan = len(header_block)
         
-        row_choices = ['inne','ute','daytrip','SUM']
+        row_choices = vodb_live_times_options + ['SUM']
         row_span = len(row_choices)
         
         

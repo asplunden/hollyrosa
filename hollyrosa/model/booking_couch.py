@@ -313,3 +313,9 @@ def getBookingOverview(holly_couch, from_date, to_date, group_level=9999, reduce
     else:
         return holly_couch.view('vodb_overview/vodb_overview', reduce=reduce, include_docs=False) # dont include docs, it gets really slow
 
+
+def getBookingEatOverview(holly_couch, from_date, to_date, group_level=9999, reduce=True):
+    if reduce:
+        return holly_couch.view('vodb_overview/vodb_eat_overview', reduce=reduce, group_level=group_level)
+    else:
+        return holly_couch.view('vodb_overview/vodb_eat_overview', reduce=reduce, include_docs=False) # dont include docs, it gets really slow
