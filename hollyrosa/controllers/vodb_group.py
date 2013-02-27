@@ -45,10 +45,13 @@ from formencode import validators
 __all__ = ['VODBGroup']
 
 
-vodb_eat_times = [u'frukost',u'lunch',u'middag',u'kvÃ¤llsfika']
+vodb_eat_times = [u'frukost',u'lunch',u'middag',u'kvällsfika']
 vodb_eat_times_options = ['inne','ute','egen']
 vodb_live_times_options = ['inne','ute','daytrip']
 #vodb_live_cols = 
+
+class Obj(object):
+    pass
 
 class VODBGroup(BaseController):
     
@@ -241,7 +244,7 @@ class VODBGroup(BaseController):
         
         
     def make_empty_vodb_live_table(self, from_date, to_date):
-        return self.make_empty_vodb_table(from_date, to_date, [u'fm',u'em',u'kvÃ¤ll'], ['inne','ute','daytrip'])
+        return self.make_empty_vodb_table(from_date, to_date, [u'fm',u'em',u'kväll'], ['inne','ute','daytrip'])
         
     def make_empty_vodb_eat_table(self, from_date, to_date):
         return self.make_empty_vodb_table(from_date, to_date, vodb_eat_times, vodb_eat_times_options)
@@ -255,13 +258,13 @@ class VODBGroup(BaseController):
         d = dict()
         d[u'fm']=u'1'
         d[u'em']=u'2'
-        d[u'kvÃ¤ll']=u'3'
+        d[u'kväll']=u'3'
         d[u'frukost'] = u'10'
         d[u'lunch'] = u'11'
         d[u'middag'] = u'12'
-        d[u'kvÃ¤llsfika'] = u'13'
+        d[u'kvällsfika'] = u'13'
         
-        return row['date'] + u'_' +d[row['time']]
+        return row['date'] + u'_' +d.get(row['time'],'unknown')
         
         
     def fn_cmp_composite_key(self, a, b):
@@ -376,7 +379,7 @@ class VODBGroup(BaseController):
         #            if not all_current_vgroup_tags.has_key(tmp_key):
         #                all_current_vgroup_tags[tmp_key] = 1
         
-        empty_vodb_occu_table = self.make_empty_vodb_table(visiting_group_o['from_date'], visiting_group_o['to_date'],[u'fm',u'em',u'kvÃ¤ll'], all_current_vgroup_tags.keys()) 
+        empty_vodb_occu_table = self.make_empty_vodb_table(visiting_group_o['from_date'], visiting_group_o['to_date'],[u'fm',u'em',u'kväll'], all_current_vgroup_tags.keys()) 
         
         row_lookup = dict()
         for tmp_row in empty_vodb_occu_table['items']:
@@ -426,7 +429,6 @@ class VODBGroup(BaseController):
                 original_value = row.get(k,0)
                 log.debug('original value: ' + str(original_value))
                 if type(original_value) == types.StringType or type(original_value) == types.UnicodeType:
-                    log.debug('IS STRING TYPE')
                     for prop in properties.values():
                         log.debug(str(prop))
                         prop_prop = prop['property']
@@ -503,7 +505,7 @@ class VODBGroup(BaseController):
         
         
     @expose('hollyrosa.templates.visiting_group_program_request_edit2')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'Du mÃ¥ste vara inloggad fÃ¶r att fÃ¥ Ã¤ndra i dina programÃ¶nskemÃ¥l'))    
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få ändra i dina programönskemål'))    
     def edit_request(self, visiting_group_id=''):     	
         visiting_group_o = holly_couch[str(visiting_group_id)] 
         visiting_group_o.program_request_info = visiting_group_o.get('program_request_info','message to program!')
@@ -558,8 +560,9 @@ class VODBGroup(BaseController):
             used_times[row.key[1]] = True
             tmp_status = row.key[2]
             tmp_id = row.id
+            log.debug('tmp_id='+str(tmp_id))
             if not used_vgroup_ids[tmp_status].has_key(tmp_id):             
-                used_vgroup_ids[tmp_status][tmp_id] = holly_couch[row.id]
+                used_vgroup_ids[tmp_status][tmp_id] = holly_couch[tmp_id]
                 log.debug('row.doc ' + str(row.doc))
                 
             overview_value_map['%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], row.key[3])] = row.value
@@ -567,6 +570,32 @@ class VODBGroup(BaseController):
                 overview_value_map['%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], 'SUM')] = overview_value_map.get('%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], 'SUM'),0)+int(row.value)
             except ValueError:
                 pass
+                
+        status_level_overview_o = getBookingOverview(holly_couch, None, None, reduce=True)
+        #...copy paste!
+        for row in status_level_overview_o:
+            log.debug('ROW'+str(row))
+            tmp_status = row.key[2]
+            tmp_id = 'sum.%d' % tmp_status
+            log.debug('tmp_id='+str(tmp_id))
+            if not used_vgroup_ids[tmp_status].has_key(tmp_id):
+                tmp_o = Obj()
+                tmp_o.id=tmp_id
+                tmp_o.name='summa for %d' % tmp_status
+                tmp_o.boknr=''
+                tmp_o.from_date=''
+                tmp_o.to_date=''
+                tmp_o.vodbstatus = tmp_status
+
+                used_vgroup_ids[tmp_status][tmp_id] = tmp_o
+                
+                
+            overview_value_map['%s:%s:%s:%s' % (tmp_id, row.key[0], row.key[1], row.key[3])] = row.value
+            try:
+                overview_value_map['%s:%s:%s:%s' % (tmp_id, row.key[0], row.key[1], 'SUM')] = overview_value_map.get('%s:%s:%s:%s' % (tmp_id, row.key[0], row.key[1], 'SUM'),0)+int(row.value)
+            except ValueError:
+                pass
+
                 
         #...build a list of dates, starting with headers 'status' and 'vgroup'
         times = ['fm','em', u'kväll','fru','lun','mid','fika']

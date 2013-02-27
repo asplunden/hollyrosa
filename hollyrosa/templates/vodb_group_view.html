@@ -186,9 +186,9 @@ function startup() {
                 
     </div>
     
-    <p>${visiting_group.vodb_contact_name}<br/>$visiting_group.vodb_contact_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.vodb_contact_email</a><br/>
+    <p>${visiting_group.get('vodb_contact_name','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('vodb_contact_email','')}</a><br/>
     </p>
-    <p><pre>${visiting_group.vodb_contact_address}</pre></p> 
+    <p><pre>${visiting_group.get('vodb_contact_address','')}</pre></p> 
 
 
 
