@@ -59,9 +59,9 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/dat
 		}
   
  
-    var eat_grid_data = ${vodb_group.vodb_eat_table}; 
-    var live_grid_data = ${vodb_group.vodb_live_table};
-    var occu_grid_data = ${vodb_group.vodb_occu_table};
+    var eat_grid_data = ${vodb_group.vodb_eat_sheet}; 
+    var live_grid_data = ${vodb_group.vodb_live_sheet};
+    var tag_grid_data = ${vodb_group.vodb_tag_sheet};
    
     var live_grid_store = new ItemFileWriteStore({
     	data: live_grid_data
@@ -73,8 +73,8 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/dat
    });
    
    
-   var occu_grid_store = new ItemFileWriteStore({
-    	data: occu_grid_data
+   var tag_grid_store = new ItemFileWriteStore({
+    	data: tag_grid_data
    });
 
     live_grid_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
@@ -95,11 +95,11 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/dat
                                 	a_saveCompleteCallback();
                                 	};
                                 	
-    occu_grid_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
+    tag_grid_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
                                 a_saveFailedCallback /*Your callback to call if save fails*/,
                                 a_newFileContentString /*The generated JSON data to send somewhere*/){
                                 	//alert(a_newFileContentString);
-                                	var inp = dom.byId('occu_grid_div_input');
+                                	var inp = dom.byId('tag_grid_div_input');
                                 	inp.value = a_newFileContentString;
                                 	a_saveCompleteCallback();
                                 	};   
@@ -128,15 +128,15 @@ var eat_layout = [[
    
     ]];
 
-var occu_layout_inner = [
+var tag_layout_inner = [
       {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
       {'name': 'Tid', 'field': 'time', 'width': '50px', editable: false}];
 
-array.forEach($occu_layout_tags, function(entry, i) {
-	occu_layout_inner.push({'name': entry, 'field': entry, 'width': '60px', editable:global_edit_allowed});
+array.forEach($tag_layout_tags, function(entry, i) {
+	tag_layout_inner.push({'name': entry, 'field': entry, 'width': '60px', editable:global_edit_allowed});
 
 	}); 
-var occu_layout = [occu_layout_inner];      
+var tag_layout = [tag_layout_inner];      
 
     //... create a new grid
    
@@ -155,20 +155,19 @@ var occu_layout = [occu_layout_inner];
         rowSelector: '10px'});
         
         
-   var occu_grid_grid = new DataGrid({
-        id: 'occu_grid',
-        store: occu_grid_store,
-        structure: occu_layout,
+   var tag_grid_grid = new DataGrid({
+        id: 'tag_grid',
+        store: tag_grid_store,
+        structure: tag_layout,
         rowSelector: '10px'});
 
 
 
     function on_save_grid_to_input() {
     	//...find dojo store and serialize it. Should be simple. Then write serialized data into 
-    	//alert('storing...');
     	live_grid_store.save(saveCompleteCallback, saveFailedCallback);
     	eat_grid_store.save(saveCompleteCallback, saveFailedCallback);
-    	occu_grid_store.save(saveCompleteCallback, saveFailedCallback);
+    	tag_grid_store.save(saveCompleteCallback, saveFailedCallback);
     	
     	};
     	
@@ -214,8 +213,8 @@ var occu_layout = [occu_layout_inner];
       live_grid_grid.startup();
       eat_grid_grid.placeAt('eat_grid_div');
       eat_grid_grid.startup();
-      occu_grid_grid.placeAt('occu_grid_div');
-      occu_grid_grid.startup();
+      tag_grid_grid.placeAt('tag_grid_div');
+      tag_grid_grid.startup();
      
     }
     	
@@ -249,7 +248,7 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
     <p>${HTML(vodb_group.info)}</p>
     <li py:for="t in vodb_group.tags">$t</li>
 </div>    
-    <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_group_tables" method="post">
+    <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_group_sheets" method="post">
     
     <h4>Properties</h4>
     
@@ -265,17 +264,17 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
     
     <div>
     	<label for="live_grid_div">Live Sheet:</label><br/>
-    	<div id="live_grid_div" style="height:600px;"><input type="hidden" id="live_grid_div_input" name="live_table"/></div>
+    	<div id="live_grid_div" style="height:600px;"><input type="hidden" id="live_grid_div_input" name="live_sheet"/></div>
     	</div>
     
     	<div>    
     	<label for="eat_grid_div">Eat Sheet:</label><br/>
-    	<div id="eat_grid_div" style="height:600px;"><input type="hidden" id="eat_grid_div_input" name="eat_table"/></div>
+    	<div id="eat_grid_div" style="height:600px;"><input type="hidden" id="eat_grid_div_input" name="eat_sheet"/></div>
     	</div>
 
     	<div>    
-    	<label for="occu_grid_div">Tag Sheet:</label><br/>
-    	<div id="occu_grid_div" style="height:600px;"><input type="hidden" id="occu_grid_div_input" name="occu_table"/></div>
+    	<label for="tag_grid_div">Tag Sheet:</label><br/>
+    	<div id="tag_grid_div" style="height:600px;"><input type="hidden" id="tag_grid_div_input" name="tag_sheet"/></div>
     	</div>
 
     

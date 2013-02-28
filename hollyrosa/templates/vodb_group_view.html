@@ -67,7 +67,7 @@ function startup() {
    common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request...", '${visiting_group.id}', '${tg.url('/booking/edit_booking')}'); 
    common_menu.add_menu_separator(menu);   
    common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit...", '${visiting_group.id}', '${tg.url('edit_group_data')}');
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit Sheet...", '${visiting_group.id}', '${tg.url('edit_group_DEL')}');
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit Sheet...", '${visiting_group.id}', '${tg.url('edit_group_sheet')}');
    common_menu.add_note_redirect_menu_item(menu, menu, "Add note...", '${visiting_group.id}', '${tg.url('/note/add_note')}');
    common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${visiting_group.id}', '${tg.url('/note/add_attachment')}');
    common_menu.add_menu_separator(menu);
@@ -251,10 +251,10 @@ function startup() {
       <th>Date</th><th>Time</th>
       <th py:for="tag in visiting_group.tags">$tag</th> 
   </tr>
-  <tr py:for="occu_row in visiting_group.get('vodb_occu_computed',[])">
-      <td class="info data">${occu_row['date']}</td>
-      <td class="info data">${occu_row['time']}</td>
-      <td class="info data" py:for="tag in visiting_group.tags">${occu_row[tag]}</td>
+  <tr py:for="tag_row in visiting_group.get('vodb_tag_computed',[])">
+      <td class="info data">${tag_row['date']}</td>
+      <td class="info data">${tag_row['time']}</td>
+      <td class="info data" py:for="tag in visiting_group.tags">${tag_row[tag]}</td>
   </tr>
 </table>
     
