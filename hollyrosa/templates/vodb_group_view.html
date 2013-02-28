@@ -66,7 +66,8 @@ function startup() {
    
    common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request...", '${visiting_group.id}', '${tg.url('/booking/edit_booking')}'); 
    common_menu.add_menu_separator(menu);   
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit...", '${visiting_group.id}', '${tg.url('edit_visiting_group')}');
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit...", '${visiting_group.id}', '${tg.url('edit_group_data')}');
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit Sheet...", '${visiting_group.id}', '${tg.url('edit_group_DEL')}');
    common_menu.add_note_redirect_menu_item(menu, menu, "Add note...", '${visiting_group.id}', '${tg.url('/note/add_note')}');
    common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${visiting_group.id}', '${tg.url('/note/add_attachment')}');
    common_menu.add_menu_separator(menu);
@@ -192,7 +193,7 @@ function startup() {
 
 
 
-<h4>Program properties</h4>
+<h4>Properties</h4>
     
     <table class="data">
         <tr>
@@ -208,11 +209,9 @@ function startup() {
 <ul>
 
 </ul>
-<p></p>
-<h2>Note and attachments, Hello :)</h2>
 
-<h2>HTML grids</h2>
-<h3>Live grid</h3>
+<h2>Computed Sheets</h2>
+<h3>Live Sheet</h3>
 <table class="data">
   <tr class="data">
       <th>Date</th><th>Time</th>
@@ -220,7 +219,7 @@ function startup() {
       <th>Bo inne</th>
       <th>Dagsbesok</th>
   </tr>
-  <tr py:for="live_row in visiting_group['vodb_live_computed']">
+  <tr py:for="live_row in visiting_group.get('vodb_live_computed',[])">
       <td class="info data">${live_row['date']}</td>
       <td class="info data">${live_row['time']}</td>
       <td class="info data">${live_row['outdoor']}</td>
@@ -229,7 +228,7 @@ function startup() {
   </tr>
 </table>
 
-<h3>Eat grid</h3>
+<h3>Eat Sheet</h3>
 <table class="data">
   <tr class="data">
       <th>Date</th><th>Time</th>
@@ -237,7 +236,7 @@ function startup() {
       <th>Inne</th>
       <th>Egen</th>
   </tr>
-  <tr py:for="eat_row in visiting_group['vodb_eat_computed']">
+  <tr py:for="eat_row in visiting_group.get('vodb_eat_computed',[])">
       <td class="info data">${eat_row['date']}</td>
       <td class="info data">${eat_row['time']}</td>
       <td class="info data">${eat_row['outdoor']}</td>
@@ -246,13 +245,13 @@ function startup() {
   </tr>
 </table>
 
-<h3>Occu grid</h3>
+<h3>Tag Sheet</h3>
 <table class="data">
   <tr class="data">
       <th>Date</th><th>Time</th>
       <th py:for="tag in visiting_group.tags">$tag</th> 
   </tr>
-  <tr py:for="occu_row in visiting_group['vodb_occu_computed']">
+  <tr py:for="occu_row in visiting_group.get('vodb_occu_computed',[])">
       <td class="info data">${occu_row['date']}</td>
       <td class="info data">${occu_row['time']}</td>
       <td class="info data" py:for="tag in visiting_group.tags">${occu_row[tag]}</td>

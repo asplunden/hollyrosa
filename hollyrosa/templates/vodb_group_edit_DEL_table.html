@@ -250,19 +250,31 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
     <li py:for="t in vodb_group.tags">$t</li>
 </div>    
     <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_group_tables" method="post">
-
+    
+    <h4>Properties</h4>
+    
+    <table class="data">
+        <tr>
+            <th>Property = Value Unit</th><th>Description</th><th>From date</th><th>To date</th>
+        </tr>
+        <tr py:for="prop in vodb_group.visiting_group_properties.values()">
+            <td class="info">$$$prop.property = $prop.value $prop.unit</td><td class="info">$prop.description</td><td class="info">$prop.from_date</td><td class="info">$prop.to_date</td>
+        </tr>
+    </table>
+    
+    
     <div>
-    	<label for="live_grid_div">Live:</label><br/>        		
+    	<label for="live_grid_div">Live Sheet:</label><br/>
     	<div id="live_grid_div" style="height:600px;"><input type="hidden" id="live_grid_div_input" name="live_table"/></div>
     	</div>
     
     	<div>    
-    	<label for="eat_grid_div">Eat:</label><br/>
+    	<label for="eat_grid_div">Eat Sheet:</label><br/>
     	<div id="eat_grid_div" style="height:600px;"><input type="hidden" id="eat_grid_div_input" name="eat_table"/></div>
     	</div>
 
     	<div>    
-    	<label for="occu_grid_div">Occu:</label><br/>
+    	<label for="occu_grid_div">Tag Sheet:</label><br/>
     	<div id="occu_grid_div" style="height:600px;"><input type="hidden" id="occu_grid_div_input" name="occu_table"/></div>
     	</div>
 
