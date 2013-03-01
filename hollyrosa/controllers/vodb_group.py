@@ -738,6 +738,7 @@ class VODBGroup(BaseController):
                     formated_dates = dateRange(tmp_summary_group['from_date'], tmp_summary_group['to_date'], format='%Y-%m-%d')
                 tmp_summary_group.date_range = formated_dates
     
+    
     def computeLiveSummaries(self, a_live_summaries_rows, a_summary_vgroups):
         """iterating through reduced result set should give the data we need. """  
         for live_computed_summary in a_live_summaries_rows:      
@@ -765,9 +766,9 @@ class VODBGroup(BaseController):
 
             
             tmp_live_summary_dict[tmp_date+':'+tmp_time] = tmp_value
-            if tmp_value != '0':
+            if tmp_value != '0' and tmp_value != 0:
                 summary_vgroup.all_values_zero = False
-                
+            #summary_vgroup.all_values_zero = False
                 
     def getCompKey(self, a_vodb_status, a_live_row):
         return "%s:%s:%s" % (a_vodb_status, a_live_row['date'], a_live_row['time'])
@@ -788,75 +789,22 @@ class VODBGroup(BaseController):
         header_times = ['fm','em','evening']
         
         #...computing the vgroups we are looking for
-        vgroup_ids = self.getVisitingGroupIdsOfViewSet(overview_live_o) #dict()
-        #for row in overview_live_o:
-        #    vgroup_ids[row.id] = True
-            
+        vgroup_ids = self.getVisitingGroupIdsOfViewSet(overview_live_o) 
         
         #...create booking for all summary groups
-        summary_vgroups = self.makeSummaryVGroups(vodb_live_times_options, vodb_status_map) #dict()
-        #for live_option in vodb_live_times_options:
-        #    log.debug('live_option: '+ live_option)
-        #    for vodb_status, vodb_status_name in vodb_status_map.items():
-        #        try:
-        #            summary_live_option_vgroups = summary_vgroups[live_option]
-        #        except KeyError:
-        #            summary_vgroups[live_option] = dict()
-        #            summary_live_option_vgroups = summary_vgroups[live_option]	
-        #        
-        #            
-        #            
-        #        summary_live_option_vgroups[vodb_status] = DataContainer(id='summary_%s_%d' % (live_option, vodb_status), name=vodb_status_name, vodbstatus=vodb_status, from_date='', to_date='', vodb_live_computed=list())
-        
+        summary_vgroups = self.makeSummaryVGroups(vodb_live_times_options, vodb_status_map)
         
         #...iterating through reduced result set should give the data we need  
         live_summaries_rows = getBookingOverview(holly_couch, None, None, reduce=True)
-        self.computeLiveSummaries(live_summaries_rows, summary_vgroups)
-        #for live_computed_summary in live_computed_summarys:      
-        #    tmp_date = live_computed_summary.key[0]
-        #    tmp_time = live_computed_summary.key[1]
-        #    tmp_status = live_computed_summary.key[2]
-        #    tmp_option = live_computed_summary.key[3]
-        #    tmp_value = live_computed_summary.value
-        #    
-        #    #...            
-        #    summary_vgroup = summary_vgroups[tmp_option][tmp_status]
-        #    if summary_vgroup.from_date > tmp_date or summary_vgroup.from_date=='':
-        #        summary_vgroup.from_date = tmp_date
-        #        summary_vgroup.has_values = True
-        #    if summary_vgroup.to_date < tmp_date or summary_vgroup.to_date=='':
-        #       summary_vgroup.to_date = tmp_date
-        #       summary_vgroup.has_values = True
-        #        
-        #    #...append data to the vodb_live_computed list assuming all data in order this should work BUT we might get a hole in our data set (not good)
-        #    try:
-        #        tmp_live_summary_dict = summary_vgroup['live_summary']
-        #    except:
-        #        summary_vgroup.live_summary = dict()
-        #        tmp_live_summary_dict = summary_vgroup['live_summary']
-        #
-        #    
-        #    tmp_live_summary_dict[tmp_date+':'+tmp_time] = tmp_value
-        #    if tmp_value != '0':
-        #        summary_vgroup.all_values_zero = False
-            
+        self.computeLiveSummaries(live_summaries_rows, summary_vgroups)    
         
         #...now that we have populated the dict-dict, we need to compute the date-range
         self.computeDateRangeOfSummaryVGroup(summary_vgroups, vodb_live_times_options, vodb_status_map)  
-        #for live_option in vodb_live_times_options:
-        #    for vodb_status, vodb_status_name in vodb_status_map.items():
-        #        summary_live_option_vgroups = summary_vgroups[live_option]
-        #        tmp_summary_group = summary_live_option_vgroups[vodb_status]
-        #        if not tmp_summary_group.has_values:
-        #            formated_dates = []
-        #        else:
-        #            formated_dates = dateRange(tmp_summary_group['from_date'], tmp_summary_group['to_date'], format='%Y-%m-%d')
-        #        tmp_summary_group.date_range = formated_dates
-        #    
             
         vgroups = list()
         for tmp_id in vgroup_ids.keys():
             tmp_vgroup = holly_couch[tmp_id]
+            tmp_vgroup.all_values_zero = dict(indoor=True, outdoor=True, daytrip=True)
             formated_dates = dateRange(tmp_vgroup['from_date'], tmp_vgroup['to_date'], format='%Y-%m-%d')
             tmp_vgroup['date_range'] = formated_dates
             
@@ -864,12 +812,15 @@ class VODBGroup(BaseController):
             for tmp_live_row in tmp_vgroup['vodb_live_computed']:
                 for k in ['indoor','outdoor','daytrip']:
                     tmp_comp_key = self.getCompKey(k, tmp_live_row)
-                    live_computed_by_date[tmp_comp_key] = tmp_live_row[k]
+                    tmp_value = tmp_live_row[k]
+                    live_computed_by_date[tmp_comp_key] = tmp_value
+                    
+                    if tmp_value != '0' and tmp_value != 0:
+                        tmp_vgroup.all_values_zero[k] = False
+                        
             tmp_vgroup['live_computed_by_date'] =  live_computed_by_date           
             vgroups.append(tmp_vgroup)
         
         vgroups.sort(self.fn_cmp_vgroups_on_date)
-        
-        
         
         return dict(header_dates=header_dates, header_times=header_times, vgroups=vgroups, bokn_status_map=bokn_status_map, vodb_status_map=vodb_status_map, summary_vgroups=summary_vgroups)

@@ -20,7 +20,7 @@
 	}
 
 .gnatt_date_header {  
-	width:8em;"
+	width:11em;"
 	color: #888;
 }
 
@@ -39,7 +39,7 @@ color: #999;
 	font-size: 80%;
 	font-weight: normal;
 	letter-spacing: 110%;
-	width: 2em;
+	width: 3em;
 	color: #444;
 }
 
@@ -50,10 +50,19 @@ color: #999;
 	background:#eee;
 	}
 
+.gnatt_vodb_status_5 {
+	background:#eed;
+	}
+
+
+.gnatt_vodb_status_10 {
+	background:#ede;
+	}
+	
 .gnatt_vodb_status_20 {
-	background:#ded;
+	background:#dee;
 	}
 		
 .gnatt_vodb_status_50 {
-	background:#dde;
+	background:#ded;
 	}
