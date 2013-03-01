@@ -217,7 +217,7 @@ function startup() {
           <div py:for="vg in vgroups" hollyrosa:vgid="$vg.id" hollyrosa:from_date="$vg.from_date" hollyrosa:to_date="$vg.to_date"  class="gnatt_vgroup_block gnatt_vodb_status_$vg.vodbstatus">$vg.boknr $vg.name [$vg.vodbstatus ${bokn_status_map[vg.vodbstatus]}]
               <br/><div py:for="d in vg.date_range"  class="gnatt_date_block" hollyrosa:date="$d">             
                   <div py:for="t in header_times"  class="gnatt_date_time_block">                 
-                   ${vg['live_computed_by_date'][d+':'+t]} 
+                   ${vg['live_computed_by_date'][live_option+':'+d+':'+t]} 
                   </div>  
               </div>
           </div>
@@ -235,16 +235,18 @@ function startup() {
 
 <!-- 
  
- * Sundays should be red in header ?
- 
  * property substitution is quite broken - it overwrites itself
  * refactor JavaScript
  * date range
  * we really need to figure out how to do $led+$spar in property substitution It wont work as intended otherwise.
 
  * vgroups and sgroups should have explicit attributes for if they have no data (today we check for empty date)
-   and also if all data items are zero (menaing maybe we should just hide the row from view in that particular grid, but it isnt always so)
+   and also if all data items are zero (menaing maybe we should just hide the row from view in that particular grid, but it isn't always so)
+ * How we display groups having only zeros or prhaps no computed live sheet? I suppose such groups are 'new' or 'created'... maybe special grid since we cant compute them.
 
+   Maybe we always show all zeros but mark the vgroup as having only zeros and then have a javascript that can hide them from view if requested.
+   We still have the problem with vgroups having no computed live sheet at all. Maybe a spearate list ?
+   
 -->
     
   

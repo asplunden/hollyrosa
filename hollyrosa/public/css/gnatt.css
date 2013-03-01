@@ -14,6 +14,11 @@
 	margin-top: 1em;
 } 
 
+
+.gnatt_sgroup_block .gnatt_date_time_block {
+	font-weight: bold;	
+	}
+
 .gnatt_date_header {  
 	width:8em;"
 	color: #888;
@@ -32,7 +37,8 @@ color: #999;
 	display:inline-block;"	
 	text-align: right;
 	font-size: 80%;
-	font-weight: bold;
+	font-weight: normal;
+	letter-spacing: 110%;
 	width: 2em;
 	color: #444;
 }
