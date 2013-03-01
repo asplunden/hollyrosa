@@ -698,7 +698,11 @@ class VODBGroup(BaseController):
                     
             
         return dict(header_dates=header_dates, header_times=header_times, row_choices=row_choices, vgroup_opts=vgroups, values=overview_value_map)
+   
         
+    def fn_cmp_vgroups_on_date(self, a, b):
+        return cmp(a['from_date'], b['from_date'])
+
         
     @expose('hollyrosa.templates.vodb_group_booking_overview2')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'fff'))    
@@ -788,6 +792,7 @@ class VODBGroup(BaseController):
             tmp_vgroup['live_computed_by_date'] =  live_computed_by_date           
             vgroups.append(tmp_vgroup)
         
+        vgroups.sort(self.fn_cmp_vgroups_on_date)
         
         
         

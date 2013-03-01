@@ -20,6 +20,13 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
 
+<?python
+import datetime
+def makeDate(s):
+    return datetime.datetime.strptime(s, '%Y-%m-%d')
+
+?>
+
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:hollyrosa="http://asplunden.org/guldkant/hollyrosa" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <xi:include href="master.html" />
@@ -44,7 +51,8 @@ function startup() {
    	var change_program_status_menu = new Menu();
    
    	var menu = new Menu({
-       targetNodeIds: ["title"],
+       targetNodeIds: ["viewport_outdoor", 'viewport_indoor', 'viewport_daytrip'],
+       selector: "div.gnatt_vgroup_block",
        leftClickToOpen: use_left_click_menu
        });
        
@@ -71,6 +79,15 @@ function startup() {
        
     
     /**** assembling change program state and vodb state menus ***/
+    
+   common_menu.add_visiting_group_menu_item(menu, menu, "View...", '${tg.url('view_vodb_group')}');
+   common_menu.add_visiting_group_menu_item(menu, menu, "Edit...", '${tg.url('edit_group_data')}');
+   common_menu.add_visiting_group_menu_item(menu, menu, "Edit Sheet...", '${tg.url('edit_group_sheet')}');
+   common_menu.add_visiting_group_list_bookings_menu_item(menu, menu, "List bookings of group...", '${tg.url('view_bookings_of_name')}');
+   common_menu.add_menu_separator(menu);
+   common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add note...", '${tg.url('/note/add_note')}');
+   common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add attachment...", '${tg.url('/note/add_attachment')}');
+   
     common_menu.add_menu_separator(menu);   
     var change_program_status_menu = new Menu();
     menu.addChild(new PopupMenuItem({
@@ -134,7 +151,7 @@ function startup() {
          //alert('tmp_date: '+tmp_date);
          //alert(header_date_positions);
          tmp_pos = header_date_positions[tmp_date];
-         style.set(date_block, {left: tmp_pos.x+'px', width: tmp_pos.w-2 + 'px' });
+         style.set(date_block, {left: tmp_pos.x+'px', width: tmp_pos.w-10 + 'px' });
          });
          
 //...try and re-compute the position dict or create another one perhaps
@@ -145,9 +162,9 @@ function startup() {
       
       array.forEach(date_header_divs, function(date_header_div) {
       	date_header_div_date = domAttr.get(date_header_div, 'hollyrosa:date');
-      	//alert(date_header_div_date)
+      	
       	tmp_pos = domGeom.position(date_header_div, true);  
-         //alert('tmp_pos:'+tmp_pos);
+         
       	header_date_positions_stage_2[date_header_div_date] = tmp_pos; 
       
       });
@@ -163,7 +180,7 @@ function startup() {
          tmp_to_pos = header_date_positions_stage_2[to_date.value];
          my_pos = domGeom.position(vgdiv,true)
          
-         style.set(vgdiv, {left: tmp_from_pos.x-my_pos.x+'px', width: (tmp_to_pos.x - tmp_from_pos.x + tmp_to_pos.w) + 'px' });
+         style.set(vgdiv, {left: tmp_from_pos.x-my_pos.x+'px', width: (tmp_to_pos.x - tmp_from_pos.x + tmp_to_pos.w + 1) + 'px' });
          });
          
       });
@@ -178,15 +195,15 @@ function startup() {
 
 <body class="tundra">
     <h2 id="title">Booking Overview 2</h2> 
-<p>From TO</p>
+
 
 <!-- container div -->
-<div style="overflow:visible;">
-
+<div style="overflow:visible;" py:for="live_option in ['outdoor','indoor','daytrip']" id="viewport_$live_option">
+<h2>$live_option</h2>
   <!-- header div row with dates and everyting-->
-  <div style="border:1px solid #aaa; overflow:visible; width:300em;">
-      <div style="display:inline-block;">Outdoor </div>
-      <div py:for="d in header_dates" class="gnatt_date_block gnatt_date_header" hollyrosa:date="$d" style="color:#888;">$d<br/>
+  <div style="border-bottom: 1px solid #888; overflow:visible; width:300em;">
+      <!-- <div style="display:inline-block;">$live_option </div> -->
+      <div py:for="d in header_dates" style="${['color: #888;','background:#fdd;'][6==makeDate(d).weekday()]}" class="gnatt_date_block gnatt_date_header" hollyrosa:date="$d" >$d<br/>
           <div py:for="t in header_times" class="gnatt_date_time_block gnatt_date_time_header">
              $t
           </div>
@@ -195,15 +212,8 @@ function startup() {
   
   
   <!-- first status groud div -->  
-  <div style="border:1px solid #866;">
-      <!--<div style="border:1px solid #999; display:inline-block;">Status NEW</div>
-      <div py:for="d in header_dates" class="gnatt_date_block">$d<br/>
-          <div py:for="t in header_times" class="gnatt_date_time_header" >
-             $t
-          </div>
-          
-      </div>  
--->
+  <div>
+
           <div py:for="vg in vgroups" hollyrosa:vgid="$vg.id" hollyrosa:from_date="$vg.from_date" hollyrosa:to_date="$vg.to_date"  class="gnatt_vgroup_block gnatt_vodb_status_$vg.vodbstatus">$vg.boknr $vg.name [$vg.vodbstatus ${bokn_status_map[vg.vodbstatus]}]
               <br/><div py:for="d in vg.date_range"  class="gnatt_date_block" hollyrosa:date="$d">             
                   <div py:for="t in header_times"  class="gnatt_date_time_block">                 
@@ -211,7 +221,7 @@ function startup() {
                   </div>  
               </div>
           </div>
-          <div py:for="sg in [s for s in summary_vgroups['outdoor'].values() if len(s.date_range)>0 ]"  hollyrosa:vgid="$sg.id" hollyrosa:from_date="$sg.from_date" hollyrosa:to_date="$sg.to_date"  class="gnatt_vgroup_block gnatt_vodb_status_$sg.vodbstatus">$sg.name [$sg.vodbstatus ${bokn_status_map[sg.vodbstatus]}] 
+          <div py:for="sg in [s for s in summary_vgroups[live_option].values() if len(s.date_range)>0 ]"  hollyrosa:vgid="$sg.id" hollyrosa:from_date="$sg.from_date" hollyrosa:to_date="$sg.to_date"  class="gnatt_vgroup_block gnatt_sgroup_block gnatt_vodb_status_$sg.vodbstatus">$sg.name [$sg.vodbstatus ${bokn_status_map[sg.vodbstatus]}] 
               <br/><div py:for="d in sg.date_range"  class="gnatt_date_block" hollyrosa:date="$d">             
                   <div py:for="t in header_times"  class="gnatt_date_time_block">                 
                    ${sg['live_summary'][d+':'+t]} 
@@ -225,13 +235,16 @@ function startup() {
 
 <!-- 
  
- * Sort on boknstatus followed by date ?
- * Grid for indor/outdoor/daytrip
- * Context menu on each vgroup div :)
  * Sundays should be red in header ?
- * Add special vgroup at the end summing up all vgroups, but for each bokn stats (?))
+ 
  * property substitution is quite broken - it overwrites itself
  * refactor JavaScript
+ * date range
+ * we really need to figure out how to do $led+$spar in property substitution It wont work as intended otherwise.
+
+ * vgroups and sgroups should have explicit attributes for if they have no data (today we check for empty date)
+   and also if all data items are zero (menaing maybe we should just hide the row from view in that particular grid, but it isnt always so)
+
 -->
     
   

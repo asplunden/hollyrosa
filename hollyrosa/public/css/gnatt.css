@@ -2,12 +2,16 @@
 
 .gnatt_vgroup_block { 
 	width:20em; 
-	position:relative; 
-	
+	position:relative; 	
 	color: #888;
 	padding-top: 0.2em;
 	padding-bottom: 0.2em;
 	margin-bottom: 0.2em;
+} 
+
+.gnatt_sgroup_block { 
+	border-bottom: 2px solid #444;
+	margin-top: 1em;
 } 
 
 .gnatt_date_header {  
