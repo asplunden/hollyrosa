@@ -37,7 +37,7 @@ from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUs
 
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange
 from hollyrosa.controllers.booking_history import remember_tag_change
-from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, make_object_of_vgdictionary
+from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, vodb_status_map, make_object_of_vgdictionary
 from hollyrosa.controllers.booking_history import remember_new_booking_request
 
 from formencode import validators
@@ -50,8 +50,7 @@ vodb_eat_times_options = [u'indoor', u'outdoor', u'own']
 vodb_live_times_options = [u'indoor',u'outdoor',u'daytrip']
 #vodb_live_cols = 
 
-class Obj(dict):
-    pass
+
 
 
 class VODBGroup(BaseController):
@@ -455,19 +454,19 @@ class VODBGroup(BaseController):
                 log.debug('original value: ' + str(original_value))
                 if type(original_value) == types.StringType or type(original_value) == types.UnicodeType:
                     for prop in properties.values():
-                        #log.debug(str(prop))
+                        log.debug('prop:'+str(prop))
                         prop_prop = prop['property']
                         # todo: WARN IF DATE IS OUTSIDE RANGE
                         
                         new_value = original_value.replace(u'$'+prop_prop, prop['value']) 
-                        
+                        log.debug('new value:' + new_value)
                         try:
                             new_value = int(new_value)
                         except ValueError:
                         	 pass
                         original_value = new_value # sadly no better idea
                         #log.debug(str(original_value))                        
-                        break
+                        
                         
                 row[k] = original_value
         
@@ -622,7 +621,7 @@ class VODBGroup(BaseController):
             tmp_id = 'sum.%d' % tmp_status
             log.debug('tmp_id='+str(tmp_id))
             if not used_vgroup_ids[tmp_status].has_key(tmp_id):
-                tmp_o = Obj()
+                tmp_o = DataContainer()
                 tmp_o.id=tmp_id
                 tmp_o.name='summa for %d' % tmp_status
                 tmp_o.boknr=''
@@ -722,6 +721,61 @@ class VODBGroup(BaseController):
             vgroup_ids[row.id] = True
             
         
+        #...create booking for all summary groups
+        summary_vgroups = dict()
+        for live_option in vodb_live_times_options:
+            log.debug('live_option: '+ live_option)
+            for vodb_status, vodb_status_name in vodb_status_map.items():
+                try:
+                    summary_live_option_vgroups = summary_vgroups[live_option]
+                except KeyError:
+                    summary_vgroups[live_option] = dict()
+                    summary_live_option_vgroups = summary_vgroups[live_option]	
+                
+                    
+                    
+                summary_live_option_vgroups[vodb_status] = DataContainer(id='summary_%s_%d' % (live_option, vodb_status), name=vodb_status_name, vodbstatus=vodb_status, from_date='', to_date='', vodb_live_computed=list())
+        
+        
+        #...iterating through reduced result set should give the data we need  
+        live_computed_summarys = getBookingOverview(holly_couch, None, None, reduce=True)
+        for live_computed_summary in live_computed_summarys:      
+            tmp_date = live_computed_summary.key[0]
+            tmp_time = live_computed_summary.key[1]
+            tmp_status = live_computed_summary.key[2]
+            tmp_option = live_computed_summary.key[3]
+            tmp_value = live_computed_summary.value
+            
+            #...            
+            summary_vgroup = summary_vgroups[tmp_option][tmp_status]
+            if summary_vgroup.from_date > tmp_date or summary_vgroup.from_date=='':
+                summary_vgroup.from_date = tmp_date
+            if summary_vgroup.to_date < tmp_date or summary_vgroup.to_date=='':
+                summary_vgroup.to_date = tmp_date
+            
+            #...append data to the vodb_live_computed list assuming all data in order this should work BUT we might get a hole in our data set (not good)
+            try:
+                tmp_live_summary_dict = summary_vgroup['live_summary']
+            except:
+                summary_vgroup.live_summary = dict()
+                tmp_live_summary_dict = summary_vgroup['live_summary']
+
+            
+            tmp_live_summary_dict[tmp_date+':'+tmp_time] = tmp_value
+            
+            
+        #...now that we have populated the dict-dict, we need to compute the date-range
+        for live_option in vodb_live_times_options:
+            for vodb_status, vodb_status_name in vodb_status_map.items():
+                summary_live_option_vgroups = summary_vgroups[live_option]
+                tmp_summary_group = summary_live_option_vgroups[vodb_status]
+                if tmp_summary_group['from_date'] == '':
+                    formated_dates = []
+                else:
+                    formated_dates = dateRange(tmp_summary_group['from_date'], tmp_summary_group['to_date'], format='%Y-%m-%d')
+                tmp_summary_group.date_range = formated_dates
+            
+            
         vgroups = list()
         for tmp_id in vgroup_ids.keys():
             tmp_vgroup = holly_couch[tmp_id]
@@ -734,7 +788,7 @@ class VODBGroup(BaseController):
             tmp_vgroup['live_computed_by_date'] =  live_computed_by_date           
             vgroups.append(tmp_vgroup)
         
-                
         
         
-        return dict(header_dates=header_dates, header_times=header_times, vgroups=vgroups)
+        
+        return dict(header_dates=header_dates, header_times=header_times, vgroups=vgroups, bokn_status_map=bokn_status_map, vodb_status_map=vodb_status_map, summary_vgroups=summary_vgroups)

@@ -91,11 +91,23 @@ def getRenderContentDict(booking):
     else:
         return booking['cache_content']
 
+
 class DataContainer(object):
+    """
+    TODO: Describe here
+    """
     def __init__(self, **kwds):
         for k, v in kwds.items():
             self.__setattr__(k, v)
-            
+   
+    def has_key(self, key):
+        return self.__hasattr__(key)
+        
+    def __getitem__(self, key):
+        try:
+            return self.__getattribute__(key)
+        except AttributeError:
+            raise KeyError, 'key "%s" not found' % key
             
 class DummyIdentity(object):
     def __init__(self):

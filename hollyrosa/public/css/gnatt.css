@@ -3,7 +3,7 @@
 .gnatt_vgroup_block { 
 	width:20em; 
 	position:relative; 
-	background:#dde;
+	
 	color: #888;
 	padding-top: 0.2em;
 	padding-bottom: 0.2em;
@@ -32,3 +32,18 @@ color: #999;
 	width: 2em;
 	color: #444;
 }
+
+
+/* color coding the gnatt vgrup blocks */
+
+.gnatt_vodb_status_0 {
+	background:#eee;
+	}
+
+.gnatt_vodb_status_20 {
+	background:#ded;
+	}
+		
+.gnatt_vodb_status_50 {
+	background:#dde;
+	}

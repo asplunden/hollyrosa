@@ -102,7 +102,7 @@ function startup() {
 
 
    var header_date_positions = {};
-   
+   var header_date_positions_stage_2 = {};
     
 	ready(function() {
 		startup();
@@ -123,19 +123,7 @@ function startup() {
       
       alert('header_date_positions:'+header_date_positions);
 
-		//...set vgroup blocks position and width
-      var vgroups = query('[hollyrosa:vgid]');
-      
-      array.forEach(vgroups, function(vgdiv) {
-         from_date = vgdiv.attributes['hollyrosa:from_date'];
-      	to_date = vgdiv.attributes['hollyrosa:to_date'];
-         
-         tmp_from_pos = header_date_positions[from_date.value];
-         tmp_to_pos = header_date_positions[to_date.value];
-         
-         
-         style.set(vgdiv, {left: tmp_from_pos.x-20+'px', width: (tmp_to_pos.x - tmp_from_pos.x + tmp_to_pos.w) + 'px' });
-         });
+		
 		
 		
 		
@@ -149,7 +137,38 @@ function startup() {
          style.set(date_block, {left: tmp_pos.x+'px', width: tmp_pos.w-2 + 'px' });
          });
          
+//...try and re-compute the position dict or create another one perhaps
+      
+      //...build array of header date positions mapping date to a dictionary date, fm, em, evening
+      
+      var date_header_divs = query('.gnatt_date_header');
+      
+      array.forEach(date_header_divs, function(date_header_div) {
+      	date_header_div_date = domAttr.get(date_header_div, 'hollyrosa:date');
+      	//alert(date_header_div_date)
+      	tmp_pos = domGeom.position(date_header_div, true);  
+         //alert('tmp_pos:'+tmp_pos);
+      	header_date_positions_stage_2[date_header_div_date] = tmp_pos; 
+      
       });
+      
+//...set vgroup blocks position and width
+      var vgroups = query('[hollyrosa:vgid]');
+      
+      array.forEach(vgroups, function(vgdiv) {
+         from_date = vgdiv.attributes['hollyrosa:from_date'];
+      	to_date = vgdiv.attributes['hollyrosa:to_date'];
+         
+         tmp_from_pos = header_date_positions_stage_2[from_date.value];
+         tmp_to_pos = header_date_positions_stage_2[to_date.value];
+         my_pos = domGeom.position(vgdiv,true)
+         
+         style.set(vgdiv, {left: tmp_from_pos.x-my_pos.x+'px', width: (tmp_to_pos.x - tmp_from_pos.x + tmp_to_pos.w) + 'px' });
+         });
+         
+      });
+         
+         
  });
   </script>
   
@@ -185,28 +204,34 @@ function startup() {
           
       </div>  
 -->
-          <div py:for="vg in vgroups" hollyrosa:vgid="$vg.id" hollyrosa:from_date="$vg.from_date" hollyrosa:to_date="$vg.to_date"  class="gnatt_vgroup_block">$vg.boknr $vg.name [$vg.boknstatus]
+          <div py:for="vg in vgroups" hollyrosa:vgid="$vg.id" hollyrosa:from_date="$vg.from_date" hollyrosa:to_date="$vg.to_date"  class="gnatt_vgroup_block gnatt_vodb_status_$vg.vodbstatus">$vg.boknr $vg.name [$vg.vodbstatus ${bokn_status_map[vg.vodbstatus]}]
               <br/><div py:for="d in vg.date_range"  class="gnatt_date_block" hollyrosa:date="$d">             
                   <div py:for="t in header_times"  class="gnatt_date_time_block">                 
                    ${vg['live_computed_by_date'][d+':'+t]} 
                   </div>  
               </div>
           </div>
-
+          <div py:for="sg in [s for s in summary_vgroups['outdoor'].values() if len(s.date_range)>0 ]"  hollyrosa:vgid="$sg.id" hollyrosa:from_date="$sg.from_date" hollyrosa:to_date="$sg.to_date"  class="gnatt_vgroup_block gnatt_vodb_status_$sg.vodbstatus">$sg.name [$sg.vodbstatus ${bokn_status_map[sg.vodbstatus]}] 
+              <br/><div py:for="d in sg.date_range"  class="gnatt_date_block" hollyrosa:date="$d">             
+                  <div py:for="t in header_times"  class="gnatt_date_time_block">                 
+                   ${sg['live_summary'][d+':'+t]} 
+                  </div>  
+              </div>
+          </div>
   
   </div>
 
 </div>
 
 <!-- 
- * Color should depend on bokn status.
- * decipher boknstatus
+ 
  * Sort on boknstatus followed by date ?
  * Grid for indor/outdoor/daytrip
  * Context menu on each vgroup div :)
  * Sundays should be red in header ?
  * Add special vgroup at the end summing up all vgroups, but for each bokn stats (?))
-
+ * property substitution is quite broken - it overwrites itself
+ * refactor JavaScript
 -->
     
   
