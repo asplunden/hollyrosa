@@ -26,14 +26,15 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa - Booking Overview</title>
+  <title>Hollyrosa - Booking Overview 2</title>
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
-  <link rel="stylesheet" type="text/css" href="/scripts/dojo-release-1.8.0/dojox/grid/resources/tundraGrid.css" />
+  <link rel="stylesheet" type="text/css" href="${tg.url('/css/gnatt.css')}" />
+  
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true, debugAtAllCosts: true"></script>
   <script>
 
-require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window", 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore'], function(ready, tags, common_menu, Menu, PopupMenuItem, dom, array, query, on, win, DataGrid, ItemFileWriteStore) {
+require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem", "dojo/dom", "dojo/dom-attr", "dojo/_base/array", "dojo/query", "dojo/on", "dojo/_base/window", 'dojo/dom-geometry', 'dojo/dom-style'], function(ready, tags, common_menu, Menu, PopupMenuItem, dom, domAttr, array, query, on, win, domGeom, style) {
 
 
 
@@ -100,14 +101,55 @@ function startup() {
 
 
 
-    	
+   var header_date_positions = {};
+   
     
 	ready(function() {
 		startup();
 
-     
-    
-		});  
+
+      //...build array of header date positions mapping date to a dictionary date, fm, em, evening
+      
+      var date_header_divs = query('.gnatt_date_header');
+      
+      array.forEach(date_header_divs, function(date_header_div) {
+      	date_header_div_date = domAttr.get(date_header_div, 'hollyrosa:date');
+      	//alert(date_header_div_date)
+      	tmp_pos = domGeom.position(date_header_div, true);  
+         //alert('tmp_pos:'+tmp_pos);
+      	header_date_positions[date_header_div_date] = tmp_pos; 
+      
+      });
+      
+      alert('header_date_positions:'+header_date_positions);
+
+		//...set vgroup blocks position and width
+      var vgroups = query('[hollyrosa:vgid]');
+      
+      array.forEach(vgroups, function(vgdiv) {
+         from_date = vgdiv.attributes['hollyrosa:from_date'];
+      	to_date = vgdiv.attributes['hollyrosa:to_date'];
+         
+         tmp_from_pos = header_date_positions[from_date.value];
+         tmp_to_pos = header_date_positions[to_date.value];
+         
+         
+         style.set(vgdiv, {left: tmp_from_pos.x-20+'px', width: (tmp_to_pos.x - tmp_from_pos.x + tmp_to_pos.w) + 'px' });
+         });
+		
+		
+		
+		//...set vgroup date blocks position and width
+		var date_blocks = query('.gnatt_date_block');
+      array.forEach(date_blocks, function(date_block) {
+         tmp_date = domAttr.get(date_block, 'hollyrosa:date');
+         //alert('tmp_date: '+tmp_date);
+         //alert(header_date_positions);
+         tmp_pos = header_date_positions[tmp_date];
+         style.set(date_block, {left: tmp_pos.x+'px', width: tmp_pos.w-2 + 'px' });
+         });
+         
+      });
  });
   </script>
   
@@ -116,44 +158,56 @@ function startup() {
 </head>
 
 <body class="tundra">
-    <h2 id="title">Booking Overview</h2> 
+    <h2 id="title">Booking Overview 2</h2> 
 <p>From TO</p>
 
-<div style="overflow:scroll;">
-<table class="data" style="overflow:scroll;">
-  <thead>
-  <tr class="data">
-      <!-- DATE -->
-      <th py:for="d in header_dates" colspan="${d[1]}">${d[0]}</th>
-  </tr>  
-  <tr class="data">      
-      <!-- TIME -->
-      <th py:for="d in header_times" colspan="${d[1]}" style="width:20em;">${d[0]}</th>
-  </tr>
-  </thead>
-  <tbody>
+<!-- container div -->
+<div style="overflow:visible;">
+
+  <!-- header div row with dates and everyting-->
+  <div style="border:1px solid #aaa; overflow:visible; width:300em;">
+      <div style="display:inline-block;">Outdoor </div>
+      <div py:for="d in header_dates" class="gnatt_date_block gnatt_date_header" hollyrosa:date="$d" style="color:#888;">$d<br/>
+          <div py:for="t in header_times" class="gnatt_date_time_block gnatt_date_time_header">
+             $t
+          </div>
+      </div>  
+  </div>
   
-  <!-- For each vodb state... ? -->
-  <!-- For each visiting group also, leftmost col should indicate state and visiting group -->
   
-  <tr py:for="vo in vgroup_opts" >
-      <td py:if="vo[3] > 0" rowspan="${vo[3]}" class="info data">${vo[0].vodbstatus}</td>
-      <td py:if="vo[3] > 0" rowspan="${vo[3]}" class="info data">${vo[0].boknr} ${vo[0].name}</td>
-      <td py:if="vo[3] > 0" rowspan="${vo[3]}" class="info data">${vo[0].from_date} - ${vo[0].to_date}</td>
-      <td class="info data">${vo[1]}</td>
-      <!-- lookup date-time-opt-value -->
-      <td py:for="do in vo[2]" class="info data">${values.get(do,'')}</td>
-      
-  </tr>
+  <!-- first status groud div -->  
+  <div style="border:1px solid #866;">
+      <!--<div style="border:1px solid #999; display:inline-block;">Status NEW</div>
+      <div py:for="d in header_dates" class="gnatt_date_block">$d<br/>
+          <div py:for="t in header_times" class="gnatt_date_time_header" >
+             $t
+          </div>
+          
+      </div>  
+-->
+          <div py:for="vg in vgroups" hollyrosa:vgid="$vg.id" hollyrosa:from_date="$vg.from_date" hollyrosa:to_date="$vg.to_date"  class="gnatt_vgroup_block">$vg.boknr $vg.name [$vg.boknstatus]
+              <br/><div py:for="d in vg.date_range"  class="gnatt_date_block" hollyrosa:date="$d">             
+                  <div py:for="t in header_times"  class="gnatt_date_time_block">                 
+                   ${vg['live_computed_by_date'][d+':'+t]} 
+                  </div>  
+              </div>
+          </div>
+
   
-  <tr py:for="s in ['booking states']">
-    
-  
-  </tr>
-  </tbody>
-</table>
+  </div>
+
 </div>
 
+<!-- 
+ * Color should depend on bokn status.
+ * decipher boknstatus
+ * Sort on boknstatus followed by date ?
+ * Grid for indor/outdoor/daytrip
+ * Context menu on each vgroup div :)
+ * Sundays should be red in header ?
+ * Add special vgroup at the end summing up all vgroups, but for each bokn stats (?))
+
+-->
     
   
 </body>

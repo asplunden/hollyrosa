@@ -88,24 +88,27 @@ def getVisitingGroupsAtDate(holly_couch, at_date):
     return holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=[formated_date],  include_docs =True)
     	
 
-def getVisitingGroupsInDatePeriod(holly_couch, from_date,  to_date):
-    """create one key for each day"""
-    
+def dateRange(from_date, to_date, format='%a %b %d %Y'):
     one_day = datetime.timedelta(1)
     formated_dates = list()
     tmp_date = datetime.datetime.strptime(from_date,'%Y-%m-%d')
     tmp_to_date = datetime.datetime.strptime(to_date,'%Y-%m-%d')
-    
     while tmp_date <= tmp_to_date:
-        formated_dates.append(tmp_date.strftime('%a %b %d %Y'))
+        formated_dates.append(tmp_date.strftime(format))
         tmp_date = tmp_date + one_day
+    return formated_dates
+    
+    
+def getVisitingGroupsInDatePeriod(holly_couch, from_date,  to_date):
+    """create one key for each day"""
+    
+    formated_dates = dateRange(from_date, to_date)
     
     # TODO: maybe one can make a view using reduce that fixes this multiple-removing stuff.
     #return holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates)
     
     check = dict()
     r = list()
-    #print holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs =True)
     for v in holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs=True):
         if not check.has_key(v.doc['_id']):
             r.append(v)

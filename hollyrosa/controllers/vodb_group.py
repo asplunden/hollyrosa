@@ -35,7 +35,7 @@ log = logging.getLogger()
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, reFormatDate
 
-from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus
+from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange
 from hollyrosa.controllers.booking_history import remember_tag_change
 from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, make_object_of_vgdictionary
 from hollyrosa.controllers.booking_history import remember_new_booking_request
@@ -50,7 +50,7 @@ vodb_eat_times_options = [u'indoor', u'outdoor', u'own']
 vodb_live_times_options = [u'indoor',u'outdoor',u'daytrip']
 #vodb_live_cols = 
 
-class Obj(object):
+class Obj(dict):
     pass
 
 
@@ -565,44 +565,59 @@ class VODBGroup(BaseController):
               
         #...raise...redirect referer...
         
+    def fnCmpSortOnFromDate(self, a, b):
+        return cmp(a['from_date'], b['from_date'])        
+        
+    
+    def compute_used_dates_and_times(self, rows):
+        used_dates = dict()
+        used_times = dict()
+        for row in rows:    
+            used_dates[row.key[0]] = True
+            used_times[row.key[1]] = True
+        return used_dates, used_times
+    
     @expose('hollyrosa.templates.vodb_group_booking_overview')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'fff'))    
-    def vodb_overview(self):
-        overview_o = getBookingOverview(holly_couch, None, None, reduce=False)
+    def vodb_overview(self, compute_local_sum=False, compute_live=False):
+        if compute_live:
+            overview_live_o = getBookingOverview(holly_couch, None, None, reduce=False)
+        else:
+            overview_live_o = list()
         overview_eat_o = getBookingEatOverview(holly_couch, None, None, reduce=False)
         overview_value_map = dict()
         
         vodb_statuses = [-100, -10, 0, 5, 10, 20, 50]
-        used_dates = dict()
-        used_times = dict()
+        #used_dates = dict()
+        #used_times = dict()
         used_vgroup_ids = dict()
         for tmp_status in vodb_statuses:
             used_vgroup_ids[tmp_status] = dict()
                        
-        for row in list(overview_o) + list(overview_eat_o):
-            log.debug('ROW'+str(row))
-            used_dates[row.key[0]] = True
-            used_times[row.key[1]] = True
+        for row in list(overview_live_o) + list(overview_eat_o):
+            #used_dates[row.key[0]] = True
+            #used_times[row.key[1]] = True
             tmp_status = row.key[2]
             tmp_id = row.id
-            log.debug('tmp_id='+str(tmp_id))
             if not used_vgroup_ids[tmp_status].has_key(tmp_id):             
                 used_vgroup_ids[tmp_status][tmp_id] = holly_couch[tmp_id]
-                log.debug('row.doc ' + str(row.doc))
+                
                 
             overview_value_map['%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], row.key[3])] = row.value
-            try:
-                overview_value_map['%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], 'SUM')] = overview_value_map.get('%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], 'SUM'),0)+int(row.value)
-            except ValueError:
-                pass
-            except TypeError:
-                pass
-                
+            if compute_local_sum:            
+                try:
+                    overview_value_map['%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], 'SUM')] = overview_value_map.get('%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], 'SUM'),0)+int(row.value)
+                except ValueError:
+                    pass
+                except TypeError:
+                    pass
+                    
+        used_dates, used_times = self.compute_used_dates_and_times(list(overview_live_o) + list(overview_eat_o))
+            
         status_level_overview_o = getBookingOverview(holly_couch, None, None, reduce=True)
         status_level_eat_overview = getBookingEatOverview(holly_couch, None, None, reduce=True)
         #...copy paste!
         for row in list(status_level_overview_o) + list(status_level_eat_overview):
-            log.debug('ROW'+str(row))
             tmp_status = row.key[2]
             tmp_id = 'sum.%d' % tmp_status
             log.debug('tmp_id='+str(tmp_id))
@@ -614,24 +629,30 @@ class VODBGroup(BaseController):
                 tmp_o.from_date=''
                 tmp_o.to_date=''
                 tmp_o.vodbstatus = tmp_status
+                tmp_o['from_date'] = '3000-00-00'
 
                 used_vgroup_ids[tmp_status][tmp_id] = tmp_o
                 
                 
             overview_value_map['%s:%s:%s:%s' % (tmp_id, row.key[0], row.key[1], row.key[3])] = row.value
-            try:
-                overview_value_map['%s:%s:%s:%s' % (tmp_id, row.key[0], row.key[1], 'SUM')] = overview_value_map.get('%s:%s:%s:%s' % (tmp_id, row.key[0], row.key[1], 'SUM'),0)+int(row.value)
-            except ValueError:
-                pass
+            if compute_local_sum:            
+                try:
+                    overview_value_map['%s:%s:%s:%s' % (tmp_id, row.key[0], row.key[1], 'SUM')] = overview_value_map.get('%s:%s:%s:%s' % (tmp_id, row.key[0], row.key[1], 'SUM'),0)+int(row.value)
+                except ValueError:
+                    pass
 
                 
         #...build a list of dates, starting with headers 'status' and 'vgroup'
-        times = vodb_live_times + vodb_eat_times
+        if compute_live:
+            times = vodb_live_times + vodb_eat_times
+        else:
+            times = vodb_eat_times
+            
         header_block = [(t,1) for t in times] 
         header_block_len = len(header_block)        
         dates = used_dates.keys()
         dates.sort()
-        header_dates = [(h, header_block_len) for h in dates]        
+        header_dates = [(h, header_block_len) for h in dates]
         
         #...check if any date is missing
         #...add header to dates
@@ -644,7 +665,10 @@ class VODBGroup(BaseController):
         header_times = [('',1)] * len(vgroup_header) + header_block * len(used_dates.keys())
         date_colspan = len(header_block)
         
-        row_choices = vodb_live_times_options + ['SUM']
+        if compute_local_sum:
+            row_choices = vodb_live_times_options + ['SUM']
+        else:
+            row_choices = vodb_live_times_options
         row_span = len(row_choices)
         
         
@@ -653,14 +677,21 @@ class VODBGroup(BaseController):
         #...Each vgroup can be represented as
         #   [(status,4), (name,4), (refnr,4), (opt1,1) ]  + fm/inne + em/inne + kvall/inne + fru/inne + lu/inne + midd/inne + kvall/inne * dates
         vgroups = []
+        
         for tmp_status in vodb_statuses:
-            for tmp_vgroup in used_vgroup_ids[tmp_status].values():
-                log.debug('tmp_vgroup ' + str(tmp_vgroup))
+            tmp_used_vgroups = used_vgroup_ids[tmp_status].values() 	
+            tmp_used_vgroups.sort(self.fnCmpSortOnFromDate)
+            for tmp_vgroup in tmp_used_vgroups:
                 rowspan = len(row_choices)
                 for tmp_opt in row_choices:
-                    #for d in dates:
-                    #    for t in times:
-                    date_opts = ['%s:%s:%s:%s' % (tmp_vgroup.id, d, t, tmp_opt) for d in dates for t in times]
+                    date_opts = []
+                    for d in dates:
+                        for t in times:
+                            if tmp_opt not in ['fm','em','evening']:
+                                if t == 'daytrip':
+                                    t = 'own'
+                            date_opts.append('%s:%s:%s:%s' % (tmp_vgroup.id, d, t, tmp_opt))                       
+                    #date_opts = ['%s:%s:%s:%s' % (tmp_vgroup.id, d, t, tmp_opt) for d in dates for t in times]
                     vgroups.append(  (tmp_vgroup, tmp_opt, date_opts, rowspan )  )
                     
                     if rowspan > 1:
@@ -669,3 +700,41 @@ class VODBGroup(BaseController):
             
         return dict(header_dates=header_dates, header_times=header_times, row_choices=row_choices, vgroup_opts=vgroups, values=overview_value_map)
         
+        
+    @expose('hollyrosa.templates.vodb_group_booking_overview2')
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'fff'))    
+    def vodb_booking_overview2(self, compute_local_sum=False, compute_live=False):
+        # the aim at first is to start draw grid / sheet using div tags instead of a table.
+        overview_live_o = getBookingOverview(holly_couch, None, None, reduce=False)
+        used_dates, used_times = self.compute_used_dates_and_times(overview_live_o)
+        used_dates_keys = used_dates.keys()
+        used_dates_keys.sort()
+        header_dates = used_dates_keys
+        header_times = used_times.keys()
+        
+        #cheat
+        header_times = ['fm','em','evening']
+        
+        #...computing the vgroups we are looking for
+        vgroup_ids = dict()
+        for row in overview_live_o:
+            log.debug('ROWID:' + row.id)
+            vgroup_ids[row.id] = True
+            
+        
+        vgroups = list()
+        for tmp_id in vgroup_ids.keys():
+            tmp_vgroup = holly_couch[tmp_id]
+            formated_dates = dateRange(tmp_vgroup['from_date'], tmp_vgroup['to_date'], format='%Y-%m-%d')
+            tmp_vgroup['date_range'] = formated_dates
+            
+            live_computed_by_date = dict()
+            for tmp_live_row in tmp_vgroup['vodb_live_computed']:
+                live_computed_by_date[tmp_live_row['date'] +':'+ tmp_live_row['time']] = tmp_live_row['outdoor'] # it could also bee outdoor
+            tmp_vgroup['live_computed_by_date'] =  live_computed_by_date           
+            vgroups.append(tmp_vgroup)
+        
+                
+        
+        
+        return dict(header_dates=header_dates, header_times=header_times, vgroups=vgroups)
