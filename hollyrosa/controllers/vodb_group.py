@@ -451,24 +451,25 @@ class VODBGroup(BaseController):
         for row in rows:
             for k in headers:
                 original_value = row.get(k,0)
-                log.debug('original value: ' + str(original_value))
-                if type(original_value) == types.StringType or type(original_value) == types.UnicodeType:
+                new_value = original_value
+                #log.debug('original value: ' + str(original_value))
+                if type(new_value) == types.StringType or type(new_value) == types.UnicodeType:
                     for prop in properties.values():
-                        log.debug('prop:'+str(prop))
+                        #log.debug('prop:'+str(prop))
                         prop_prop = prop['property']
                         # todo: WARN IF DATE IS OUTSIDE RANGE
                         
-                        new_value = original_value.replace(u'$'+prop_prop, prop['value']) 
-                        log.debug('new value:' + new_value)
-                        try:
-                            new_value = int(new_value)
-                        except ValueError:
-                        	 pass
-                        original_value = new_value # sadly no better idea
-                        #log.debug(str(original_value))                        
+                        prop_value = prop['value']
+                        if None != prop_value:
+                        	new_value = new_value.replace(u'$'+prop_prop, prop_value) 
                         
-                        
-                row[k] = original_value
+                    try:
+                        new_value = str(eval(new_value,{"__builtins__":None},{}))
+                    except ValueError:
+                        pass
+                    except SyntaxError:
+                        pass  
+                row[k] = new_value
         
     @expose()
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
@@ -481,7 +482,8 @@ class VODBGroup(BaseController):
             visiting_group_o['vodb_eat_sheet'] = vodb_eat_sheet
                         
             #...create cache content. Substitute properties and make sure we have at least zeros in all columns
-            vodb_eat_computed = vodb_eat_sheet['items']            
+            vodb_eat_sheet_copy = json.loads(eat_sheet)
+            vodb_eat_computed = vodb_eat_sheet_copy['items']
             self.vodb_sheet_property_substitution(vodb_eat_computed, vodb_eat_times_options, visiting_group_o['visiting_group_properties'])
             
             visiting_group_o['vodb_eat_computed'] = vodb_eat_computed
@@ -489,16 +491,17 @@ class VODBGroup(BaseController):
         if live_sheet != None:
             vodb_live_sheet = json.loads(live_sheet)
             visiting_group_o['vodb_live_sheet'] = vodb_live_sheet
-            vodb_live_computed = vodb_live_sheet['items']
+            vodb_live_sheet_copy = json.loads(live_sheet)
+            vodb_live_computed = vodb_live_sheet_copy['items']
             self.vodb_sheet_property_substitution(vodb_live_computed, vodb_live_times_options, visiting_group_o['visiting_group_properties'])
             visiting_group_o['vodb_live_computed'] = vodb_live_computed
               
             
-
         if tag_sheet != None:
             vodb_tag_sheet = json.loads(tag_sheet)
             visiting_group_o['vodb_tag_sheet'] = vodb_tag_sheet
-            vodb_tag_computed = vodb_tag_sheet['items']
+            vodb_tag_sheet_copy = json.loads(tag_sheet)
+            vodb_tag_computed = vodb_tag_sheet_copy['items']
             vodb_tag_times_tags = self.compute_all_used_vgroup_tags(visiting_group_o['tags'], vodb_tag_sheet['items'])
             self.vodb_sheet_property_substitution(vodb_tag_computed, vodb_tag_times_tags, visiting_group_o['visiting_group_properties'])
             visiting_group_o['vodb_tag_computed'] = vodb_tag_computed
