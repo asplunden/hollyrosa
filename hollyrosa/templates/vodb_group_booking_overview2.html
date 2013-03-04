@@ -131,45 +131,33 @@ function startup() {
       
       array.forEach(date_header_divs, function(date_header_div) {
       	date_header_div_date = domAttr.get(date_header_div, 'hollyrosa:date');
-      	//alert(date_header_div_date)
       	tmp_pos = domGeom.position(date_header_div, true);  
-         //alert('tmp_pos:'+tmp_pos);
       	header_date_positions[date_header_div_date] = tmp_pos; 
       
       });
-      
-      //alert('header_date_positions:'+header_date_positions);
-
-		
-		
-		
 		
 		//...set vgroup date blocks position and width
 		var date_blocks = query('.gnatt_date_block');
       array.forEach(date_blocks, function(date_block) {
          tmp_date = domAttr.get(date_block, 'hollyrosa:date');
-         //alert('tmp_date: '+tmp_date);
-         //alert(header_date_positions);
          tmp_pos = header_date_positions[tmp_date];
          style.set(date_block, {left: tmp_pos.x+'px', width: tmp_pos.w-10 + 'px' });
          });
          
-//...try and re-compute the position dict or create another one perhaps
+      //...try and re-compute the position dict or create another one perhaps
       
       //...build array of header date positions mapping date to a dictionary date, fm, em, evening
       
       var date_header_divs = query('.gnatt_date_header');
       
       array.forEach(date_header_divs, function(date_header_div) {
-      	date_header_div_date = domAttr.get(date_header_div, 'hollyrosa:date');
-      	
+      	date_header_div_date = domAttr.get(date_header_div, 'hollyrosa:date');	
       	tmp_pos = domGeom.position(date_header_div, true);  
-         
       	header_date_positions_stage_2[date_header_div_date] = tmp_pos; 
       
       });
       
-//...set vgroup blocks position and width
+      //...set vgroup blocks position and width
       var vgroups = query('[hollyrosa:vgid]');
       
       array.forEach(vgroups, function(vgdiv) {
@@ -242,23 +230,26 @@ function startup() {
  
  * refactor JavaScript
  * date range
+ * we will need to add island+confirmed in a special summary group. We probably also will need to add island+confirmed+preliminary
+ * remove program booking related menu options
+ 
  
  * check dates on external edit visiting group
    - both format
    - and from less than to
  * what happens when a group changes from and to dates?
  
- * automatically populate the computed sheets
 
  * How we display groups having only zeros or prhaps no computed live sheet? I suppose such groups are 'new' or 'created'... maybe special grid since we cant compute them.
+ * automatically populate the computed sheets
 
    Maybe we always show all zeros but mark the vgroup as having only zeros and then have a javascript that can hide them from view if requested.
    We still have the problem with vgroups having no computed live sheet at all. Maybe a spearate list ?
    
    Maybe vgroups with only zeros should be displayed with an colour outline and no fill?
 
+ * When properties are updated, the computed sheet data must also be updated.
  
- * we will need to add island+confirmed in a special summary group. We probably also will need to add island+confirmed+preliminary
    
 -->
     

@@ -28,7 +28,7 @@ from hollyrosa.widgets.edit_visiting_group_program_request_form import create_ed
 from hollyrosa.widgets.edit_vodb_group_form import create_edit_vodb_group_form
 from tg import tmpl_context
 
-import datetime,logging, json, time, types
+import datetime,logging, json, time, types,  copy
 
 log = logging.getLogger()
 
@@ -104,17 +104,12 @@ class VODBGroup(BaseController):
 
   
     @expose('hollyrosa.templates.vodb_group_edit')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
+    @require(Any(is_user('user.erspl'), has_level('pl'), has_level('staff'), msg='Only staff and pl may edit vodb group data'))
     def edit_group_data(self, visiting_group_id=''):
         visiting_group_x = holly_couch[visiting_group_id]
         tmpl_context.form = create_edit_vodb_group_form
         
-        #...construct the age group list. It's going to be a json document. Hard coded.
-        #... if we are to partially load from database and check that we can process it, we do need to go from python to json. (and back)
-        #...construct a program request template. It's going to be a json document. Hard coded.
-        
-        
-        
+        #...add data if it doesent exist
         if not visiting_group_x.has_key('vodb_status'):
             visiting_group_x['vodb_status'] = 0
         
@@ -128,15 +123,13 @@ class VODBGroup(BaseController):
 
 
     def newOrExistingVgroupId(self, a_id):
+        """returns the id if it exists or if a_id is empty or none, a new id is generated and returned."""
         is_new = False
         r_id = a_id
                  
         if None == a_id or a_id == '':
             is_new = True
             r_id = genUID(type='visiting_group')
-        #elif 'visiting_group' not in id:
-        #    is_new = True
-        #    r_id = 'visiting_group.'+id 
             
         return is_new, r_id
     
@@ -147,10 +140,9 @@ class VODBGroup(BaseController):
     def save_vodb_group_properties(self, id='', boknr='', name='', info='', camping_location='', vodb_contact_name='', vodb_contact_phone='', vodb_contact_email='', vodb_contact_address='', from_date='', to_date='', visiting_group_properties=None):
         #...how do we handle new groups? Like new visiting_group, right?
         #   better have type=visiting_group for all groups and then have subtypes=group, course, daytrip, funk, etc for filtering/deciding on additional capabillities
-        #
+        
         is_new, vgroup_id = self.newOrExistingVgroupId(id) 
-                
-                
+        
         if is_new:
             program_state = 0
             vodb_state = 0
@@ -170,18 +162,14 @@ class VODBGroup(BaseController):
         visiting_group_o['vodb_contact_address'] = vodb_contact_address
         
         visiting_group_o['boknr'] = boknr
-        #visiting_group_o['password'] = password
+        
         if is_new:
             visiting_group_o['boknstatus'] = program_state
             visiting_group_o['vodbstatus'] = vodb_state
         visiting_group_o['camping_location'] = camping_location
         
         visiting_group_property_o = dict()
-            
-            
-        #...populate / change properties
-
-
+    
 
         # TODO: refactor        
         #...remove non-used params !!!! Make a dict and see which are used, remove the rest
@@ -242,6 +230,7 @@ class VODBGroup(BaseController):
         
         
     def dateGen(self, from_date, to_date):
+        """generator expression for generating all dates from from_date to to_date"""
         tmp_result = datetime.datetime.strptime(from_date, "%Y-%m-%d")
         
         yield from_date
@@ -260,27 +249,23 @@ class VODBGroup(BaseController):
         """
     
         r1_items = list()
-        #rid = lowest_rid
         for tmp_date in self.dateGen(from_date, to_date):
             for tmp_time in times:
                 it = dict(date=tmp_date, time=tmp_time)
                 it['rid'] = self.get_composite_key(it)
                 for tmp_col in cols:
                     it[tmp_col] = 0
-                    
                 r1_items.append(it)
-                #rid += 1
 
         return dict(identifier='rid', items=r1_items)
         
         
     def make_empty_vodb_live_sheet(self, from_date, to_date):
         return self.make_empty_vodb_sheet(from_date, to_date, vodb_live_times, vodb_live_times_options)
-        
+
+
     def make_empty_vodb_eat_sheet(self, from_date, to_date):
         return self.make_empty_vodb_sheet(from_date, to_date, vodb_eat_times, vodb_eat_times_options)
-        
-
     
     
     def get_composite_key(self, row):
@@ -358,23 +343,6 @@ class VODBGroup(BaseController):
         live_data_items.sort(self.fn_cmp_composite_key)
         live_data['items'] = live_data_items
 
-        # todo        
-        # tags in yellow box
-        # What do we do with tag data when a tag is deleted?
-        # What do we do with tag data when a tag is added
-        # Data for non existing tag, shouldnt it be shown anyway? 
-        # Can we purge data that has no tag associated?
-        #
-        # When later saving all this, we should compute a cache content that can be used in future queries / views so we 
-        # can start compute collected information
-        #
-        #
-        # first of all, a general mega overview...
-        #
-        # we also soon will need som kind of subtyping
-        
-        
-             
         eat_data = visiting_group_o.get('vodb_eat_sheet', dict(identifier='rid', items=[]))     
         empty_vodb_eat_sheet = self.make_empty_vodb_eat_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'])
         row_lookup = dict()
@@ -393,22 +361,11 @@ class VODBGroup(BaseController):
         eat_data_items = eat_data['items']
         eat_data_items.sort(self.fn_cmp_composite_key)
         eat_data['items'] = eat_data_items
-            
-        
+
        
         tag_data = visiting_group_o.get('vodb_tag_sheet', dict(identifier='rid', items=[]))     
         
         all_current_vgroup_tags = self.compute_all_used_vgroup_tags(visiting_group_o['tags'], tag_data['items'])
-        #all_current_vgroup_tags = dict()
-        #for tmp_key in visiting_group_o['tags']:
-        #    all_current_vgroup_tags[tmp_key] = 1
-        #    
-        #
-        #for tmp_row in occu_data['items']:
-        #    for tmp_key in tmp_row.keys():
-        #        if ((tmp_key != 'date') and (tmp_key != 'time')):
-        #            if not all_current_vgroup_tags.has_key(tmp_key):
-        #                all_current_vgroup_tags[tmp_key] = 1
         
         empty_vodb_tag_sheet = self.make_empty_vodb_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'],vodb_live_times, all_current_vgroup_tags.keys()) 
         
@@ -435,16 +392,13 @@ class VODBGroup(BaseController):
         visiting_group_o.vodb_eat_sheet = json.dumps( eat_data )
         visiting_group_o.vodb_tag_sheet = json.dumps( tag_data )
         
-        
         #...we also must fix the tag_grid layout since its dynamic
-        
         tag_layout_tags = json.dumps(visiting_group_o['tags'])
         
         return dict(vodb_group=visiting_group_o, tag_layout_tags=tag_layout_tags, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
     
     
-                    
-    def vodb_sheet_property_substitution(self, rows, headers, properties):
+    def vodb_sheet_property_substitution_helper(self, rows, headers, properties):
         """
         TODO: WEE NEED TO TRIGGER THIS IF ANY PROPERTIES EVER CHANGE
         """
@@ -452,10 +406,9 @@ class VODBGroup(BaseController):
             for k in headers:
                 original_value = row.get(k,0)
                 new_value = original_value
-                #log.debug('original value: ' + str(original_value))
+
                 if type(new_value) == types.StringType or type(new_value) == types.UnicodeType:
                     for prop in properties.values():
-                        #log.debug('prop:'+str(prop))
                         prop_prop = prop['property']
                         # todo: WARN IF DATE IS OUTSIDE RANGE
                         
@@ -470,42 +423,63 @@ class VODBGroup(BaseController):
                     except SyntaxError:
                         pass  
                 row[k] = new_value
-        
+
+
+    def vodb_sheet_property_substitution(self,  a_visiting_group,  a_options,  a_visiting_group_properties,  a_sheet_name): 
+        if a_visiting_group.has_key(a_sheet_name):
+            vodb_sheet = a_visiting_group[a_sheet_name]
+            vodb_sheet_copy = copy.deepcopy( vodb_sheet ) 
+            vodb_computed = vodb_sheet_copy['items']
+            self.vodb_sheet_property_substitution_helper(vodb_computed, a_options, a_visiting_group_properties)
+            a_visiting_group[a_sheet_name.replace('sheet','computed')] = vodb_computed
+    
+    
+
     @expose()
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
     def update_group_sheets(self, vgroup_id='', tag_sheet=None, eat_sheet=None, live_sheet=None, saveButton=''):
         # todo: accessor function making sure the type really is visiting_group
         visiting_group_o = holly_couch[vgroup_id] 
+        visiting_group_properties = visiting_group_o['visiting_group_properties']
         
         if eat_sheet != None:
             vodb_eat_sheet = json.loads(eat_sheet)
             visiting_group_o['vodb_eat_sheet'] = vodb_eat_sheet
-                        
-            #...create cache content. Substitute properties and make sure we have at least zeros in all columns
-            vodb_eat_sheet_copy = json.loads(eat_sheet)
-            vodb_eat_computed = vodb_eat_sheet_copy['items']
-            self.vodb_sheet_property_substitution(vodb_eat_computed, vodb_eat_times_options, visiting_group_o['visiting_group_properties'])
             
-            visiting_group_o['vodb_eat_computed'] = vodb_eat_computed
+        self.vodb_sheet_property_substitution(visiting_group_o,  vodb_eat_times_options,  visiting_group_properties,  'vodb_eat_sheet') 
+                
+            #...create cache content. Substitute properties and make sure we have at least zeros in all columns
+            ##vodb_eat_sheet_copy = copy.deepcopy( visiting_group_o['vodb_eat_sheet']) #json.loads(eat_sheet)
+            ##vodb_eat_computed = vodb_eat_sheet_copy['items']
+            ##self.vodb_sheet_property_substitution(vodb_eat_computed, vodb_eat_times_options, visiting_group_o['visiting_group_properties'])
+            
+            ##visiting_group_o['vodb_eat_computed'] = vodb_eat_computed
 
         if live_sheet != None:
             vodb_live_sheet = json.loads(live_sheet)
             visiting_group_o['vodb_live_sheet'] = vodb_live_sheet
-            vodb_live_sheet_copy = json.loads(live_sheet)
-            vodb_live_computed = vodb_live_sheet_copy['items']
-            self.vodb_sheet_property_substitution(vodb_live_computed, vodb_live_times_options, visiting_group_o['visiting_group_properties'])
-            visiting_group_o['vodb_live_computed'] = vodb_live_computed
-              
             
+            ##vodb_live_sheet_copy = json.loads(live_sheet)
+            ##vodb_live_computed = vodb_live_sheet_copy['items']
+            ##self.vodb_sheet_property_substitution(vodb_live_computed, vodb_live_times_options, visiting_group_o['visiting_group_properties'])
+            ##visiting_group_o['vodb_live_computed'] = vodb_live_computed
+              
+
+        self.vodb_sheet_property_substitution(visiting_group_o,  vodb_live_times_options,  visiting_group_properties,  'vodb_live_sheet') 
+
+
         if tag_sheet != None:
             vodb_tag_sheet = json.loads(tag_sheet)
             visiting_group_o['vodb_tag_sheet'] = vodb_tag_sheet
-            vodb_tag_sheet_copy = json.loads(tag_sheet)
-            vodb_tag_computed = vodb_tag_sheet_copy['items']
+##            vodb_tag_sheet_copy = json.loads(tag_sheet)
+##            vodb_tag_computed = vodb_tag_sheet_copy['items']
             vodb_tag_times_tags = self.compute_all_used_vgroup_tags(visiting_group_o['tags'], vodb_tag_sheet['items'])
-            self.vodb_sheet_property_substitution(vodb_tag_computed, vodb_tag_times_tags, visiting_group_o['visiting_group_properties'])
-            visiting_group_o['vodb_tag_computed'] = vodb_tag_computed
-            	        
+##            self.vodb_sheet_property_substitution(vodb_tag_computed, vodb_tag_times_tags, visiting_group_o['visiting_group_properties'])
+##            visiting_group_o['vodb_tag_computed'] = vodb_tag_computed
+
+        self.vodb_sheet_property_substitution(visiting_group_o,  vodb_tag_times_tags,  visiting_group_properties,  'vodb_tag_sheet') 
+
+
         holly_couch[vgroup_id] = visiting_group_o
         raise redirect(request.referrer)
         
@@ -579,9 +553,10 @@ class VODBGroup(BaseController):
             used_times[row.key[1]] = True
         return used_dates, used_times
     
+    
     @expose('hollyrosa.templates.vodb_group_booking_overview')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'fff'))    
-    def vodb_overview(self, compute_local_sum=False, compute_live=False):
+    def vodb_eat_overview(self, compute_local_sum=False, compute_live=False):
         if compute_live:
             overview_live_o = getBookingOverview(holly_couch, None, None, reduce=False)
         else:
@@ -590,15 +565,11 @@ class VODBGroup(BaseController):
         overview_value_map = dict()
         
         vodb_statuses = [-100, -10, 0, 5, 10, 20, 50]
-        #used_dates = dict()
-        #used_times = dict()
         used_vgroup_ids = dict()
         for tmp_status in vodb_statuses:
             used_vgroup_ids[tmp_status] = dict()
                        
         for row in list(overview_live_o) + list(overview_eat_o):
-            #used_dates[row.key[0]] = True
-            #used_times[row.key[1]] = True
             tmp_status = row.key[2]
             tmp_id = row.id
             if not used_vgroup_ids[tmp_status].has_key(tmp_id):             
@@ -692,8 +663,7 @@ class VODBGroup(BaseController):
                             if tmp_opt not in ['fm','em','evening']:
                                 if t == 'daytrip':
                                     t = 'own'
-                            date_opts.append('%s:%s:%s:%s' % (tmp_vgroup.id, d, t, tmp_opt))                       
-                    #date_opts = ['%s:%s:%s:%s' % (tmp_vgroup.id, d, t, tmp_opt) for d in dates for t in times]
+                            date_opts.append('%s:%s:%s:%s' % (tmp_vgroup.id, d, t, tmp_opt))
                     vgroups.append(  (tmp_vgroup, tmp_opt, date_opts, rowspan )  )
                     
                     if rowspan > 1:
@@ -771,7 +741,6 @@ class VODBGroup(BaseController):
             tmp_live_summary_dict[tmp_date+':'+tmp_time] = tmp_value
             if tmp_value != '0' and tmp_value != 0:
                 summary_vgroup.all_values_zero = False
-            #summary_vgroup.all_values_zero = False
                 
     def getCompKey(self, a_vodb_status, a_live_row):
         return "%s:%s:%s" % (a_vodb_status, a_live_row['date'], a_live_row['time'])
@@ -779,17 +748,14 @@ class VODBGroup(BaseController):
         
     @expose('hollyrosa.templates.vodb_group_booking_overview2')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'fff'))    
-    def vodb_booking_overview2(self, compute_local_sum=False, compute_live=False):
+    def vodb_booking_overview(self, compute_local_sum=False, compute_live=False):
         # the aim at first is to start draw grid / sheet using div tags instead of a table.
         overview_live_o = getBookingOverview(holly_couch, None, None, reduce=False)
         used_dates, used_times = self.compute_used_dates_and_times(overview_live_o)
         used_dates_keys = used_dates.keys()
         used_dates_keys.sort()
         header_dates = used_dates_keys
-        header_times = used_times.keys()
-        
-        #cheat
-        header_times = ['fm','em','evening']
+        header_times = vodb_live_times
         
         #...computing the vgroups we are looking for
         vgroup_ids = self.getVisitingGroupIdsOfViewSet(overview_live_o) 
@@ -813,7 +779,7 @@ class VODBGroup(BaseController):
             
             live_computed_by_date = dict()
             for tmp_live_row in tmp_vgroup['vodb_live_computed']:
-                for k in ['indoor','outdoor','daytrip']:
+                for k in vodb_live_times_options:
                     tmp_comp_key = self.getCompKey(k, tmp_live_row)
                     tmp_value = tmp_live_row[k]
                     live_computed_by_date[tmp_comp_key] = tmp_value
