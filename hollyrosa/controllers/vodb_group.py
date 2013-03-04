@@ -302,6 +302,30 @@ class VODBGroup(BaseController):
                         all_current_vgroup_tags[tmp_key] = 1
         return all_current_vgroup_tags
 
+    
+    def prepareAndSanitizeSheetDataForEdit(self,  a_visiting_group,  a_sheet_name,  a_from_date,  a_to_date,  a_empty_sheet):
+        """sanitizing data, basically, removing data outside date range and adding data where it doesent exist"""
+        
+        data = a_visiting_group.get(a_sheet_name, dict(identifier='rid', items=[]))
+
+        row_lookup = dict()
+        for tmp_row in a_empty_sheet['items']:
+            row_lookup[tmp_row['rid']] = tmp_row
+        
+        for tmp_row in data['items']:
+            composite_key = tmp_row['rid'] 
+            if row_lookup.has_key(composite_key):
+                del row_lookup[composite_key]
+            
+        for row_left in row_lookup.values():
+            data['items'].append(row_left)
+            
+        #...re-sort the rows
+        data_items = data['items']
+        data_items.sort(self.fn_cmp_composite_key)
+        data['items'] = data_items
+        return json.dumps( data )
+        
         
     @expose('hollyrosa.templates.vodb_group_edit_sheet')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
@@ -309,88 +333,97 @@ class VODBGroup(BaseController):
         visiting_group_o = holly_couch[visiting_group_id]
         tmpl_context.form = create_edit_vodb_group_form
         
-        #...construct the age group list. It's going to be a json document. Hard coded.
-        #... if we are to partially load from database and check that we can process it, we do need to go from python to json. (and back)
-        #...construct a program request template. It's going to be a json document. Hard coded.
-        
-        
+        #...augument old data
         if not visiting_group_o.has_key('vodb_status'):
             visiting_group_o['vodb_status'] = 0
         for k in ['vodb_contact_name', 'vodb_contact_email', 'vodb_contact_phone', 'vodb_contact_address']:
             if not visiting_group_o.has_key(k):
                 visiting_group_o[k] = ''
         
-        #...step 1 - create some random data just to show you know what it looks like
-        # the real tricky part is to construct that merge part that does two things:
-        # 1. we cant have rows with dates outside the range
-        # 2. if we miss rows with certain dates, we should insert them
-        live_data = visiting_group_o.get('vodb_live_sheet', dict(identifier='rid', items=[]))
+        #...sanitizing data, basically, removing data outside date range and adding data where it doesent exist
+        l_from_date = visiting_group_o['from_date']
+        l_to_date = visiting_group_o['to_date']
         empty_vodb_live_sheet = self.make_empty_vodb_live_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'])
-        row_lookup = dict()
-        for tmp_row in empty_vodb_live_sheet['items']:
-            row_lookup[tmp_row['rid']] = tmp_row
+        visiting_group_o['vodb_live_sheet'] = self.prepareAndSanitizeSheetDataForEdit(visiting_group_o,  'vodb_live_sheet', l_from_date,  l_to_date,  empty_vodb_live_sheet )
         
-        for tmp_row in live_data['items']:
-            composite_key = tmp_row['rid'] 
-            if row_lookup.has_key(composite_key):
-                del row_lookup[composite_key]
-            
-        for row_left in row_lookup.values():
-            live_data['items'].append(row_left)
-            
-        #...re-sort the rows!
-        live_data_items = live_data['items']
-        live_data_items.sort(self.fn_cmp_composite_key)
-        live_data['items'] = live_data_items
+#        live_data = visiting_group_o.get('vodb_live_sheet', dict(identifier='rid', items=[]))
+#        empty_vodb_live_sheet = self.make_empty_vodb_live_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'])
+#        row_lookup = dict()
+#        for tmp_row in empty_vodb_live_sheet['items']:
+#            row_lookup[tmp_row['rid']] = tmp_row
+#        
+#        for tmp_row in live_data['items']:
+#            composite_key = tmp_row['rid'] 
+#            if row_lookup.has_key(composite_key):
+#                del row_lookup[composite_key]
+#            
+#        for row_left in row_lookup.values():
+#            live_data['items'].append(row_left)
+#            
+#        #...re-sort the rows!
+#        live_data_items = live_data['items']
+#        live_data_items.sort(self.fn_cmp_composite_key)
+#        live_data['items'] = live_data_items
+#        visiting_group_o['vodb_live_sheet'] = json.dumps( live_data )
 
-        eat_data = visiting_group_o.get('vodb_eat_sheet', dict(identifier='rid', items=[]))     
+        #...same thing for eat data
         empty_vodb_eat_sheet = self.make_empty_vodb_eat_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'])
-        row_lookup = dict()
-        for tmp_row in empty_vodb_eat_sheet['items']:
-            row_lookup[tmp_row['rid']] = tmp_row
+        visiting_group_o['vodb_eat_sheet'] = self.prepareAndSanitizeSheetDataForEdit(visiting_group_o,  'vodb_eat_sheet', l_from_date,  l_to_date,  empty_vodb_eat_sheet )
         
-        for tmp_row in eat_data['items']:
-            composite_key = tmp_row['rid'] 
-            if row_lookup.has_key(composite_key):
-                del row_lookup[composite_key]
-            
-        for row_left in row_lookup.values():
-            eat_data['items'].append(row_left)
-            
-        #...re-sort the rows!
-        eat_data_items = eat_data['items']
-        eat_data_items.sort(self.fn_cmp_composite_key)
-        eat_data['items'] = eat_data_items
+#        eat_data = visiting_group_o.get('vodb_eat_sheet', dict(identifier='rid', items=[]))     
+#        empty_vodb_eat_sheet = self.make_empty_vodb_eat_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'])
+#        row_lookup = dict()
+#        for tmp_row in empty_vodb_eat_sheet['items']:
+#            row_lookup[tmp_row['rid']] = tmp_row
+#        
+#        for tmp_row in eat_data['items']:
+#            composite_key = tmp_row['rid'] 
+#            if row_lookup.has_key(composite_key):
+#                del row_lookup[composite_key]
+#            
+#        for row_left in row_lookup.values():
+#            eat_data['items'].append(row_left)
+#            
+#        #...re-sort the rows!
+#        eat_data_items = eat_data['items']
+#        eat_data_items.sort(self.fn_cmp_composite_key)
+#        eat_data['items'] = eat_data_items
 
-       
-        tag_data = visiting_group_o.get('vodb_tag_sheet', dict(identifier='rid', items=[]))     
-        
+        #...same thing for tag data
+        tag_data = visiting_group_o.get('vodb_tag_sheet', dict(identifier='rid', items=[]))
         all_current_vgroup_tags = self.compute_all_used_vgroup_tags(visiting_group_o['tags'], tag_data['items'])
-        
         empty_vodb_tag_sheet = self.make_empty_vodb_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'],vodb_live_times, all_current_vgroup_tags.keys()) 
+        visiting_group_o['vodb_tag_sheet'] = self.prepareAndSanitizeSheetDataForEdit(visiting_group_o,  'vodb_tag_sheet', l_from_date,  l_to_date,  empty_vodb_tag_sheet)
         
-        row_lookup = dict()
-        for tmp_row in empty_vodb_tag_sheet['items']:
-            row_lookup[tmp_row['rid']] = tmp_row
+#        
+#        tag_data = visiting_group_o.get('vodb_tag_sheet', dict(identifier='rid', items=[]))     
+#        
+#        all_current_vgroup_tags = self.compute_all_used_vgroup_tags(visiting_group_o['tags'], tag_data['items'])
+#        
+#        empty_vodb_tag_sheet = self.make_empty_vodb_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'],vodb_live_times, all_current_vgroup_tags.keys()) 
+#        
+#        row_lookup = dict()
+#        for tmp_row in empty_vodb_tag_sheet['items']:
+#            row_lookup[tmp_row['rid']] = tmp_row
+#        
+#        for tmp_row in tag_data['items']:
+#            composite_key = tmp_row['rid'] 
+#            if row_lookup.has_key(composite_key):
+#                del row_lookup[composite_key]
+#            
+#        for row_left in row_lookup.values():
+#            tag_data['items'].append(row_left)
+#            
+#        #...re-sort the rows!
+#        tag_data_items = tag_data['items']
+#        tag_data_items.sort(self.fn_cmp_composite_key)
+#        tag_data['items'] = tag_data_items
         
-        for tmp_row in tag_data['items']:
-            composite_key = tmp_row['rid'] 
-            if row_lookup.has_key(composite_key):
-                del row_lookup[composite_key]
-            
-        for row_left in row_lookup.values():
-            tag_data['items'].append(row_left)
-            
-        #...re-sort the rows!
-        tag_data_items = tag_data['items']
-        tag_data_items.sort(self.fn_cmp_composite_key)
-        tag_data['items'] = tag_data_items
         
         
         
-        visiting_group_o['vodb_live_sheet'] = json.dumps( live_data )
-        visiting_group_o.vodb_eat_sheet = json.dumps( eat_data )
-        visiting_group_o.vodb_tag_sheet = json.dumps( tag_data )
+        #visiting_group_o['vodb_eat_sheet'] = json.dumps( eat_data )
+        #visiting_group_o['vodb_tag_sheet'] = json.dumps( tag_data )
         
         #...we also must fix the tag_grid layout since its dynamic
         tag_layout_tags = json.dumps(visiting_group_o['tags'])
