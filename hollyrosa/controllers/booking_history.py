@@ -104,6 +104,17 @@ def remember_booking_properties_change(holly_couch, booking=None, slot_row_posit
     
     remember_booking_change(holly_couch, booking_id=booking['_id'],  change_op=7,  change_text=text,  changed_by=changed_by, booking_day_id=booking_day['_id'])
     
+    
+def remember_booking_vgroup_properties_change(holly_couch, booking=None, visiting_group_name='', visiting_group_id='',  changed_by='',  activity_title=''):
+    """Booking visiting group property change for HSS wedneday january 10 19:10 to 21:15"""
+    booking_day_id=''
+    if booking['booking_day_id'] != '' and booking['booking_day_id'] != None:
+        booking_day_id = booking['booking_day_id']
+        text = '%s visiting group properties changed for %s on %s' %(visiting_group_name,  activity_title, holly_couch[booking_day_id]['date'] )
+    else:
+        text = '%s visiting group properties changed for %s' %(visiting_group_name,  activity_title )
+    remember_booking_change(holly_couch, booking_id=booking['_id'],  change_op=7,  change_text=text,  changed_by=changed_by, booking_day_id=booking_day_id,  visiting_group_id=visiting_group_id)
+    
 
 def remember_new_booking_request(holly_couch, booking=None, changed_by=''):
     """Trapper requested for HSS wedneday january 10 to friday januari 12"""

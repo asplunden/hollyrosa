@@ -214,3 +214,4 @@ def make_object_of_vgdictionary(visiting_group_c):
     return visiting_group
             
 
+

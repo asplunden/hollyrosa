@@ -36,8 +36,9 @@ log = logging.getLogger()
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, reFormatDate
 
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange
-from hollyrosa.controllers.booking_history import remember_tag_change
+from hollyrosa.controllers.booking_history import remember_tag_change,  remember_booking_vgroup_properties_change
 from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, vodb_status_map, make_object_of_vgdictionary
+from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange
 from hollyrosa.controllers.booking_history import remember_new_booking_request
 
 from formencode import validators
@@ -143,13 +144,14 @@ class VODBGroup(BaseController):
         
         is_new, vgroup_id = self.newOrExistingVgroupId(id) 
         
+        #...load or create new vgroup
         if is_new:
             program_state = 0
             vodb_state = 0
             visiting_group_o = dict(type='visiting_group')
-      
         else:
             visiting_group_o = holly_couch[vgroup_id]
+
 
         #...fill in data
         visiting_group_o['name'] = name
@@ -167,59 +169,50 @@ class VODBGroup(BaseController):
             visiting_group_o['boknstatus'] = program_state
             visiting_group_o['vodbstatus'] = vodb_state
         visiting_group_o['camping_location'] = camping_location
-        
-        visiting_group_property_o = dict()
-    
 
-        # TODO: refactor        
-        #...remove non-used params !!!! Make a dict and see which are used, remove the rest
-        unused_params = {}        
-        used_param_ids = []
-        if  visiting_group_o.has_key('visiting_group_properties'):
-            used_param_ids = visiting_group_o['visiting_group_properties'].keys()
-        
-        for param in visiting_group_properties:
-            is_new_param = False
-            if param['property'] != '' and param['property'] != None:
-                if param['id'] != '' and param['id'] != None:
-                    visiting_group_property_o[param['id']] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
-                else:
-                    #...compute new unsued id
-                    # TODO: these ids are not perfectly unique. It could be a problem with dojo grid
-                    
-                    new_id_int = 1
-                    while str(new_id_int) in used_param_ids:
-                        new_id_int += 1
-                    used_param_ids.append(str(new_id_int))
-                    
-                    visiting_group_property_o[str(new_id_int)] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
-                    
-        # no need to delete old params, but we need to add to history how params are changed and what it affects
-        
-        #...now we have to update all cached content, so we need all bookings that belong to this visiting group
-        
-        visiting_group_o['visiting_group_properties'] = visiting_group_property_o
-        
-        # TODO: IMPORTANT TO FIX LATER
-        # TODO: refactor
-        bookings = getBookingsOfVisitingGroup(holly_couch, vgroup_id,  None)
-        for tmp in bookings:
-            tmp_booking = tmp.doc
-            
-            new_content = computeCacheContent(visiting_group_o, tmp_booking['content'])
-            if new_content != tmp_booking['cache_content'] :
-            
-                tmp_booking['cache_content'] = new_content
-                tmp_booking['last_changed_by'] = getLoggedInUserId(request)
-                
-                # TODO: change booking status (from whatever, since the text has changed)
-                
-                
-                # TODO: remember booking history change
-                
-                
-                holly_couch[tmp_booking['_id']] = tmp_booking
-            
+
+
+#        visiting_group_property_o = dict()
+#    
+#
+#        #...remove non-used params !!!! Make a dict and see which are used, remove the rest
+#        unused_params = {}        
+#        used_param_ids = []
+#        if  visiting_group_o.has_key('visiting_group_properties'):
+#            used_param_ids = visiting_group_o['visiting_group_properties'].keys()
+#        
+#        for param in visiting_group_properties:
+#            is_new_param = False
+#            if param['property'] != '' and param['property'] != None:
+#                if param['id'] != '' and param['id'] != None:
+#                    visiting_group_property_o[param['id']] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
+#                else:
+#                    #...compute new unsued id
+#                
+#                    
+#                    new_id_int = 1
+#                    while str(new_id_int) in used_param_ids:
+#                        new_id_int += 1
+#                    used_param_ids.append(str(new_id_int))
+#                    
+#                    visiting_group_property_o[str(new_id_int)] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
+#                    
+#        # no need to delete old params, but we need to add to history how params are changed and what it affects
+        visiting_group_o['visiting_group_properties'] = populatePropertiesAndRemoveUnusedProperties(visiting_group_o,  visiting_group_properties)
+        updateBookingsCacheContentAfterPropertyChange(holly_couch, visiting_group_o,  getLoggedInUserId(request))
+#        bookings = getBookingsOfVisitingGroup(holly_couch, vgroup_id,  None)
+#        for tmp in bookings:
+#            tmp_booking = tmp.doc
+#            
+#            new_content = computeCacheContent(visiting_group_o, tmp_booking['content'])
+#            if new_content != tmp_booking['cache_content'] :
+#            
+#                tmp_booking['cache_content'] = new_content
+#                tmp_booking['last_changed_by'] = getLoggedInUserId(request)   
+#                
+#                holly_couch[tmp_booking['_id']] = tmp_booking
+#        
+#        #...also make property substitution in sheets (since we are changing properties)
         
         holly_couch[vgroup_id] = visiting_group_o
         
@@ -345,49 +338,10 @@ class VODBGroup(BaseController):
         l_to_date = visiting_group_o['to_date']
         empty_vodb_live_sheet = self.make_empty_vodb_live_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'])
         visiting_group_o['vodb_live_sheet'] = self.prepareAndSanitizeSheetDataForEdit(visiting_group_o,  'vodb_live_sheet', l_from_date,  l_to_date,  empty_vodb_live_sheet )
-        
-#        live_data = visiting_group_o.get('vodb_live_sheet', dict(identifier='rid', items=[]))
-#        empty_vodb_live_sheet = self.make_empty_vodb_live_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'])
-#        row_lookup = dict()
-#        for tmp_row in empty_vodb_live_sheet['items']:
-#            row_lookup[tmp_row['rid']] = tmp_row
-#        
-#        for tmp_row in live_data['items']:
-#            composite_key = tmp_row['rid'] 
-#            if row_lookup.has_key(composite_key):
-#                del row_lookup[composite_key]
-#            
-#        for row_left in row_lookup.values():
-#            live_data['items'].append(row_left)
-#            
-#        #...re-sort the rows!
-#        live_data_items = live_data['items']
-#        live_data_items.sort(self.fn_cmp_composite_key)
-#        live_data['items'] = live_data_items
-#        visiting_group_o['vodb_live_sheet'] = json.dumps( live_data )
 
         #...same thing for eat data
         empty_vodb_eat_sheet = self.make_empty_vodb_eat_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'])
         visiting_group_o['vodb_eat_sheet'] = self.prepareAndSanitizeSheetDataForEdit(visiting_group_o,  'vodb_eat_sheet', l_from_date,  l_to_date,  empty_vodb_eat_sheet )
-        
-#        eat_data = visiting_group_o.get('vodb_eat_sheet', dict(identifier='rid', items=[]))     
-#        empty_vodb_eat_sheet = self.make_empty_vodb_eat_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'])
-#        row_lookup = dict()
-#        for tmp_row in empty_vodb_eat_sheet['items']:
-#            row_lookup[tmp_row['rid']] = tmp_row
-#        
-#        for tmp_row in eat_data['items']:
-#            composite_key = tmp_row['rid'] 
-#            if row_lookup.has_key(composite_key):
-#                del row_lookup[composite_key]
-#            
-#        for row_left in row_lookup.values():
-#            eat_data['items'].append(row_left)
-#            
-#        #...re-sort the rows!
-#        eat_data_items = eat_data['items']
-#        eat_data_items.sort(self.fn_cmp_composite_key)
-#        eat_data['items'] = eat_data_items
 
         #...same thing for tag data
         tag_data = visiting_group_o.get('vodb_tag_sheet', dict(identifier='rid', items=[]))
@@ -395,37 +349,7 @@ class VODBGroup(BaseController):
         empty_vodb_tag_sheet = self.make_empty_vodb_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'],vodb_live_times, all_current_vgroup_tags.keys()) 
         visiting_group_o['vodb_tag_sheet'] = self.prepareAndSanitizeSheetDataForEdit(visiting_group_o,  'vodb_tag_sheet', l_from_date,  l_to_date,  empty_vodb_tag_sheet)
         
-#        
-#        tag_data = visiting_group_o.get('vodb_tag_sheet', dict(identifier='rid', items=[]))     
-#        
-#        all_current_vgroup_tags = self.compute_all_used_vgroup_tags(visiting_group_o['tags'], tag_data['items'])
-#        
-#        empty_vodb_tag_sheet = self.make_empty_vodb_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'],vodb_live_times, all_current_vgroup_tags.keys()) 
-#        
-#        row_lookup = dict()
-#        for tmp_row in empty_vodb_tag_sheet['items']:
-#            row_lookup[tmp_row['rid']] = tmp_row
-#        
-#        for tmp_row in tag_data['items']:
-#            composite_key = tmp_row['rid'] 
-#            if row_lookup.has_key(composite_key):
-#                del row_lookup[composite_key]
-#            
-#        for row_left in row_lookup.values():
-#            tag_data['items'].append(row_left)
-#            
-#        #...re-sort the rows!
-#        tag_data_items = tag_data['items']
-#        tag_data_items.sort(self.fn_cmp_composite_key)
-#        tag_data['items'] = tag_data_items
-        
-        
-        
-        
-        #visiting_group_o['vodb_eat_sheet'] = json.dumps( eat_data )
-        #visiting_group_o['vodb_tag_sheet'] = json.dumps( tag_data )
-        
-        #...we also must fix the tag_grid layout since its dynamic
+        #...we also must supply tags for the tag_grid layout since it depends both on old used tags and current tags
         tag_layout_tags = json.dumps(visiting_group_o['tags'])
         
         return dict(vodb_group=visiting_group_o, tag_layout_tags=tag_layout_tags, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
