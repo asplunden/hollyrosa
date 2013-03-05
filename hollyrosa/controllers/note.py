@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -24,6 +24,8 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch,  genUID
+from hollyrosa.controllers import common_couch
+
 from formencode import validators
 
 import datetime,  StringIO,  time
@@ -57,8 +59,6 @@ class Note(BaseController):
         return dict(note=note_o)
         
         
-        
-        
     @expose('hollyrosa.templates.edit_attachment')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))  
     def add_attachment(self, target_id):
@@ -74,7 +74,7 @@ class Note(BaseController):
         if note_id == '':
             note_o = DataContainer(text='', target_id=target_id, _id='')
         else:
-            note_o = holly_couch[note_id] 
+            note_o = common_couch.getNote(holly_couch,  note_id) 
         return dict(note=note_o)
         
         
@@ -86,7 +86,7 @@ class Note(BaseController):
         if attachment_id == '':
             attachment_o = DataContainer(text='', target_id=target_id, _id='')
         else:
-            attachment_o = holly_couch[attachment_id] 
+            attachment_o = common_couch.getAttachment(holly_couch,  attachment_id)
         return dict(attachment=attachment_o)
         
     @expose("json")
@@ -105,7 +105,7 @@ class Note(BaseController):
             note_change='new'
             note_o['timestamp'] = timestamp
         else:
-            note_o = holly_couch[_id]
+            note_o = common_couch.getNote(holly_couch,  _id)
             history = note_o['history']
             if history == None:
                 history = list()
@@ -137,7 +137,7 @@ class Note(BaseController):
             attachment_change='new'
             attachment_o['timestamp'] = timestamp
         else:
-            attachment_o = holly_couch[_id]
+            attachment_o = common_couch.getAttachment(holly_couch,  _id)
             history = attachment_o['history']
             if history == None:
                 history = list()
@@ -145,14 +145,13 @@ class Note(BaseController):
                 history.append([timestamp, attachment_o['text']])
             attachment_o['history'] = history
             attachment_change = 'changed'
-                    
+        
         attachment_o['last_changed_by'] = getLoggedInUserId(request)
         attachment_o['text'] = text
         holly_couch[attachment_o['_id']] = attachment_o
         
-        
         file = request.POST['attachment']
-        print '****', file
+
         if file != '':
             holly_couch.put_attachment(attachment_o, attachment.file, filename=attachment.filename)
         

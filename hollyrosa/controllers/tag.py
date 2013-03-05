@@ -32,6 +32,7 @@ from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUs
 
 from hollyrosa.model.booking_couch import genUID 
 from hollyrosa.controllers.booking_history import remember_tag_change
+from hollyrosa.controllers import common_couch
 from formencode import validators
 
 __all__ = ['tag']
@@ -45,7 +46,7 @@ class Tag(BaseController):
     @expose("json")
     @validate(validators={'id':validators.UnicodeString})        
     def get_tags(self, id):
-        vgroup = holly_couch[id]
+        vgroup = common_couch.getVisitingGroup(holly_couch,  id)
         tags = vgroup.get('tags',[])
         return dict(tags=tags)
     
@@ -53,7 +54,7 @@ class Tag(BaseController):
     @expose("json")
     @validate(validators={'id':validators.UnicodeString, 'tags':validators.UnicodeString})        
     def add_tags(self, id, tags):
-        vgroup = holly_couch[id]
+        vgroup = common_couch.getVisitingGroup(holly_couch,  id)
         old_tags = vgroup.get('tags',[])
         remember_old_tags = [t for t in old_tags]
         new_tags = [t.strip() for t in tags.split(',')]
@@ -70,7 +71,7 @@ class Tag(BaseController):
     @expose("json")
     @validate(validators={'id':validators.UnicodeString, 'tag':validators.UnicodeString})        
     def delete_tag(self, id, tag):
-        vgroup = holly_couch[id]
+        vgroup = common_couch.getVisitingGroup(holly_couch,  id)
         old_tags = vgroup.get('tags',[])
         new_tags = [t for t in old_tags if t.strip() != tag.strip()]
         vgroup['tags'] = new_tags

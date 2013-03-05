@@ -97,6 +97,14 @@ def getSlotState(holly_couch,  slot_state_id):
     return getCouchDBDocument(holly_couch,  slot_state_id,  doc_type='slot_state')
    
    
+def getNote(holly_couch,  note_id):
+    return getCouchDBDocument(holly_couch,  note_id,  doc_type='note')
+    
+    
+def getAttachment(holly_couch,  attachment_id):
+    return getCouchDBDocument(holly_couch,  attachment_id,  doc_type='attachment')
+
+
 def createEmptyProgramBooking(valid_from='',  valid_to='',  requested_date=''):
     return dict(type='booking', subtype='program',  valid_from=valid_from,  valid_to=valid_to,  requested_date=requested_date)
     
