@@ -195,7 +195,7 @@ function startup() {
 <div style="overflow:visible; margin-bottom:10em;" py:for="live_option in ['outdoor','indoor','daytrip']" id="viewport_$live_option">
 <h2>$live_option</h2>
   <!-- header div row with dates and everyting-->
-  <div style="border-bottom: 1px solid #888; overflow:visible; width:300em;">
+  <div style="border-bottom: 1px solid #888; overflow:visible; width:800em;">
       <div py:for="d in header_dates" style="${['color: #888;','background:#fdd;'][6==makeDate(d).weekday()]}" class="gnatt_date_block gnatt_date_header" hollyrosa:date="$d" >$d<br/>
           <div py:for="t in header_times" class="gnatt_date_time_block gnatt_date_time_header">
              $t

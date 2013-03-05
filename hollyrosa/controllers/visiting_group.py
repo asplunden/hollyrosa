@@ -248,6 +248,8 @@ class VisitingGroup(BaseController):
         
         else:
             visiting_group_c = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+            if not visiting_group_c.has_key('subtype'):
+                visiting_group_c['subtype'] = 'program'
             visiting_group = make_object_of_vgdictionary(visiting_group_c)
             
         return dict(visiting_group=visiting_group,  bokn_status_map=bokn_status_options,  is_new=is_new)

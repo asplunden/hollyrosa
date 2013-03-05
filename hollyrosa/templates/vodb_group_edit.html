@@ -26,12 +26,12 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa - VODB Group ${vodb_group.name}</title>
+  <title>Hollyrosa - VODB ${vodb_group.subtype} Group ${vodb_group.name}</title>
 
 </head>
 
 <body>
-    <h2>Edit vodb group ${vodb_group.name}</h2>
+    <h2>Edit vodb ${vodb_group.subtype} group ${vodb_group.name}</h2>
     <!-- Vodb status: <b>${bokn_status_map[vodb_group.vodb_status]}</b><br/> -->
     
     <div py:replace="tmpl_context.form(vodb_group, action='save_vodb_group_properties', child_args=dict(boknstatus=dict(options=bokn_status_map)))">Input Form</div>

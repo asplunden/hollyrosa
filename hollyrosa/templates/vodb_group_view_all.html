@@ -226,9 +226,9 @@ function loadNotesFor(id) {
 
         <li><a href="${tg.url('view_today')}">today</a></li>
         <li id="bokn_status_menu" >Filter booking status</li>
-        <li py:if="request.identity"><a href="${tg.url('/visiting_group/edit_visiting_group')}">New Visiting Group</a></li>
-        <li py:if="request.identity"><a href="${tg.url('/visiting_group/edit_visiting_group')}">New Staff Member</a></li>
-        <li py:if="request.identity"><a href="${tg.url('/visiting_group/edit_visiting_group')}">New Course</a></li>
+        <li py:if="request.identity"><a href="${tg.url('/vodb_group/edit_group_data', params={'subtype':'program'})}">New Visiting Group</a></li>
+        <li py:if="request.identity"><a href="${tg.url('/vodb_group/edit_group_data', params={'subtype':'staff'})}">New Staff Member</a></li>
+        <li py:if="request.identity"><a href="${tg.url('/vodb_group/edit_group_data', params={'subtype':'course'})}">New Course</a></li>
     
     </ul>
     <h2>Viewing visiting groups</h2>

@@ -32,7 +32,7 @@ program_visiting_group_properties_template = [DataContainer(property='sma',  val
                                               DataContainer(property='rov',  value='0',  unit=u'rover',  description=u'antal roverscouter'),
                                               DataContainer(property='led',  value='0',  unit=u'ledare',  description=u'antal ledare')]
                                               
-staff_visiting_group_properties_template = [DataContainer(property='funk',  value='1',  unit=u'funk',  description=u'antal funk'), DataContainer(property='barn',  value='0',  unit=u'antal funk barn',  description=u'antal funk barn')]
+staff_visiting_group_properties_template = [DataContainer(property='funk',  value='1',  unit=u'funk',  description=u'antal funk'), DataContainer(property='barn',  value='0',  unit=u'fkbarn',  description=u'antal funk barn')]
  
  
  

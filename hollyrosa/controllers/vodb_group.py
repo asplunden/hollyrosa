@@ -38,7 +38,7 @@ from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUs
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange
 from hollyrosa.controllers.booking_history import remember_tag_change,  remember_booking_vgroup_properties_change
 from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, vodb_status_map, make_object_of_vgdictionary, vodb_eat_times_options, vodb_live_times_options
-from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange, updateVisitingGroupComputedSheets, computeAllUsedVisitingGroupsTagsForTagSheet
+from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange, updateVisitingGroupComputedSheets, computeAllUsedVisitingGroupsTagsForTagSheet,  program_visiting_group_properties_template,  staff_visiting_group_properties_template,  course_visiting_group_properties_template
 from hollyrosa.controllers.booking_history import remember_new_booking_request
 from hollyrosa.controllers import common_couch
 
@@ -106,7 +106,7 @@ class VODBGroup(BaseController):
   
     @expose('hollyrosa.templates.vodb_group_edit')
     @require(Any(is_user('user.erspl'), has_level('pl'), has_level('staff'), msg='Only staff and pl may edit vodb group data'))
-    def edit_group_data(self, visiting_group_id=''):
+    def edit_group_data(self, visiting_group_id='', subtype=''):
 #        visiting_group_x = holly_couch[visiting_group_id]
         tmpl_context.form = create_edit_vodb_group_form
         
@@ -130,6 +130,8 @@ class VODBGroup(BaseController):
             for k in ['vodb_contact_name', 'vodb_contact_email', 'vodb_contact_phone', 'vodb_contact_address']:
                 if not visiting_group_c.has_key(k):
                     visiting_group_c[k] = ''
+            if not visiting_group_c.has_key('subtype'):
+                visiting_group_c['subtype'] = 'program'
             visiting_group = make_object_of_vgdictionary(visiting_group_c)
         
         
@@ -166,10 +168,14 @@ class VODBGroup(BaseController):
         
         #...load or create new vgroup
         if is_new:
-            program_state = 0
-            vodb_state = 0
-            visiting_group_o = dict(type='visiting_group')
-            raise IOError
+#            program_state = 0
+#            vodb_state = 0
+            if not subtype in ['program','course','staff']:
+                tg.flash('error with subtype')
+                raise redirect(request.referrer)
+                
+            visiting_group_o = dict(type='visiting_group',  subtype=subtype,  tags=[],  boknstatus=0,  vodbstatus=0)
+        
         else:
             visiting_group_o = holly_couch[vgroup_id]
 
@@ -186,9 +192,9 @@ class VODBGroup(BaseController):
         
         visiting_group_o['boknr'] = boknr
         
-        if is_new:
-            visiting_group_o['boknstatus'] = program_state
-            visiting_group_o['vodbstatus'] = vodb_state
+#        if is_new:
+#            visiting_group_o['boknstatus'] = program_state
+#            visiting_group_o['vodbstatus'] = vodb_state
         visiting_group_o['camping_location'] = camping_location
 
         # TODO: figure out the order of updating things if something goes wrong.
@@ -633,6 +639,12 @@ class VODBGroup(BaseController):
         used_dates_keys = used_dates.keys()
         used_dates_keys.sort()
         header_dates = used_dates_keys
+        
+        # try and extend dates
+        min_date = header_dates[0]
+        max_date = header_dates[len(header_dates)-1]
+        header_dates = dateRange(min_date, max_date, format='%Y-%m-%d')
+        
         header_times = vodb_live_times
         
         #...computing the vgroups we are looking for
