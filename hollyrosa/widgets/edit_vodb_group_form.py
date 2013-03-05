@@ -44,7 +44,8 @@ class EditVodbGroupForm(TableForm):
     show_errors = True
     
     class fields(WidgetsList):
-        id = HiddenField(validator=UnicodeString())
+        _id = HiddenField(validator=UnicodeString())
+        subtype = HiddenField(validator=UnicodeString()) 
         name = TextField(validator=UnicodeString(min=1),  css_class="edit_name",  size=40)
         boknr = TextField(validator=UnicodeString())
         

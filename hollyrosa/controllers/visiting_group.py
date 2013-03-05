@@ -38,8 +38,9 @@ from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_
 from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
 from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
 from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, make_object_of_vgdictionary, vodb_eat_times_options, vodb_live_times_options
-from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange,  updateVisitingGroupComputedSheets,  computeAllUsedVisitingGroupsTagsForTagSheet
+from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange,  updateVisitingGroupComputedSheets,  computeAllUsedVisitingGroupsTagsForTagSheet,  program_visiting_group_properties_template,  staff_visiting_group_properties_template,  course_visiting_group_properties_template
 from hollyrosa.controllers.booking_history import remember_tag_change
+from hollyrosa.controllers import common_couch
 
 from tg import request, response
 from tg.controllers import CUSTOM_CONTENT_TYPE
@@ -48,6 +49,7 @@ __all__ = ['VisitingGroup']
 
 
 class VisitingGroupPropertyRow(object):
+    """Used for supplying data to the properties row fields in edit visiting group and edit vodb group"""
     def __init__(self,  id,  property_row):
         self.id= id
         self.property = property_row['property']
@@ -56,7 +58,6 @@ class VisitingGroupPropertyRow(object):
         self.description = property_row['description']
         self.from_date = property_row['from_date']
         self.to_date = property_row['to_date']
-        #self._sa_instance_state = 0
     
     
 class VisitingGroup(BaseController):
@@ -69,8 +70,7 @@ class VisitingGroup(BaseController):
         v_group_map = dict() 
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)
         return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(),  bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
-        
-        
+
 
     def makeRemainingVisitingGroupsMap(self, visiting_groups,  from_date='',  to_date=''):
         v_group_map = dict()
@@ -81,8 +81,7 @@ class VisitingGroup(BaseController):
                     v_group_map[b] = 1
 
         return v_group_map
-        
-        
+    
 
     @expose('hollyrosa.templates.visiting_group_view_all')
     @validate(validators={'from_date':validators.DateValidator(not_empty=False), 'to_date':validators.DateValidator(not_empty=False)})
@@ -97,7 +96,7 @@ class VisitingGroup(BaseController):
     @expose('hollyrosa.templates.visiting_group_view_all')
     @require(Any(is_user('erspl'), has_level('staff'),   msg='Only staff members and viewers may view visiting group properties'))
     def view_tags(self, tag):
-        # TODO>: rename and maybe only return visiting groups docs ?
+        # TODO: rename and maybe only return visiting groups docs ?
         visiting_groups = [v.doc for v in getDocumentsByTag(holly_couch, tag)] 
         remaining_visiting_groups_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups)
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)
@@ -117,8 +116,6 @@ class VisitingGroup(BaseController):
     @validate(validators={'program_state':validators.Int(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_program_state(self,  program_state=None):
-        #boknstatus=boknstatus[:4] # amateurish quick sanitation
-        #visiting_groups = get_visiting_groups_with_boknstatus(boknstatus) 
         visiting_groups =[v.doc for v in getVisitingGroupsByBoknstatus(holly_couch, program_state)]
         v_group_map = dict()
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)  
@@ -140,6 +137,7 @@ class VisitingGroup(BaseController):
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_period(self,  period=None):
 
+        # TODO: refactor so we only show visiting groups in time span given by daterange document.
         if period == '1an':
             from_date='2011-01-01'
             to_date='2011-07-16'
@@ -198,11 +196,8 @@ class VisitingGroup(BaseController):
             visiting_group = DataContainer(name='',  id=None,  info='')
             
         else:
+            visiting_group = common_couch.getVisitingGroup(holly_couch,  id) 
             
-            visiting_group = holly_couch[id] 
-            
-            # TODO: refactor make DataContainer from visiting group
-                
             properties=[p for p in visiting_group['visiting_group_properties'].values()]
             
         return dict(visiting_group=visiting_group, properties=properties)
@@ -222,106 +217,109 @@ class VisitingGroup(BaseController):
             bookings=[]
             notes=[]
         else:
-            visiting_group = holly_couch[str(visiting_group_id)]
+            visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
 
-            # TODO: see below
+            # TODO: there is no composite view any more showing both bookings and visiting group data
             bookings = [] 
             notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)]
         return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent, program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, notes=notes)
 
 
     @expose('hollyrosa.templates.edit_visiting_group')
-    @validate(validators={'visiting_group_id':validators.UnicodeString})
+    @validate(validators={'visiting_group_id':validators.UnicodeString,  'subtype':validators.UnicodeString})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change visiting group properties'))
-    def edit_visiting_group(self,  visiting_group_id=None,  **kw):
+    def edit_visiting_group(self,  visiting_group_id=None, subtype='',  **kw):
         tmpl_context.form = create_edit_visiting_group_form
         
-        new_empty_visiting_group_property = [DataContainer(property='sma',  value='0',  unit=u'småbarn',  description=u'antal deltagare 0 till 8 år'),
-                                             DataContainer(property='spar',  value='0',  unit=u'spår',  description=u'antal deltagare 8 till 9 år'), 
-                                             DataContainer(property='uppt',  value='0',  unit=u'uppt',  description=u'antal deltagare 10 till 11 år'), 
-                                             DataContainer(property='aven',  value='0',  unit=u'aven',  description=u'antal deltagare 12 till 15 år'), 
-                                             DataContainer(property='utm',  value='0',  unit=u'utm',  description=u'antal deltagare 16 till 18 år'),
-                                             DataContainer(property='rov',  value='0',  unit=u'rover',  description=u'antal roverscouter'),
-                                             DataContainer(property='led',  value='0',  unit=u'ledare',  description=u'antal ledare')]
- 
- 
-        if None == visiting_group_id:
-            visiting_group = DataContainer(name='',  id=None,  info='',  visiting_group_properties=new_empty_visiting_group_property)
-        elif visiting_group_id=='':
-            visiting_group = DataContainer(name='',  id=None,  info='')
+        is_new = ((None == visiting_group_id) or ('' == visiting_group_id))
+        if is_new:
+            properties_template = dict()
+            
+            if subtype == 'program':
+                properties_template = program_visiting_group_properties_template
+                
+            if subtype == 'staff':
+                properties_template = staff_visiting_group_properties_template
+                
+            if subtype =='course':
+                properties_template = course_visiting_group_properties_template
+                
+            visiting_group = DataContainer(name='',  id=None, _id=None,   info='',  visiting_group_properties=properties_template,  subtype=subtype,  contact_person='',  contact_person_email='',  contact_person_phone='',  boknr='')
+        
         else:
-            visiting_group_c = holly_couch[str(visiting_group_id)] 
-#            visiting_group_c['from_date'] = datetime.datetime.strptime(visiting_group_c['from_date'],'%Y-%m-%d')
-#            visiting_group_c['to_date'] = datetime.datetime.strptime(visiting_group_c['to_date'],'%Y-%m-%d')
+            visiting_group_c = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+            visiting_group = make_object_of_vgdictionary(visiting_group_c)
             
-            #...HERE MAKE OBJECT OF DICTIONARY OR IT WONT WORK WITH THE FORMS
-            
-            #vgps = []
-            #for id,  vgp in visiting_group_c['visiting_group_properties'].items():
-            #    try:
-            #        
-            #        tmp_to_date = datetime.datetime.strptime(vgp['to_date'],'%Y-%m-%d')
-            #    except ValueError:
-            #        tmp_to_date = None
-            #    
-            #    try:
-            #        tmp_from_date = datetime.datetime.strptime(vgp['from_date'],'%Y-%m-%d')
-            #    except ValueError:
-            #        tmp_from_date = None
-            #    
-            #    
-            #    vgpx = DataContainer(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=tmp_from_date,  to_date=tmp_to_date,  id=str(id))
-            #    vgps.append(vgpx)
-#
-            # TODO: DataContainerFromDictLikeObject(fields=)
-#            visiting_group = DataContainer(name=visiting_group_c['name'],  id=visiting_group_c['_id'],  info=visiting_group_c['info'],  visiting_group_properties=vgps
-#                                           ,  contact_person=visiting_group_c['contact_person'],  contact_person_email=visiting_group_c['contact_person_email'],  contact_person_phone=visiting_group_c['contact_person_phone'], 
-#                                           boknr=visiting_group_c['boknr'], password=visiting_group_c.get('password',''), boknstatus=visiting_group_c['boknstatus'],  camping_location=visiting_group_c['camping_location'],  from_date=datetime.datetime.strptime(visiting_group_c['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(visiting_group_c['to_date'], '%Y-%m-%d'))
- #
-        visiting_group = make_object_of_vgdictionary(visiting_group_c)       
-        return dict(visiting_group=visiting_group,  bokn_status_map=bokn_status_options)
-        
-        
+        return dict(visiting_group=visiting_group,  bokn_status_map=bokn_status_options,  is_new=is_new)
+
 
     @expose()
     @validate(create_edit_visiting_group_form, error_handler=edit_visiting_group)
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change visiting group properties'))
-    def save_visiting_group_properties(self,  id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr='', password=''):
-        # TODO: does not work?
-        if None == id or id == '':
-            is_new = True
-            program_state = 0
-            vodb_state = 0
-            visiting_group_c = dict(type='visiting_group')
+    def save_visiting_group_properties(self,  _id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr='', password='',  subtype=''):
+        id = _id
+        is_new = ((None == id) or (id == ''))
+        
+        #...this is a hack so we can direct the id of the visiting group for special groups
+        
+        if not is_new:
+            if 'visiting_group' not in id:
+                is_new = True
+                id_c = 'visiting_group.'+id
+        else:
             id_c = genUID(type='visiting_group')
-        elif 'visiting_group' not in id:
-            is_new = True
-            visiting_group_c = dict(type='visiting_group')
-            id_c = 'visiting_group.'+id
-            program_state = 0
-            vodb_state = 0
+            
+        if is_new:
+            # TODO: make sure subtype is in one of
+            if not subtype in ['program','course','staff']:
+                tg.flash('error with subtype')
+                raise redirect(request.referrer)
+                
+            visiting_group_c = dict(type='visiting_group',  subtype=subtype,  tags=[],  boknstatus=0,  vodbstatus=0)
+            #...populate sheets and computed sheets?
+            
         else:
             id_c = id
             visiting_group_c = holly_couch[id_c]
-            is_new= False
             
-        visiting_group_c['type'] = 'visiting_group'
+        #visiting_group_c['type'] = 'visiting_group'
         visiting_group_c['name'] = name
         visiting_group_c['info'] = info
+        
+        # TODO: sanitize dates. REFACTOR
+        try:
+            tmp_date = datetime.datetime.strptime(str(from_date),'%Y-%m-%d')
+        except ValueError:
+            tg.flash('error with from-date')
+            raise redirect(request.referrer)
+            
         visiting_group_c['from_date'] = str(from_date)
+        
+        try:
+            tmp_date = datetime.datetime.strptime(str(to_date),'%Y-%m-%d')
+        except ValueError:
+            tg.flash('error with to-date')
+            raise redirect(request.referrer)
         visiting_group_c['to_date'] = str(to_date)
+        
+        
         visiting_group_c['contact_person'] = contact_person
         visiting_group_c['contact_person_email'] = contact_person_email
         visiting_group_c['contact_person_phone'] = contact_person_phone
+        
+        # TODO: boknr maybe shouldnt be changeble if program or vodb state has passed by preliminary (10) ?
+        
         visiting_group_c['boknr'] = boknr
+        
+        # TODO: password for group should be set in special page
         visiting_group_c['password'] = password
-        if is_new:
-            visiting_group_c['boknstatus'] = program_state
-            visiting_group_c['vodbstatus'] = vodb_state
+        
         visiting_group_c['camping_location'] = camping_location
         
         #...now we have to update all cached content, so we need all bookings that belong to this visiting group
         visiting_group_c['visiting_group_properties'] = populatePropertiesAndRemoveUnusedProperties(visiting_group_c,  visiting_group_properties)
+
+        
         updateBookingsCacheContentAfterPropertyChange(holly_couch, visiting_group_c,  getLoggedInUserId(request))
         vodb_tag_times_tags = computeAllUsedVisitingGroupsTagsForTagSheet(visiting_group_c['tags'], visiting_group_c.get('vodb_tag_sheet',dict(items=[]))['items'])
         updateVisitingGroupComputedSheets(visiting_group_c, visiting_group_c['visiting_group_properties'], sheet_map=dict(vodb_eat_sheet=vodb_eat_times_options, vodb_live_sheet=vodb_live_times_options, vodb_tag_sheet=vodb_tag_times_tags))
@@ -334,8 +332,6 @@ class VisitingGroup(BaseController):
         raise redirect('/visiting_group/view_all')
 
 
-    
-  
     @validate(validators={'id':validators.Int})
     @require(Any(is_user('root'), has_level('pl'), msg='Only pl members may change visiting group properties'))
     def delete_visiting_group(self,  id=None):
@@ -343,8 +339,8 @@ class VisitingGroup(BaseController):
             pass
             
         raise redirect('/visiting_group/view_all')
-        
-        
+
+
     def fn_cmp_booking_date_list(self, a, b):
         if a[0].booking_day == None:
             if b[0].booking_day == None:
@@ -430,7 +426,6 @@ class VisitingGroup(BaseController):
                 booking_day_id = b['booking_day_id']
                 if '' != booking_day_id:
                     tmp_booking_day = booking_day_map[booking_day_id]
-                    #tmp_schema = holly_couch[tmp_booking_day.day_schema_id]
                     slot_id = b['slot_id']
                     slot_o = slot_map[slot_id]
             
@@ -455,7 +450,6 @@ class VisitingGroup(BaseController):
         return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time, visiting_group=first_visiting_group, bokn_status_map=bokn_status_map, notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)], show_group=show_group)
 
 
-    #@expose(content_type='x-application/download')
     @expose(content_type=CUSTOM_CONTENT_TYPE)
     @validate(validators={"visiting_group_id":validators.UnicodeString(), "doc_id":validators.UnicodeString()})
     @require(Any(is_user('root'), has_level('pl'), has_level('staff'), msg='Only staff members may view visiting group attachments'))   
@@ -464,34 +458,34 @@ class VisitingGroup(BaseController):
         response.headerlist.append(('Content-Disposition','attachment;filename=%s' % doc_id))        
                 
         return holly_couch.get_attachment(visiting_group_id, doc_id).read()
-        
-        
-    @expose()
-    @require(Any(is_user('root'), has_level('pl'), has_level('staff'), msg='Only staff members may upload visiting group attachments'))   
-    def upload_attachment(self, vgrpid, file=''):
-        doc = holly_couch[vgrpid]
-        
-        file = request.POST['file']
-
-        holly_couch.put_attachment(doc, file.file, filename=file.filename)
-        raise redirect(request.referrer)
     
-        
+    
+#    @expose()
+#    @require(Any(is_user('root'), has_level('pl'), has_level('staff'), msg='Only staff members may upload visiting group attachments'))   
+#    def upload_attachment(self, vgrpid, file=''):
+#        doc = holly_couch[vgrpid]
+#        
+#        file = request.POST['file']
+#
+#        holly_couch.put_attachment(doc, file.file, filename=file.filename)
+#        raise redirect(request.referrer)
+    
+    
     @expose('hollyrosa.templates.edit_visiting_group_vodb_data')
     @validate(validators={"id":validators.UnicodeString()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def edit_vodb_data(self, id):
-        vgroup = holly_couch[id]
+        vgroup = common_couch.getVisitingGroup(holly_couch,  id)
         return dict(visiting_group=vgroup)
-        
-        
+    
+    
     def do_set_program_state(self, holly_couch, visiting_group_id,  visiting_group_o,  state):
         visiting_group_o['boknstatus'] = state
         holly_couch[visiting_group_id] = visiting_group_o
         
         #..TODO: remember state change
                 
-        #...only PL can set state=20 (approved) or -10 (disapproved)
+        # TODO: only PL can set state=20 (approved) or -10 (disapproved)
         
         ##if state=='20' or state=='-10' or booking_o['booking_state'] == 20 or booking_o['booking_state']==-10:
             #ok = False
@@ -518,18 +512,20 @@ class VisitingGroup(BaseController):
         visiting_group_o['vodbstatus'] = state
         holly_couch[visiting_group_id] = visiting_group_o
 
+
     @expose()
     @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True), 'state':validators.Int(not_empty=True)})    
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def set_program_state(self, visiting_group_id=None,  state=0):
-        visiting_group_o = holly_couch[visiting_group_id] 
+        visiting_group_o = common_couch.getVisitingGroup(holly_couch,  visiting_group_id) 
         self.do_set_program_state(holly_couch, visiting_group_id,  visiting_group_o, int(state))            
         raise redirect(request.referrer)
+
 
     @expose()
     @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True), 'state':validators.Int(not_empty=True)})    
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def set_vodb_state(self, visiting_group_id=None,  state=0):
-        visiting_group_o = holly_couch[visiting_group_id] 
+        visiting_group_o = common_couch.getVisitingGroup(holly_couch,  visiting_group_id) 
         self.do_set_vodb_state(holly_couch, visiting_group_id,  visiting_group_o, int(state))            
         raise redirect(request.referrer)

@@ -40,6 +40,7 @@ from hollyrosa.controllers.booking_history import remember_tag_change,  remember
 from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, vodb_status_map, make_object_of_vgdictionary, vodb_eat_times_options, vodb_live_times_options
 from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange, updateVisitingGroupComputedSheets, computeAllUsedVisitingGroupsTagsForTagSheet
 from hollyrosa.controllers.booking_history import remember_new_booking_request
+from hollyrosa.controllers import common_couch
 
 from formencode import validators
 
@@ -106,28 +107,48 @@ class VODBGroup(BaseController):
     @expose('hollyrosa.templates.vodb_group_edit')
     @require(Any(is_user('user.erspl'), has_level('pl'), has_level('staff'), msg='Only staff and pl may edit vodb group data'))
     def edit_group_data(self, visiting_group_id=''):
-        visiting_group_x = holly_couch[visiting_group_id]
+#        visiting_group_x = holly_couch[visiting_group_id]
         tmpl_context.form = create_edit_vodb_group_form
         
-        #...add data if it doesent exist
-        if not visiting_group_x.has_key('vodb_status'):
-            visiting_group_x['vodb_status'] = 0
-        
-        for k in ['vodb_contact_name', 'vodb_contact_email', 'vodb_contact_phone', 'vodb_contact_address']:
-            if not visiting_group_x.has_key(k):
-                visiting_group_x[k] = ''
+        is_new = ((None == visiting_group_id) or ('' == visiting_group_id))
+        if is_new:
+            properties_template = dict()
+            
+            if subtype == 'program':
+                properties_template = program_visiting_group_properties_template
                 
-        visiting_group_o = make_object_of_vgdictionary(visiting_group_x)
+            if subtype == 'staff':
+                properties_template = staff_visiting_group_properties_template
+                
+            if subtype =='course':
+                properties_template = course_visiting_group_properties_template
+                
+            visiting_group = DataContainer(name='',  id=None, _id=None,   info='',  visiting_group_properties=properties_template,  subtype=subtype,  contact_person='',  contact_person_email='',  contact_person_phone='',  boknr='')
+        
+        else:
+            visiting_group_c = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+            for k in ['vodb_contact_name', 'vodb_contact_email', 'vodb_contact_phone', 'vodb_contact_address']:
+                if not visiting_group_c.has_key(k):
+                    visiting_group_c[k] = ''
+            visiting_group = make_object_of_vgdictionary(visiting_group_c)
+        
+        
+#        #...add data if it doesent exist
+#        if not visiting_group_x.has_key('vodb_status'):
+#            visiting_group_x['vodb_status'] = 0
+        
+                
+#        visiting_group_o = make_object_of_vgdictionary(visiting_group_x)
          
-        return dict(vodb_group=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
+        return dict(vodb_group=visiting_group, reFormatDate=reFormatDate, bokn_status_map=workflow_map, is_new=is_new)
 
 
     def newOrExistingVgroupId(self, a_id):
         """returns the id if it exists or if a_id is empty or none, a new id is generated and returned."""
         is_new = False
         r_id = a_id
-                 
-        if None == a_id or a_id == '':
+
+        if ((None == a_id) or (a_id == '')):
             is_new = True
             r_id = genUID(type='visiting_group')
             
@@ -137,10 +158,10 @@ class VODBGroup(BaseController):
     @expose()
     @validate(create_edit_vodb_group_form, error_handler=edit_group_data)
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change visiting group properties'))
-    def save_vodb_group_properties(self, id='', boknr='', name='', info='', camping_location='', vodb_contact_name='', vodb_contact_phone='', vodb_contact_email='', vodb_contact_address='', from_date='', to_date='', visiting_group_properties=None):
+    def save_vodb_group_properties(self, _id='', boknr='', name='', info='', camping_location='', vodb_contact_name='', vodb_contact_phone='', vodb_contact_email='', vodb_contact_address='', from_date='', to_date='', subtype='', visiting_group_properties=None):
         #...how do we handle new groups? Like new visiting_group, right?
         #   better have type=visiting_group for all groups and then have subtypes=group, course, daytrip, funk, etc for filtering/deciding on additional capabillities
-        
+        id = _id
         is_new, vgroup_id = self.newOrExistingVgroupId(id) 
         
         #...load or create new vgroup
@@ -148,6 +169,7 @@ class VODBGroup(BaseController):
             program_state = 0
             vodb_state = 0
             visiting_group_o = dict(type='visiting_group')
+            raise IOError
         else:
             visiting_group_o = holly_couch[vgroup_id]
 

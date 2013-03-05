@@ -175,9 +175,6 @@ class has_level(Predicate):
 
 
     def evaluate(self, environ, credentials):
-        # Checking if it's the author
-        
-        #print 'cred', dir(environ),  environ.keys(),  environ['repoze.who.identity'],  environ['repoze.who.identity']['user_level']
         
         if not environ.has_key('repoze.who.identity'):
             self.unmet(level=self.level)
@@ -211,9 +208,10 @@ def make_object_of_vgdictionary(visiting_group_c):
         vgps.append(vgpx)
 
     # TODO: DataContainerFromDictLikeObject(fields=)
-    visiting_group = DataContainer(name=visiting_group_c['name'],  id=visiting_group_c['_id'],  info=visiting_group_c['info'],  visiting_group_properties=vgps
+    visiting_group = DataContainer(name=visiting_group_c['name'],  _id=visiting_group_c['_id'],  info=visiting_group_c['info'],  visiting_group_properties=vgps
                                    ,  contact_person=visiting_group_c['contact_person'],  contact_person_email=visiting_group_c['contact_person_email'],  contact_person_phone=visiting_group_c['contact_person_phone'], 
-                                   boknr=visiting_group_c['boknr'], password=visiting_group_c.get('password',''), boknstatus=visiting_group_c['boknstatus'],  camping_location=visiting_group_c['camping_location'],  from_date=datetime.datetime.strptime(visiting_group_c['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(visiting_group_c['to_date'], '%Y-%m-%d'))
+                                   boknr=visiting_group_c['boknr'], password=visiting_group_c.get('password',''), boknstatus=visiting_group_c['boknstatus'],  camping_location=visiting_group_c['camping_location'],  from_date=datetime.datetime.strptime(visiting_group_c['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(visiting_group_c['to_date'], '%Y-%m-%d'), 
+                                   subtype=visiting_group_c['subtype'])
             
     return visiting_group
             

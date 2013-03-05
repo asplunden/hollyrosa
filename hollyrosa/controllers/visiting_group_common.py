@@ -22,9 +22,36 @@ import copy,  types
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange
 from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId
 
+
+
+program_visiting_group_properties_template = [DataContainer(property='sma',  value='0',  unit=u'småbarn',  description=u'antal deltagare 0 till 8 år'),
+                                              DataContainer(property='spar',  value='0',  unit=u'spår',  description=u'antal deltagare 8 till 9 år'), 
+                                              DataContainer(property='uppt',  value='0',  unit=u'uppt',  description=u'antal deltagare 10 till 11 år'), 
+                                              DataContainer(property='aven',  value='0',  unit=u'aven',  description=u'antal deltagare 12 till 15 år'), 
+                                              DataContainer(property='utm',  value='0',  unit=u'utm',  description=u'antal deltagare 16 till 18 år'),
+                                              DataContainer(property='rov',  value='0',  unit=u'rover',  description=u'antal roverscouter'),
+                                              DataContainer(property='led',  value='0',  unit=u'ledare',  description=u'antal ledare')]
+                                              
+staff_visiting_group_properties_template = [DataContainer(property='funk',  value='1',  unit=u'funk',  description=u'antal funk'), DataContainer(property='barn',  value='0',  unit=u'antal funk barn',  description=u'antal funk barn')]
+ 
+ 
+ 
+course_visiting_group_properties_template = [DataContainer(property='SSD',  value='0',  unit=u'SSD',  description=u'antal kursdeltagare från SSD'), 
+                                              DataContainer(property='scout',  value='0',  unit=u'scout',  description=u'antal kursdeltagare från scouterna (utom SSD)'), 
+                                              DataContainer(property='ovr',  value='0',  unit=u'övriga',  description=u'antal övriga kursdeltagare'), 
+                                              DataContainer(property='led',  value='0',  unit=u'kursled',  description=u'antal kursledare'), 
+                                              DataContainer(property='barn',  value='0',  unit=u'klbarn',  description=u'antal kursledarbarn')]
+ 
+ 
+ 
 def updateBookingsCacheContentAfterPropertyChange(a_holly_couch, a_visiting_group,  logged_in_user_id):
     """after propertes have been changed, the bookings needs to have their cache content updated"""
     # TODO: if cachecontent changes, should we change booking status or somehow mark it?
+    
+    is_new_group = not a_visiting_group.has_key('_id')
+    if is_new_group:
+        return
+    
     l_visiting_group_name = a_visiting_group['name']
     l_visiting_group_id = a_visiting_group['_id']
     bookings = getBookingsOfVisitingGroup(a_holly_couch, a_visiting_group.id,  None)
@@ -64,7 +91,11 @@ def populatePropertiesAndRemoveUnusedProperties(a_visiting_group,  a_visiting_gr
                 #...compute new unsued id
                 # TODO: these ids are not perfectly unique. It could be a problem with dojo grid
                 
-                largest_int = max(used_param_ids)
+                if len(used_param_ids) > 0:
+                    largest_int = max([int(i) for i in used_param_ids])
+                else:
+                    largest_int = 0
+                    
                 new_id_int = largest_int + 1
                 #while str(new_id_int) in used_param_ids:
                 #    new_id_int += 1
