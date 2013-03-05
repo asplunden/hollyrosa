@@ -37,8 +37,8 @@ from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
 from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
 from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
 from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
-from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, make_object_of_vgdictionary
-from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange
+from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, make_object_of_vgdictionary, vodb_eat_times_options, vodb_live_times_options
+from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange,  updateVisitingGroupComputedSheets,  computeAllUsedVisitingGroupsTagsForTagSheet
 from hollyrosa.controllers.booking_history import remember_tag_change
 
 from tg import request, response
@@ -320,62 +320,12 @@ class VisitingGroup(BaseController):
             visiting_group_c['vodbstatus'] = vodb_state
         visiting_group_c['camping_location'] = camping_location
         
-#        visiting_group_property_c = dict()
-#       
-#            
-#        #...remove non-used params !!!! Make a dict and see which are used, remove the rest
-#        unused_params = {}
-##        for k in visiting_group.visiting_group_property:
-##            unused_params[str(k.id)] = k
-#        
-#        used_param_ids = []
-#        if  visiting_group_c.has_key('visiting_group_properties'):
-#            used_param_ids = visiting_group_c['visiting_group_properties'].keys()
-#        
-#        for param in visiting_group_properties:
-#            is_new_param = False
-#            if param['property'] != '' and param['property'] != None:
-#                if param['id'] != '' and param['id'] != None:
-#                    visiting_group_property_c[param['id']] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
-#                #what if the param has no id?
-#                else:
-#                    #...compute new unsued id
-#                    
-#                    new_id_int = 1
-#                    while str(new_id_int) in used_param_ids:
-#                        new_id_int += 1
-#                    used_param_ids.append(str(new_id_int))
-#                    
-#                    visiting_group_property_c[str(new_id_int)] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
-#                    
-#        # no need to delete old params, but we need to add to history how params are changed and what it affects
-#        
         #...now we have to update all cached content, so we need all bookings that belong to this visiting group
-        visiting_group_o['visiting_group_properties'] = populatePropertiesAndRemoveUnusedProperties(visiting_group_o,  visiting_group_properties)
-        updateBookingsCacheContentAfterPropertyChange(holly_couch, visiting_group_o,  getLoggedInUserId(request))
-           
-           
-#        visiting_group_c['visiting_group_properties'] = visiting_group_property_c
-#        
-#        # TODO: IMPORTANT TO FIX LATER
-#        bookings = getBookingsOfVisitingGroup(holly_couch, id_c,  None)
-#        for tmp in bookings:
-#            tmp_booking = tmp.doc
-#            
-#            new_content = computeCacheContent(visiting_group_c, tmp_booking['content'])
-#            if new_content != tmp_booking['cache_content'] :
-#            
-#                tmp_booking['cache_content'] = new_content
-#                tmp_booking['last_changed_by'] = getLoggedInUserId(request)
-#                
-#                # TODO: change booking status (from whatever, since the text has changed)
-#                
-#                
-#                # TODO: remember booking history change
-#                
-#                
-#                holly_couch[tmp_booking['_id']] = tmp_booking
-#            
+        visiting_group_c['visiting_group_properties'] = populatePropertiesAndRemoveUnusedProperties(visiting_group_c,  visiting_group_properties)
+        updateBookingsCacheContentAfterPropertyChange(holly_couch, visiting_group_c,  getLoggedInUserId(request))
+        vodb_tag_times_tags = computeAllUsedVisitingGroupsTagsForTagSheet(visiting_group_c['tags'], visiting_group_c.get('vodb_tag_sheet',dict(items=[]))['items'])
+        updateVisitingGroupComputedSheets(visiting_group_c, visiting_group_c['visiting_group_properties'], sheet_map=dict(vodb_eat_sheet=vodb_eat_times_options, vodb_live_sheet=vodb_live_times_options, vodb_tag_sheet=vodb_tag_times_tags))
+        
         
         holly_couch[id_c] = visiting_group_c
         

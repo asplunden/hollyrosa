@@ -65,6 +65,9 @@ for k,  v in change_op_lookup.items():
     change_op_map[v] = k.replace('_',' ')
 
 
+vodb_eat_times_options = [u'indoor', u'outdoor', u'own']
+vodb_live_times_options = [u'indoor',u'outdoor',u'daytrip']
+
 def reFormatDate(b):
     try:
         r = datetime.datetime.strptime(b, '%Y-%m-%d').strftime('%A %d %B')

@@ -37,8 +37,8 @@ from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUs
 
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange
 from hollyrosa.controllers.booking_history import remember_tag_change,  remember_booking_vgroup_properties_change
-from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, vodb_status_map, make_object_of_vgdictionary
-from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange
+from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, vodb_status_map, make_object_of_vgdictionary, vodb_eat_times_options, vodb_live_times_options
+from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange, updateVisitingGroupComputedSheets, computeAllUsedVisitingGroupsTagsForTagSheet
 from hollyrosa.controllers.booking_history import remember_new_booking_request
 
 from formencode import validators
@@ -47,8 +47,7 @@ __all__ = ['VODBGroup']
 
 vodb_live_times = [u'fm', u'em', u'evening']
 vodb_eat_times = [u'breakfast', u'lunch', u'lunch_arrive', u'lunch_depart', u'dinner']
-vodb_eat_times_options = [u'indoor', u'outdoor', u'own']
-vodb_live_times_options = [u'indoor',u'outdoor',u'daytrip']
+
 #vodb_live_cols = 
 
 
@@ -170,51 +169,17 @@ class VODBGroup(BaseController):
             visiting_group_o['vodbstatus'] = vodb_state
         visiting_group_o['camping_location'] = camping_location
 
-
-
-#        visiting_group_property_o = dict()
-#    
-#
-#        #...remove non-used params !!!! Make a dict and see which are used, remove the rest
-#        unused_params = {}        
-#        used_param_ids = []
-#        if  visiting_group_o.has_key('visiting_group_properties'):
-#            used_param_ids = visiting_group_o['visiting_group_properties'].keys()
-#        
-#        for param in visiting_group_properties:
-#            is_new_param = False
-#            if param['property'] != '' and param['property'] != None:
-#                if param['id'] != '' and param['id'] != None:
-#                    visiting_group_property_o[param['id']] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
-#                else:
-#                    #...compute new unsued id
-#                
-#                    
-#                    new_id_int = 1
-#                    while str(new_id_int) in used_param_ids:
-#                        new_id_int += 1
-#                    used_param_ids.append(str(new_id_int))
-#                    
-#                    visiting_group_property_o[str(new_id_int)] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
-#                    
-#        # no need to delete old params, but we need to add to history how params are changed and what it affects
+        # TODO: figure out the order of updating things if something goes wrong.
+        
+        #...update properties
         visiting_group_o['visiting_group_properties'] = populatePropertiesAndRemoveUnusedProperties(visiting_group_o,  visiting_group_properties)
+        
         updateBookingsCacheContentAfterPropertyChange(holly_couch, visiting_group_o,  getLoggedInUserId(request))
-#        bookings = getBookingsOfVisitingGroup(holly_couch, vgroup_id,  None)
-#        for tmp in bookings:
-#            tmp_booking = tmp.doc
-#            
-#            new_content = computeCacheContent(visiting_group_o, tmp_booking['content'])
-#            if new_content != tmp_booking['cache_content'] :
-#            
-#                tmp_booking['cache_content'] = new_content
-#                tmp_booking['last_changed_by'] = getLoggedInUserId(request)   
-#                
-#                holly_couch[tmp_booking['_id']] = tmp_booking
-#        
-#        #...also make property substitution in sheets (since we are changing properties)
+        vodb_tag_times_tags = computeAllUsedVisitingGroupsTagsForTagSheet(visiting_group_o['tags'], visiting_group_o.get('vodb_tag_sheet',dict(items=[]))['items'])
+        updateVisitingGroupComputedSheets(visiting_group_o, visiting_group_o['visiting_group_properties'], sheet_map=dict(vodb_eat_sheet=vodb_eat_times_options, vodb_live_sheet=vodb_live_times_options, vodb_tag_sheet=vodb_tag_times_tags))
         
         holly_couch[vgroup_id] = visiting_group_o
+        
         
         if visiting_group_o.has_key('_id'):
             raise redirect('/vodb_group/view_vodb_group?visiting_group_id='+visiting_group_o['_id'])
@@ -283,17 +248,7 @@ class VODBGroup(BaseController):
         
     # the expression del referrs to Data Eat Live. LED was too confusing so I choose DEL :)    
 
-    def compute_all_used_vgroup_tags(self, tags, rows):
-        all_current_vgroup_tags = dict()
-        for tmp_key in tags:
-            all_current_vgroup_tags[tmp_key] = 1
-            
-        for tmp_row in rows:
-            for tmp_key in tmp_row.keys():
-                if ((tmp_key != 'date') and (tmp_key != 'time')):
-                    if not all_current_vgroup_tags.has_key(tmp_key):
-                        all_current_vgroup_tags[tmp_key] = 1
-        return all_current_vgroup_tags
+
 
     
     def prepareAndSanitizeSheetDataForEdit(self,  a_visiting_group,  a_sheet_name,  a_from_date,  a_to_date,  a_empty_sheet):
@@ -345,7 +300,7 @@ class VODBGroup(BaseController):
 
         #...same thing for tag data
         tag_data = visiting_group_o.get('vodb_tag_sheet', dict(identifier='rid', items=[]))
-        all_current_vgroup_tags = self.compute_all_used_vgroup_tags(visiting_group_o['tags'], tag_data['items'])
+        all_current_vgroup_tags = computeAllUsedVisitingGroupsTagsForTagSheet(visiting_group_o['tags'], tag_data['items'])
         empty_vodb_tag_sheet = self.make_empty_vodb_sheet(visiting_group_o['from_date'], visiting_group_o['to_date'],vodb_live_times, all_current_vgroup_tags.keys()) 
         visiting_group_o['vodb_tag_sheet'] = self.prepareAndSanitizeSheetDataForEdit(visiting_group_o,  'vodb_tag_sheet', l_from_date,  l_to_date,  empty_vodb_tag_sheet)
         
@@ -354,43 +309,7 @@ class VODBGroup(BaseController):
         
         return dict(vodb_group=visiting_group_o, tag_layout_tags=tag_layout_tags, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
     
-    
-    def vodb_sheet_property_substitution_helper(self, rows, headers, properties):
-        """
-        TODO: WEE NEED TO TRIGGER THIS IF ANY PROPERTIES EVER CHANGE
-        """
-        for row in rows:
-            for k in headers:
-                original_value = row.get(k,0)
-                new_value = original_value
-
-                if type(new_value) == types.StringType or type(new_value) == types.UnicodeType:
-                    for prop in properties.values():
-                        prop_prop = prop['property']
-                        # todo: WARN IF DATE IS OUTSIDE RANGE
-                        
-                        prop_value = prop['value']
-                        if None != prop_value:
-                        	new_value = new_value.replace(u'$'+prop_prop, prop_value) 
-                        
-                    try:
-                        new_value = str(eval(new_value,{"__builtins__":None},{}))
-                    except ValueError:
-                        pass
-                    except SyntaxError:
-                        pass  
-                row[k] = new_value
-
-
-    def vodb_sheet_property_substitution(self,  a_visiting_group,  a_options,  a_visiting_group_properties,  a_sheet_name): 
-        if a_visiting_group.has_key(a_sheet_name):
-            vodb_sheet = a_visiting_group[a_sheet_name]
-            vodb_sheet_copy = copy.deepcopy( vodb_sheet ) 
-            vodb_computed = vodb_sheet_copy['items']
-            self.vodb_sheet_property_substitution_helper(vodb_computed, a_options, a_visiting_group_properties)
-            a_visiting_group[a_sheet_name.replace('sheet','computed')] = vodb_computed
-    
-    
+        
 
     @expose()
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
@@ -400,43 +319,23 @@ class VODBGroup(BaseController):
         visiting_group_properties = visiting_group_o['visiting_group_properties']
         
         if eat_sheet != None:
-            vodb_eat_sheet = json.loads(eat_sheet)
-            visiting_group_o['vodb_eat_sheet'] = vodb_eat_sheet
-            
-        self.vodb_sheet_property_substitution(visiting_group_o,  vodb_eat_times_options,  visiting_group_properties,  'vodb_eat_sheet') 
-                
-            #...create cache content. Substitute properties and make sure we have at least zeros in all columns
-            ##vodb_eat_sheet_copy = copy.deepcopy( visiting_group_o['vodb_eat_sheet']) #json.loads(eat_sheet)
-            ##vodb_eat_computed = vodb_eat_sheet_copy['items']
-            ##self.vodb_sheet_property_substitution(vodb_eat_computed, vodb_eat_times_options, visiting_group_o['visiting_group_properties'])
-            
-            ##visiting_group_o['vodb_eat_computed'] = vodb_eat_computed
+            visiting_group_o['vodb_eat_sheet'] = json.loads(eat_sheet)
 
         if live_sheet != None:
-            vodb_live_sheet = json.loads(live_sheet)
-            visiting_group_o['vodb_live_sheet'] = vodb_live_sheet
-            
-            ##vodb_live_sheet_copy = json.loads(live_sheet)
-            ##vodb_live_computed = vodb_live_sheet_copy['items']
-            ##self.vodb_sheet_property_substitution(vodb_live_computed, vodb_live_times_options, visiting_group_o['visiting_group_properties'])
-            ##visiting_group_o['vodb_live_computed'] = vodb_live_computed
-              
-
-        self.vodb_sheet_property_substitution(visiting_group_o,  vodb_live_times_options,  visiting_group_properties,  'vodb_live_sheet') 
-
+            visiting_group_o['vodb_live_sheet'] = json.loads(live_sheet)
 
         if tag_sheet != None:
             vodb_tag_sheet = json.loads(tag_sheet)
             visiting_group_o['vodb_tag_sheet'] = vodb_tag_sheet
-##            vodb_tag_sheet_copy = json.loads(tag_sheet)
-##            vodb_tag_computed = vodb_tag_sheet_copy['items']
-            vodb_tag_times_tags = self.compute_all_used_vgroup_tags(visiting_group_o['tags'], vodb_tag_sheet['items'])
-##            self.vodb_sheet_property_substitution(vodb_tag_computed, vodb_tag_times_tags, visiting_group_o['visiting_group_properties'])
-##            visiting_group_o['vodb_tag_computed'] = vodb_tag_computed
+        
+        vodb_tag_times_tags = computeAllUsedVisitingGroupsTagsForTagSheet(visiting_group_o['tags'], vodb_tag_sheet['items'])
+            
+        #self.vodb_sheet_property_substitution(visiting_group_o,  vodb_eat_times_options,  visiting_group_properties,  'vodb_eat_sheet') 
+        #self.vodb_sheet_property_substitution(visiting_group_o,  vodb_live_times_options,  visiting_group_properties,  'vodb_live_sheet') 
+        #self.vodb_sheet_property_substitution(visiting_group_o,  vodb_tag_times_tags,  visiting_group_properties,  'vodb_tag_sheet') 
 
-        self.vodb_sheet_property_substitution(visiting_group_o,  vodb_tag_times_tags,  visiting_group_properties,  'vodb_tag_sheet') 
-
-
+        updateVisitingGroupComputedSheets(visiting_group_o, visiting_group_properties, sheet_map=dict(vodb_eat_sheet=vodb_eat_times_options, vodb_live_sheet=vodb_live_times_options, vodb_tag_sheet=vodb_tag_times_tags))
+        
         holly_couch[vgroup_id] = visiting_group_o
         raise redirect(request.referrer)
         

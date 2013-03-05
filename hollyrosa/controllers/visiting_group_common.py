@@ -18,7 +18,7 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-
+import copy,  types
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange
 from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId
 
@@ -74,3 +74,57 @@ def populatePropertiesAndRemoveUnusedProperties(a_visiting_group,  a_visiting_gr
                 
     # TODO: we need to add to history how params are changed and what it affects
     return visiting_group_property_o
+
+
+def visitingGroupPropertyVODBSheetSubstitutionHelper(rows, headers, properties):
+    """
+    """
+    for row in rows:
+        for k in headers:
+            original_value = row.get(k,0)
+            new_value = original_value
+
+            if type(new_value) == types.StringType or type(new_value) == types.UnicodeType:
+                for prop in properties.values():
+                    prop_prop = prop['property']
+                    # todo: WARN IF DATE IS OUTSIDE RANGE
+                    
+                    prop_value = prop['value']
+                    if None != prop_value:
+                        new_value = new_value.replace(u'$'+prop_prop, prop_value) 
+                    
+                try:
+                    new_value = str(eval(new_value,{"__builtins__":None},{}))
+                except ValueError:
+                    pass
+                except SyntaxError:
+                    pass  
+            row[k] = new_value
+
+
+def visitingGroupPropertyVODBSheetSubstitution(a_visiting_group,  a_options,  a_visiting_group_properties,  a_sheet_name): 
+    if a_visiting_group.has_key(a_sheet_name):
+        vodb_sheet = a_visiting_group[a_sheet_name]
+        vodb_sheet_copy = copy.deepcopy( vodb_sheet ) 
+        vodb_computed = vodb_sheet_copy['items']
+        visitingGroupPropertyVODBSheetSubstitutionHelper(vodb_computed, a_options, a_visiting_group_properties)
+        a_visiting_group[a_sheet_name.replace('sheet','computed')] = vodb_computed
+
+
+def updateVisitingGroupComputedSheets(a_visiting_group,  a_visiting_group_properties, sheet_map={}):
+    """call this function whenever the sheets or the properties of a visiting groups has changed"""
+    for sheet_name, options in sheet_map.items():
+        visitingGroupPropertyVODBSheetSubstitution(a_visiting_group,  options,  a_visiting_group_properties,  sheet_name) 
+        
+    
+def computeAllUsedVisitingGroupsTagsForTagSheet(tags, rows):
+    all_current_vgroup_tags = dict()
+    for tmp_key in tags:
+        all_current_vgroup_tags[tmp_key] = 1
+        
+    for tmp_row in rows:
+        for tmp_key in tmp_row.keys():
+            if ((tmp_key != 'date') and (tmp_key != 'time')):
+                if not all_current_vgroup_tags.has_key(tmp_key):
+                    all_current_vgroup_tags[tmp_key] = 1
+    return all_current_vgroup_tags
