@@ -217,7 +217,7 @@ function startup() {
           <div py:for="sg in [s for s in summary_vgroups[live_option].values() if s.has_values ]"  hollyrosa:vgid="$sg.id" hollyrosa:from_date="$sg.from_date" hollyrosa:to_date="$sg.to_date"  hollyrosa:all_values_zero="$sg.all_values_zero" class="gnatt_vgroup_block gnatt_sgroup_block gnatt_vodb_status_$sg.vodbstatus">$sg.name [$sg.vodbstatus ${bokn_status_map[sg.vodbstatus]}] 
               <br/><div py:for="d in sg.date_range"  class="gnatt_date_block" hollyrosa:date="$d">             
                   <div py:for="t in header_times"  class="gnatt_date_time_block">                 
-                   ${sg['live_summary'][d+':'+t]} 
+                   ${sg['live_summary'].get(d+':'+t,'0')} 
                   </div>  
               </div>
           </div>
