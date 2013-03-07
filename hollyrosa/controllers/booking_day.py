@@ -66,12 +66,6 @@ from hollyrosa.model import holly_couch
 __all__ = ['BookingDay',  'Calendar']
     
 
-
-#def getBookingDay(holly_couch, booking_day_id):
-#    return holly_couch[booking_day_id] 
-    
-#def getBooking(holly_couch, id):
-#    return holly_couch[id]
     
 def deleteBooking(holly_couch, booking_o):
     booking_o['booking_state'] = -100

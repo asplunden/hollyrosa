@@ -66,97 +66,12 @@ class Tools(BaseController):
             
         activity_groups = [h.value for h in getAllActivityGroups(holly_couch)]
         return dict(show_day=day,  activity_groups=activity_groups)
-        
-    
-    @expose(content_type='application/x-download')
-    def make_program_day_doc(self,  day=None,  file=None):
-        
-        
-        
-        in_file = file.file
-        
-        #in_file=StringIO.StringIO()
-        #in_file.write(template)
-        #...generate the mapping:
-        #   find booking_day corresponding to day
-        
-        booking_day_o = DBSession.query(booking.BookingDay).filter('date=\''+str(day)+'\'').one()
-        bookings = DBSession.query(booking.Booking).filter('booking_day_id='+str(booking_day_o.id)).all()
-        
-        #...this is VERY wrong since the list isn't produced according to slot row position, have to rethink
-        #   also, how to handle trapper 1 to trapper 7
-        
-        new_bookings = dict()
-        new_bookings['Trapper 1'] = [[] for i in range(4)] 
-        new_bookings['Trapper 2'] = [[] for i in range(4)] 
-        new_bookings['Trapper 3'] = [[] for i in range(4)] 
-        new_bookings['Trapper 4'] = [[] for i in range(4)] 
-        new_bookings['Trapper 5'] = [[] for i in range(4)] 
-        new_bookings['Trapper 6'] = [[] for i in range(4)] 
-        new_bookings['Trapper 7'] = [[] for i in range(4)] 
-        
-        for s in bookings:
-            if s.slot_row_position != None:
-                tmp_activity_row = new_bookings.get(s.slot_row_position.slot_row.activity.title, [[] for i in range(4)] )
-                tmp_slot_index = 0
-                #print s.slot_row_position.time_from.strftime('%H:%M') 
-                if s.slot_row_position.time_from.strftime('%H:%M') =='09:00':
-                    tmp_slot_index = 0
-                elif s.slot_row_position.time_from.strftime('%H:%M') == '13:00':
-                    tmp_slot_index = 1
-                elif s.slot_row_position.time_from.strftime('%H:%M') == '17:00':
-                    tmp_slot_index = 2
-                else:
-                    tmp_slot_index = 3
-                
-                tmp_visiting_group_name = s.visiting_group_name
-                if tmp_visiting_group_name == None:
-                    tmp_visiting_group_name = ''
-                #tmp_activity_row.append(s.visiting_group_name + ' ' + getRenderContent(s))
-                tmp_new_string = tmp_visiting_group_name + ' ' + getRenderContent(s) #s.slot_row_position.slot_row.activity.title
-                
-                
-                #print '***',  tmp_slot_index,  tmp_new_string,  s.slot_row_position.slot_row.activity.title
-                
-                if s.slot_row_position.slot_row.activity.title == 'Trapper':
-                    #print 'TRAPPER'
-                    tmp_trapper_index = 1
-                    while (tmp_trapper_index < 8):
-                        if 0 == len(new_bookings['Trapper %d' % tmp_trapper_index][tmp_slot_index] ):
-                            tmp_activity_row = new_bookings['Trapper %d' % tmp_trapper_index]
-                            break
-                        tmp_trapper_index += 1
-                
-                tmp_activity_row[tmp_slot_index].append(tmp_new_string)
-                new_bookings[s.slot_row_position.slot_row.activity.title] = tmp_activity_row
-       
-        #...fix Trapper -> Trapper 1--7
-        new_new_bookings = dict()
-        for key,  tmp_activity_row in new_bookings.items():
-            new_new_bookings[key]  = [ ';\n'.join(ts) for ts in tmp_activity_row]
-        
-    
-        #f = open('/home/marel069/programdayn.ods', 'r')
-        #template=f.read()
-        
-        
-        out_txt = OOorg.make(in_file,  booking_day_mapping=new_new_bookings)
-        #f.close()
 
-        pylons.response.headers['Content-Type'] = 'application/x-download'
-        pylons.response.headers['Content-Length'] = len(out_txt)
-        pylons.response.headers["Content-Disposition"] = "attachment; filename=make_program_day_doc.ods"
-        
-        return out_txt
 
 
     def get_severity(self, visiting_group,  severity):
-        #if booking_o['visiting_group_name'] in ['Program II', 'Konf II', 'Program I', 'Konf I', 'WSJ Home hospitality', '60 Degrees North', 'Led Utb Scout']:
         if visiting_group.get('hide_warn_on_suspect_bookings', False) == True:
-            #print 'HIDE WARN'
             severity = 0
-        #else:
-            #print visiting_group.get('hide_warn_on_suspect_bookings', 'MA')
         return severity
 
 
@@ -478,29 +393,34 @@ class Tools(BaseController):
         
 #    @expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def make_booking_days(self):
-        pos = 1000
-        dates = list()
-        #...must iterate a date range, check out websetup.py....        
-        for i in range(30):
-            d = datetime.date(2012, 6, i+1)
-            dates.append(str(d))
-       
-        for i in range(31):
-            d = datetime.date(2012, 7, i+1)
-            dates.append(str(d))
-
-        for i in range(31):
-            d = datetime.date(2012, 8, i+1)
-            dates.append(str(d))
+    def make_booking_days(self,  from_date,  to_date,  day_schema_id='day_schema.2013'):
+        pos = 1300
+        dates = dateRange(min_date, max_date, format='%Y-%m-%d')
+        
+        # some dates will be lagerskola.2013 other will be schema.2013 and there will be 60DN.2013
+#        #...must iterate a date range, check out websetup.py....        
+#        for i in range(30):
+#            d = datetime.date(2012, 6, i+1)
+#            dates.append(str(d))
+#       
+#        for i in range(31):
+#            d = datetime.date(2012, 7, i+1)
+#            dates.append(str(d))
+#
+#        for i in range(31):
+#            d = datetime.date(2012, 8, i+1)
+#            dates.append(str(d))
             
             
         for d in dates:
-            bd_c = dict(type='booking_day', date=d, note='', title='', num_program_crew_members=0, num_fladan_crew_members=0, day_schema_id='day_schema.1', zorder=pos )
+            #...make sure the date doesent exist already
+            raise IOError
+            
+            bd_c = dict(type='booking_day', date=d, note='', title='', num_program_crew_members=0, num_fladan_crew_members=0, day_schema_id=day_schema_id, zorder=pos,  room_schema_id='room_schema.2013' )
             holly_couch['booking_day.'+str(pos)] = bd_c
             pos += 1
             
-        raise redirect('/')       
+        raise redirect('/')
         
 #    @expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))

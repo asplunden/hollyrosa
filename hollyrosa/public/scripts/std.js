@@ -1,5 +1,5 @@
 /**
- * Copyright 2010, 2011, 2012 Martin Eliasson
+ * Copyright 2010, 2011, 2012, 2013 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *
@@ -31,7 +31,7 @@ function set_visible_ag_rows(acg_id, v) {
 
 function navigation_calendar_is_disabled(x) {
     var test_date = dojo.date.locale.format(x, {datePattern: "yyyy-MM-dd", selector: "date"});
-    return test_date < "2012-06-01" || test_date > "2012-08-30"; 
+    return test_date < "2012-06-01" || test_date > "2013-10-20"; 
 }
 
  
