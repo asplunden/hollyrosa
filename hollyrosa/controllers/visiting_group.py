@@ -203,7 +203,7 @@ class VisitingGroup(BaseController):
         return dict(visiting_group=visiting_group, properties=properties)
         
         
-    @expose('hollyrosa.templates.show_visiting_group')
+    @expose('hollyrosa.templates.visiting_group_view')
     @validate(validators={'visiting_group_id':validators.UnicodeString})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def show_visiting_group(self,  visiting_group_id=None,  **kw):
