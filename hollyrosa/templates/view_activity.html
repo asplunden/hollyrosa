@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -80,6 +80,6 @@ addPrintLink.addEvent(window, 'load', function(){addPrintLink.init('print-on-dem
     
     <!-- <p>GPS: ${activity.gps_lat} - ${activity.gps_long} Add google map</p> -->
    <em><span py:if="True==activity.equipment_needed">Equipment needed</span> <span py:if="True==activity.education_needed">Education needed</span> <span py:if="True==activity.certificate_needed">Certificate needed</span> </em>
-    <p>Speical info note: <a href="${tg.url('/note/edit_note', params={'_id':activity.get('booking_info_id','')})}">${activity.get('booking_info_id','')}</a></p>
+    <p>Speical info note: <a href="${tg.url('/note/edit_note', params={'note_id':activity.get('booking_info_id','')})}">${activity.get('booking_info_id','')}</a></p>
 </body>
 </html>
