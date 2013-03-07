@@ -32,7 +32,7 @@ import datetime,logging, json, time
 log = logging.getLogger()
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
-from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, reFormatDate
+from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, reFormatDate,  sanitizeDate
 
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr
 from hollyrosa.controllers.booking_history import remember_tag_change
@@ -195,9 +195,13 @@ class VisitingGroupProgramRequest(BaseController):
     @expose()
     @require(Any(has_level('pl'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få spara programönskemål'))
     def update_visiting_group_program_request(self, program_request_info='', contact_person='', contact_person_email='', contact_person_phone='', vgroup_id='', program_request_input='', have_skippers=False, miniscout=False, ready_to_process=False, age_group_input='', saveButton='', submitButton=''):
-        visiting_group_id = str(vgroup_id)
-        visiting_group_o = holly_couch[visiting_group_id]
+        # TODO: once property data has changed, we somehow need to propagate that property data to all places where the properties are used BUT I dont think we really waht to propagate it unless we do some state-change,
+        # we probably want to check the data before it is allowed to progress into other parts of the system.
         
+        visiting_group_id = str(vgroup_id)
+        
+        # TODO: refactor line below
+        visiting_group_o = holly_couch[visiting_group_id]
         
         may_change_request_data = (0  == visiting_group_o['boknstatus'])
         visiting_group_o['contact_person'] = contact_person
@@ -229,20 +233,30 @@ class VisitingGroupProgramRequest(BaseController):
 
                 tmp_vgroup_property = None
                 property_found = False
-                for tmp_vgroup_property in visiting_group_o['visiting_group_properties'].values():
+                property_id = None
+                for tmp_vgroup_property_id,  tmp_vgroup_property in visiting_group_o['visiting_group_properties'].items():
                     if tmp_vgroup_property['property'] == process_property:
-                        property_found = True                    
+                        property_found = True
+                        property_id = tmp_vgroup_property
+                        log.debug('*** property %ss match found, property_id=%s' % (process_property,  property_id))
                         break
             
                 if property_found:
                     log.debug('old: ' + str(process_property) + '=' + str(tmp_vgroup_property['value']))
             
+                    # TODO: maybe sanitize so value must be an int?
                     tmp_vgroup_property['value'] = tmp_age_group['value']
-                    tmp_vgroup_property['from_date'] = tmp_age_group['from_date']
-                    tmp_vgroup_property['to_date'] = tmp_age_group['to_date']
+                    
+                    # TODO: check that dates are within valid ranges
+                    #...so we might have to write a fance fancy validator for all this json data
+                    ok_1,  tmp_vgroup_property['from_date'] = sanitizeDate(tmp_age_group['from_date'],  default_date=tmp_vgroup_property['from_date'] )
+                    ok_2,  tmp_vgroup_property['to_date'] = sanitizeDate(tmp_age_group['to_date'],  default_date=tmp_vgroup_property['to_date'] )
+                    ok_3 = ok_1 and ok_2 and (tmp_vgroup_property['to_date']  >=  tmp_vgroup_property['from_date'] )
+                    log.debug('from date is %s and to date is %s' % ( tmp_vgroup_property['from_date'] ,   tmp_vgroup_property['to_date'] ))
+                    #...todo check dates are in range
                     
                     log.debug('new: ' + process_property + '=' + str(tmp_age_group['value']))
-                    #...ALSO MOVE DATES!
+                    #visiting_group_o['visiting_group_properties'][property_id] = tmp_vgroup_property
                 else:
                     log.debug('property not found, what do we do?')
                 
@@ -255,18 +269,18 @@ class VisitingGroupProgramRequest(BaseController):
                             if tmp_key > lowest_key_number:
                                 lowest_key_number = int(tmp_key)
                         lowest_key_number +=1
-                        log.debug('lowest_key_number: ' + str(lowest_key_number))
-                        new_property_row = {u'description': tmp_age_group['age_group'], u'value': tmp_age_group['value'], u'from_date': tmp_age_group['from_date'], u'to_date': tmp_age_group['to_date'], u'property': tmp_age_group['property'], u'unit': tmp_age_group['unit']}
+                        
+                        # TODO: Date sanitation here too
+                        ok_4,  new_from_date = sanitizeDate(tmp_age_group['from_date'],  default_date=tmp_vgroup_property['from_date'] )
+                        ok_5,  new_to_date = sanitizeDate(tmp_age_group['to_date'],  default_date=tmp_vgroup_property['to_date'] )
+                        ok_6 = ok_4 and ok_5 and (new_from_date <= new_to_date)
+                        new_property_row = {u'description': tmp_age_group['age_group'], u'value': tmp_age_group['value'], u'from_date': new_from_date, u'to_date': new_to_date, u'property': tmp_age_group['property'], u'unit': tmp_age_group['unit']}
                         x = visiting_group_o['visiting_group_properties']
                         x[str(lowest_key_number)] = new_property_row
                         visiting_group_o['visiting_group_properties'] = x
-                        log.debug(str(x))                        
             
-            holly_couch[str(vgroup_id)] = visiting_group_o
-            
-        # We need to sanitize the dates that dojo/dijit supplies, they are not on the string form we preferre.
-        # first, be ready to SANITIZE things like DATE RANGES 
-        # 
+            holly_couch[visiting_group_o['_id']] = visiting_group_o
+
         # for the program request , iterate through it
         if may_change_request_data:
             if 'True' == ready_to_process or True:
@@ -274,28 +288,23 @@ class VisitingGroupProgramRequest(BaseController):
                 for tmp_request in program_request_list['items']:
                     log.debug('found request...' + str(tmp_request))
                     request_for_age_groups = [x[4:] for x in ['age_sma','age_spar','age_uppt','age_aven','age_utm','age_rov','age_led'] if tmp_request[x]]
-                    if len(request_for_age_groups) > 0:                    
-                        requested_date = tmp_request['requested_date'][:10]
-                        requested_date_o = time.strptime(requested_date, "%Y-%M-%d" )
-                        log.debug('requested_date: ' + requested_date)
-                        requested_time = tmp_request['requested_time']
-                        log.debug('requested_time: ' + requested_time)
-                        requested_activity_id = tmp_request['requested_activity']
-                        log.debug('activity_id: ' + requested_activity_id)
+                    if len(request_for_age_groups) > 0:
+                        #...TODO: sanitize requested_date
+                        ok_r1, requested_date = sanitizeDate(tmp_request['requested_date'][:10],  default_date='')
                         
-                        #...now that we have all the data:
-                        #...look up the day id of the date
-                        booking_day_o = getBookingDayOfDate(holly_couch, tmp_request['requested_date'][:10]) # NEED TO SANITIZE...
+                        # TODO: reuse the parsing of the date
+                        requested_date_o = time.strptime(requested_date, "%Y-%M-%d" )
+                        requested_time = tmp_request['requested_time']
+                        requested_activity_id = tmp_request['requested_activity']
+                        
+                        booking_day_o = getBookingDayOfDate(holly_couch, requested_date)
                         log.debug(booking_day_o)
                         day_schema_id = booking_day_o['day_schema_id']
-                        log.debug('day_schema id: ' + day_schema_id)
                         schema_o = holly_couch[day_schema_id]                        
-                        
                         
                         #...given fm/em/evening, look up the matching slot_id. Probably the schema will be needed (and maybe index 0,1,2,3...)
                         tmp_activity_row = schema_o['schema'][requested_activity_id]
                         
-                        log.debug('tmp_activity_row: ' + str(tmp_activity_row))
                         #...look through the list, lets say we have a time and we need the slot id matching that time
                         #   then the reasonable way is too look through all list entries being dicts and return slot id when time match found
                         activity_selection_map = dict()
@@ -315,18 +324,19 @@ class VisitingGroupProgramRequest(BaseController):
                                 match_slot_id = tmp_slot_info['slot_id']
                                 log.debug('match for slot_id: ' + match_slot_id)
                                 
-                                # lets create a booking!   
-                                
-                                
-                                
+                                # lets create a booking!
+                                # TODO: refactor the creation of a new booking
                                 new_booking = dict(type='booking',  valid_from='',  valid_to='',  requested_date=requested_date, slot_id=match_slot_id, booking_day_id=booking_day_o['_id'],  subtype='program')
                                 new_booking['visiting_group_id'] = str(vgroup_id)
                                 new_booking['valid_from'] = visiting_group_o['from_date']
                                 new_booking['valid_to'] = visiting_group_o['to_date']
+                                new_booking['reuested_date'] = requested_date
                                 new_booking['visiting_group_name'] = visiting_group_o['name']
                                 new_booking['last_changed_by_id'] = getLoggedInUserId(request)
                                 
                                 activity_o = holly_couch[requested_activity_id]
+                                
+                                # TODO: the line below gts the properties wrong
                                 content = u'%s (önskar %s %s %s) %s' % ( ' '.join(['$$%s'%a for a in request_for_age_groups ]) ,activity_selection_map.get(requested_activity_id, activity_o['title']), time.strftime("%d/%M", requested_date_o).replace('0',''), time_selection_translator.get(requested_time, requested_time), tmp_request['note'] )                                 
                                 
                                 new_booking['content'] = content
@@ -335,7 +345,7 @@ class VisitingGroupProgramRequest(BaseController):
             
                                 
                                 new_booking['booking_state'] = activity_o['default_booking_state']                                
-                                                             
+                                
                                 slot_map  = getSchemaSlotActivityMap(holly_couch, day_schema_id)
                                 slot = slot_map[match_slot_id]
                                 new_uid = genUID(type='booking')
@@ -345,7 +355,7 @@ class VisitingGroupProgramRequest(BaseController):
                                 
                                 #...remember the created booking
                                 
-                                remember_new_booking_request(holly_couch, booking=new_booking, changed_by=getLoggedInUserId())
+                                remember_new_booking_request(holly_couch, booking=new_booking, changed_by=getLoggedInUserId(request))
                                 break
-                        
+                                
         raise redirect(request.referrer)

@@ -69,6 +69,20 @@ for k,  v in change_op_lookup.items():
 vodb_eat_times_options = [u'indoor', u'outdoor', u'own']
 vodb_live_times_options = [u'indoor',u'outdoor',u'daytrip']
 
+
+def sanitizeDate(d,  default_date=''):
+    """Make sure d is on the form YYYY-mm-dd"""
+    # TODO we really should use formenc validate here
+    
+    try:
+        #...only use first ten chars
+        d_trunc = d[:10]
+        d_pars = datetime.datetime.strptime(d_trunc, '%Y-%m-%d')
+        return True,  d_pars.strftime('%Y-%m-%d')
+    except ValueError:
+        return False, default_date
+        
+        
 def reFormatDate(b):
     try:
         r = datetime.datetime.strptime(b, '%Y-%m-%d').strftime('%A %d %B')
@@ -83,11 +97,15 @@ def getFormatedDate(date_obj):
     else:
         return date_obj.strftime('%A %d %B')
 
+
+
 def getRenderContent(booking):
     if booking.cache_content=='' or booking.cache_content == None:
         return booking.content
     else:
         return booking.cache_content
+        
+        
         
 def getRenderContentDict(booking):
     if booking['cache_content']=='' or booking['cache_content'] == None:
