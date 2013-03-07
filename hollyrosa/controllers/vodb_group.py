@@ -335,7 +335,10 @@ class VODBGroup(BaseController):
         #...we also must supply tags for the tag_grid layout since it depends both on old used tags and current tags
         tag_layout_tags = json.dumps(visiting_group_o['tags'])
         
-        return dict(vodb_group=visiting_group_o, tag_layout_tags=tag_layout_tags, reFormatDate=reFormatDate, bokn_status_map=workflow_map)
+        #...TODO: load notes
+        notes = []
+        
+        return dict(vodb_group=visiting_group_o, tag_layout_tags=tag_layout_tags, reFormatDate=reFormatDate, vodb_state_map=bokn_status_map, program_state_map=bokn_status_map,  notes=notes)
     
         
 

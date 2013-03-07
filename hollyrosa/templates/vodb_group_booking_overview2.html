@@ -227,12 +227,12 @@ function startup() {
 </div>
 
 <!-- 
- 
+ * the edit sheet page needs to get lots of info copied from the other two views
  * refactor JavaScript
  * date range
  * we will need to add island+confirmed in a special summary group. We probably also will need to add island+confirmed+preliminary
  * remove program booking related menu options
- 
+ * we probably dont want to mix lots of staff members with visiting groups, but we still need to get the overview count right.
  
  * check dates on external edit visiting group
    - both format
@@ -247,10 +247,19 @@ function startup() {
    We still have the problem with vgroups having no computed live sheet at all. Maybe a spearate list ?
    
    Maybe vgroups with only zeros should be displayed with an colour outline and no fill?
-
- * When properties are updated, the computed sheet data must also be updated.
  
-   
+ 
+ House booking:
+  * activity group for bed (done)
+   * list of all beds / houses with numbers
+   * add those beds to a special schema. Which probably will be so much easier with a rudimentary schema editor. Maybe we can use Dojo DataGrid. Or I just use the offline tool. 
+ * Two functions will be very needed:
+ 1. move-all-following
+ 2. book-from-now-until
+ 3. delete-from-now-until
+ 
+ Maybe 2 and 3 can be achieved by a DataGrid with ceckboxes if there should be a booking. Or multi book should be overhauled and put into action.
+ 
 -->
     
   
