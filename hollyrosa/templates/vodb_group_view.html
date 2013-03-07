@@ -66,8 +66,8 @@ function startup() {
    
    common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request...", '${visiting_group.id}', '${tg.url('/booking/edit_booking')}'); 
    common_menu.add_menu_separator(menu);   
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit...", '${visiting_group.id}', '${tg.url('edit_group_data')}');
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit Sheet...", '${visiting_group.id}', '${tg.url('edit_group_sheet')}');
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb data...", '${visiting_group.id}', '${tg.url('edit_group_data')}');
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb Sheet...", '${visiting_group.id}', '${tg.url('edit_group_sheet')}');
    common_menu.add_note_redirect_menu_item(menu, menu, "Add note...", '${visiting_group.id}', '${tg.url('/note/add_note')}');
    common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${visiting_group.id}', '${tg.url('/note/add_attachment')}');
    common_menu.add_menu_separator(menu);
@@ -132,21 +132,10 @@ function startup() {
 	
 	common_menu.add_menu_separator(menu);   
    common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history...", '${visiting_group['id']}', '${tg.url('/history/show')}');
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb data...", '${visiting_group['id']}', '${tg.url('/vodb_group/edit_group_data')}');
-
 	};
-	
-	 
-
-
-
-    	
     
 	ready(function() {
 		startup();
-
-     
-    
 		});  
  });
   </script>
@@ -166,16 +155,14 @@ function startup() {
 <table class="visiting_group_info_table">
 <tr><td class="legend">bok.nr:</td><td class="info">${visiting_group.boknr}</td></tr>
 <tr><td class="legend">subtype:</td><td class="info">${visiting_group.get('subtype','')}</td></tr>
-<tr><td class="legend">password:</td><td class="info">${visiting_group.get('password','')}</td></tr>
-
 <tr><td class="legend">vodb status:</td><td class="info">${vodb_state_map.get(visiting_group.get('vodbstatus','-'))}</td></tr>
 <tr><td class="legend">program status:</td><td class="info">${program_state_map.get(visiting_group.boknstatus,'')}</td></tr>
 
-
-
 <tr><td class="legend">camping location:</td><td class="info">${visiting_group.camping_location}</td></tr>
 </table>
+
 <p>${HTML(visiting_group.info)}</p></div>
+<h3>Notes and attachments</h3>
     <div py:for="n in notes" >
             
         <div class="${n.type}2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i><b>${n.timestamp}</b> ${n.type} by ${n.last_changed_by}</i><br/><br/>
@@ -194,7 +181,7 @@ function startup() {
 
 
 
-<h4>Properties</h4>
+<h3>Properties</h3>
     
     <table class="data">
         <tr>
@@ -211,8 +198,8 @@ function startup() {
 
 </ul>
 
-<h2>Computed Sheets</h2>
-<h3>Live Sheet</h3>
+<h3>Computed Sheets</h3>
+<h4>Live Sheet</h4>
 <table class="data">
   <tr class="data">
       <th>Date</th><th>Time</th>
@@ -229,7 +216,7 @@ function startup() {
   </tr>
 </table>
 
-<h3>Eat Sheet</h3>
+<h4>Eat Sheet</h4>
 <table class="data">
   <tr class="data">
       <th>Date</th><th>Time</th>
@@ -246,7 +233,7 @@ function startup() {
   </tr>
 </table>
 
-<h3>Tag Sheet</h3>
+<h4>Tag Sheet</h4>
 <table class="data">
   <tr class="data">
       <th>Date</th><th>Time</th>

@@ -177,9 +177,9 @@ class VisitingGroupProgramRequest(BaseController):
         age_group_data = json.dumps(age_group_data_tmp)
         visiting_group_o.program_request_age_group = visiting_group_o.get('program_request_age_group', age_group_data)
         
-        program_request_data_dict = {'identifier': 'id', 'items': [[{'id':0, 'requested_date': visiting_group_o['from_date'], 'requested_time':'', 'requested_activity': '', 'age_sma':False, 'age_spar':False, 'age_uppt':False, 'age_aven':False, 'age_utm':False, 'age_rov':False, 'age_led':False, 'note':''} for i in range(35)]] }
+        program_request_data_dict = {'identifier': 'id', 'items': [{'id':str(i), 'requested_date': visiting_group_o['from_date'], 'requested_time':'', 'requested_activity': '', 'age_sma':False, 'age_spar':False, 'age_uppt':False, 'age_aven':False, 'age_utm':False, 'age_rov':False, 'age_led':False, 'note':''} for i in range(35)] }
     
-        
+        #program_request_data_dict = {'identifier': 'rid', 'items': []}
         
         program_request_data = json.dumps(program_request_data_dict)
         visiting_group_o.program_request = visiting_group_o.get('program_request', program_request_data)

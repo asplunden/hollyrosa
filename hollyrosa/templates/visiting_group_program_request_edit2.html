@@ -61,6 +61,8 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
  
     var age_group_data = ${visiting_group_program_request.program_request_age_group}; 
     var program_request_data = ${visiting_group_program_request.program_request};
+    
+    
    
     var program_request_store = new ItemFileWriteStore({
     	data: program_request_data
@@ -103,14 +105,14 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
       {'name': 'Äventyrare', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
       {'name': 'Utmanare', 'field': 'age_utm', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},  
       {'name': 'Rover', 'field': 'age_rov', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Note', 'field': 'cnote', 'width': '200px', editable:global_edit_allowed}
+      {'name': 'Note', 'field': 'note', 'width': '200px', editable:global_edit_allowed}
     ]];
                             	
     
     var age_group_layout = [[
-      {'name': 'Ålder',                    field: 'age', 'width': '100px'},
-      {'name': 'Grupp',                  field: 'age_group', 'width': '100px'},
-      {'name': 'Antal deltagare', field: 'value', 'width': '150px', editable: global_edit_allowed},
+      {'name': 'Ålder',                     field: 'age', 'width': '100px'},
+      {'name': 'Grupp',                     field: 'age_group', 'width': '100px'},
+      {'name': 'Antal deltagare',       field: 'value', 'width': '150px', editable: global_edit_allowed},
       {'name': 'Från datum',              field: 'from_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
       {'name': 'Till datum',                field: 'to_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue}
     ]];
