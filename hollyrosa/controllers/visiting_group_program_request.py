@@ -195,21 +195,6 @@ class VisitingGroupProgramRequest(BaseController):
     @expose()
     @require(Any(has_level('pl'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få spara programönskemål'))
     def update_visiting_group_program_request(self, program_request_info='', contact_person='', contact_person_email='', contact_person_phone='', vgroup_id='', program_request_input='', have_skippers=False, miniscout=False, ready_to_process=False, age_group_input='', saveButton='', submitButton=''):
-        log.debug('update')
-        log.debug(contact_person)
-        log.debug(contact_person_email)
-        log.debug(contact_person_phone)
-        log.debug(program_request_info)
-        log.debug(miniscout)
-        log.debug(have_skippers)
-        log.debug(ready_to_process)
-
-        #log.debug('program request:'+program_request_input)
-        #log.debug('program_json: ' + str( json.loads(program_request_input) ) )
-        
-        #log.debug('age group:' + age_group_input)
-        #log.debug('age_json: ' + str( json.loads(age_group_input) ) )
-        
         visiting_group_id = str(vgroup_id)
         visiting_group_o = holly_couch[visiting_group_id]
         
@@ -218,6 +203,7 @@ class VisitingGroupProgramRequest(BaseController):
         visiting_group_o['contact_person'] = contact_person
         visiting_group_o['contact_person_email'] = contact_person_email
         visiting_group_o['contact_person_phone'] = contact_person_phone
+        
 
         if may_change_request_data:    
             visiting_group_o['program_request_info'] = program_request_info
@@ -226,13 +212,10 @@ class VisitingGroupProgramRequest(BaseController):
             visiting_group_o['program_request_age_group'] = age_group_input
             visiting_group_o['program_request'] = program_request_input
             
+            
             #...SOME PROCESSING SHOULD ONLY BE DONE IF READY TO SHIP
             if 'True' == ready_to_process:
-                visiting_group_o['boknstatus'] = 5 # todo: use constant
-        
-        
-            #...load properties dict:
-            log.debug(visiting_group_o['visiting_group_properties'])        
+                visiting_group_o['boknstatus'] = 5 # TODO: use constant
         
             #...iterate through age_group_data, items is a list of dicts...
             age_group_data = json.loads(age_group_input)
@@ -292,8 +275,6 @@ class VisitingGroupProgramRequest(BaseController):
                     log.debug('found request...' + str(tmp_request))
                     request_for_age_groups = [x[4:] for x in ['age_sma','age_spar','age_uppt','age_aven','age_utm','age_rov','age_led'] if tmp_request[x]]
                     if len(request_for_age_groups) > 0:                    
-                        log.debug('age groups: ' + str(request_for_age_groups))
-                        log.debug('txt: '+tmp_request['note'])
                         requested_date = tmp_request['requested_date'][:10]
                         requested_date_o = time.strptime(requested_date, "%Y-%M-%d" )
                         log.debug('requested_date: ' + requested_date)
@@ -338,7 +319,7 @@ class VisitingGroupProgramRequest(BaseController):
                                 
                                 
                                 
-                                new_booking = dict(type='booking',  valid_from='',  valid_to='',  requested_date=requested_date, slot_id=match_slot_id, booking_day_id=booking_day_o['_id'])
+                                new_booking = dict(type='booking',  valid_from='',  valid_to='',  requested_date=requested_date, slot_id=match_slot_id, booking_day_id=booking_day_o['_id'],  subtype='program')
                                 new_booking['visiting_group_id'] = str(vgroup_id)
                                 new_booking['valid_from'] = visiting_group_o['from_date']
                                 new_booking['valid_to'] = visiting_group_o['to_date']
@@ -366,15 +347,5 @@ class VisitingGroupProgramRequest(BaseController):
                                 
                                 remember_new_booking_request(holly_couch, booking=new_booking, changed_by=getLoggedInUserId())
                                 break
-            
                         
-                        #...that should be everything we need to create a new booking
-                        
-                        
-        
-        #
-        # It would be a great step towards 2014 version with the improved 4-1 schedule view
-        #
-              
-        #...raise...redirect referer...
-        
+        raise redirect(request.referrer)

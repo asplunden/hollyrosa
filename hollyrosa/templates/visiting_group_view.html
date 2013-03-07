@@ -117,7 +117,7 @@ function startup() {
    var set_program_state_url = '${tg.url('/visiting_group/set_program_state')}';       
     
    array.forEach(common_menu.program_state_change_list, function(x) {console.log(x); common_menu.add_change_program_state_menu_item(menu, change_program_status_menu, x['name'], x['state'], 0, set_program_state_url);});
-	
+	/* Disabled so we dont do misstakes *
 	var change_vodb_status_menu = new Menu();
     menu.addChild(new PopupMenuItem({
    	label: "Change vodb status",
@@ -128,7 +128,8 @@ function startup() {
    var set_vodb_state_url = '${tg.url('/visiting_group/set_vodb_state')}';       
     
    array.forEach(common_menu.vodb_state_change_list, function(x) {console.log(x); common_menu.add_change_program_state_menu_item(menu, change_vodb_status_menu, x['name'], x['state'], 0, set_vodb_state_url);});
-	
+	*/
+    
 	common_menu.add_menu_separator(menu);   
    common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history...", '${visiting_group['id']}', '${tg.url('/history/show')}');
    common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb data...", '${visiting_group['id']}', '${tg.url('/vodb_group/edit_data', params={'vgroup_id':visiting_group['id']})}');
@@ -182,7 +183,7 @@ function startup() {
     
     <h3>Message to program from ext booking</h3>
     <div class="note">
-    <p>${HTML(visiting_group.get('message_to_program',''))}</p></div>
+    <p>${HTML(visiting_group.get('program_request_info',''))}</p></div>
     
     <h3>Properties</h3>
     <table class="data">
