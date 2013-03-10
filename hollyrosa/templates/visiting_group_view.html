@@ -178,7 +178,7 @@ function startup() {
                 
     </div>
     
-    <p>${visiting_group.contact_person}<br/>$visiting_group.contact_person_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.contact_person_email</a><br/>
+    <p>${visiting_group.get('contact_person','')}<br/>${visiting_group.get('contact_person_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('contact_person_email','')}</a><br/>
     </p> 
     
     <h3>Message to program from ext booking</h3>
