@@ -204,8 +204,33 @@ class has_level(Predicate):
 
 
 
-
-def make_object_of_vgdictionary(visiting_group_c):
+def makeVisitingGroupObjectOfVGDictionary(a_visiting_group):
+    obj_params = makeParamsForObjectOfVGDictionary(a_visiting_group)
+    
+    # TODO: DataContainerFromDictLikeObject(fields=)
+    visiting_group = DataContainer(name=a_visiting_group['name'],  _id=a_visiting_group['_id'],  info=a_visiting_group['info'],  visiting_group_properties=obj_params, 
+                                   contact_person=a_visiting_group.get('contact_person', ''),  contact_person_email=a_visiting_group.get('contact_person_email', ''),  contact_person_phone=a_visiting_group.get('contact_person_phone', ''), 
+                                   boknr=a_visiting_group['boknr'], password=a_visiting_group.get('password',''), boknstatus=a_visiting_group['boknstatus'],  camping_location=a_visiting_group['camping_location'],  
+                                   from_date=datetime.datetime.strptime(a_visiting_group['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(a_visiting_group['to_date'], '%Y-%m-%d'), 
+                                   subtype=a_visiting_group['subtype'])
+            
+    return visiting_group
+    
+    
+def makeVODBGroupObjectOfVGDictionary(a_visiting_group):
+    obj_params = makeParamsForObjectOfVGDictionary(a_visiting_group)
+    
+    visiting_group = DataContainer(name=a_visiting_group['name'],  _id=a_visiting_group['_id'],  info=a_visiting_group['info'],  visiting_group_properties=obj_params, 
+                                   vodb_contact_person=a_visiting_group.get('vodb_contact_person', ''),  vodb_contact_email=a_visiting_group.get('vodb_contact_email', ''),  
+                                   vodb_contact_phone=a_visiting_group.get('vodb_contact_phone', ''), vodb_contact_address=a_visiting_group.get('vodb_contact_address', ''), 
+                                   boknr=a_visiting_group['boknr'], password=a_visiting_group.get('password',''), boknstatus=a_visiting_group['boknstatus'],  camping_location=a_visiting_group['camping_location'],  
+                                   from_date=datetime.datetime.strptime(a_visiting_group['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(a_visiting_group['to_date'], '%Y-%m-%d'), 
+                                   subtype=a_visiting_group['subtype'])
+            
+    return visiting_group
+    
+    
+def makeParamsForObjectOfVGDictionary(visiting_group_c):
     """
     This function is for making an object that tw forms understands from a couchdb dict like object    
     """
@@ -224,14 +249,5 @@ def make_object_of_vgdictionary(visiting_group_c):
                 
         vgpx = DataContainer(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=tmp_from_date,  to_date=tmp_to_date,  id=str(id))
         vgps.append(vgpx)
-
-    # TODO: DataContainerFromDictLikeObject(fields=)
-    visiting_group = DataContainer(name=visiting_group_c['name'],  _id=visiting_group_c['_id'],  info=visiting_group_c['info'],  visiting_group_properties=vgps
-                                   ,  contact_person=visiting_group_c['contact_person'],  contact_person_email=visiting_group_c['contact_person_email'],  contact_person_phone=visiting_group_c['contact_person_phone'], 
-                                   boknr=visiting_group_c['boknr'], password=visiting_group_c.get('password',''), boknstatus=visiting_group_c['boknstatus'],  camping_location=visiting_group_c['camping_location'],  from_date=datetime.datetime.strptime(visiting_group_c['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(visiting_group_c['to_date'], '%Y-%m-%d'), 
-                                   subtype=visiting_group_c['subtype'])
-            
-    return visiting_group
-            
-
-
+    return vgps
+    

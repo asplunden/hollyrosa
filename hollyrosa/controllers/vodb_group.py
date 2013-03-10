@@ -37,7 +37,7 @@ from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUs
 
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange
 from hollyrosa.controllers.booking_history import remember_tag_change,  remember_booking_vgroup_properties_change
-from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, vodb_status_map, make_object_of_vgdictionary, vodb_eat_times_options, vodb_live_times_options
+from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, vodb_status_map, makeVODBGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options
 from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange, updateVisitingGroupComputedSheets, computeAllUsedVisitingGroupsTagsForTagSheet,  program_visiting_group_properties_template,  staff_visiting_group_properties_template,  course_visiting_group_properties_template
 from hollyrosa.controllers.booking_history import remember_new_booking_request
 from hollyrosa.controllers import common_couch
@@ -132,15 +132,12 @@ class VODBGroup(BaseController):
                     visiting_group_c[k] = ''
             if not visiting_group_c.has_key('subtype'):
                 visiting_group_c['subtype'] = 'program'
-            visiting_group = make_object_of_vgdictionary(visiting_group_c)
+            visiting_group = makeVODBGroupObjectOfVGDictionary(visiting_group_c)
         
         
 #        #...add data if it doesent exist
 #        if not visiting_group_x.has_key('vodb_status'):
 #            visiting_group_x['vodb_status'] = 0
-        
-                
-#        visiting_group_o = make_object_of_vgdictionary(visiting_group_x)
          
         return dict(vodb_group=visiting_group, reFormatDate=reFormatDate, bokn_status_map=workflow_map, is_new=is_new)
 

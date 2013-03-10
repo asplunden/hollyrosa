@@ -905,7 +905,7 @@ class BookingDay(BaseController):
         #...first, find the slot to prolong to
         old_booking = common_couch.getBooking(holly_couch,  booking_id) # move into model
         booking_day_id = old_booking['booking_day_id']
-        booking_day = common_couch.getBooking(holly_couch,  booking_day_id)
+        booking_day = common_couch.getBookingDay(holly_couch,  booking_day_id)
         day_schema_id = booking_day['day_schema_id']
         day_schema = common_couch.getDaySchema(holly_couch,  day_schema_id)
         old_slot_id = old_booking['slot_id']

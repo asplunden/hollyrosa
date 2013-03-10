@@ -37,7 +37,7 @@ from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
 from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
 from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
 from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
-from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, make_object_of_vgdictionary, vodb_eat_times_options, vodb_live_times_options
+from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, makeVisitingGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options
 from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange,  updateVisitingGroupComputedSheets,  computeAllUsedVisitingGroupsTagsForTagSheet,  program_visiting_group_properties_template,  staff_visiting_group_properties_template,  course_visiting_group_properties_template
 from hollyrosa.controllers.booking_history import remember_tag_change
 from hollyrosa.controllers import common_couch
@@ -250,7 +250,7 @@ class VisitingGroup(BaseController):
             visiting_group_c = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
             if not visiting_group_c.has_key('subtype'):
                 visiting_group_c['subtype'] = 'program'
-            visiting_group = make_object_of_vgdictionary(visiting_group_c)
+            visiting_group = makeVisitingGroupObjectOfVGDictionary(visiting_group_c)
             
         return dict(visiting_group=visiting_group,  bokn_status_map=bokn_status_options,  is_new=is_new)
 
