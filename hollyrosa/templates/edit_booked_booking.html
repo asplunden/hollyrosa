@@ -36,11 +36,6 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/ready"], function(edit_booking, dom, on, xhr, ready) { 
 
 
-function on_update_visiting_group_data(data)
-{
-    alert(data);
-}
-
 function get_visiting_group_data_from_XHR_helper(visiting_group_id, value) {
     xhr("${tg.url('/visiting_group/show_visiting_group_data')}", {
     handleAs:"json",
@@ -61,7 +56,7 @@ function propagate_selected_value() {
     edit_booking.set_form_field_value('create_edit_book_slot_form_visiting_group_name', value);
 }
 
-  
+/*
 function transfer_from_date(date) {
     dom.byId("create_edit_new_booking_request_form_valid_from").value = date;
 }
@@ -70,16 +65,22 @@ function transfer_from_date(date) {
 function transfer_to_date(date) {
     dom.byId("create_edit_new_booking_request_form_valid_to").value = date;
 }
-
+*/
 
 ready(function(){
     var elem = dom.byId('create_edit_book_slot_form_visiting_group_id');
     on( elem, "change", propagate_selected_value);
     on( elem, "change", get_visiting_group_data_from_XHR);
 
-     
-    if ( '0' != '${edit_this_visiting_group}' ) {
+    is_new_booking = '0' == '${edit_this_visiting_group}' ;
+    if ( ! is_new_booking ) {
       get_visiting_group_data_from_XHR_helper('${edit_this_visiting_group}', '${edit_this_visiting_group}');
+    } else {
+        //...load N/A group (should be the first in the list)
+        value = elem.options[elem.selectedIndex].text;
+        edit_booking.set_form_field_value('create_edit_book_slot_form_visiting_group_name', value);
+        id_value = elem.options[elem.selectedIndex].value;
+        get_visiting_group_data_from_XHR_helper(value, id_value);
     }
 });
 
