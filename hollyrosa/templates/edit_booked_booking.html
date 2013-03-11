@@ -72,17 +72,6 @@ function transfer_to_date(date) {
 }
 
 
-function transfer_to_content(text) {
-    var old_text = dom.byId("create_edit_book_slot_form_content").value;
-    if ('' == old_text) {
-        dom.byId("create_edit_book_slot_form_content").value = text;
-    }
-    else {
-        dom.byId("create_edit_book_slot_form_content").value = old_text + " " + text;
-    }
-}
-
-
 ready(function(){
     var elem = dom.byId('create_edit_book_slot_form_visiting_group_id');
     on( elem, "change", propagate_selected_value);

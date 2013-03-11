@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2011, 2012 Martin Eliasson
+ * Copyright 2012, 2011, 2012, 2013 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *
@@ -18,7 +18,7 @@
  **/
 
  
-define(["dojo/_base/array", "dojo/query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], function(array, query, dom, domConstruct, xhr, ready) {
+define(["dojo/_base/array", "dojo/query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/on", "dojo/ready"], function(array, query, dom, domConstruct, xhr, on, ready) {
 
 
 function set_form_field_value(form_field_id, value){
@@ -70,7 +70,16 @@ function update_visiting_group_data(data) {
     array.forEach(properties, function(g){
         tr = domConstruct.create("tr", null, table);
         td = domConstruct.create("td", {}, table);
-        ahref = domConstruct.create("a", {href:'javascript:transfer_to_content("\$\$' + g['property'] +'");', innerHTML: '\$'+g['property']}, td);
+        // ahref = domConstruct.create("a", {href:'javascript:transfer_to_content("\$\$' + g['property'] +'");', innerHTML: '\$'+g['property']}, td);
+        ahref = domConstruct.create("a", { innerHTML: '\$'+g['property']}, td);
+        on(ahref, 'click', function(e) {
+            old_text = dom.byId("create_edit_book_slot_form_content").value;
+            if ('' == old_text) {
+                dom.byId("create_edit_book_slot_form_content").value = '\$\$' + g['property'] ;
+            } else {
+                dom.byId("create_edit_book_slot_form_content").value = old_text + " " + '\$\$' + g['property'] ;
+            }       
+        });
         td = domConstruct.create("td", { innerHTML: g['value'] }, table);
         td = domConstruct.create("td", { innerHTML: g['unit'] }, table);
         td = domConstruct.create("td", { innerHTML: g['description'] }, table);
