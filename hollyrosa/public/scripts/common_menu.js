@@ -77,7 +77,7 @@
    
    
 	function add_booking_op_menu_item(a_menu, a_sub_menu, a_name, a_url) {
-   	a_sub_menu.addChild(new MenuItem({
+        a_sub_menu.addChild(new MenuItem({
                label: a_name,
                onClick: function(evt) {
                    var node = a_menu.currentTarget;
@@ -90,7 +90,19 @@
                }
            })); 
 	}
-	
+    
+    
+    function add_call_function_menu_item(a_menu, a_sub_menu, a_name, a_func) {
+        a_sub_menu.addChild(new MenuItem({
+            label: a_name,
+            onClick: function(evt) {
+                var node = a_menu.currentTarget;
+                
+                a_func(node);
+                }
+           }));
+    }
+    
 	
 	function add_booking_op_menu_item_for_block(a_menu, a_sub_menu, a_name, a_url) {
    	var menu_item =new MenuItem({
@@ -294,6 +306,7 @@
 	
 	return {
 		add_redirect_menu_item:add_redirect_menu_item, 
+        add_call_function_menu_item:add_call_function_menu_item,
 	   add_vgid_redirect_menu_item:add_vgid_redirect_menu_item, 
 	   add_note_redirect_menu_item:add_note_redirect_menu_item, 
 	   add_list_bookings_redirect_menu_item:add_list_bookings_redirect_menu_item, 
