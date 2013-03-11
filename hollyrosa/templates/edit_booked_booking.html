@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -44,7 +44,6 @@ function get_visiting_group_data_from_XHR_helper(visiting_group_id, value) {
 }
 
 
-/* check if this is really right */
 function get_visiting_group_data_from_XHR(visiting_group_id) {
     var value = this.options[this.selectedIndex].value;
     get_visiting_group_data_from_XHR_helper(visiting_group_id, value);
@@ -56,16 +55,6 @@ function propagate_selected_value() {
     edit_booking.set_form_field_value('create_edit_book_slot_form_visiting_group_name', value);
 }
 
-/*
-function transfer_from_date(date) {
-    dom.byId("create_edit_new_booking_request_form_valid_from").value = date;
-}
-
-
-function transfer_to_date(date) {
-    dom.byId("create_edit_new_booking_request_form_valid_to").value = date;
-}
-*/
 
 ready(function(){
     var elem = dom.byId('create_edit_book_slot_form_visiting_group_id');
