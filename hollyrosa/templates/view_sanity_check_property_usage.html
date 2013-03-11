@@ -48,15 +48,11 @@ require(["common_menu", "dojo/_base/array", "dijit/Menu","dijit/MenuItem", "diji
     }
     
     
-    
     function unschedule_booking(node)
     {
         booking_id = node.attributes["hollyrosa:bid"].value;
         activity_id = node.attributes["hollyrosa:aid"].value;
         visiting_group_id = node.attributes["hollyrosa:vgid"].value;
-        
-        alert(activity_id);
-        return;
         
         xhr("${tg.url('/hollyrosa/booking/unschedule_booking_async')}",
         { 
@@ -76,8 +72,6 @@ require(["common_menu", "dojo/_base/array", "dijit/Menu","dijit/MenuItem", "diji
         query: {'booking_id':booking_id},
         method:"POST"}).then(on_booking_warning_ignored);
     }
-    
-    // try to add ignore warning menu item
 
     
     ready(function() {
