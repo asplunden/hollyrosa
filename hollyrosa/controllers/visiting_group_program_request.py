@@ -38,6 +38,7 @@ from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchema
 from hollyrosa.controllers.booking_history import remember_tag_change
 from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map
 from hollyrosa.controllers.booking_history import remember_new_booking_request
+from hollyrosa.controllers import common_couch
 
 from formencode import validators
 
@@ -116,6 +117,21 @@ age_group_data_raw = """{
 #property_list = []
 #for tmp in age_group_data_raw['items']:
 #    property_list.append(tmp['property'])
+
+
+class ValidationErrorMessages(list):
+    """This class is used in the external booking request to do custom validation of errors found in the rather complex data sent from the grids. 
+    Typically, we have two dates and there are constraints on them."""
+    
+    def __init__(self):
+        super(ValidationErrorMessages, self).__init__()
+    
+    def report(self, section,  message,  problematic_value):
+        self.append(dict(section=section,  message=message,  problematic_value=problematic_value))
+    
+    def hasErrors(self):
+        return len(self) > 0
+        
 
 
 class VisitingGroupProgramRequest(BaseController):
@@ -197,11 +213,23 @@ class VisitingGroupProgramRequest(BaseController):
     def update_visiting_group_program_request(self, program_request_info='', contact_person='', contact_person_email='', contact_person_phone='', vgroup_id='', program_request_input='', have_skippers=False, miniscout=False, ready_to_process=False, age_group_input='', saveButton='', submitButton=''):
         # TODO: once property data has changed, we somehow need to propagate that property data to all places where the properties are used BUT I dont think we really waht to propagate it unless we do some state-change,
         # we probably want to check the data before it is allowed to progress into other parts of the system.
+        # TODO: We lost a lot of work, but our aim is to introduce the validation_error_messages list to contain all problems we have encountered.
+        # what about making a subclassed list which can add speciealy formatted messages?
+        # also, we should hav a comprehensive from-date-to-date checker
+        #
+        # dont forget to check for empty fm/em/evening
+        # also common_couch code should be added
+        #
+        # make a validation_error_contect object that can be passed around and a date range checker and similar.
+        # essentially we want to store section(1,2,3) property name and message. How to fix it.
+        #
+        #
+        # 
+        
+        validation_error_messages = ValidationErrorMessages()
         
         visiting_group_id = str(vgroup_id)
-        
-        # TODO: refactor line below
-        visiting_group_o = holly_couch[visiting_group_id]
+        visiting_group_o = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         
         may_change_request_data = (0  == visiting_group_o['boknstatus'])
         visiting_group_o['contact_person'] = contact_person
@@ -217,8 +245,8 @@ class VisitingGroupProgramRequest(BaseController):
             visiting_group_o['program_request'] = program_request_input
             
             
-            #...SOME PROCESSING SHOULD ONLY BE DONE IF READY TO SHIP
-            if 'True' == ready_to_process:
+            # TODO: ...SOME PROCESSING SHOULD ONLY BE DONE IF READY TO SHIP
+            if ready_to_process and (not validation_error_messages.hasErrors()):
                 visiting_group_o['boknstatus'] = 5 # TODO: use constant
         
             #...iterate through age_group_data, items is a list of dicts...
@@ -249,15 +277,27 @@ class VisitingGroupProgramRequest(BaseController):
                     
                     # TODO: check that dates are within valid ranges
                     #...so we might have to write a fance fancy validator for all this json data
-                    ok_1,  tmp_vgroup_property['from_date'] = sanitizeDate(tmp_age_group['from_date'],  default_date=tmp_vgroup_property['from_date'] )
+                    ok_1,  tmp_vgroup_property['from_date'] = sanitizeDate(tmp_age_group['from_date'],  default_date=tmp_vgroup_property['from_date']  )
+                    if not ok_1:
+                        validation_error_messages.report('properties',  'from-date of property %s not a valid date in format YYYY-MM-DD' % tmp_vgroup_property['property'], tmp_age_group['from_date'])
                     ok_2,  tmp_vgroup_property['to_date'] = sanitizeDate(tmp_age_group['to_date'],  default_date=tmp_vgroup_property['to_date'] )
-                    ok_3 = ok_1 and ok_2 and (tmp_vgroup_property['to_date']  >=  tmp_vgroup_property['from_date'] )
-                    log.debug('from date is %s and to date is %s' % ( tmp_vgroup_property['from_date'] ,   tmp_vgroup_property['to_date'] ))
-                    #...todo check dates are in range
+                    if not ok_2:
+                        validation_error_messages.report('properties',  'to-date of property %s not a valid date in format YYYY-MM-DD' % tmp_vgroup_property['property'], tmp_age_group['to_date'])
+                    ok_3 = (tmp_vgroup_property['to_date']  >=  tmp_vgroup_property['from_date'] )
+                    if not ok_3:
+                        validation_error_messages.report('properties',  'to-date cannot ocurrr before from-date of property %s' % tmp_vgroup_property['property'], tmp_age_group['from_date'])
+                    ok_4 = tmp_vgroup_property['from_date'] >= visiting_group_o['from_date']
+                    if not ok_4:
+                        validation_error_messages.report('properties',  'from-date %s of property %s cannot occurr before overal from-date %s of visiting group' % (tmp_vgroup_property['from_date'],  tmp_vgroup_property['property'], visiting_group_o['from_date']), tmp_vgroup_property['from_date']) 
+                    ok_5 = tmp_vgroup_property['to_date'] <= visiting_group_o['to_date']
+                    if not ok_5:
+                        validation_error_messages.report('properties',  'to-date %s of property %s cannot occurr after overal to-date %s of visiting group' % (tmp_vgroup_property['to_date'],  tmp_vgroup_property['property'], visiting_group_o['to_date']), tmp_vgroup_property['to_date']) 
+                    
+                    
                     
                     log.debug('new: ' + process_property + '=' + str(tmp_age_group['value']))
                     #visiting_group_o['visiting_group_properties'][property_id] = tmp_vgroup_property
-                else:
+                else: # property not found, new property
                     log.debug('property not found, what do we do?')
                 
                     if 0 == tmp_age_group['value']:
@@ -271,27 +311,47 @@ class VisitingGroupProgramRequest(BaseController):
                         lowest_key_number +=1
                         
                         # TODO: Date sanitation here too
-                        ok_4,  new_from_date = sanitizeDate(tmp_age_group['from_date'],  default_date=tmp_vgroup_property['from_date'] )
-                        ok_5,  new_to_date = sanitizeDate(tmp_age_group['to_date'],  default_date=tmp_vgroup_property['to_date'] )
-                        ok_6 = ok_4 and ok_5 and (new_from_date <= new_to_date)
+                        ok_6,  new_from_date = sanitizeDate(tmp_age_group['from_date'],  default_date=visiting_group_o['from_date'] )
+                        if not ok_6:
+                            validation_error_messages.report('properties',  'from-date of property %s not a valid date in format YYYY-MM-DD' % tmp_age_group['property'], tmp_age_group['from_date'])
+                        ok_7,  new_to_date = sanitizeDate(tmp_age_group['to_date'],  default_date=visiting_group_o['to_date'] )
+                        if not ok_7:
+                            validation_error_messages.report('properties',  'to-date of property %s not a valid date in format YYYY-MM-DD' % tmp_age_group['property'], tmp_age_group['to_date'])
+                            
+                        ok_8 = (new_from_date <= new_to_date)
+                        if not ok_8:
+                            validation_error_messages.report('properties',  'to-date cannot ocurrr before from-date of property %s' % tmp_age_group['property'], tmp_age_group['from_date'])
+                        ok_9 = tmp_age_group['from_date'] >= visiting_group_o['from_date']
+                        if not ok_9:
+                            validation_error_messages.report('properties',  'from-date %s of property %s cannot occurr before overall from-date %s of visiting group' % (tmp_age_group['from_date'],  tmp_age_group['property'], visiting_group_o['from_date']), tmp_age_group['from_date']) 
+                        ok_10 = tmp_age_group['to_date'] <= visiting_group_o['to_date']
+                        if not ok_10:
+                            validation_error_messages.report('properties',  'to-date %s of property %s cannot occurr after overal to-date %s of visiting group' % (tmp_age_group['to_date'],  tmp_age_group['property'], visiting_group_o['to_date']), tmp_age_group['to_date']) 
+                    
                         new_property_row = {u'description': tmp_age_group['age_group'], u'value': tmp_age_group['value'], u'from_date': new_from_date, u'to_date': new_to_date, u'property': tmp_age_group['property'], u'unit': tmp_age_group['unit']}
                         x = visiting_group_o['visiting_group_properties']
                         x[str(lowest_key_number)] = new_property_row
                         visiting_group_o['visiting_group_properties'] = x
             
+            visiting_group_o['validation_error_messages'] = validation_error_messages
             holly_couch[visiting_group_o['_id']] = visiting_group_o
 
         # for the program request , iterate through it
-        if may_change_request_data:
+        if may_change_request_data and len(validation_error_messages) == 0:
             if 'True' == ready_to_process or True:
                 program_request_list = json.loads(program_request_input)
                 for tmp_request in program_request_list['items']:
                     log.debug('found request...' + str(tmp_request))
                     request_for_age_groups = [x[4:] for x in ['age_sma','age_spar','age_uppt','age_aven','age_utm','age_rov','age_led'] if tmp_request[x]]
+                    
                     if len(request_for_age_groups) > 0:
-                        #...TODO: sanitize requested_date
-                        ok_r1, requested_date = sanitizeDate(tmp_request['requested_date'][:10],  default_date='')
                         
+                        #...TODO: sanitize requested_date and make sure it is in range
+                        ok_r1, requested_date = sanitizeDate(tmp_request['requested_date'][:10],  default_date='')
+                        if not ok_r1:
+                            validation_error_messages.report('booking request',  'requested date %s is not a valid date in format YYYY-MM-DD' % tmp_request['requested_date'], tmp_request['requested_date'])
+                        if not ((requested_date >= visiting_group_o['from_date']) and (requested_date <= visiting_group_o['to_date'])):
+                            validation_error_messages.report('booking request',  'requested date %s is not a within the date range of the visiting group' % tmp_request['requested_date'], tmp_request['requested_date'])
                         # TODO: reuse the parsing of the date
                         requested_date_o = time.strptime(requested_date, "%Y-%M-%d" )
                         requested_time = tmp_request['requested_time']
@@ -300,7 +360,9 @@ class VisitingGroupProgramRequest(BaseController):
                         booking_day_o = getBookingDayOfDate(holly_couch, requested_date)
                         log.debug(booking_day_o)
                         day_schema_id = booking_day_o['day_schema_id']
-                        schema_o = holly_couch[day_schema_id]                        
+                        
+                        #...TODO day shema will probably always be the same so just query once per schema
+                        schema_o = common_couch.getDaySchema(holly_couch,  day_schema_id)                        
                         
                         #...given fm/em/evening, look up the matching slot_id. Probably the schema will be needed (and maybe index 0,1,2,3...)
                         tmp_activity_row = schema_o['schema'][requested_activity_id]

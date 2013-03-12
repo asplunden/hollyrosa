@@ -21,6 +21,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 import copy,  types
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange
 from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId
+from hollyrosa.controllers.booking_history import remember_tag_change,  remember_booking_vgroup_properties_change
 
 
 
@@ -30,7 +31,8 @@ program_visiting_group_properties_template = [DataContainer(property='sma',  val
                                               DataContainer(property='aven',  value='0',  unit=u'aven',  description=u'antal deltagare 12 till 15 år'), 
                                               DataContainer(property='utm',  value='0',  unit=u'utm',  description=u'antal deltagare 16 till 18 år'),
                                               DataContainer(property='rov',  value='0',  unit=u'rover',  description=u'antal roverscouter'),
-                                              DataContainer(property='led',  value='0',  unit=u'ledare',  description=u'antal ledare')]
+                                              DataContainer(property='led',  value='0',  unit=u'ledare',  description=u'antal ledare'), 
+                                              DataContainer(property='antal',  value='0',  unit=u'antal',  description=u'preliminärt uppskattat antal')]
                                               
 staff_visiting_group_properties_template = [DataContainer(property='funk',  value='1',  unit=u'funk',  description=u'antal funk'), DataContainer(property='barn',  value='0',  unit=u'fkbarn',  description=u'antal funk barn')]
  
@@ -68,8 +70,8 @@ def updateBookingsCacheContentAfterPropertyChange(a_holly_couch, a_visiting_grou
                 #...we need booking day of booking if it exists
                 
                 
-                remember_booking_vgroup_properties_change(holly_couch, booking=tmp_booking, visiting_group_id=l_visiting_group_id,  visiting_group_name=l_visiting_group_name, changed_by=logged_in_user_id,  activity_title=a_holly_couch[tmp_booking['activity_id']]['title'])
-                holly_couch[tmp_booking['_id']] = tmp_booking
+                remember_booking_vgroup_properties_change(a_holly_couch, booking=tmp_booking, visiting_group_id=l_visiting_group_id,  visiting_group_name=l_visiting_group_name, changed_by=logged_in_user_id,  activity_title=a_holly_couch[tmp_booking['activity_id']]['title'])
+                a_holly_couch[tmp_booking['_id']] = tmp_booking
 
 
 def populatePropertiesAndRemoveUnusedProperties(a_visiting_group,  a_visiting_group_properties):

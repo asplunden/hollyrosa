@@ -40,13 +40,16 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
   function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready, domReady ){
     
     function formatDate(datum) {
-        var d = stamp.fromISOString(datum);
-        return locale.format(d, {selector: 'date', formatLength: 'short'});
+        /*var d = stamp.fromISOString(datum);
+        return locale.format(d, {selector: 'date', formatLength: 'short'});*/
+        return datum;
     }
 
     function getDateValue(){
         /*Override the default getValue function for dojox.grid.cells.DateTextBox   */
-        return stamp.toISOString(this.widget.get('value'));
+        /* return stamp.toISOString(this.widget.get('value')); */
+        return locale.format(this.widget.get('value'), {selector: 'date', datePattern: 'yyyy-MM-dd'});
+        
     }
     
     
@@ -73,7 +76,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     	data: age_group_data
       });
 
-    age_group_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
+    age_group_store._saveEverything = function(a_saveCompleteCallback,
                                 a_saveFailedCallback /*Your callback to call if save fails*/,
                                 a_newFileContentString /*The generated JSON data to send somewhere*/){
                                 
@@ -82,17 +85,14 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
                                 	a_saveCompleteCallback();
     										};
     
-    program_request_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
-                                a_saveFailedCallback /*Your callback to call if save fails*/,
+    program_request_store._saveEverything = function(a_saveCompleteCallback,
+                                a_saveFailedCallback,
                                 a_newFileContentString /*The generated JSON data to send somewhere*/){
-                                	//alert(a_newFileContentString);
                                 	var inp = dom.byId('program_request_div_input');
                                 	inp.value = a_newFileContentString;
                                 	a_saveCompleteCallback();
-                                	};   
-
-
-    
+                                	};  
+                                    
     var global_edit_allowed = ( ${visiting_group_program_request.boknstatus} == 0 ); 
     
     var program_request_layout = [[
@@ -107,7 +107,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
       {'name': 'Rover', 'field': 'age_rov', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
       {'name': 'Note', 'field': 'note', 'width': '200px', editable:global_edit_allowed}
     ]];
-                            	
+
     
     var age_group_layout = [[
       {'name': 'Ålder',                     field: 'age', 'width': '100px'},
@@ -120,6 +120,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     /*create a new grid*/
     var age_group_grid = new DataGrid({
         id: 'age_group_gridx',
+        singleClickEdit: true,
         store: age_group_store,
         structure: age_group_layout,
         rowSelector: '10px'});
@@ -134,22 +135,18 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
 
 
     function on_save_grid_to_input() {
-    	//...find dojo store and serialize it. Should be simple. Then write serialized data into 
-    	//alert('storing...');
     	age_group_store.save(saveCompleteCallback, saveFailedCallback);
     	program_request_store.save(saveCompleteCallback, saveFailedCallback);
     	dom.byId('program_request_info').value = dijit.byId('program_request_info_editor').value;
     	};
-    	
-    
-    
     
     
     function on_validate() {
       var myForm = dijit.byId('myForm');
     	if(myForm.validate()){
-            //var result = confirm('Form is valid, press OK to submit');
-            
+            /* do some more advanced form data validation
+             * all requested dates should be within the range of the visiting group
+             */ 
             return true;
         } else {
             alert('Form contains invalid data.  Please correct first');
@@ -174,8 +171,6 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     
     
     function on_ready(){
-      //...validate form
-    	
       var submit_button = dijit.byId('submit_button');
       var save_button = dijit.byId('save_button');
       
@@ -186,8 +181,8 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
 			dom.byId('ready_to_process').value = 'True';      
       });
         
-		on( submit_button , 'click', on_validate_finalize);  
-		on( save_button , 'click', on_validate); 
+    on( submit_button , 'click', on_validate_finalize);  
+    on( save_button , 'click', on_validate); 
 		
     age_group_grid.placeAt('age_group_div');
     age_group_grid.startup();
@@ -196,10 +191,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
      
     }
     	
-      ready(on_ready);
-      
-        
-      
+    ready(on_ready);
 });
 
 </script>
@@ -211,6 +203,7 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
 
 <body class="tundra">
     <h2>Programönskemål för ${visiting_group_program_request.name}</h2>
+    
 
 	<p>Lägertid: <b>${reFormatDate(visiting_group_program_request.from_date)} - ${reFormatDate(visiting_group_program_request.to_date)}</b><br/>
     Boknings status: <b>${bokn_status_map[visiting_group_program_request.boknstatus]}</b></p>
@@ -222,17 +215,26 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
     </p>
     <p>
     Det finns i grunden fyra sorters information du behöver mata in:
-    <ul>
+    <ol>
 		<li>Kontaktinfo och speciellt info</li>
 		<li>Övrig programönskemåls info</li>
 		<li>Antal och lägertid per åldersgrupp. Passar er grupp inte mallen, använd hellre vårt pappers-formulär</li>
 		<li>Programönskemål. Välj dag, tid och kryssa sedan i vilka åldersgrupper det gäller.</li>   
-    </ul>
+    </ol>
     </p>
     <p>Sist av allt tryck "spara utkasst". <b>OBS! du kan alltid spara som utkasst och fortsätta fylla i formuläret tills dess att du har bestämt dig, men du måste tillslut välja att "spara och processa". Efter att du valt "spara och processa" så tar vi hand om era programönskemål</b>
     men det är också så att efter att du tryckt "spara och processa" så kan du inte ändra i annat än kontaktinfo.
     </p>
-</div>    
+    
+    <div id="validation_error_messages" py:if="visiting_group_program_request.has_key('validation_error_messages')">
+    <h3>Att rätta till</h3>
+    <p>Den här rutan visas för att det finns minst en sak som behöver korrigeras i programönskemålen innan "spara och processa" kan genomföras. "spara utkasst" fungerar dock alltid.</p>
+    <table>
+        <tr><th>Sektion</th><th>Att korrigera</th></tr>
+        <tr py:for="m in visiting_group_program_request.validation_error_messages"><td>$m['section']</td><td>$m['message']</td></tr>
+    </table>
+    </div>
+    </div>    
     
     
     <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_visiting_group_program_request" method="post">
