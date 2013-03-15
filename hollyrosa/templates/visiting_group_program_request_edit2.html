@@ -225,16 +225,18 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
     <p>Sist av allt tryck "spara utkasst". <b>OBS! du kan alltid spara som utkasst och fortsätta fylla i formuläret tills dess att du har bestämt dig, men du måste tillslut välja att "spara och processa". Efter att du valt "spara och processa" så tar vi hand om era programönskemål</b>
     men det är också så att efter att du tryckt "spara och processa" så kan du inte ändra i annat än kontaktinfo.
     </p>
+    </div>
     
-    <div id="validation_error_messages" py:if="visiting_group_program_request.has_key('validation_error_messages')">
+    <div id="validation_error_messages" py:if="hasValidationErrors(visiting_group_program_request)" style="background:#fcc;">
     <h3>Att rätta till</h3>
-    <p>Den här rutan visas för att det finns minst en sak som behöver korrigeras i programönskemålen innan "spara och processa" kan genomföras. "spara utkasst" fungerar dock alltid.</p>
+    <p>Den här rutan visas för att det finns minst en sak som behöver korrigeras i programönskemålen innan "spara och processa" kan genomföras och lyckas. Tillsvidare kan du använda "spara utkasst" så du inte förlorar det du matat in.</p>
+    <p py:for="msg in visiting_group_program_request.get('validation_error_explanations',{}).values()">$msg</p>
     <table>
-        <tr><th>Sektion</th><th>Att korrigera</th></tr>
-        <tr py:for="m in visiting_group_program_request.validation_error_messages"><td>$m['section']</td><td>$m['message']</td></tr>
+        <tr><th>Sektion</th><th>Att korrigera</th><th>Problematiskt värde</th></tr>
+        <tr py:for="m in visiting_group_program_request.validation_error_messages"><td>${m['section']}</td><td>${m['message']}</td><td>${m['problematic_value']}</td></tr>
     </table>
     </div>
-    </div>    
+       
     
     
     <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_visiting_group_program_request" method="post">

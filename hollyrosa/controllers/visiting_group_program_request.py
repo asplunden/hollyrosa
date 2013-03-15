@@ -114,20 +114,32 @@ age_group_data_raw = """{
 }"""
 
 
-#property_list = []
-#for tmp in age_group_data_raw['items']:
-#    property_list.append(tmp['property'])
+validation_error_explanations = {}
+validation_error_explanations['date_format'] = u"Det har blivit fel i formateringen av ett datum. Datum måste vara på formen YYYY-MM-DD. Det kan bero på att ett datum inte angivits, men troligare är det ett fel vi programmerare har gjort."
+validation_error_explanations['date_range'] = u"Ett datum som angivits är inte innom rimliga gränser. Datumet kan exempelvis vara innan er grupp kommit till ön eller efter att den åkt hem igen."
+validation_error_explanations['date_order'] = u"Ett datum-par, oftast från-datum och till-datum, är i fel kronologisk ordning. Det är lite orimligt att man åker hem innan man kommit ut till ön."
+validation_error_explanations['req_fm_em'] = u"En rad bland bokningsförfrågningarna saknar val av tid på dagen (fm/em/kväll)"
 
+def hasValidationErrors(vgroup):
+    """This function is to be used from visiting group program request """
+    if vgroup.has_key('validation_error_messages'):
+        if len(vgroup['validation_error_messages']) != 0:
+            return True
+    return False
+    
 
 class ValidationErrorMessages(list):
     """This class is used in the external booking request to do custom validation of errors found in the rather complex data sent from the grids. 
     Typically, we have two dates and there are constraints on them."""
     
     def __init__(self):
+        """The idea about explanations is to have a general explanation that can be used repeatedly but only shown once"""
         super(ValidationErrorMessages, self).__init__()
+        self.explanations = dict()
     
-    def report(self, section,  message,  problematic_value):
-        self.append(dict(section=section,  message=message,  problematic_value=problematic_value))
+    def report(self, section,  message,  problematic_value,  explanation_key):
+        self.append(dict(section=section,  message=message,  problematic_value=problematic_value,  explanation_key=explanation_key))
+        self.explanations[explanation_key] = validation_error_explanations[explanation_key]
     
     def hasErrors(self):
         return len(self) > 0
@@ -149,26 +161,26 @@ class VisitingGroupProgramRequest(BaseController):
         
     
     	
-    @expose('hollyrosa.templates.visiting_group_program_request_edit')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
-    def edit(self):
-        tmpl_context.form = create_edit_visiting_group_program_request_form
-        vgpr = dict()
-        vgpr['name'] = 'test vgroup'
-        vgpr['info'] = 'this is some info text'
-        vgpr['contact_person'] = 'john doe'
-        vgpr['from_date'] = '2012-06-01' 
-        vgpr['to_date'] = '2012-06-06'
-        
-        #...construct the age group list. It's going to be a json document. Hard coded.
-        #... if we are to partially load from database and check that we can process it, we do need to go from python to json. (and back)
-        
-        
-        #vgpr['age_group_data'] = age_group_data
-        
-        #...construct a program request template. It's going to be a json document. Hard coded.
-        
-        return dict(visiting_group_program_request=vgpr)
+#    @expose('hollyrosa.templates.visiting_group_program_request_edit')
+#    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
+#    def edit(self):
+#        tmpl_context.form = create_edit_visiting_group_program_request_form
+#        vgpr = dict()
+#        vgpr['name'] = 'test vgroup'
+#        vgpr['info'] = 'this is some info text'
+#        vgpr['contact_person'] = 'john doe'
+#        vgpr['from_date'] = '2012-06-01' 
+#        vgpr['to_date'] = '2012-06-06'
+#        
+#        #...construct the age group list. It's going to be a json document. Hard coded.
+#        #... if we are to partially load from database and check that we can process it, we do need to go from python to json. (and back)
+#        
+#        
+#        #vgpr['age_group_data'] = age_group_data
+#        
+#        #...construct a program request template. It's going to be a json document. Hard coded.
+#        
+#        return dict(visiting_group_program_request=vgpr)
         
         
         
@@ -200,7 +212,8 @@ class VisitingGroupProgramRequest(BaseController):
         program_request_data = json.dumps(program_request_data_dict)
         visiting_group_o.program_request = visiting_group_o.get('program_request', program_request_data)
         
-        return dict(visiting_group_program_request=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=bokn_status_map)
+        return dict(visiting_group_program_request=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=bokn_status_map,  hasValidationErrors=hasValidationErrors)
+        
         
     @expose('hollyrosa.templates.visiting_group_program_request_edit')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
@@ -243,11 +256,6 @@ class VisitingGroupProgramRequest(BaseController):
             visiting_group_o['program_request_have_skippers'] = have_skippers
             visiting_group_o['program_request_age_group'] = age_group_input
             visiting_group_o['program_request'] = program_request_input
-            
-            
-            # TODO: ...SOME PROCESSING SHOULD ONLY BE DONE IF READY TO SHIP
-            if ready_to_process and (not validation_error_messages.hasErrors()):
-                visiting_group_o['boknstatus'] = 5 # TODO: use constant
         
             #...iterate through age_group_data, items is a list of dicts...
             age_group_data = json.loads(age_group_input)
@@ -275,23 +283,22 @@ class VisitingGroupProgramRequest(BaseController):
                     # TODO: maybe sanitize so value must be an int?
                     tmp_vgroup_property['value'] = tmp_age_group['value']
                     
-                    # TODO: check that dates are within valid ranges
-                    #...so we might have to write a fance fancy validator for all this json data
+                    #...check that dates are within valid ranges
                     ok_1,  tmp_vgroup_property['from_date'] = sanitizeDate(tmp_age_group['from_date'],  default_date=tmp_vgroup_property['from_date']  )
                     if not ok_1:
-                        validation_error_messages.report('properties',  'from-date of property %s not a valid date in format YYYY-MM-DD' % tmp_vgroup_property['property'], tmp_age_group['from_date'])
+                        validation_error_messages.report('properties',  u'Från-datum som tillhör åldersgrupp %s har fel format.' % tmp_vgroup_property['property'], problematic_value=tmp_age_group['from_date'], explanation_key='date_format' )
                     ok_2,  tmp_vgroup_property['to_date'] = sanitizeDate(tmp_age_group['to_date'],  default_date=tmp_vgroup_property['to_date'] )
                     if not ok_2:
-                        validation_error_messages.report('properties',  'to-date of property %s not a valid date in format YYYY-MM-DD' % tmp_vgroup_property['property'], tmp_age_group['to_date'])
+                        validation_error_messages.report('properties',  u'Till-datum som tillhör åldersgrupp %s har fel format.' % tmp_vgroup_property['property'], problematic_value=tmp_age_group['to_date'], explanation_key='date_format' )
                     ok_3 = (tmp_vgroup_property['to_date']  >=  tmp_vgroup_property['from_date'] )
                     if not ok_3:
-                        validation_error_messages.report('properties',  'to-date cannot ocurrr before from-date of property %s' % tmp_vgroup_property['property'], tmp_age_group['from_date'])
+                        validation_error_messages.report('properties',  u'Till-datum kan inte inträffa före från-datum, se datumen i åldersgruppen %s.' % tmp_vgroup_property['property'], problematic_value=tmp_age_group['from_date']  + ' - ' + tmp_age_group['from_date'], explanation_key='date_order' )
                     ok_4 = tmp_vgroup_property['from_date'] >= visiting_group_o['from_date']
                     if not ok_4:
-                        validation_error_messages.report('properties',  'from-date %s of property %s cannot occurr before overal from-date %s of visiting group' % (tmp_vgroup_property['from_date'],  tmp_vgroup_property['property'], visiting_group_o['from_date']), tmp_vgroup_property['from_date']) 
+                        validation_error_messages.report('properties',  u'Från-datum %s som tillhör åldersgrupp %s kan inte inträffa före från-datum %s för din grupp.' % (tmp_vgroup_property['from_date'],  tmp_vgroup_property['property'], visiting_group_o['from_date']), problematic_value=tmp_vgroup_property['from_date'],  explanation_key='date_range') 
                     ok_5 = tmp_vgroup_property['to_date'] <= visiting_group_o['to_date']
                     if not ok_5:
-                        validation_error_messages.report('properties',  'to-date %s of property %s cannot occurr after overal to-date %s of visiting group' % (tmp_vgroup_property['to_date'],  tmp_vgroup_property['property'], visiting_group_o['to_date']), tmp_vgroup_property['to_date']) 
+                        validation_error_messages.report('properties',  u'Till-datum %s som tillhör åldersgrupp %s kan inte inträffa efter från-datum %s för din grupp.' % (tmp_vgroup_property['to_date'],  tmp_vgroup_property['property'], visiting_group_o['to_date']), problematic_value=tmp_vgroup_property['to_date'],  explanation_key='date_range') 
                     
                     
                     
@@ -313,20 +320,20 @@ class VisitingGroupProgramRequest(BaseController):
                         # TODO: Date sanitation here too
                         ok_6,  new_from_date = sanitizeDate(tmp_age_group['from_date'],  default_date=visiting_group_o['from_date'] )
                         if not ok_6:
-                            validation_error_messages.report('properties',  'from-date of property %s not a valid date in format YYYY-MM-DD' % tmp_age_group['property'], tmp_age_group['from_date'])
+                            validation_error_messages.report('properties',  u'Från-datum som tillhör åldersgrupp %s har fel format.' % tmp_vgroup_property['property'], problematic_value=tmp_age_group['from_date'], explanation_key='date_format' )
                         ok_7,  new_to_date = sanitizeDate(tmp_age_group['to_date'],  default_date=visiting_group_o['to_date'] )
                         if not ok_7:
-                            validation_error_messages.report('properties',  'to-date of property %s not a valid date in format YYYY-MM-DD' % tmp_age_group['property'], tmp_age_group['to_date'])
+                            validation_error_messages.report('properties',  u'Till-datum som tillhör åldersgrupp %s har fel format.' % tmp_vgroup_property['property'], problematic_value=tmp_age_group['to_date'], explanation_key='date_format' )
                             
                         ok_8 = (new_from_date <= new_to_date)
                         if not ok_8:
-                            validation_error_messages.report('properties',  'to-date cannot ocurrr before from-date of property %s' % tmp_age_group['property'], tmp_age_group['from_date'])
+                            validation_error_messages.report('properties',  u'Till-datum kan inte inträffa före från-datum, se datumen i åldersgruppen %s.' % tmp_vgroup_property['property'], problematic_value=tmp_age_group['from_date']  + ' - ' + tmp_age_group['from_date'], explanation_key='date_order' )
                         ok_9 = tmp_age_group['from_date'] >= visiting_group_o['from_date']
                         if not ok_9:
-                            validation_error_messages.report('properties',  'from-date %s of property %s cannot occurr before overall from-date %s of visiting group' % (tmp_age_group['from_date'],  tmp_age_group['property'], visiting_group_o['from_date']), tmp_age_group['from_date']) 
+                            validation_error_messages.report('properties',  u'Från-datum %s som tillhör åldersgrupp %s kan inte inträffa före från-datum %s för din grupp.' % (tmp_vgroup_property['from_date'],  tmp_vgroup_property['property'], visiting_group_o['from_date']), problematic_value=tmp_vgroup_property['from_date'],  explanation_key='date_range') 
                         ok_10 = tmp_age_group['to_date'] <= visiting_group_o['to_date']
                         if not ok_10:
-                            validation_error_messages.report('properties',  'to-date %s of property %s cannot occurr after overal to-date %s of visiting group' % (tmp_age_group['to_date'],  tmp_age_group['property'], visiting_group_o['to_date']), tmp_age_group['to_date']) 
+                            validation_error_messages.report('properties',  u'Till-datum %s som tillhör åldersgrupp %s kan inte inträffa efter från-datum %s för din grupp.' % (tmp_vgroup_property['to_date'],  tmp_vgroup_property['property'], visiting_group_o['to_date']), problematic_value=tmp_vgroup_property['to_date'],  explanation_key='date_range') 
                     
                         new_property_row = {u'description': tmp_age_group['age_group'], u'value': tmp_age_group['value'], u'from_date': new_from_date, u'to_date': new_to_date, u'property': tmp_age_group['property'], u'unit': tmp_age_group['unit']}
                         x = visiting_group_o['visiting_group_properties']
@@ -334,11 +341,14 @@ class VisitingGroupProgramRequest(BaseController):
                         visiting_group_o['visiting_group_properties'] = x
             
             visiting_group_o['validation_error_messages'] = validation_error_messages
+            visiting_group_o['validation_error_explanations'] = validation_error_messages.explanations
             holly_couch[visiting_group_o['_id']] = visiting_group_o
-
+        
+        # TODO: We should have a two step process: first construct all bookings (make a list) and if it all is successfull and no validation errors, thats when we actually write them to the db.
+        
         # for the program request , iterate through it
         if may_change_request_data and len(validation_error_messages) == 0:
-            if 'True' == ready_to_process or True:
+            if 'True' == ready_to_process:
                 program_request_list = json.loads(program_request_input)
                 for tmp_request in program_request_list['items']:
                     log.debug('found request...' + str(tmp_request))
@@ -349,13 +359,18 @@ class VisitingGroupProgramRequest(BaseController):
                         #...TODO: sanitize requested_date and make sure it is in range
                         ok_r1, requested_date = sanitizeDate(tmp_request['requested_date'][:10],  default_date='')
                         if not ok_r1:
-                            validation_error_messages.report('booking request',  'requested date %s is not a valid date in format YYYY-MM-DD' % tmp_request['requested_date'], tmp_request['requested_date'])
+                            validation_error_messages.report('booking request',  u'Det angivna önskade datumet %s har fel format.' % tmp_request['requested_date'], problematic_value=tmp_request['requested_date'],  explanation_key='date_format')
                         if not ((requested_date >= visiting_group_o['from_date']) and (requested_date <= visiting_group_o['to_date'])):
-                            validation_error_messages.report('booking request',  'requested date %s is not a within the date range of the visiting group' % tmp_request['requested_date'], tmp_request['requested_date'])
+                            validation_error_messages.report('booking request',  u'Det efterfrågade datumet %s är inte mellan din grupps från- och till- datum.' % tmp_request['requested_date'], problematic_value=tmp_request['requested_date'],  explanation_key='date_range')
                         # TODO: reuse the parsing of the date
                         requested_date_o = time.strptime(requested_date, "%Y-%M-%d" )
                         requested_time = tmp_request['requested_time']
                         requested_activity_id = tmp_request['requested_activity']
+                        
+                        no_activity_selected = ('' == requested_activity_id)
+                        
+                        # TODO: what if there is no requested activity?
+                        # TODO: how do users choose not to which anything after they have made a request? I think we actually will need a NULL request and this is where we among other things check the null request.
                         
                         booking_day_o = getBookingDayOfDate(holly_couch, requested_date)
                         log.debug(booking_day_o)
@@ -396,7 +411,7 @@ class VisitingGroupProgramRequest(BaseController):
                                 new_booking['visiting_group_name'] = visiting_group_o['name']
                                 new_booking['last_changed_by_id'] = getLoggedInUserId(request)
                                 
-                                activity_o = holly_couch[requested_activity_id]
+                                activity_o = common_couch.getActivity(holly_couch, requested_activity_id)
                                 
                                 # TODO: the line below gts the properties wrong
                                 content = u'%s (önskar %s %s %s) %s' % ( ' '.join(['$$%s'%a for a in request_for_age_groups ]) ,activity_selection_map.get(requested_activity_id, activity_o['title']), time.strftime("%d/%M", requested_date_o).replace('0',''), time_selection_translator.get(requested_time, requested_time), tmp_request['note'] )                                 
@@ -420,4 +435,6 @@ class VisitingGroupProgramRequest(BaseController):
                                 remember_new_booking_request(holly_couch, booking=new_booking, changed_by=getLoggedInUserId(request))
                                 break
                                 
+                visiting_group_o['boknstatus'] = 5 # TODO: use constant
+                
         raise redirect(request.referrer)
