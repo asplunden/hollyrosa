@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011,2012 Martin Eliasson
+Copyright 2010, 2011,2012, 2013 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -28,74 +28,75 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Edit/Create Booking Request</title>
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
-  <script type="text/javascript" src="${tg.url('/scripts/dojo-release-1.5.0/dojo/dojo.js')}" ></script>
-  <script type="text/javascript">
-  
-  
- 
-  
-  
-function get_visiting_group_data_from_XHR(visiting_group_id) {
-    var value = this.options[this.selectedIndex].value;
-    
-    
-    dojo.xhrGet({
-    url: "${tg.url('/visiting_group/show_visiting_group_data?id=')}"+value,
+  <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
+  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
+  <script>
+
+require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/ready"], function(edit_booking, dom, on, xhr, ready) { 
+
+function get_visiting_group_data_from_XHR_helper(visiting_group_id, value) {
+    xhr("${tg.url('/visiting_group/show_visiting_group_data')}", {
     handleAs:"json",
-    load: on_update_visiting_group_data
-    });
+    method:"GET",
+    query: {'id':value}}).then(edit_booking.update_visiting_group_data);
 }
 
 
- function propagate_selected_value() {
-    var value = this.options[this.selectedIndex].text;
-    set_form_field_value('create_edit_new_booking_request_form_visiting_group_name', value);
-  }
+function get_visiting_group_data_from_XHR(visiting_group_id) {
+    var value = this.options[this.selectedIndex].value;
+    get_visiting_group_data_from_XHR_helper(visiting_group_id, value);
+}
 
-  
-  function attach_local_event_handlers() {
-    dojo.connect(dojo.byId('create_edit_new_booking_request_form_visiting_group_id'), "onchange", null, propagate_selected_value);
-    dojo.connect(dojo.byId('create_edit_new_booking_request_form_visiting_group_id'), "onchange", null, get_visiting_group_data_from_XHR);
-  }
-  
-  function ajaxload_if_visiting_group_selected() {
-    var visiting_group_id = dojo.byId('create_edit_new_booking_request_form_visiting_group_id');
-    var visiting_group_id_index = visiting_group_id.options.selectedIndex;
-    var value = visiting_group_id.options[visiting_group_id_index].value;
-    if (0 != visiting_group_id_index) {
-        dojo.xhrGet({
-        url: "${tg.url('/visiting_group/show_visiting_group_data?id=')}"+value,
-        handleAs:"json",
-        load: on_update_visiting_group_data
-    });
-    }
-  }
-  
-  
+
+function propagate_selected_value() {
+    var value = this.options[this.selectedIndex].text;
+    edit_booking.set_form_field_value('create_edit_new_booking_request_form_visiting_group_name', value);
+}
+
+
 function transfer_from_date(date) {
-    dojo.byId("create_edit_new_booking_request_form_valid_from").value = date;
+    dom.byId("create_edit_new_booking_request_form_valid_from").value = date;
 }
 
 
 function transfer_to_date(date) {
-    dojo.byId("create_edit_new_booking_request_form_valid_to").value = date;
+    dom.byId("create_edit_new_booking_request_form_valid_to").value = date;
 }
 
 
 function transfer_to_content(text) {
-    var old_text = dojo.byId("create_edit_new_booking_request_form_content").value;
+    var old_text = dom.byId("create_edit_new_booking_request_form_content").value;
     if ('' == old_text) {
-        dojo.byId("create_edit_new_booking_request_form_content").value = text;
+        dom.byId("create_edit_new_booking_request_form_content").value = text;
     }
     else {
-        dojo.byId("create_edit_new_booking_request_form_content").value = old_text + " " + text;
+        dom.byId("create_edit_new_booking_request_form_content").value = old_text + " " + text;
     }
 }
 
-  
-  dojo.addOnLoad(attach_local_event_handlers);
-  dojo.addOnLoad(ajaxload_if_visiting_group_selected);
-  </script>
+
+ready(function(){
+    var elem = dom.byId('create_edit_new_booking_request_form_visiting_group_id');
+    on( elem, "change", propagate_selected_value);
+    on( elem, "change", get_visiting_group_data_from_XHR);
+    on( dom.byId('fromdate_href'), "click", transfer_from_date);
+    on( dom.byId('todate_href'), "click", transfer_to_date);
+    
+    is_new_booking = '0' == '${edit_this_visiting_group}' ;
+    if ( ! is_new_booking ) {
+      get_visiting_group_data_from_XHR_helper('${edit_this_visiting_group}', '${edit_this_visiting_group}');
+    } else {
+        //...load N/A group (should be the first in the list)
+        value = elem.options[elem.selectedIndex].text;
+        edit_booking.set_form_field_value('create_edit_new_booking_request_form_visiting_group_name', value);
+        id_value = elem.options[elem.selectedIndex].value;
+        get_visiting_group_data_from_XHR_helper(value, id_value);
+    }
+});
+
+
+});
+</script>
 </head>
 
 <body>
@@ -105,8 +106,8 @@ function transfer_to_content(text) {
         <div class="note" id="visiting_group_data_info"></div>
         <h4>group info</h4>
         <table id="visiting_group_info_table">
-            <tr><td>From:</td><td><span id="visiting_group_data_fromdate" /> <a href="javascript:transfer_to_booking_request_fromdate();">transfer to <i>from date</i></a></td></tr>
-            <tr><td>To:</td><td> <span  id="visiting_group_data_todate"/> <a href="javascript:transfer_to_booking_request_todate();">transfer to <i>to date</i></a></td></tr>
+            <tr><td>From:</td><td><span id="visiting_group_data_fromdate" /> <a id="fromdate_href" >transfer to <i>from date</i></a></td></tr>
+            <tr><td>To:</td><td> <span  id="visiting_group_data_todate"/> <a id="todate_href" >transfer to <i>to date</i></a></td></tr>
             <tr><td>Contact:</td><td id="visiting_group_data_contact"/></tr>
             <tr><td>Phone:</td><td id="visiting_group_data_phone"/></tr>
             <tr><td>Email:</td><td id="visiting_group_data_email"/></tr>
@@ -119,9 +120,6 @@ function transfer_to_content(text) {
     
     
     <div py:replace="tmpl_context.form(booking, action='save_new_booking_request', child_args=dict(activity_id=dict(options=activities), visiting_group_id=dict(options=visiting_groups)))">Input Form</div>
-    
-    
-    
     
 </body>
 </html>

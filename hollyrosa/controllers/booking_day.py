@@ -749,6 +749,7 @@ class BookingDay(BaseController):
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change a booking'))
     def edit_booking(self,  return_to_day_id=None,  booking_id=None, visiting_group_id='', **kw):
         tmpl_context.form = create_edit_new_booking_request_form
+        edit_this_visiting_group = 0
         
         activities = [(a.doc['_id'],  a.doc['title'] ) for a in getAllActivities(holly_couch)]
         if return_to_day_id == None: 
@@ -763,6 +764,7 @@ class BookingDay(BaseController):
         #...patch since this is the way we will be called if validator for new will fail
         if (visiting_group_id != '') and (visiting_group_id != None):
             booking_o = DataContainer(id='', content='', visiting_group_id = visiting_group_id, visiting_group_name=tmp_visiting_group['name'])
+            edit_this_visiting_group = 0 #visiting_group_id
         elif booking_id=='' or booking_id==None:
             booking_o = DataContainer(id='', content='')
         else:
@@ -774,7 +776,7 @@ class BookingDay(BaseController):
         if return_to_day_id != None and return_to_day_id != '':
             booking_o.requested_date = booking_day_o['date']
         booking_o.return_to_day_id = return_to_day_id
-        return dict(visiting_groups=visiting_groups,  activities=activities, booking=booking_o)
+        return dict(visiting_groups=visiting_groups,  activities=activities, booking=booking_o,  edit_this_visiting_group=edit_this_visiting_group)
         
         
     @expose('hollyrosa.templates.move_booking')
@@ -846,7 +848,7 @@ class BookingDay(BaseController):
     @require(Any(is_user('root'), has_level('view'), has_level('staff'), has_level('pl'),  msg='Only viewers, staff and PL can submitt a new booking request'))
     @expose()
     def save_new_booking_request(self, content='',  activity_id=None,  visiting_group_name='',  visiting_group_select=None,  valid_from=None,  valid_to=None,  requested_date=None,  visiting_group_id=None,  id=None,  return_to_day_id=None):
-        is_new= ((d ==None) or (id==''))
+        is_new= ((id ==None) or (id==''))
         
         if is_new:
             new_booking = common_couch.createEmptyProgramBooking() # dict(type='booking',  subtype='program',  booking_day_id='', slot_id='') 
