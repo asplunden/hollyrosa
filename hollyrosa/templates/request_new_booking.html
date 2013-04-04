@@ -54,12 +54,16 @@ function propagate_selected_value() {
 }
 
 
-function transfer_from_date(date) {
+function transfer_from_date(event) {
+    date_elem = dom.byId("visiting_group_data_fromdate");
+    date = date_elem.innerHTML;
     dom.byId("create_edit_new_booking_request_form_valid_from").value = date;
 }
 
 
-function transfer_to_date(date) {
+function transfer_to_date(event) {
+    date_elem = dom.byId("visiting_group_data_todate");
+    date = date_elem.innerHTML;
     dom.byId("create_edit_new_booking_request_form_valid_to").value = date;
 }
 
