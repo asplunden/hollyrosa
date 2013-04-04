@@ -49,7 +49,7 @@ function create_visiting_group_properties_table_headings(table) {
  }
 
 
-function update_visiting_group_data(data) {
+function update_visiting_group_data_common(data, content_elem_id) {
     var visiting_group = data['visiting_group'];
     
     set_visiting_group_form_values(visiting_group);
@@ -73,11 +73,11 @@ function update_visiting_group_data(data) {
         // ahref = domConstruct.create("a", {href:'javascript:transfer_to_content("\$\$' + g['property'] +'");', innerHTML: '\$'+g['property']}, td);
         ahref = domConstruct.create("a", { innerHTML: '\$'+g['property']}, td);
         on(ahref, 'click', function(e) {
-            old_text = dom.byId("create_edit_book_slot_form_content").value;
+            old_text = dom.byId(content_elem_id).value;
             if ('' == old_text) {
-                dom.byId("create_edit_book_slot_form_content").value = '\$\$' + g['property'] ;
+                dom.byId(content_elem_id).value = '\$\$' + g['property'] ;
             } else {
-                dom.byId("create_edit_book_slot_form_content").value = old_text + " " + '\$\$' + g['property'] ;
+                dom.byId(content_elem_id).value = old_text + " " + '\$\$' + g['property'] ;
             }       
         });
         td = domConstruct.create("td", { innerHTML: g['value'] }, table);
@@ -89,8 +89,20 @@ function update_visiting_group_data(data) {
 }
 
 
+function update_visiting_group_data(data) {
+    update_visiting_group_data_common(data, "create_edit_book_slot_form_content");
+}
 
-return {set_form_field_value:set_form_field_value, update_visiting_group_data:update_visiting_group_data};
+
+
+function update_visiting_group_data_for_new_booking_request(data) {
+    update_visiting_group_data_common(data, "create_edit_new_booking_request_form_content");
+}
+
+
+
+
+return {set_form_field_value:set_form_field_value, update_visiting_group_data:update_visiting_group_data, update_visiting_group_data_for_new_booking_request:update_visiting_group_data_for_new_booking_request};
 
 
 });
