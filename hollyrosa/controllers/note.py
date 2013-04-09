@@ -28,7 +28,9 @@ from hollyrosa.controllers import common_couch
 
 from formencode import validators
 
-import datetime,  StringIO,  time
+import datetime,  StringIO, time, logging
+
+log = logging.getLogger()
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
@@ -170,8 +172,9 @@ class Note(BaseController):
     @require(Any(is_user('root'), has_level('pl'), has_level('staff'), msg='Only staff members may view visiting group attachments'))   
     def download_attachment(self, attachment_id, doc_id):
         response.content_type='x-application/download'
-        response.headerlist.append(('Content-Disposition','attachment;filename=%s' % doc_id))        
-                
+        log.debug(u'Trying to download attachment="%s" filename="%s"' % (attachment_id, doc_id))  
+        headers = ('Content-Disposition', ('attachment;filename=%s' % doc_id).replace(u' ',u'_').replace(u'å',u'a').replace(u'ö',u'o').encode('ascii', 'replace'))
+        response.headerlist.append(headers)
         return holly_couch.get_attachment(attachment_id, doc_id).read()
 
 
