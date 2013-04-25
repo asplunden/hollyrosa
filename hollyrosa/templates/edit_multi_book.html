@@ -47,9 +47,13 @@ function draw_booked_slot(booking_day_id, slot_row_id, activity_id, visiting_gro
     tmp_li = domConstruct.create('li', {}, menu_ul);
     domConstruct.create('a', {innerHTML:'view', href:"view_booked_booking?id="+booking_id}, tmp_li);
     tmp_li = domConstruct.create('li', {}, menu_ul);
-    domConstruct.create('a', {innerHTML:'delete', href:"javascript:delete_booking('" + booking_id + "');"}, tmp_li);
+    tmp_delete = domConstruct.create('a', {innerHTML:'delete'}, tmp_li);
+    domAttr.set(tmp_delete, 'hollyrosa:bid', booking_id);
+    on(tmp_delete, 'click', function() { delete_booking(booking_id);} );
     tmp_li = domConstruct.create('li', {}, menu_ul);
-    domConstruct.create('a', {innerHTML:'unschedule', href:"javascript:unschedule_booking('" + booking_id +"');"}, tmp_li);
+    tmp_unschedule = domConstruct.create('a', {innerHTML:'unschedule'}, tmp_li);
+    domAttr.set(tmp_unschedule, 'hollyrosa:bid', booking_id);
+    on(tmp_unschedule, 'click', function() { unschedule_booking(booking_id);} );
     
     //...create menu with delete | unschedule etc
     
@@ -128,10 +132,10 @@ function delete_booking(booking_id)
 }
 
 
-function unschedule_booking(booking_id, activity_id, visiting_group_id)
+function unschedule_booking(booking_id)
 {
     dojo.byId('delete_req_booking_id').value =  booking_id;
-    qf = domForm.toQuery("booking_req_form");
+    qf = domForm.toQuery("delete_booking_form");
     xhr('${tg.url("/booking/unschedule_booking_async")}', {
     handleAs:"json",
     query:qf}).then(on_booking_deleted);
@@ -168,6 +172,20 @@ ready(function(){
     });
     
     
+    // repeat !
+    var unschedule_ahrefs = query('a[hollyrosa:action="unschedule"]');
+    
+    array.forEach(unschedule_ahrefs, function(a_href) {
+        
+        //...now, find out the attributes of the href
+        
+        on(a_href, "click", function() {
+            bid = domAttr.get(a_href, "hollyrosa:bid");
+            unschedule_booking(bid);
+            });
+    });
+    
+    
     on(dom.byId("input_button_book_slot_stage_2"), "click",  function(){book_slot_stage_2();});
     on(dom.byId("input_button_cancel_slot_stage_2"), "click",  function(){cancel_book_stage_2();});
 });
@@ -200,18 +218,6 @@ ready(function(){
     
     <h2>${activities_map[booking.activity_id].title} booking</h2>
     <h3>${booking.visiting_group_name}</h3> 
-       
-        
-    <ul class="any_menu context_inline_menu">
-        <li py:if="None !=booking_day"><a href="${tg.url('/booking/edit_booked_booking', params={'return_to_day_id':booking.booking_day_id, 'id':booking.id})}">edit</a></li>
-        <li py:if="None ==booking_day"><a href="${tg.url('/booking/edit_booking', params={'return_to_day_id':booking.booking_day_id, 'id':booking.id})}">edit</a></li>
-        <li py:if="None !=booking_day"><a href="${tg.url('/booking/unschedule_booking', params={'booking_day_id':booking.booking_day_id, 'booking_id':booking.id})}">unschedule</a></li>
-        <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', params={'booking_id':booking.id, 'state':0})}">preliminary</a></li>
-        <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', params={'booking_id':booking.id, 'state':10})}">booked</a></li>
-        <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', params={'booking_id':booking.id, 'state':20})}">approve</a></li>
-        <li py:if="None !=booking_day"><a href="${tg.url('/workflow/set_state', params={'booking_id':booking.id, 'state':-10})}">disapprove</a></li>
-        <li py:if="None !=booking_day"><a href="${tg.url('/booking/multi_book', params={'booking_id':booking.id})}">multi-book</a></li>
-    </ul>
     
     <div class="note">${booking.content}</div>
     <h3>${activities_map[booking.activity_id].title}</h3>
@@ -231,9 +237,8 @@ ready(function(){
                 <ul class="any_menu context_inline_menu">
                         <li><a href="${tg.url('edit_booked_booking', params={'return_to_day_id':tmp_day.id, 'id':b.id})}">edit</a></li>
                         <li><a href="${tg.url('view_booked_booking', params={'return_to_day_id':tmp_day.id, 'id':b.id})}">view</a></li>
-                        <li><a href="javascript:delete_booking('${b.id}');">delete</a></li>
                         <li><a hollyrosa:action="delete" hollyrosa:bid="${b.id}" >delete</a></li>
-                        <li><a href="javascript:unschedule_booking('${b.id}');">unschedule</a></li>
+                        <li><a hollyrosa:action="unschedule" hollyrosa:bid="${b.id}" >unschedule</a></li>
                     </ul>
                 </div>
             </div>
@@ -242,9 +247,6 @@ ready(function(){
             <div py:if="blockings_map.has_key(str(tmp_day.id)+':'+str(slot_position.id))">&nbsp;</div>
             <ul id="minimenu_${slot_position.id}" class="context_inline_menu any_menu">
                 <li py:if="not blockings_map.has_key(str(tmp_day.id)+':'+str(slot_position.id))"><a hollyrosa:action="book" hollyrosa:bday_id="${tmp_day.id}" hollyrosa:spid="${slot_position.id}" hollyrosa:activity_id="${booking.activity_id}" hollyrosa:vgroup_id="${booking.visiting_group_id}" >book</a></li>
-                <!-- <li><a  py:if="not blockings_map.has_key(slot_position.id)" href="${tg.url('book_slot', booking_day_id=booking_day.id, slot_position_id=slot_position.id)}">book</a></li> -->
-                <!-- <li><a py:if="not blockings_map.has_key(slot_position.id)" href="${tg.url('block_slot', booking_day_id=booking_day.id, slot_row_position_id=slot_position.id)}">block slot</a></li> -->
-                <!-- <li><a py:if="blockings_map.has_key(slot_position.id)" href="${tg.url('unblock_slot', booking_day_id=booking_day.id, slot_row_position_id=slot_position.id)}">unblock slot</a></li> -->
             </ul>
             </div>
         </div>
