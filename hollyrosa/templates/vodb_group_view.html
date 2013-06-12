@@ -168,7 +168,7 @@ function startup() {
         <div class="${n.type}2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i><b>${n.timestamp}</b> ${n.type} by ${n.last_changed_by}</i><br/><br/>
         <div py:if="'note' == n.type">${HTML(n.text)}</div>
         <div py:if="('attachment' == n.type)">${n.text}<br/><br/>
-        	<div py:for="at in n.get('_attachments',[''])"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n.id,'doc_id':at})}"><b>${at}</b> ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>
+        	<div py:for="at in n.get('_attachments',[])"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n.id,'doc_id':at})}"><b>${at}</b> ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>
         	 
         	</div>
         </div>
