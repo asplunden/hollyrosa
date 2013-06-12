@@ -223,6 +223,107 @@ var tag_layout = [tag_layout_inner];
 
 </script>
 
+
+  <script>
+
+require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window"], function(ready, tags, common_menu, Menu, PopupMenuItem, dom, array, query, on, win) {
+
+
+function deleteTagHelper(evt) {
+   var tag_elem = evt.srcElement.parentElement;
+   var inner_text = tag_elem.innerText;
+   inner_text = inner_text.replace(' (X)',''); 
+   tags.deleteTag("${tg.url('/tag/delete_tag')}", "${vodb_group.id}", inner_text);
+}
+
+
+function addTagHelper() {
+   tags.addTags("${tg.url('/tag/add_tags')}", "${vodb_group.id}", tag_input);
+}
+
+
+function startup() {
+	//...setup main menu for visiting group  	
+	var use_left_click_menu = common_menu.load_left_click_menu();
+   	var change_program_status_menu = new Menu();
+   
+   	var menu = new Menu({
+       targetNodeIds: ["visiting_group_menu", "note"],
+       leftClickToOpen: use_left_click_menu
+       });
+       
+
+	//...load all tags for visiting group
+	tags.getTags("${tg.url('/tag/get_tags')}", "${vodb_group.id}");
+   
+   
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request...", '${vodb_group.id}', '${tg.url('/booking/edit_booking')}'); 
+   common_menu.add_menu_separator(menu);   
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "View vodb group...", '${vodb_group.id}', '${tg.url('view_vodb_group')}');
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb data...", '${vodb_group.id}', '${tg.url('edit_group_data')}');
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb Sheet...", '${vodb_group.id}', '${tg.url('edit_group_sheet')}');
+   common_menu.add_note_redirect_menu_item(menu, menu, "Add note...", '${vodb_group.id}', '${tg.url('/note/add_note')}');
+   common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${vodb_group.id}', '${tg.url('/note/add_attachment')}');
+   common_menu.add_menu_separator(menu);
+   common_menu.add_list_bookings_redirect_menu_item(menu, menu, "List bookings of group...", '${vodb_group['name']}', '${tg.url('/visiting_group/view_bookings_of_name')}');
+      
+   //...attach the add tag handler
+	var the_add_tag_href_elem = dom.byId('add_tag_href2');
+	on(the_add_tag_href_elem, 'click', addTagHelper);
+	
+	//...link delete tag handler to any element with class .tag in document.
+	on(win.doc, '.tag:click', deleteTagHelper);
+	
+	
+	//...create menu for add/edit/show/delete note
+	var note_menu = new Menu({
+       targetNodeIds: ["content"],
+       selector: "div.note2",
+       leftClickToOpen: common_menu.load_left_click_menu()
+       });
+       
+    common_menu.add_note_redirect_menu_item(note_menu, note_menu, "Add note...", '${vodb_group.id}', '${tg.url('/note/add_note')}');
+    common_menu.add_note_redirect_menu_item(note_menu, note_menu, "Add attachment...", '${vodb_group.id}', '${tg.url('/note/add_attachment')}');
+    common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Edit note...",  '${tg.url('/note/edit_note')}');
+    common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Delete note...", '${tg.url('/note/delete_note')}');
+    
+    
+    //...create menu for add/edit/show/delete note
+	var attachment_menu = new Menu({
+       targetNodeIds: ["content"],
+       selector: "div.attachment2",
+       leftClickToOpen: common_menu.load_left_click_menu()
+       });
+       
+    common_menu.add_note_redirect_menu_item(attachment_menu, attachment_menu, "Add note...", '${vodb_group.id}', '${tg.url('/note/add_note')}');
+    common_menu.add_note_redirect_menu_item(attachment_menu, attachment_menu, "Add attachment...", '${vodb_group.id}', '${tg.url('/note/add_attachment')}');
+    common_menu.add_visiting_group_edit_note_menu_item(attachment_menu, attachment_menu, "Edit attachment...",  '${tg.url('/note/edit_attachment')}');
+    common_menu.add_visiting_group_edit_note_menu_item(attachment_menu, attachment_menu, "Delete attachment...", '${tg.url('/note/delete_note')}');
+    
+    /**** assembling change program state and vodb state menus ***/
+	var change_vodb_status_menu = new Menu();
+    menu.addChild(new PopupMenuItem({
+   	label: "Change vodb status",
+      popup: change_vodb_status_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+   })); 
+   
+   var set_vodb_state_url = '${tg.url('/visiting_group/set_vodb_state')}';       
+    
+   array.forEach(common_menu.vodb_state_change_list, function(x) {console.log(x); common_menu.add_change_program_state_menu_item(menu, change_vodb_status_menu, x['name'], x['state'], 0, set_vodb_state_url);});
+	
+	common_menu.add_menu_separator(menu);   
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history...", '${vodb_group['id']}', '${tg.url('/history/show')}');
+	};
+    
+	ready(function() {
+		startup();
+		});  
+ });
+  </script>
+
+
+  
 <script>
 require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/ValidationTextBox", "dijit/form/DateTextBox"]);
 </script>
@@ -233,8 +334,10 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
     <p>${reFormatDate(vodb_group.from_date)} to ${reFormatDate(vodb_group.to_date)}</p>
 
 	
-	<div class="note" id="note" hollyrosa:vgid="${vodb_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul>
-</div>
+	<div class="note" id="note" hollyrosa:vgid="${vodb_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
+<a id="add_tag_href2" href="javascript:;">Add Tags</a>
+</form></div>
+
 <table class="visiting_group_info_table">
 <tr><td class="legend">bok.nr:</td><td class="info">${vodb_group.boknr}</td></tr>
 <tr><td class="legend">subtype:</td><td class="info">${vodb_group.get('subtype','')}</td></tr>
