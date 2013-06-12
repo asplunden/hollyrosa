@@ -10,9 +10,9 @@ setup(
     name='hollyrosa',
     version='0.1',
     description='',
-    author='',
-    author_email='',
-    #url='',
+    author='Martin Eliasson',
+    author_email='asplunden@gmail.com',
+    url='http://github.com/asplunden/hollyrosa',
     install_requires=[
         "TurboGears2 >= 2.0b7",
         "Catwalk >= 2.0.2",
@@ -21,7 +21,9 @@ setup(
         "toscawidgets >= 0.9.7.1",
         "zope.sqlalchemy >= 0.4 ",
         "repoze.tm2 >= 1.0a4",
-        
+        "tw.dynforms >= 0.9.8",
+        "tw.tinymce >= 0.8",
+        "couchdb-python >= 0.8",
         "repoze.what-quickstart >= 1.0",
                 ],
     setup_requires=["PasteScript >= 1.7"],
