@@ -148,11 +148,11 @@ function startup() {
 </head>
 
 <body class="tundra">
-    <h2 id="visiting_group_menu" hollyrosa:vgid="${visiting_group.id}">${visiting_group.name}</h2> 
-    <p>${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
+    <h2 id="visiting_group_menu" class="context_menu_symbol" hollyrosa:vgid="${visiting_group.id}">${visiting_group.name}</h2> 
+    <p class="context_menu_symbol">${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
     
 
-    <div class="note" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
+    <div class="note context_menu_symbol" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
 <a id="add_tag_href2" href="javascript:;">Add Tags</a>
 </form></div>
 <table class="visiting_group_info_table">
@@ -168,7 +168,7 @@ function startup() {
 <h3>Notes and attachments</h3>
     <div py:for="n in notes" >
             
-        <div class="${n.type}2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i><b>${n.timestamp}</b> ${n.type} by ${n.last_changed_by}</i><br/><br/>
+        <div class="${n.type}2 context_menu_symbol" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i><b>${n.timestamp}</b> ${n.type} by ${n.last_changed_by}</i><br/><br/>
         <div py:if="'note' == n.type">${HTML(n.text)}</div>
         <div py:if="('attachment' == n.type)">${n.text}<br/><br/>
         	<div py:for="at in n.get('_attachments',[])"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n.id,'doc_id':at})}"><b>${at}</b> ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>

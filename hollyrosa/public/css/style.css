@@ -849,3 +849,10 @@ table.visiting_group_info_table tr td.info {
 	font-weight: bold;
 	color: #000;	
 	}
+
+    
+.context_menu_symbol:hover {
+    background-image: url('../images/dropdown_menu_symbol.png');
+    background-repeat: no-repeat;
+    background-position: right top;
+}

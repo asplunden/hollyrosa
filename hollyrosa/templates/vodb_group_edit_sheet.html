@@ -330,11 +330,11 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
 </head>
 
 <body class="tundra">
-    <h2 id="visiting_group_menu" hollyrosa:vgid="${vodb_group.id}">${vodb_group.name}</h2> 
-    <p>${reFormatDate(vodb_group.from_date)} to ${reFormatDate(vodb_group.to_date)}</p>
+    <h2 id="visiting_group_menu" hollyrosa:vgid="${vodb_group.id}" class="context_menu_symbol">${vodb_group.name}</h2> 
+    <p class="context_menu_symbol">${reFormatDate(vodb_group.from_date)} to ${reFormatDate(vodb_group.to_date)}</p>
 
 	
-	<div class="note" id="note" hollyrosa:vgid="${vodb_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
+	<div class="note context_menu_symbol" id="note" hollyrosa:vgid="${vodb_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
 <a id="add_tag_href2" href="javascript:;">Add Tags</a>
 </form></div>
 

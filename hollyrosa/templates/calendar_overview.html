@@ -122,9 +122,9 @@ def makeDate(s):
     <table class="data" id="calendar_listing">
         <tr><th>Day</th><th>Note</th></tr>
         <tr py:for="booking_day in booking_days" style="${['','background:#fdd;'][6==makeDate(booking_day['date']).weekday()]}" class="calendar_overview" hollyrosa:bdate="${booking_day['date']}" hollyrosa:bdayid="${booking_day['_id']}"> 
-            <td class="data info"><a href="${tg.url('/booking/day', params={'day_id':str(booking_day['_id'])})}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a><br/>  
+            <td class="data info context_menu_symbol"><a href="${tg.url('/booking/day', params={'day_id':str(booking_day['_id'])})}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a><br/>  
             </td>
-            <td class="data info"><h2>${booking_day.get('title','')}</h2>
+            <td class="data info context_menu_symbol"><h2>${booking_day.get('title','')}</h2>
             <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day['events']">$e</li></ul>            
             ${HTML(booking_day['note'])}</td>
         </tr>

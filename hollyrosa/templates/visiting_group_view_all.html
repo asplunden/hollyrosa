@@ -225,7 +225,7 @@ function loadNotesFor(id) {
     Choose time period: <ul class="any_menu">
 
         <li><a href="${tg.url('view_today')}">today</a></li>
-        <li id="bokn_status_menu" >Filter booking status</li>
+        <li id="bokn_status_menu" class="context_menu_symbol">Filter booking status</li>
         
         <!-- <li><a href="${tg.url('view_at_date', at_date='2012-06-15')}">Miniscout I</a></li>
         <li><a href="${tg.url('view_at_date', at_date='2012-06-18')}">Miniscout II</a></li>
@@ -238,9 +238,9 @@ function loadNotesFor(id) {
     <h2>Viewing visiting groups</h2>
     <table id="vgroup_listing">
         <tr py:for="visiting_group in visiting_groups" class="name_menu" hollyrosa:vgid="${visiting_group._id}" hollyrosa:vgname="${visiting_group.name}" hollyrosa:has_notes="${has_notes_map.has_key(visiting_group._id)}">
-            <td class="info data">${visiting_group.name}<a name="vgroupid_${visiting_group._id}"/></td>
-            <td class="info data">[${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}]<br/><br/>${visiting_group.get('contact_person','')}<br/>${visiting_group.get('contact_person_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('contact_person_email','')}</a></td>
-            <td class="info data">
+            <td class="info data context_menu_symbol">${visiting_group.name}<a name="vgroupid_${visiting_group._id}"/></td>
+            <td class="info data context_menu_symbol">[${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}]<br/><br/>${visiting_group.get('contact_person','')}<br/>${visiting_group.get('contact_person_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('contact_person_email','')}</a></td>
+            <td class="info data context_menu_symbol">
             <div class="note"><ul class="tag_list" py:for="tag in visiting_group.get('tags',[])"><li>$tag</li></ul>
             <p>bok.nr: <b>${visiting_group.boknr}</b> <br/>
             vodb status: <b>${vodb_state_map.get(visiting_group.get('vodbstatus','-'), '')}</b><br/>
