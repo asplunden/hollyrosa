@@ -219,8 +219,9 @@
         var agc_val = domAttr.get(elem, 'hollyrosa:acgid');
         if (a_ag_status[agc_val]) {
             dojo.style(elem, {display: 'block'});
-        }
-        else {
+        } else if (null == a_ag_status[agc_val]) {
+            dojo.style(elem, {display: 'block'});
+        } else {
             dojo.style(elem, {display: 'none'});
         }
     });
@@ -228,7 +229,7 @@
 	
 	
 	function add_ag_checkbox_menu_item(a_menu, a_name, a_id, a_ag_status) {
-		var l_is_checked = false;
+		var l_is_checked = true;
 		if (a_id in a_ag_status) {
 			l_is_checked = a_ag_status[a_id];
 			}
