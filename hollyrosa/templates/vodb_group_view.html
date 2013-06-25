@@ -71,6 +71,7 @@ function startup() {
    common_menu.add_note_redirect_menu_item(menu, menu, "Add note...", '${visiting_group.id}', '${tg.url('/note/add_note')}');
    common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${visiting_group.id}', '${tg.url('/note/add_attachment')}');
    common_menu.add_menu_separator(menu);
+   
    common_menu.add_list_bookings_redirect_menu_item(menu, menu, "List bookings of group...", '${visiting_group['name']}', '${tg.url('/visiting_group/view_bookings_of_name')}');
       
    //...attach the add tag handler
@@ -118,9 +119,27 @@ function startup() {
     
    array.forEach(common_menu.vodb_state_change_list, function(x) {console.log(x); common_menu.add_change_program_state_menu_item(menu, change_vodb_status_menu, x['name'], x['state'], 0, set_vodb_state_url);});
 	
+    
+    /**** assembling create vodb computation schema items ***/
+	var create_vodb_calculation_schema_menu = new Menu();
+    menu.addChild(new PopupMenuItem({
+   	label: "Create VODB Calculation Schema",
+      popup: create_vodb_calculation_schema_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+   })); 
+    
+   
+   common_menu.add_vgid_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live outdoor', '${visiting_group.id}', '${tg.url('create_calculation_schema')}');
+   common_menu.add_vgid_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live indoor', '${visiting_group.id}', '${tg.url('create_calculation_schema')}');
+   common_menu.add_vgid_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live daytrip', '${visiting_group.id}', '${tg.url('create_calculation_schema')}');
+   
+   
+   
 	common_menu.add_menu_separator(menu);   
    common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history...", '${visiting_group['id']}', '${tg.url('/history/show')}');
 	};
+    
+    
     
 	ready(function() {
 		startup();

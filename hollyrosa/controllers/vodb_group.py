@@ -340,7 +340,7 @@ class VODBGroup(BaseController):
         
 
     @expose()
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members may update vodb group sheets'))
     def update_group_sheets(self, vgroup_id='', tag_sheet=None, eat_sheet=None, live_sheet=None, saveButton=''):
         # todo: accessor function making sure the type really is visiting_group
         visiting_group_o = holly_couch[vgroup_id] 
@@ -483,10 +483,9 @@ class VODBGroup(BaseController):
                 tmp_o.id=tmp_id
                 tmp_o.name='summa for %d' % tmp_status
                 tmp_o.boknr=''
-                tmp_o.from_date=''
                 tmp_o.to_date=''
                 tmp_o.vodbstatus = tmp_status
-                tmp_o['from_date'] = '3000-00-00'
+                tmp_o.from_date = '3000-00-00'
 
                 used_vgroup_ids[tmp_status][tmp_id] = tmp_o
                 
@@ -683,3 +682,59 @@ class VODBGroup(BaseController):
         vgroups.sort(self.fn_cmp_vgroups_on_date)
         
         return dict(header_dates=header_dates, header_times=header_times, vgroups=vgroups, bokn_status_map=bokn_status_map, vodb_status_map=vodb_status_map, summary_vgroups=summary_vgroups)
+
+
+    @expose()
+    @validate(validators={'vodb_state':validators.UnicodeString(not_empty=True)})
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may set up vodb calculation schemas'))
+    def create_calculation_schema(self,  visiting_group_id=None):
+        # todo: accessor function making sure the type really is visiting_group
+        visiting_group_o = holly_couch[visiting_group_id] 
+        visiting_group_properties = visiting_group_o['visiting_group_properties']
+        
+        
+        
+        
+        # try create a live sheet for indoor living for the whole of the groups stay....fm em kvall
+        # then try att use only properties that is within the stated range.
+        
+        from_date = visiting_group_o['from_date']
+        to_date = visiting_group_o['to_date']
+        rows=[]
+        new_live_sheet = dict(identifier='rid',  items=rows)
+        for tmp_date in self.dateGen(from_date, to_date):
+            i=0
+            for t in ['fm', 'em', 'evening']:
+                i += 1
+                #...figure out properties in range.
+                prop_str_list = []
+                for tmp_prop in visiting_group_properties.values():
+                    if tmp_prop['from_date'] <= tmp_date and tmp_prop['to_date'] >= tmp_date:
+                        prop_str_list.append('$'+tmp_prop['property'])
+                
+                rows.append(dict(date=tmp_date,  time=t,  indoor=0,  outdoor='+'.join(prop_str_list),  daytrip=0,  rid=tmp_date+'_'+str(i)))
+        
+        rows[0]['outdoor'] = 0
+        rows[-2]['outdoor'] = 0
+        rows[-1]['outdoor'] = 0
+        
+        visiting_group_o['vodb_live_sheet'] = new_live_sheet
+        
+        #if eat_sheet != None:
+         #   visiting_group_o['vodb_eat_sheet'] = json.loads(eat_sheet)
+
+        #if live_sheet != None:
+         #   visiting_group_o['vodb_live_sheet'] = json.loads(live_sheet)
+
+        #if tag_sheet != None:
+         #   vodb_tag_sheet = json.loads(tag_sheet)
+         #   visiting_group_o['vodb_tag_sheet'] = vodb_tag_sheet
+        
+        vodb_tag_times_tags = computeAllUsedVisitingGroupsTagsForTagSheet(visiting_group_o['tags'], visiting_group_o['vodb_tag_sheet']['items'])
+            
+         
+
+        updateVisitingGroupComputedSheets(visiting_group_o, visiting_group_properties, sheet_map=dict(vodb_eat_sheet=vodb_eat_times_options, vodb_live_sheet=vodb_live_times_options, vodb_tag_sheet=vodb_tag_times_tags))
+        
+        holly_couch[visiting_group_id] = visiting_group_o
+        raise redirect(request.referrer)
