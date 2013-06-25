@@ -39,6 +39,14 @@
          }
       add_redirect_menu_item(a_menu, a_sub_menu, a_name, l_params, a_url); 
 	}
+    
+    function add_calc_sheet_redirect_menu_item(a_menu, a_sub_menu, a_name, a_vgid, a_live, a_url) {
+		var l_params = {
+      	visiting_group_id: a_vgid,
+        live: a_live
+         }
+      add_redirect_menu_item(a_menu, a_sub_menu, a_name, l_params, a_url); 
+	}
 	
 		         
    function add_note_redirect_menu_item(a_menu, a_sub_menu, a_name, a_target_id, a_url) {
@@ -324,7 +332,8 @@
 		load_left_click_menu:load_left_click_menu,
 		add_change_program_state_menu_item:add_change_program_state_menu_item,
 		program_state_change_list:program_state_change_list,
-		vodb_state_change_list:program_state_change_list
+		vodb_state_change_list:program_state_change_list,
+        add_calc_sheet_redirect_menu_item:add_calc_sheet_redirect_menu_item
 		  };
 	});
 	

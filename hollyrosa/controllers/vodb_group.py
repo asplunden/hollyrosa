@@ -687,7 +687,7 @@ class VODBGroup(BaseController):
     @expose()
     @validate(validators={'vodb_state':validators.UnicodeString(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may set up vodb calculation schemas'))
-    def create_calculation_schema(self,  visiting_group_id=None):
+    def create_calculation_schema(self,  visiting_group_id=None,  live='outdoor'):
         # todo: accessor function making sure the type really is visiting_group
         visiting_group_o = holly_couch[visiting_group_id] 
         visiting_group_properties = visiting_group_o['visiting_group_properties']
@@ -711,12 +711,13 @@ class VODBGroup(BaseController):
                 for tmp_prop in visiting_group_properties.values():
                     if tmp_prop['from_date'] <= tmp_date and tmp_prop['to_date'] >= tmp_date:
                         prop_str_list.append('$'+tmp_prop['property'])
-                
-                rows.append(dict(date=tmp_date,  time=t,  indoor=0,  outdoor='+'.join(prop_str_list),  daytrip=0,  rid=tmp_date+'_'+str(i)))
+                tmp_r = dict(date=tmp_date,  time=t,  indoor=0,  outdoor=0,  daytrip=0,  rid=tmp_date+'_'+str(i))
+                tmp_r[live] = '+'.join(prop_str_list)
+                rows.append(tmp_r)
         
-        rows[0]['outdoor'] = 0
-        rows[-2]['outdoor'] = 0
-        rows[-1]['outdoor'] = 0
+        rows[0][live] = 0
+        rows[-2][live] = 0
+        rows[-1][live] = 0
         
         visiting_group_o['vodb_live_sheet'] = new_live_sheet
         
