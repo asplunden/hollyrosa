@@ -23,10 +23,6 @@ from uuid import uuid4
 import datetime
 from hollyrosa.controllers.common import DataContainer
     
-    
-
-#def genUID():
-#    return uuid4().hex
 
 
 # TODO: make type mandatory
@@ -98,6 +94,15 @@ def dateRange(from_date, to_date, format='%a %b %d %Y'):
         tmp_date = tmp_date + one_day
     return formated_dates
     
+
+def dateRange2(from_date, count, format='%Y-%m-%d'):
+    one_day = datetime.timedelta(1)
+    formated_dates = list()
+    tmp_date = datetime.datetime.strptime(from_date,'%Y-%m-%d')
+    for i in range(count):
+        formated_dates.append(tmp_date.strftime(format))
+        tmp_date = tmp_date + one_day
+    return formated_dates
     
 def getVisitingGroupsInDatePeriod(holly_couch, from_date,  to_date):
     """create one key for each day"""

@@ -39,7 +39,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch, genUID
-from hollyrosa.model.booking_couch import getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate, getVisitingGroupsInDatePeriod
+from hollyrosa.model.booking_couch import getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate, getVisitingGroupsInDatePeriod,  dateRange2
 from hollyrosa.model.booking_couch import getAllHistoryForBookings,  getAllActivities,  getAllActivityGroups,  getVisitingGroupsAtDate,  getUserNameMap,  getSchemaSlotActivityMap,  getAllVisitingGroups,  getActivityTitleMap
 import datetime
 from formencode import validators
@@ -222,16 +222,23 @@ class BookingDay(BaseController):
         return activities_map
 
 
-    def make_slot_rows__of_day_schema(self,  day_schema,  activities_map):
+    def make_slot_rows__of_day_schema(self,  day_schema,  activities_map,  dates):
         slot_row_schema = day_schema['schema']
         
         slot_rows = list()
         
+        
+        
         for tmp_activity_id, tmp_slots in slot_row_schema.items():
             tmp_activity = activities_map[tmp_activity_id]
             
-            tmp_row = DataContainer(activity_id=tmp_activity_id,  zorder=tmp_slots[0]['zorder'] , title=tmp_activity['title'],  activity_group_id=tmp_activity['activity_group_id'],  bg_color=tmp_activity['bg_color'],  capacity=tmp_activity['capacity'],  slot_row_position=[ DataContainer(id=str(s['slot_id']),  time_from=s['time_from'],  time_to=s['time_to'],  duration=s['duration']) for s in tmp_slots[1:]])
+            tmp_row = DataContainer(activity_id=tmp_activity_id,  zorder=tmp_slots[0]['zorder'] , title=tmp_activity['title'],  activity_group_id=tmp_activity['activity_group_id'],  bg_color=tmp_activity['bg_color'],  capacity=tmp_activity['capacity'])
             
+            tmp_row.slot_row_position = []
+            for tmp_date in dates:
+                for s in tmp_slots[1:]:
+                    tmp_row.slot_row_position.append( DataContainer(id=str(s['slot_id']),  time_from=s['time_from'],  time_to=s['time_to'],  duration=s['duration'],  date=tmp_date) ) 
+                
             slot_rows.append(tmp_row)
         
         slot_rows.sort(self.fn_cmp_slot_row)
@@ -352,8 +359,9 @@ class BookingDay(BaseController):
         day_schema_id = booking_day_o['day_schema_id']
         day_schema = common_couch.getDaySchema(holly_couch,  day_schema_id)#holly_couch[day_schema_id]
         
-        slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map)
-            
+        slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map,  dates=[booking_day_o['date']])
+        
+        
         #...first, get booking_day for today
         new_bookings = self.getNonDeletedBookingsForBookingDay(holly_couch, day_id)
         
@@ -375,7 +383,92 @@ class BookingDay(BaseController):
             
         return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups, reFormatDate = reFormatDate)
         
+    
+    @expose('hollyrosa.templates.booking_day_l')
+    @validate(validators={'day_id':validators.Int(not_empty=False), 'day':validators.DateValidator(not_empty=False)})
+    def day_l(self,  day=None,  day_id=None):
+        """Show a complete booking day"""
         
+        # TODO: we really need to get only the slot rows related to our booking day schema or things will go wrong at some point when we have more than one schema to work with.
+        
+        today_sql_date = datetime.datetime.today().date().strftime("%Y-%m-%d")
+        activities_map = self.getActivitiesMap(getAllActivities(holly_couch))
+        
+        if day_id != None:
+            booking_day_o = common_couch.getBookingDay(holly_couch, day_id)
+            
+        elif day=='today':
+    
+            booking_day_o = getBookingDayOfDate(holly_couch, today_sql_date)
+            day_id = booking_day_o['_id']
+            
+        else:
+            booking_day_o = getBookingDayOfDate(holly_couch, str(day))
+            day_id = booking_day_o['_id']
+        
+        #  TODO: fix row below
+        booking_day_o['id'] = day_id
+        
+        #...trying to find all days, lets say seven days after the indicated day
+        first_date = booking_day_o['date']
+        dates = dateRange2(first_date,  7)
+        headers = []
+        for tmp_date in dates:
+            headers.append('FM (%s)' % tmp_date)
+            headers.append('EM (%s)' % tmp_date)
+        
+        #...we also need a list of booking days in order to fill in all slots
+        booking_o_list = []
+        for tmp_date in dates:
+            booking_o_list.append(getBookingDayOfDate(holly_couch, str(tmp_date)))
+        
+        #...we have to assume all days belong to the same day schema, otherwise, we really shouldnt display that day
+        day_schema_id = 'living_schema.50d4888393f544b0a47c1bcdbbc533ab'# MARTIN booking_day_o['day_schema_id']
+        day_schema = common_couch.getDaySchema(holly_couch,  day_schema_id)#holly_couch[day_schema_id]
+        
+        slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map,  dates=dates)
+        #...first, get booking_day for today
+        all_bookings = dict()
+        all_blockings = dict()
+
+        for tmp_date in dates:
+            # TODO: ...too many lookups here
+            tmp_booking_day_o = getBookingDayOfDate(holly_couch, tmp_date)
+            tmp_day_id = tmp_booking_day_o['_id']
+            tmp_bookings = self.getNonDeletedBookingsForBookingDay(holly_couch, tmp_day_id)
+            tmp_blockings = self.getSlotBlockingsForBookingDay(holly_couch, tmp_day_id)
+            for k,  v in tmp_bookings.items():
+                new_k = (str(tmp_date),  str(k)) # change to day id later
+                all_bookings[new_k] = v
+            for k,  v in tmp_blockings.items():
+                new_k = (str(tmp_date),  str(k)) # change to day id later
+                all_blockings[new_k] = v
+        print all_bookings
+        # TODO: need a map for bookings that not only looks at slot_id but also on date. Thats a combined key.
+        
+        #...we need a mapping from activity to a list / tupple slot_row_position
+        #
+        #   the new version should be a list of rows. Each row is either a DataContainer or a dict (basically the same...)
+        #    We need to know activity name, color, id and group (which we get from the activities) and we need a list of slot positions
+        activity_slot_position_map = self.getActivitySlotPositionsMap(day_schema) 
+        
+        #...find all unscheduled bookings
+        showing_sql_date = str(booking_day_o['date'])
+        
+        # TODO need to show for the whole date range
+        unscheduled_bookings = self.getUnscheduledBookingsForToday(holly_couch, showing_sql_date,  activities_map)
+        
+        #...compute all blockings, create a dict mapping slot_row_position_id to actual state
+        # TODO need to show blockings for whole date range
+
+        days = self.getAllDays()
+
+        activity_groups = [DataContainer(id=d.value['_id'],  title=d.value['title']) for d in getAllActivityGroups(holly_couch)] 
+            
+        return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=all_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=all_blockings,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups, headers=headers, reFormatDate = reFormatDate)
+    
+
+
     @expose('hollyrosa.templates.booking_day_fladan')
     @validate(validators={'day_id':validators.UnicodeString(not_empty=False), 'day':validators.DateValidator(not_empty=False), 'ag':validators.UnicodeString(not_empty=False)})
     def fladan_day(self,  day=None,  day_id=None, ag=''):

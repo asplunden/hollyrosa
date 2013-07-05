@@ -40,7 +40,7 @@ from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedu
 from booking_history import  remember_workflow_state_change
 from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level
 
-from hollyrosa.model.booking_couch import getAllActivityGroups,  getAllScheduledBookings,  getAllBookingDays,  getAllVisitingGroups
+from hollyrosa.model.booking_couch import getAllActivityGroups,  getAllScheduledBookings,  getAllBookingDays,  getAllVisitingGroups,  getAllActivities
 from hollyrosa.model.booking_couch import getAgeGroupStatistics, getTagStatistics, getSchemaSlotActivityMap, getActivityTitleMap, getBookingDays, getAllUtelunchBookings
 __all__ = ['tools']
 
@@ -453,6 +453,7 @@ class Tools(BaseController):
         log.info( utelunch_dict )
         return dict(booking_days=all_booking_days, utelunches=utelunch_dict)
 
+
     @expose()
     @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
     def set_booking_day_schema_ids(self):
@@ -464,3 +465,31 @@ class Tools(BaseController):
             
         raise redirect('/')
         
+        
+    @expose()
+    @require(Any(has_level('pl'),  msg='Only PL or staff members can poke around the schemas'))
+    def create_living_schema(self):
+        ew_id = genUID(type='living_schema')
+        schema = dict(type='day_schema',  subtype='house',  title='house schema')
+        all_activities = getAllActivities(holly_couch)
+        
+        #...create some living, map to all activities in ag groups house
+        i=0
+        z=0
+        tmp_schema = dict()
+        for tmp_act in list(all_activities):
+            
+            z += 1
+            tmp_id = dict(zorder=z,  id=tmp_act['id'])
+            tmp_fm = dict(time_from='00:00:00', time_to='12:00:00',  duration='12:00:00', title='FM',  slot_id='slot.' + str(i) )
+            i+=1
+            tmp_em = dict(time_from='12:00:00', time_to='23:59:00',  duration='12:00:00', title='EM',  slot_id='slot.' + str( i) )
+            #...create fm and em but nothing more
+            
+            tmp_schema[tmp_act['id']] = [tmp_id,  tmp_fm,  tmp_em]
+        
+        schema['schema'] = tmp_schema
+        holly_couch[ew_id] = schema
+        
+        
+        raise redirect(request.referer)
