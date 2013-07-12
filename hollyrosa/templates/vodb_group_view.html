@@ -129,14 +129,17 @@ function startup() {
    })); 
     
    
-   common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live outdoor', '${visiting_group.id}', 'outdoor','${tg.url('create_calculation_schema')}');
-   common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live indoor', '${visiting_group.id}', 'indoor', '${tg.url('create_calculation_schema')}');
-   common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live daytrip', '${visiting_group.id}', 'daytrip','${tg.url('create_calculation_schema')}');
+   common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live outdoor', '${visiting_group.id}', 'outdoor', 'live','${tg.url('create_calculation_schema')}');
+   common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live indoor', '${visiting_group.id}', 'indoor', 'live', '${tg.url('create_calculation_schema')}');
+   common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live daytrip', '${visiting_group.id}', 'daytrip', 'live', '${tg.url('create_calculation_schema')}');
    
-   
+    common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Eat outdoor', '${visiting_group.id}', 'outdoor', 'eat','${tg.url('create_calculation_schema')}');
+    common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Eat indoor', '${visiting_group.id}', 'indoor', 'eat', '${tg.url('create_calculation_schema')}');
+    common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Eat own', '${visiting_group.id}', 'own', 'eat', '${tg.url('create_calculation_schema')}');
+  
    
 	common_menu.add_menu_separator(menu);   
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history...", '${visiting_group['id']}', '${tg.url('/history/show')}');
+    common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history...", '${visiting_group['id']}', '${tg.url('/history/show')}');
 	};
     
     

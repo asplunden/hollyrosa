@@ -685,14 +685,23 @@ class VODBGroup(BaseController):
 
 
     @expose()
-    @validate(validators={'vodb_state':validators.UnicodeString(not_empty=True)})
+    @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True), 'live':validators.UnicodeString(not_empty=True), 'change_schema':validators.UnicodeString()})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may set up vodb calculation schemas'))
-    def create_calculation_schema(self,  visiting_group_id=None,  live='outdoor'):
+    def create_calculation_schema(self,  visiting_group_id=None,  live='outdoor',  change_schema='live'):
         # todo: accessor function making sure the type really is visiting_group
         visiting_group_o = holly_couch[visiting_group_id] 
         visiting_group_properties = visiting_group_o['visiting_group_properties']
         
+        time_row_schema = []
+        is_changing_live_sheet = False
+        is_changing_eat_sheet = False
         
+        if change_schema == 'live':
+            time_row_schema = ['fm', 'em', 'evening']
+            is_changing_live_sheet = True
+        elif change_schema == 'eat': # this one is more tricky since we dont want to have arrival and departure data set every day.
+            time_row_schema = ['breakfast', 'lunch', 'lunch_arrive', 'lunch_depart',  'dinner']
+            is_changing_eat_sheet = True
         
         
         # try create a live sheet for indoor living for the whole of the groups stay....fm em kvall
@@ -704,7 +713,7 @@ class VODBGroup(BaseController):
         new_live_sheet = dict(identifier='rid',  items=rows)
         for tmp_date in self.dateGen(from_date, to_date):
             i=0
-            for t in ['fm', 'em', 'evening']:
+            for t in time_row_schema:
                 i += 1
                 #...figure out properties in range.
                 prop_str_list = []
@@ -712,28 +721,30 @@ class VODBGroup(BaseController):
                     if tmp_prop['from_date'] <= tmp_date and tmp_prop['to_date'] >= tmp_date:
                         prop_str_list.append('$'+tmp_prop['property'])
                 tmp_r = dict(date=tmp_date,  time=t,  indoor=0,  outdoor=0,  daytrip=0,  rid=tmp_date+'_'+str(i))
-                tmp_r[live] = '+'.join(prop_str_list)
+                
+                if t not in ['lunch_arrive', 'lunch_depart']:
+                    tmp_r[live] = '+'.join(prop_str_list)
+                else:
+                    tmp_r[live] = 0
                 rows.append(tmp_r)
         
         rows[0][live] = 0
         rows[-2][live] = 0
         rows[-1][live] = 0
         
-        visiting_group_o['vodb_live_sheet'] = new_live_sheet
+        if is_changing_eat_sheet:
+            visiting_group_o['vodb_eat_sheet'] = new_live_sheet
+        elif is_changing_live_sheet:
+            visiting_group_o['vodb_live_sheet'] = new_live_sheet
+        
         
         #if eat_sheet != None:
          #   visiting_group_o['vodb_eat_sheet'] = json.loads(eat_sheet)
 
         #if live_sheet != None:
          #   visiting_group_o['vodb_live_sheet'] = json.loads(live_sheet)
-
-        #if tag_sheet != None:
-         #   vodb_tag_sheet = json.loads(tag_sheet)
-         #   visiting_group_o['vodb_tag_sheet'] = vodb_tag_sheet
         
         vodb_tag_times_tags = computeAllUsedVisitingGroupsTagsForTagSheet(visiting_group_o['tags'], visiting_group_o['vodb_tag_sheet']['items'])
-            
-         
 
         updateVisitingGroupComputedSheets(visiting_group_o, visiting_group_properties, sheet_map=dict(vodb_eat_sheet=vodb_eat_times_options, vodb_live_sheet=vodb_live_times_options, vodb_tag_sheet=vodb_tag_times_tags))
         
