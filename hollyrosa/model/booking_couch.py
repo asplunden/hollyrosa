@@ -69,6 +69,10 @@ def getBookingDayOfDate(holly_couch, date):
     return list(holly_couch.view('booking_day/all_booking_days',  keys=[date],  include_docs=True))[0].doc
     
     
+def getBookingDayOfDateList(holly_couch, dates):
+    return list(holly_couch.view('booking_day/all_booking_days',  keys=dates,  include_docs=True))
+    
+    
 def getAllBookingDays(holly_couch):
     return holly_couch.view('booking_day/all_booking_days',  include_docs=True)
     
@@ -183,7 +187,9 @@ def getSlotAndActivityIdOfBooking(holly_couch, booking):
                 return (tmp_activity_id,  tmp_slot)
     return (None,  None)
 
-
+#
+# HISTORY
+#
 
 def getAllHistory(holly_couch, limit=None):
     """returns booking history sorted in reverse chronological order."""

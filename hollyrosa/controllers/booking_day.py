@@ -39,7 +39,7 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch, genUID
-from hollyrosa.model.booking_couch import getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate, getVisitingGroupsInDatePeriod,  dateRange2
+from hollyrosa.model.booking_couch import getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate, getVisitingGroupsInDatePeriod,  dateRange2,  getBookingDayOfDateList
 from hollyrosa.model.booking_couch import getAllHistoryForBookings,  getAllActivities,  getAllActivityGroups,  getVisitingGroupsAtDate,  getUserNameMap,  getSchemaSlotActivityMap,  getAllVisitingGroups,  getActivityTitleMap
 import datetime
 from formencode import validators
@@ -223,11 +223,12 @@ class BookingDay(BaseController):
 
 
     def make_slot_rows__of_day_schema(self,  day_schema,  activities_map,  dates):
+        if not isinstance(dates,  list):
+            dates = [dates]
+        
         slot_row_schema = day_schema['schema']
-        
+        booking_days = [x.doc for x in getBookingDayOfDateList(holly_couch,  dates)]
         slot_rows = list()
-        
-        
         
         for tmp_activity_id, tmp_slots in slot_row_schema.items():
             tmp_activity = activities_map[tmp_activity_id]
@@ -235,9 +236,11 @@ class BookingDay(BaseController):
             tmp_row = DataContainer(activity_id=tmp_activity_id,  zorder=tmp_slots[0]['zorder'] , title=tmp_activity['title'],  activity_group_id=tmp_activity['activity_group_id'],  bg_color=tmp_activity['bg_color'],  capacity=tmp_activity['capacity'])
             
             tmp_row.slot_row_position = []
-            for tmp_date in dates:
+            for tmp_day in booking_days: #te in dates:
+                tmp_date = tmp_day['date']
+                bdayid = tmp_day['_id']
                 for s in tmp_slots[1:]:
-                    tmp_row.slot_row_position.append( DataContainer(id=str(s['slot_id']),  time_from=s['time_from'],  time_to=s['time_to'],  duration=s['duration'],  date=tmp_date) ) 
+                    tmp_row.slot_row_position.append( DataContainer(id=str(s['slot_id']),  time_from=s['time_from'],  time_to=s['time_to'],  duration=s['duration'],  date=tmp_date,  booking_day_id=bdayid) ) 
                 
             slot_rows.append(tmp_row)
         
@@ -262,6 +265,25 @@ class BookingDay(BaseController):
             
         return bookings
         
+
+    def getNonDeletedLiveBookingsForBookingDay(self, holly_couch, start_date,  end_date):
+        # TODO refactor out view
+        # this is a modified copy of getNonDeletedBookingsForBookingDay
+        bookings_c = holly_couch.view('booking_day_live/non_deleted_live_bookings_of_booking_day',  startkey=[start_date, ''],  endkey=[end_date, 'zzzzzzzzz'])
+            
+        # TODO: optimize away this dict thing
+        bookings = dict()
+        for x in bookings_c:
+            b = x.value
+            new_booking = DataContainer(id=b['_id'],  content=b['content'],  cache_content=b['cache_content'],  
+                                        booking_state=b['booking_state'],  visiting_group_id=b['visiting_group_id'],  
+                                        visiting_group_name=b['visiting_group_name'],  valid_from=b.get('valid_from', ''),  valid_to=b.get('valid_to', ''),  requested_date=b.get('requested_date', ''),  last_changed_by_id=b['last_changed_by_id'],  
+                                        slot_id=x.key[1],  date=x.key[0])
+            ns = bookings.get(new_booking.slot_id, list())
+            ns.append(new_booking)
+            bookings[new_booking.slot_id] = ns
+            
+        return bookings
         
     def getSlotStateOfBookingDayIdAndSlotId(self, holly_couch, booking_day_id,  slot_id):
         return [s for s in holly_couch.view('booking_day/slot_states',keys=[[booking_day_id, slot_id]],include_docs=True)]
@@ -423,7 +445,7 @@ class BookingDay(BaseController):
             booking_o_list.append(getBookingDayOfDate(holly_couch, str(tmp_date)))
         
         #...we have to assume all days belong to the same day schema, otherwise, we really shouldnt display that day
-        day_schema_id = 'living_schema.50d4888393f544b0a47c1bcdbbc533ab'# MARTIN booking_day_o['day_schema_id']
+        day_schema_id = 'living_schema.38d0bf32cc18426381f01409aabaa8d2'# MARTIN booking_day_o['day_schema_id']
         day_schema = common_couch.getDaySchema(holly_couch,  day_schema_id)#holly_couch[day_schema_id]
         
         slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map,  dates=dates)
@@ -435,7 +457,7 @@ class BookingDay(BaseController):
             # TODO: ...too many lookups here
             tmp_booking_day_o = getBookingDayOfDate(holly_couch, tmp_date)
             tmp_day_id = tmp_booking_day_o['_id']
-            tmp_bookings = self.getNonDeletedBookingsForBookingDay(holly_couch, tmp_day_id)
+            tmp_bookings = self.getNonDeletedLiveBookingsForBookingDay(holly_couch,  tmp_date,  tmp_date)  #self.getNonDeletedBookingsForBookingDay(holly_couch, tmp_day_id)
             tmp_blockings = self.getSlotBlockingsForBookingDay(holly_couch, tmp_day_id)
             for k,  v in tmp_bookings.items():
                 new_k = (str(tmp_date),  str(k)) # change to day id later

@@ -481,10 +481,11 @@ class Tools(BaseController):
             
             z += 1
             tmp_id = dict(zorder=z,  id=tmp_act['id'])
-            tmp_fm = dict(time_from='00:00:00', time_to='12:00:00',  duration='12:00:00', title='FM',  slot_id='slot.' + str(i) )
+            tmp_fm = dict(time_from='00:00:00', time_to='12:00:00',  duration='12:00:00', title='FM',  slot_id='live_slot.' + str(i) )
             i+=1
-            tmp_em = dict(time_from='12:00:00', time_to='23:59:00',  duration='12:00:00', title='EM',  slot_id='slot.' + str( i) )
+            tmp_em = dict(time_from='12:00:00', time_to='23:59:00',  duration='12:00:00', title='EM',  slot_id='live_slot.' + str( i) )
             #...create fm and em but nothing more
+            i+=1
             
             tmp_schema[tmp_act['id']] = [tmp_id,  tmp_fm,  tmp_em]
         

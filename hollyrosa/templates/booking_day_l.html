@@ -177,8 +177,8 @@ function navigation_calendar_clicked(x) {
               
           	 common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "View...", '${tg.url('/booking/view_booked_booking')}');
           	 common_menu.add_visiting_group_list_bookings_menu_item(unschedule_menu, unschedule_menu, "List bookings of group", '${tg.url('/visiting_group/view_bookings_of_name')}');
-		    	 common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Edit...", '${tg.url('/booking/edit_booking')}');
-             common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Delete...", '${tg.url('delete_booking')}'); 
+            common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Edit...", '${tg.url('/booking/edit_booking')}');
+            common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Delete...", '${tg.url('delete_booking')}'); 
              
              
        
@@ -264,15 +264,14 @@ function navigation_calendar_clicked(x) {
         
             <!-- we may have several slot bookings-->
             <div py:if="bookings.has_key((slot_position.date, slot_position.id))">
-            <p>booking here</p>
                 
-                <div py:for="b in bookings[(slot_position.date, slot_position.id)]" class="slot_booking" hollyrosa:bid="${b.id}" hollyrosa:bdayid="${booking_day.id}" hollyrosa:lock="${['off','block'][blockings_map.has_key((slot_position.date, slot_position.id))]}"  hollyrosa:vgname="${b.visiting_group_name}" hollyrosa:vgid="${b.visiting_group_id}" hollyrosa:sid="${slot_position.id}">
+                <div py:for="b in bookings[(slot_position.date, slot_position.id)]" class="slot_booking" hollyrosa:bid="${b.id}" hollyrosa:bdayid="${slot_position.booking_day_id}" hollyrosa:lock="${['off','block'][blockings_map.has_key((slot_position.date, slot_position.id))]}"  hollyrosa:vgname="${b.visiting_group_name}" hollyrosa:vgid="${b.visiting_group_id}" hollyrosa:sid="${slot_position.id}">
                 <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/visiting_group/view_bookings_of_name', params={'name':b.visiting_group_name})}">${b.visiting_group_name}</a></span><br/><a href="${tg.url('view_booked_booking', params={'booking_id':b.id, 'return_to_day_id':booking_day.id})}" style="padding-left:2em;">${getRenderContent(b)}</a>
                 
                     
                 </div>
             </div>
-            <div py:if="not bookings.has_key(slot_position.id)" class="slot_empty" hollyrosa:bdayid="${booking_day.id}" hollyrosa:lock="${['off','block'][blockings_map.has_key((slot_position.date, slot_position.id))]}" hollyrosa:sid="${slot_position.id}">&nbsp;</div>
+            <div py:if="not bookings.has_key(slot_position.id)" class="slot_empty" hollyrosa:bdayid="${slot_position.booking_day_id}" hollyrosa:lock="${['off','block'][blockings_map.has_key((slot_position.date, slot_position.id))]}" hollyrosa:sid="${slot_position.id}">&nbsp;</div>
             
         </div>
     </div> 
