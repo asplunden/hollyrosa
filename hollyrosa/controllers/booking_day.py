@@ -34,7 +34,7 @@ http://turbogears.org/2.0/docs/main/Auth/Authorization.html#module-repoze.what.p
 """
 
 
-from tg import expose, flash, require, url, request, redirect,  validate
+from tg import expose, flash, require, url, request, redirect,  validate,  override_template
 
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
@@ -757,7 +757,9 @@ class BookingDay(BaseController):
         elif booking_o['subtype'] == 'live':
             tmpl_context.form = create_edit_book_live_slot_form
             # TODO: find out how to express this
-            tmpl_context.template = 'hollyrosa.templates.edit_booked_booking'
+            template = 'genshi:hollyrosa.templates.edit_booked_live_booking'
+            override_template(self.edit_booked_booking, template) 
+            
             
         booking_o['return_to_day_id'] = return_to_day_id
         
@@ -774,6 +776,8 @@ class BookingDay(BaseController):
         visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in tmp_visiting_groups]  
         
         end_slot_id_options = self.getEndSlotIdOptions('living_schema.38d0bf32cc18426381f01409aabaa8d2',  slot_position['activity_id'])
+        
+        print 'end_slot_id_options',  end_slot_id_options
         
         return dict(booking_day=booking_day, slot_position=slot_position, booking=booking_,  visiting_groups=visiting_groups, edit_this_visiting_group=booking_o['visiting_group_id'],  activity=activity,  end_slot_id_options=end_slot_id_options,  living_schema_id='living_schema.38d0bf32cc18426381f01409aabaa8d2')
         
