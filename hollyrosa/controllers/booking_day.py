@@ -985,7 +985,7 @@ class BookingDay(BaseController):
         #...patch since this is the way we will be called if validator for new will fail
         booking_o = common_couch.getBooking(holly_couch,  booking_id)
         booking_o.return_to_day_id = return_to_day_id
-        activity_id,  slot_o = getSlotAndActivityIdOfBooking(holly_couch, booking_o)
+        activity_id,  slot_o = getSlotAndActivityIdOfBooking(holly_couch, booking_o,  booking_o['subtype'])
         activity_o = common_couch.getActivity(holly_couch,  booking_o['activity_id'])
         booking_day = common_couch.getBookingDay(holly_couch,  booking_o['booking_day_id'])
         booking_ = DataContainer(activity_id=activity_id,  content=booking_o['content'],  cache_content=booking_o['cache_content'],  visiting_group_name=booking_o['visiting_group_name'],  id=booking_o['_id'],  return_to_day_id=return_to_day_id)
@@ -996,31 +996,63 @@ class BookingDay(BaseController):
     @expose()
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change activity properties'))
     def save_move_booking(self,  id=None,  activity_id=None,  return_to_day_id=None,  **kw):
-        new_booking = common_couch.getBooking(holly_couch,  id)
-        old_activity_id = new_booking['activity_id']
+        booking_o = common_couch.getBooking(holly_couch,  id)
+        old_activity_id = booking_o['activity_id']
+
         
         #...slot row position must be changed, so we need to find slot row of activity and then slot row position with aproximately the same time span
-        old_slot_id = new_booking['slot_id']
+        old_slot_id = booking_o['slot_id']
         #old_activity_id,  old_slot = getSlotAndActivityIdOfBooking(new_booking)
-        booking_day_id = new_booking['booking_day_id']
+        booking_day_id = booking_o['booking_day_id']
         booking_day_o = common_couch.getBookingDay(holly_couch,  booking_day_id)
-        schema_o = common_couch.getDaySchema(holly_couch,  booking_day_o['day_schema_id'])
         
+        # TODO read schema from booking_day
+        if booking_o['subtype'] == 'program':
+            schema_o = common_couch.getDaySchema(holly_couch,  booking_day_o['day_schema_id'])
+        elif booking_o['subtype'] == 'live':
+             schema_o = common_couch.getDaySchema(holly_couch,  'living_schema.38d0bf32cc18426381f01409aabaa8d2')
+             
         #...iterate thrue the schema first time looking for slot_id_position and activity
         the_schema = schema_o['schema']
+        
+        old_end_slot_id = booking_o.get('booking_end_slot_id', '')
+        #...first, find the index of the slot id
+        #...try match slot_id
+        old_end_slot_index = None
         for tmp_activity_id,  tmp_activity_row in the_schema.items():
             tmp_slot_index = 1
             for tmp_slot in tmp_activity_row[1:]:
                 if tmp_slot['slot_id'] == old_slot_id:
-                    old_activity_id = tmp_activity_id
+                    #...we got a match
+                    old_activity_id_according_to_slot_id = tmp_activity_id
                     old_slot = tmp_slot
                     old_slot_index = tmp_slot_index
-                    break
+                elif tmp_slot['slot_id'] == old_end_slot_id:
+                    old_end_slot_index = tmp_slot_index
                 tmp_slot_index += 1
         
+        #...now, find the 
         tmp_new_slot_row = the_schema[activity_id]
         new_slot = tmp_new_slot_row[old_slot_index]
         new_slot_id = new_slot['slot_id']
+        
+        new_end_slot_id = None
+        if old_end_slot_index != None:
+            new_end_slot = tmp_new_slot_row[old_end_slot_index]
+            new_end_slot_id = new_end_slot['slot_id']
+            
+        #TODO: also need to change slot_schema_row as well as well as start and end slot id's
+        old_slot_row_schema_of_activity = getSlotRowSchemaOfActivity(holly_couch,  schema_o['_id'],  old_activity_id)
+        old_slot_row_schema_of_activity = list(old_slot_row_schema_of_activity)[0].value[1:]
+     
+        slot_row_schema_of_activity = getSlotRowSchemaOfActivity(holly_couch,  schema_o['_id'],  activity_id)
+        slot_row_schema_of_activity = list(slot_row_schema_of_activity)[0].value[1:]
+     
+
+        booking_o['slot_schema_row'] = slot_row_schema_of_activity
+        
+        #TODO need to move slot_id and end_slot_id as well as slot_schema
+        
         #new_slot_row = DBSession.query(booking.SlotRow).filter('activity_id='+str(activity_id)).one()
         #for tmp_slot_row_position in new_slot_row.slot_row_position:
          #   
@@ -1029,14 +1061,15 @@ class BookingDay(BaseController):
          #       new_booking.slot_row_position = tmp_slot_row_position
         
         #...it's not perfectly normalized that we also need to change activity id
-        new_booking['activity_id'] = activity_id
-        new_booking['slot_id'] = new_slot_id
-        holly_couch[new_booking['_id']] = new_booking
+        booking_o['activity_id'] = activity_id
+        booking_o['slot_id'] = new_slot_id
+        booking_o['booking_end_slot_id'] = new_end_slot_id
+        holly_couch[booking_o['_id']] = booking_o
         
         activity_title_map = getActivityTitleMap(holly_couch)
         
         # TODO: remember move booking
-        remember_booking_move(holly_couch, booking=new_booking,  booking_day=booking_day_o,  old_activity_title=activity_title_map[old_activity_id],  new_activity_title=activity_title_map[activity_id])
+        remember_booking_move(holly_couch, booking=booking_o,  booking_day=booking_day_o,  old_activity_title=activity_title_map[old_activity_id],  new_activity_title=activity_title_map[activity_id])
         raise redirect('/booking/day?day_id='+str(return_to_day_id)) 
         
         

@@ -174,10 +174,15 @@ def getAllVisitingGroupsNameAmongBookings(holly_couch, from_date='',  to_date='9
     return visiting_group_names_result.keys()
     
     
-def getSlotAndActivityIdOfBooking(holly_couch, booking):
+def getSlotAndActivityIdOfBooking(holly_couch, booking,  subtype):
     booking_day_id = booking['booking_day_id']
     booking_day_o = holly_couch[booking_day_id]
-    schema_o = holly_couch[booking_day_o['day_schema_id']]
+    
+    if subtype=='program':
+        schema_o = holly_couch[booking_day_o['day_schema_id']]
+    elif subtype == 'live':
+        schema_o = holly_couch[ 'living_schema.38d0bf32cc18426381f01409aabaa8d2']  #booking_day_o['day_schema_id']]
+    #schema_o = holly_couch[booking_day_o['day_schema_id']]
     slot_id = booking['slot_id']
     
     #...iterate thrue the schema
