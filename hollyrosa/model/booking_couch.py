@@ -268,9 +268,12 @@ def getUserNameMap(holly_couch):
     return m
 
 # TODO: VERY DNGEROUS TO CACHE
-def getSchemaSlotActivityMap(holly_couch, day_schema_id):
-    #global _schema_slot_activity_map
-    try:    
+def getSchemaSlotActivityMap(holly_couch, booking_day,  subtype):
+    if subtype == 'program':
+        day_schema_id = booking_day['day_schema_id']
+    else:
+        day_schema_id = 'living_schema.38d0bf32cc18426381f01409aabaa8d2'
+    try:
         tmp = _schema_slot_activity_map
         print 'found'
     except NameError:
@@ -286,6 +289,18 @@ def getSchemaSlotActivityMap(holly_couch, day_schema_id):
         _schema_slot_activity_map = m
     
     return tmp
+    
+    
+    
+    
+    
+
+def getSlotRowSchemaOfActivity(holly_couch,  day_schema_id,  activity_id):
+    return holly_couch.view('day_schema/slot_schema_of_activity',  key=[day_schema_id,  activity_id])
+    
+    
+    
+    
     
     
 def getNotesForTarget(holly_couch, target_id):
