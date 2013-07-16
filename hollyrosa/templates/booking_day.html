@@ -27,7 +27,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa - ${booking_day.date}</title>
+  <title>Hollyrosa Program Day - ${booking_day.date}</title>
   
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
 <style type="text/css">
@@ -226,7 +226,7 @@ function navigation_calendar_clicked(x) {
         	</ul>
     </div>
    
-    <h2>${reFormatDate(booking_day.date)}</h2>
+    <h2>Program Day ${reFormatDate(booking_day.date)}</h2>
 
     <div class="note"><h2>${booking_day.get('title','')}</h2>
     <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day.events">$e</li></ul>${HTML(booking_day.note)}
@@ -253,8 +253,8 @@ function navigation_calendar_clicked(x) {
     <div class="booking_day_overview_activity">Slot time</div>
     <div class="booking_day_overview_slots">Morning</div>
     <div class="booking_day_overview_slots">Afternoon</div>
-    <!--<div class="booking_day_overview_slots">Evening</div>
-    <div class="booking_day_overview_slots">After hours</div>-->
+    <div class="booking_day_overview_slots">Evening</div>
+    <div class="booking_day_overview_slots">After hours</div>
   </div>
 
     <!-- <div py:for="slot_row in slot_rows" hollyrosa:acgid="${slot_row.activity.activity_group_id}"  class="booking_day_overview_slot_row" style="background: ${slot_row.activity.bg_color};"> -->

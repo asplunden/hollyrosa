@@ -27,7 +27,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa - ${booking_day.date}</title>
+  <title>Hollyrosa Live Overview - ${booking_day.date}</title>
   
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
 <style type="text/css">
@@ -46,9 +46,6 @@ var jdata = {};
  
 
 ready(function() {
-    /*recall_visible_ag();
-    set_save_visible_handlers();
-    */
     var e = dom.byId('navigation_calendar'); 
     domAttr.set(e, 'dojoType', 'dijit.Calendar'); 
     domAttr.set(e, 'onChange', 'navigation_calendar_clicked'); 
@@ -226,7 +223,7 @@ function navigation_calendar_clicked(x) {
         	</ul>
     </div>
    
-    <h2>${reFormatDate(booking_day.date)}</h2>
+    <h2>Live Overview ${reFormatDate(booking_day.date)}</h2>
 
     <div class="note"><h2>${booking_day.get('title','')}</h2>
     <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day.events">$e</li></ul>${HTML(booking_day.note)}
