@@ -403,13 +403,13 @@ class BookingDay(BaseController):
         days = self.getAllDays()
 
         activity_groups = [DataContainer(id=d.value['_id'],  title=d.value['title']) for d in getAllActivityGroups(holly_couch)] 
-            
-        return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups, reFormatDate = reFormatDate)
         
+        return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=new_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=blockings_map,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups, reFormatDate = reFormatDate)
     
-    @expose('hollyrosa.templates.booking_day_l')
+    
+    @expose('hollyrosa.templates.live_day')
     @validate(validators={'day_id':validators.Int(not_empty=False), 'day':validators.DateValidator(not_empty=False)})
-    def day_l(self,  day=None,  day_id=None):
+    def live(self,  day=None,  day_id=None):
         """Show a complete booking day"""
         
         # TODO: we really need to get only the slot rows related to our booking day schema or things will go wrong at some point when we have more than one schema to work with.
@@ -788,7 +788,7 @@ class BookingDay(BaseController):
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked live booking properties'))
     def save_booked_live_booking_properties(self,  id=None,  content=None,  visiting_group_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  end_date=None,  end_slot_id=None,  block_after_book=False ):
         tmp_activity_id = self.save_booked_booking_properties_helper(id,  content,  visiting_group_name,  visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  block_after_book=block_after_book,  subtype='live',  end_date=end_date,  end_slot_id=end_slot_id)
-        raise redirect('day_l?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id))
+        raise redirect('live?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id))
     
     @validate(create_edit_book_slot_form, error_handler=edit_booked_booking)      
     @expose()

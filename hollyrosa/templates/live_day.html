@@ -66,7 +66,7 @@ ready(function() {
 function navigation_calendar_clicked(x) {
         var selected_date = dojo.date.locale.format(x, {datePattern: "yyyy-MM-dd", selector: "date"});
         if ("${booking_day.date}" != selected_date) {
-            window.location.assign('day?day=' + selected_date);
+            window.location.assign('live?day=' + selected_date);
         }
     }
     
@@ -233,19 +233,8 @@ function navigation_calendar_clicked(x) {
     <br/>
     <a href="${tg.url('/calendar/edit_booking_day',params={'id':booking_day.id})}">edit</a>
     </div>
-
-  
-    <h3>Unscheduled bookings</h3>    
-    <ul id="unscheduled_bookings">
-        <li py:for="booking in unscheduled_bookings" hollyrosa:acgid="${booking.activity_group_id}" class="unscheduled_booking" hollyrosa:bid="${booking.id}" hollyrosa:bdayid="${booking_day.id}"  hollyrosa:vgname="${booking.visiting_group_name}">${booking.activity_title} 
-        <span class="group_info">${booking.visiting_group_name}</span>  ${getRenderContent(booking)}, <span class="requested_date">requested date ${booking.requested_date}</span> <span class="date_info">  [${booking.valid_from}  - ${booking.valid_to}]</span> 
-            <ul class="any_menu context_inline_menu_toggle">
-            <li py:for="tt in [t for t in activity_slot_position_map.get(booking.activity_id,[])[1:]  if not blockings_map.has_key(t['slot_id'])]">
-        			<a href="${tg.url('schedule_booking', params={'booking_id':booking.id, 'booking_day_id':booking_day.id, 'slot_row_position_id':tt.slot_id})}">[${tt.time_from} - ${tt.time_to}]</a></li>
-    			</ul>
-    </li></ul>
-    
-    <h3>Scheduled bookings and daily overview</h3>
+    &nbsp;<br/><br/>
+    <h3>Scheduled living and daily overview</h3>
   <div class="booking_day_overview" id="booking_day_overview">
   
   <!-- hack for 2011 for showing FM EM evening and after hours -->

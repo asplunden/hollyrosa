@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -46,7 +46,7 @@ def makeDate(s):
        });
 
    menu.addChild(new MenuItem({
-       label: "Day schema",
+       label: "Day overview",
        onClick: function(evt) {
            var node = menu.currentTarget;
            var bdayid = node.attributes["hollyrosa:bdayid"].value;
@@ -56,6 +56,19 @@ def makeDate(s):
            window.location = '${tg.url('/booking/day')}' + '?' + ioQuery.objectToQuery(ioq);
            }
        }));
+       
+       menu.addChild(new MenuItem({
+       label: "Live overview",
+       onClick: function(evt) {
+           var node = menu.currentTarget;
+           var bdayid = node.attributes["hollyrosa:bdayid"].value;
+           var ioq = {
+               day_id: bdayid
+               };
+           window.location = '${tg.url('/booking/live')}' + '?' + ioQuery.objectToQuery(ioq);
+           }
+       }));
+
    common_menu.add_menu_separator(menu);
    menu.addChild(new MenuItem({
        label: "Visiting groups this day",
