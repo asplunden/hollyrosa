@@ -466,7 +466,7 @@ class BookingDay(BaseController):
             for k,  v in tmp_blockings.items():
                 new_k = (str(tmp_date),  str(k)) # change to day id later
                 all_blockings[new_k] = v
-        print all_bookings
+
         # TODO: need a map for bookings that not only looks at slot_id but also on date. Thats a combined key.
         
         #...we need a mapping from activity to a list / tupple slot_row_position
@@ -777,8 +777,6 @@ class BookingDay(BaseController):
         
         end_slot_id_options = self.getEndSlotIdOptions('living_schema.38d0bf32cc18426381f01409aabaa8d2',  slot_position['activity_id'])
         
-        print 'end_slot_id_options',  end_slot_id_options
-        
         return dict(booking_day=booking_day, slot_position=slot_position, booking=booking_,  visiting_groups=visiting_groups, edit_this_visiting_group=booking_o['visiting_group_id'],  activity=activity,  end_slot_id_options=end_slot_id_options,  living_schema_id='living_schema.38d0bf32cc18426381f01409aabaa8d2')
         
     
@@ -801,7 +799,6 @@ class BookingDay(BaseController):
         is_new = (None == id or '' == id) 
         #...id can be None if a new slot is booked
         if is_new:
-            print 'IS NEW!!!!!'
             old_booking = common_couch.createEmptyProgramBooking(subtype=subtype)
             old_booking['slot_id'] = slot_id
             old_booking['booking_day_id'] = booking_day_id
@@ -851,7 +848,6 @@ class BookingDay(BaseController):
                 slot_row_schema_of_activity = list(slot_row_schema_of_activity)[0].value[1:]
                 old_booking['slot_schema_row'] = slot_row_schema_of_activity
             
-            print 'OLD BOOKING',  old_booking
             holly_couch[new_uid] = old_booking
             id = new_uid
         else:
@@ -860,7 +856,6 @@ class BookingDay(BaseController):
             slot = slot_map[slot_id]
             
             if subtype == 'live':
-                print 'LIVE!!!"'
                 old_booking['booking_date'] = booking_day['date']
                 old_booking['booking_end_date'] = end_date.strftime('%Y-%m-%d')
                 old_booking['booking_end_slot_id'] = end_slot_id
