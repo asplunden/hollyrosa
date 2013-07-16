@@ -1,5 +1,5 @@
 /**
- * Copyright 2010, 2011, 2012 Martin Eliasson
+ * Copyright 2010, 2011, 2012, 2013 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *
@@ -357,8 +357,15 @@ div.booking_day_overview_slot_row {
     border-bottom: 1px solid #ccc;
 }
 
+/* copy */
+div.living_day_overview_slot_row {
+    display: block;
+    padding:0.2em;
+    margin:0em;
+    border-bottom: 1px solid #ccc;
+}
+
 tr.tr_booking_day_overview_slot_row {
-    
     padding:0.2em;
     margin:0em;
     border: 1px solid #000;
@@ -373,9 +380,17 @@ div.booking_day_overview_activity {
     border-right: 1px solid #ccc;
 }
 
+
+/* copy */
+div.living_day_overview_activity {
+    display: inline-block;
+    width: 12%;
+    padding:0em;
+    top: 0%;
+    border-right: 1px solid #ccc;
+}
+
 td.td_booking_day_overview_activity {
-    
-    
     padding:0em;
     top:0px;
     border-right: 1px solid #000;
@@ -385,12 +400,24 @@ td.td_booking_day_overview_activity {
 
 div.booking_day_overview_slots {
     display: inline-block;
-    width: 21%;
+    width:  21%;
     padding: 0.1em;
     top:0px;
     border-right: 1px solid #ccc;
     // text-shadow: 2px 2px 2px #ccc;
 }
+
+
+/* copy */
+div.living_day_overview_slots {
+    display: inline-block;
+    width:  6%;
+    padding: 0.1em;
+    top:0px;
+    border-right: 1px solid #ccc;
+    // text-shadow: 2px 2px 2px #ccc;
+}
+
 
 td.td_booking_day_overview_slots {
     padding: 0.1em;
