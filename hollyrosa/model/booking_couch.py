@@ -304,7 +304,8 @@ def getSlotRowSchemaOfActivity(holly_couch,  day_schema_id,  activity_id):
     return holly_couch.view('day_schema/slot_schema_of_activity',  key=[day_schema_id,  activity_id])
     
     
-    
+def getAllSchemas(holly_couch):
+    return holly_couch.view('day_schema/day_schema',  include_docs=True)
     
     
     
