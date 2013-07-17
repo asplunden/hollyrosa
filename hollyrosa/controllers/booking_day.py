@@ -716,7 +716,7 @@ class BookingDay(BaseController):
         
 
 
-    @expose('hollyrosa.templates.show_booking')
+    @expose('hollyrosa.templates.booking_view')
     @validate(validators={'booking_id':validators.UnicodeString(not_empty=True), 'return_to_day_id':validators.UnicodeString(not_empty=False)})
     def view_booked_booking(self,  return_to_day_id=None,  booking_id=None):
        
@@ -742,7 +742,12 @@ class BookingDay(BaseController):
         history = [h.doc for h in getAllHistoryForBookings(holly_couch, [booking_id])]
         user_name_map = getUserNameMap(holly_couch)
         
-        return dict(booking_day=booking_day,  slot_position=slot_position, booking=booking_o,  workflow_map=workflow_map,  history=history,  change_op_map=change_op_map,  getRenderContent=getRenderContentDict,  activity=activity, formatDate=reFormatDate,  user_name_map=user_name_map)
+        end_slot = None
+        if booking_o.has_key('booking_end_slot_id'):
+            end_slot = slot_map[booking_o['booking_end_slot_id']]
+            
+        
+        return dict(booking_day=booking_day,  slot_position=slot_position, booking=booking_o,  workflow_map=workflow_map,  history=history,  change_op_map=change_op_map,  getRenderContent=getRenderContentDict,  activity=activity, formatDate=reFormatDate,  user_name_map=user_name_map,  end_slot=end_slot)
         
         
     @expose('hollyrosa.templates.edit_booked_booking')
