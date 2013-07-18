@@ -47,7 +47,7 @@ if False:
     holly_couch['school_schema.2013'] = ds
     holly_couch['60dn_schema.2013'] = ds
     
-if True:
+if False:
     pos = 1300
     school_dates_spring = dateRange('2013-05-01', '2013-06-08', format='%Y-%m-%d')
     summer_dates = dateRange('2013-06-09', '2013-08-02', format='%Y-%m-%d')
@@ -73,3 +73,17 @@ if True:
 # never delete eternal documents
 
 
+if True:
+    design_view_names = ['all_activities', 'booking_day', 'day_schema','history', 'notes','statistics','tag_statistics','tags','user', 'visiting_groups', 'vodb_overview', 'workflow' ]
+    
+    for tmp_name in design_view_names:
+        tmp_dv = '_design/%s' % tmp_name
+        dv_doc = holly_couch[tmp_dv]
+        print dv_doc
+        print dv_doc['views']
+        
+        file_name = 'design_views/%s.viewfunc' % tmp_name
+        f = open(file_name, 'w')
+        f.write(str(dv_doc))
+        f.close()
+        
