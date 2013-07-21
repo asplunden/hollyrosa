@@ -165,7 +165,7 @@ function navigation_calendar_clicked(x) {
            
            
            
-           /******************* unschedule menu ********************/
+           /******************* unschedule menu ********************
            var unschedule_menu = new Menu({
                targetNodeIds: ["unscheduled_bookings"],
                selector: "li.unscheduled_booking",
@@ -187,7 +187,7 @@ function navigation_calendar_clicked(x) {
                 leftClickToOpen: common_menu.load_left_click_menu(),
         	       popup: schedule_more_menu
              }));
-           
+           */
          var agroups = ${"[" + ','.join( ['["'+a.id + '", "' + a.title +'"]' for a in activity_groups]   )   + "]"};           
          
   			var ag_status = common_menu.load_ag_checkbox_status();         
