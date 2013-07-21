@@ -1,4 +1,24 @@
-# tool for administring the holly_couch database from command line
+# -*- coding: utf-8 -*-
+"""
+hollyrosa_tool.py
+
+Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+"""
 
 import copy,  datetime
 import couchdb
@@ -17,7 +37,7 @@ def dateRange(from_date, to_date, format='%a %b %d %Y'):
     
 #...read from ini file
 db_url = 'http://localhost:5989'
-db_name = 'hollyrosa_2013_prod'
+db_name = 'hollyrosa_2013_test'
 
 couch_server = couchdb.Server(url=db_url)
 try:
@@ -74,7 +94,7 @@ if False:
 
 
 if True:
-    design_view_names = ['all_activities', 'booking_day', 'day_schema','history', 'notes','statistics','tag_statistics','tags','user', 'visiting_groups', 'vodb_overview', 'workflow' ]
+    design_view_names = ['all_activities', 'booking_day', 'day_schema','history', 'notes','statistics','tag_statistics','tags','user', 'visiting_groups', 'vodb_overview', 'workflow', 'booking_day_live' ]
     
     for tmp_name in design_view_names:
         tmp_dv = '_design/%s' % tmp_name

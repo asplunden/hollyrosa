@@ -137,6 +137,10 @@ def getVisitingGroupsByVodbState(holly_couch, state):
     return holly_couch.view("visiting_groups/all_visiting_groups_by_vodb_state",  startkey=[state,  None],  endkey=[state,  '9999-99-99'],  include_docs =True)  
 
 
+def getVisitingGroupsByGroupType(holly_couch,  group_type):
+    return holly_couch.view("visiting_groups/all_visiting_groups_by_group_type",  startkey=[group_type,  None],  endkey=[group_type,  '9999-99-99'],  include_docs =True)  
+    
+    
 def getVisitingGroupOfVisitingGroupName(holly_couch, name):
     return holly_couch.view('visiting_groups/visiting_group_by_name', keys=[name], include_docs=True)
     
