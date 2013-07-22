@@ -220,9 +220,28 @@ def getAllHistoryForBookings(holly_couch, booking_ids,  limit=250):
     
 #----
 
-def getAllActivityGroups(holly_couch):
-    return holly_couch.view('all_activities/all_activity_groups')
+def getAllActivityGroups(holly_couch,  filter_activity_group_ids=None):
+    tmp_result = holly_couch.view('all_activities/all_activity_groups')
+    if filter_activity_group_ids == None:
+        return tmp_result
+    else:
+        filtered_result = list()
+        for tmp_r in tmp_result:
+            if tmp_r.value['_id'] in filter_activity_group_ids:
+                filtered_result.append(tmp_r)
+        return filtered_result
     
+    
+def getActivityGroupNameAndIdList(holly_couch,  day_schema=None):
+    """for displaying drop down in web page and similar"""
+    filter_activity_group_ids = None
+    if day_schema != None:
+        filter_activity_group_ids = day_schema['activity_groups_ids']
+        
+    tmp_result = getAllActivityGroups(holly_couch,  filter_activity_group_ids)
+    return [DataContainer(id=d.value['_id'],  title=d.value['title']) for d in tmp_result]
+
+
 def getAllActivities(holly_couch):
     return holly_couch.view('all_activities/all_activities', include_docs=True)
     

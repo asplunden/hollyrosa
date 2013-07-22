@@ -107,3 +107,35 @@ if True:
         f.write(str(dv_doc))
         f.close()
         
+if False:
+    
+    activities = list()
+    agroups=dict()
+    
+    for tmp_day_schema in holly_couch.view('day_schema/day_schema',  include_docs=True):
+        day_schema = tmp_day_schema.doc
+        
+        for k, v in day_schema['schema'].items():
+            #print k
+            #print v
+            activities.append(k)
+            tmp_activity = holly_couch[k]
+            agid = tmp_activity['activity_group_id']
+            #print 'agid',  agid
+            tmp_agroup = holly_couch[agid]
+            if not agroups.has_key(tmp_agroup.id):
+                agroups[tmp_agroup.id] = tmp_agroup
+                print 'added agroup', tmp_agroup
+        print 'ALL AGS',  agroups
+        print 
+        all_keys = [k for k in agroups.keys()]
+        print 
+        day_schema2 = holly_couch[day_schema.id]
+        day_schema2['activity_groups_ids'] = all_keys
+        holly_couch[day_schema.id] = day_schema2
+        
+#        # given all activities, find all activity groups
+#        activity_groups = dict()
+#        
+#        for tmp_ag in holly_couch.view('all_activities/all_activity_groups_and_activity',  include_docs=True,  keys=activities):
+#            print tmp_ag
