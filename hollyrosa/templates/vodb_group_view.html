@@ -203,8 +203,9 @@ function startup() {
 
 <h3>Room Bookings</h3>
  <div py:for="rb in room_bookings">
+    
     <div py:if="None != rb.booking_day_id" class="booking_meta_info" hollyrosa:bid="${rb['id']}" hollyrosa:bdayid="${rb['booking_day_id']}">
-    ${rb.activity['title']}
+    <h4><a href="${tg.url('/booking/view_activity', {'activity_id':rb.activity['_id']})}">${rb.activity.title}</a></h4>
         <span class="workflow_state_${rb.booking_state}"><a href="${tg.url('/booking/live', {'day_id':rb.booking_day_id})}">${reFormatDate(rb.booking_date)}</a> ${rb.start_time} - <a href="${tg.url('/booking/live', {'day':rb.booking_end_date})}">${reFormatDate(rb.booking_end_date)}</a> ${rb.end_time}
         </span>
         
