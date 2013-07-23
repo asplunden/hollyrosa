@@ -403,7 +403,17 @@ class VODBGroup(BaseController):
             
         room_bookings = list()
         for b in getRoomBookingsOfVODBGroup(holly_couch,  visiting_group_id):
-            b2 = DataContainer(booking_state=b['booking_state'],  cache_content=b['cache_content'],  content=b['content'] ,  activity=activities[b['activity_id']],  id=b['_id'],  booking_date=b.get('booking_date', 'Unknown'), booking_end_date=b.get('booking_end_date', 'Unknown'),  booking_day_id=b.get('booking_day_id', ''),  valid_from=b.get('valid_from',''),  valid_to=b.get('valid_to',''),  requested_date=b.get('requested_date',''),  slot_time='')
+            
+            #...lookup slot map
+            live_schema_id = 'living_schema.38d0bf32cc18426381f01409aabaa8d2'
+            tmp_slot_row_data = list(holly_couch.view('day_schema/slot_map',  keys=[[b['slot_id'],  live_schema_id], [b['booking_end_slot_id'],  live_schema_id]]))
+            
+            print 
+            print 'start time',  tmp_slot_row_data[0],tmp_slot_row_data[1]
+
+            start_time = tmp_slot_row_data[0].value[1]['time_from']
+            end_time = tmp_slot_row_data[1].value[1]['time_to']
+            b2 = DataContainer(booking_state=b['booking_state'],  cache_content=b['cache_content'],  content=b['content'] ,  activity=activities[b['activity_id']],  id=b['_id'],  booking_date=b.get('booking_date', 'Unknown'), booking_end_date=b.get('booking_end_date', 'Unknown'),  booking_day_id=b.get('booking_day_id', ''),  valid_from=b.get('valid_from',''),  valid_to=b.get('valid_to',''),  requested_date=b.get('requested_date',''),  start_time=start_time,  end_time=end_time)
             
             room_bookings.append(b2)
         
