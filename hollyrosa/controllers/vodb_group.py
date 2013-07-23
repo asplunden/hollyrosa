@@ -395,9 +395,13 @@ class VODBGroup(BaseController):
         visiting_group_o.show_vodb_eat_sheet = json.dumps(dict(identifier='rid', items=visiting_group_o.get('vodb_eat_computed', list())))
         visiting_group_o.show_vodb_tag_sheet = json.dumps(dict(identifier='rid', items=visiting_group_o.get('vodb_tag_computed', list())))
 
+
+        #...find room_bookings
+        room_bookings = list()
+        
         
         tag_layout_tags = json.dumps(visiting_group_o['tags'])
-        return dict(visiting_group=visiting_group_o, reFormatDate=reFormatDate, vodb_state_map=bokn_status_map, program_state_map=bokn_status_map, notes=notes, tag_layout_tags=tag_layout_tags)
+        return dict(visiting_group=visiting_group_o, reFormatDate=reFormatDate, vodb_state_map=bokn_status_map, program_state_map=bokn_status_map, notes=notes, tag_layout_tags=tag_layout_tags,  room_bookings=room_bookings)
         
         
         

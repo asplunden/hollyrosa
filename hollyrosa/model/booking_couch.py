@@ -377,3 +377,8 @@ def getBookingEatOverview(holly_couch, from_date, to_date, group_level=9999, red
         return holly_couch.view('vodb_overview/vodb_eat_overview', reduce=reduce, group_level=group_level)
     else:
         return holly_couch.view('vodb_overview/vodb_eat_overview', reduce=reduce, include_docs=False) # dont include docs, it gets really slow
+
+
+
+def getRoomBookingsOfVODBGroup(holly_couch,  visiting_group_id):
+    return [b.doc for b in holly_couch.view('visiting_groups/live_bookings_of_visiting_group',  include_docs=True,  startkey=[visiting_group_id, ''],  endkey=[visiting_group_id, 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'])]
