@@ -32,13 +32,15 @@ class EditBookLiveSlotForm(TableForm):
     class fields(WidgetsList):
         id = HiddenField(validator=UnicodeString)
         booking_day_id = HiddenField(validator=UnicodeString)
-        slot_id = HiddenField(validator=UnicodeString)
+        #slot_id = HiddenField(validator=UnicodeString)
         activity_id = HiddenField(validator=UnicodeString)
         return_to_day_id = HiddenField(validator=UnicodeString)
         visiting_group_name = TextField(validator=UnicodeString(min=1),  css_class="edit_name",  size=40)
         visiting_group_id = SingleSelectField(validator=UnicodeString)
-        end_date = CalendarDatePicker('end_date', validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
-        end_slot_id = SingleSelectField(validator=UnicodeString)
+        booking_date = CalendarDatePicker('start_date', validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
+        slot_id = SingleSelectField(validator=UnicodeString)
+        booking_end_date = CalendarDatePicker('end_date', validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
+        booking_end_slot_id = SingleSelectField(validator=UnicodeString)
         content = TextArea(validator=UnicodeString)
         block_after_book = CheckBox()
         

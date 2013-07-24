@@ -41,8 +41,13 @@ from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch, genUID
 from hollyrosa.model.booking_couch import getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate, getVisitingGroupsInDatePeriod,  dateRange2,  getBookingDayOfDateList,  getSlotRowSchemaOfActivity,  getActivityGroupNameAndIdList
 from hollyrosa.model.booking_couch import getAllHistoryForBookings,  getAllActivities,  getAllActivityGroups,  getVisitingGroupsAtDate,  getUserNameMap,  getSchemaSlotActivityMap,  getAllVisitingGroups,  getActivityTitleMap
-import datetime
+import datetime,  logging
+
+log = logging.getLogger()
+
 from formencode import validators
+
+
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
@@ -775,7 +780,7 @@ class BookingDay(BaseController):
         slot_position = slot_map[slot_id]
         activity_id = booking_o['activity_id']
         activity = common_couch.getActivity(holly_couch,  activity_id)
-        booking_ = DataContainer(activity_id=activity_id, slot_id=slot_id, activity=activity,  id=booking_o['_id'],  visiting_group_name=booking_o['visiting_group_name'],  visiting_group_id=booking_o['visiting_group_id'],  content=booking_o['content'], end_date=booking_o.get('booking_end_date', '2013-07-24'), end_slot_id=booking_o.get('booking_end_slot_id', ''),  return_to_day_id=return_to_day_id, booking_day_id=return_to_day_id )
+        booking_ = DataContainer(activity_id=activity_id, slot_id=slot_id, activity=activity,  id=booking_o['_id'],  visiting_group_name=booking_o['visiting_group_name'],  visiting_group_id=booking_o['visiting_group_id'],  content=booking_o['content'], booking_date=booking_o.get('booking_date', '2013-07-01'), booking_end_date=booking_o.get('booking_end_date', '2013-07-24'), booking_end_slot_id=booking_o.get('booking_end_slot_id', ''),  return_to_day_id=return_to_day_id, booking_day_id=return_to_day_id )
         
         tmp_visiting_groups = getVisitingGroupsAtDate(holly_couch, booking_day['date']) 
         visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in tmp_visiting_groups]  
@@ -789,8 +794,8 @@ class BookingDay(BaseController):
     @validate(create_edit_book_live_slot_form, error_handler=edit_booked_booking)      
     @expose()
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked live booking properties'))
-    def save_booked_live_booking_properties(self,  id=None,  content=None,  visiting_group_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  end_date=None,  end_slot_id=None,  block_after_book=False ):
-        tmp_activity_id = self.save_booked_booking_properties_helper(id,  content,  visiting_group_name,  visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  block_after_book=block_after_book,  subtype='live',  end_date=end_date,  end_slot_id=end_slot_id)
+    def save_booked_live_booking_properties(self,  id=None,  content=None,  visiting_group_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  booking_date=None,  booking_end_date=None,  booking_end_slot_id=None,  block_after_book=False ):
+        tmp_activity_id = self.save_booked_booking_properties_helper(id,  content,  visiting_group_name,  visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  booking_date=booking_date,  block_after_book=block_after_book,  subtype='live',  booking_end_date=booking_end_date,  booking_end_slot_id=booking_end_slot_id)
         raise redirect('live?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id))
     
     @validate(create_edit_book_slot_form, error_handler=edit_booked_booking)      
@@ -800,21 +805,44 @@ class BookingDay(BaseController):
         tmp_activity_id = self.save_booked_booking_properties_helper(id,  content,  visiting_group_name,  visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  block_after_book=block_after_book,  subtype='program')
         raise redirect('day?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id))
         
-    def save_booked_booking_properties_helper(self,  id=None,  content=None,  visiting_group_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  block_after_book=False,  subtype='program',  end_date='',  end_slot_id=''):
+    def save_booked_booking_properties_helper(self,  id=None,  content=None,  visiting_group_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  booking_date=None,  block_after_book=False,  subtype='program',  booking_end_date='',  booking_end_slot_id=''):
         is_new = (None == id or '' == id) 
         #...id can be None if a new slot is booked
+        booking_day = None
+        
+        #...there is a big difference on how booking_day_id is handled.
+        #   for a programe booking, booking day id decides the date but on room bookings (live) it's the oposite.
+        #   booking_date determines booking_day_id
+        
         if is_new:
             old_booking = common_couch.createEmptyProgramBooking(subtype=subtype)
+            
+            if subtype == 'live':
+                #...look up booking day by date
+                booking_day = getBookingDayOfDate(holly_couch,  booking_date.strftime('%Y-%m-%d'))
+                booking_day_id = booking_day['_id']
+                
             old_booking['slot_id'] = slot_id
             old_booking['booking_day_id'] = booking_day_id
-            
+                
+                
             if visiting_group_id !=None:
                 vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
                 old_booking['valid_from'] = vgroup['from_date']
                 old_booking['valid_to'] = vgroup['to_date']
-        else:
+        else: # saving to existing booking
             old_booking = common_couch.getBooking(holly_couch,  id)
-        
+            
+            if subtype == 'live':
+                #...change booking_day_id according to booking date
+                booking_day = getBookingDayOfDate(holly_couch,  booking_date.strftime('%Y-%m-%d'))
+                booking_day_id = booking_day['_id']
+                old_booking['slot_id'] = slot_id
+                old_booking['booking_day_id'] = booking_day_id
+            elif subtype == 'program':
+                booking_day = common_couch.getBookingDay(holly_couch,  booking_day_id)
+            
+        #...common for both new and existing bookings as well as program and room bookings
         old_visiting_group_name = old_booking.get('visiting_group_name', '')
         old_booking['visiting_group_name'] = visiting_group_name
         old_booking['visiting_group_id'] = visiting_group_id
@@ -825,6 +853,7 @@ class BookingDay(BaseController):
             
         #...make sure activity is set
         if (None != activity_id) or (''==activity_id):
+            log.warn("activity is not set, using fallback method")
             tmp_activity_id = activity_id
             old_booking['activity_id'] = activity_id
         else:
@@ -837,17 +866,17 @@ class BookingDay(BaseController):
         old_booking['booking_state'] = activity['default_booking_state']
         
         if is_new:
-            booking_day = common_couch.getBookingDay(holly_couch,  booking_day_id)
+            ## shouldnt be necessary: booking_day = common_couch.getBookingDay(holly_couch,  booking_day_id)
             slot_map  = getSchemaSlotActivityMap(holly_couch, booking_day,  subtype=subtype)
             slot = slot_map[slot_id]
             new_uid = genUID(type='booking')            
-            remember_book_slot(holly_couch, booking_id=new_uid, booking=old_booking,  slot_row_position=slot, booking_day=booking_day,  activity_title=activity['title'])
             
             #...if subtype is live, then set dates and end-dates
             if subtype == 'live':
-                old_booking['booking_date'] = booking_day['date']
-                old_booking['booking_end_date'] = end_date.strftime('%Y-%m-%d')
-                old_booking['booking_end_slot_id'] = end_slot_id
+                old_booking['booking_date'] = booking_date.strftime('%Y-%m-%d') #booking_day['date']
+                old_booking['booking_end_date'] = booking_end_date.strftime('%Y-%m-%d')
+                old_booking['booking_end_slot_id'] = booking_end_slot_id
+                old_booking['slot_id'] = slot_id # we dont change booking_date and slot_id on program bookings. They use the schedule method instead.
                 tmp_schema_id = 'living_schema.38d0bf32cc18426381f01409aabaa8d2'
                 slot_row_schema_of_activity = getSlotRowSchemaOfActivity(holly_couch,  tmp_schema_id,  tmp_activity_id)
                 slot_row_schema_of_activity = list(slot_row_schema_of_activity)[0].value[1:]
@@ -855,19 +884,24 @@ class BookingDay(BaseController):
             
             holly_couch[new_uid] = old_booking
             id = new_uid
-        else:
-            booking_day = common_couch.getBookingDay(holly_couch,  booking_day_id)
+            remember_book_slot(holly_couch, booking_id=new_uid, booking=old_booking,  slot_row_position=slot, booking_day=booking_day,  activity_title=activity['title'])
+            
+        else: # booking is not new.
+            # shouldnt be necessary: booking_day = common_couch.getBookingDay(holly_couch,  booking_day_id)
             slot_map  = getSchemaSlotActivityMap(holly_couch, booking_day,  subtype=subtype)
             slot = slot_map[slot_id]
             
             if subtype == 'live':
+                old_booking['slot_id'] = slot_id
                 old_booking['booking_date'] = booking_day['date']
-                old_booking['booking_end_date'] = end_date.strftime('%Y-%m-%d')
-                old_booking['booking_end_slot_id'] = end_slot_id
+                old_booking['booking_end_date'] = booking_end_date.strftime('%Y-%m-%d')
+                old_booking['booking_end_slot_id'] = booking_end_slot_id
                 tmp_schema_id = 'living_schema.38d0bf32cc18426381f01409aabaa8d2'
                 slot_row_schema_of_activity = getSlotRowSchemaOfActivity(holly_couch,  tmp_schema_id,  tmp_activity_id)
                 slot_row_schema_of_activity = list(slot_row_schema_of_activity)[0].value[1:]
                 old_booking['slot_schema_row'] = slot_row_schema_of_activity
+                
+            #...TODO: update this remeber thing significantly
             remember_booking_properties_change(holly_couch, booking=old_booking, slot_row_position=slot, booking_day=booking_day,  old_visiting_group_name=old_visiting_group_name,  new_visiting_group_name=visiting_group_name, new_content='',  activity_title=activity['title'])
             
             holly_couch[id] = old_booking
