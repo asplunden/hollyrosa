@@ -405,7 +405,7 @@ class VODBGroup(BaseController):
         for b in getRoomBookingsOfVODBGroup(holly_couch,  visiting_group_id):
             
             #...lookup slot map
-            live_schema_id = 'living_schema.38d0bf32cc18426381f01409aabaa8d2'
+            live_schema_id = 'room_schema.2013' # TODO: Read dynamically from booking day 
             tmp_slot_row_data = list(holly_couch.view('day_schema/slot_map',  keys=[[b['slot_id'],  live_schema_id], [b['booking_end_slot_id'],  live_schema_id]]))
             
             print 

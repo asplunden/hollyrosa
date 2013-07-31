@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -470,7 +470,8 @@ class Tools(BaseController):
     @require(Any(has_level('pl'),  msg='Only PL or staff members can poke around the schemas'))
     def create_living_schema(self):
         ew_id = genUID(type='living_schema')
-        schema = dict(type='day_schema',  subtype='house',  title='house schema')
+        schema = dict(type='day_schema',  subtype='room',  title='room schema 2013',  activity_group_ids=["activity_groups_ids", "roomgroup.fyrbyn", "roomgroup.vaderstracken", "roomgroup.vindarnashus","roomgroup.tunet",
+        "roomgroup.skrakvik","roomgroup.tc","roomgroup.alphyddorna","roomgroup.gokboet","roomgroup.kojan"])
         all_activities = getAllActivities(holly_couch)
         
         #...create some living, map to all activities in ag groups house
@@ -478,16 +479,18 @@ class Tools(BaseController):
         z=0
         tmp_schema = dict()
         for tmp_act in list(all_activities):
+            print tmp_act
+            if tmp_act.has_key('activity_group_id') or True:
+                if tmp_act.doc['activity_group_id'][:9] == 'roomgroup':            
+                    z += 1
+                    tmp_id = dict(zorder=z,  id=tmp_act['id'])
+                    tmp_fm = dict(time_from='00:00:00', time_to='12:00:00',  duration='12:00:00', title='FM',  slot_id='live_slot.' + str(i) )
+                    i +=1
+                    tmp_em = dict(time_from='12:00:00', time_to='23:59:00',  duration='12:00:00', title='EM',  slot_id='live_slot.' + str( i) )
+                    #...create fm and em but nothing more
+                    i+=1
             
-            z += 1
-            tmp_id = dict(zorder=z,  id=tmp_act['id'])
-            tmp_fm = dict(time_from='00:00:00', time_to='12:00:00',  duration='12:00:00', title='FM',  slot_id='live_slot.' + str(i) )
-            i+=1
-            tmp_em = dict(time_from='12:00:00', time_to='23:59:00',  duration='12:00:00', title='EM',  slot_id='live_slot.' + str( i) )
-            #...create fm and em but nothing more
-            i+=1
-            
-            tmp_schema[tmp_act['id']] = [tmp_id,  tmp_fm,  tmp_em]
+                    tmp_schema[tmp_act['id']] = [tmp_id,  tmp_fm,  tmp_em]
         
         schema['schema'] = tmp_schema
         holly_couch[ew_id] = schema

@@ -107,8 +107,9 @@ if True:
         f.write(str(dv_doc))
         f.close()
         
-if False:
-    
+        
+# Creating a tmp day schema
+if False:    
     activities = list()
     agroups=dict()
     
@@ -116,8 +117,6 @@ if False:
         day_schema = tmp_day_schema.doc
         
         for k, v in day_schema['schema'].items():
-            #print k
-            #print v
             activities.append(k)
             tmp_activity = holly_couch[k]
             agid = tmp_activity['activity_group_id']
@@ -133,9 +132,143 @@ if False:
         day_schema2 = holly_couch[day_schema.id]
         day_schema2['activity_groups_ids'] = all_keys
         holly_couch[day_schema.id] = day_schema2
+
+
+
+# Creating a room schema for 2013
+if False:    
+    activities = list()
+    agroups=dict()
+    
+    #...list all activities, but select only activities in activity groups starting with roomgroup.....
+    
+    for tmp_day_schema in holly_couch.view('day_schema/day_schema',  include_docs=True):
+        day_schema = tmp_day_schema.doc
         
-#        # given all activities, find all activity groups
-#        activity_groups = dict()
-#        
-#        for tmp_ag in holly_couch.view('all_activities/all_activity_groups_and_activity',  include_docs=True,  keys=activities):
-#            print tmp_ag
+        for k, v in day_schema['schema'].items():
+            activities.append(k)
+            tmp_activity = holly_couch[k]
+            agid = tmp_activity['activity_group_id']
+            tmp_agroup = holly_couch[agid]
+            if not agroups.has_key(tmp_agroup.id):
+                agroups[tmp_agroup.id] = tmp_agroup
+                print 'added agroup', tmp_agroup
+        print 'ALL AGS',  agroups
+        print 
+        all_keys = [k for k in agroups.keys()]
+        print 
+        day_schema2 = holly_couch[day_schema.id]
+        day_schema2['activity_groups_ids'] = all_keys
+        holly_couch[day_schema.id] = day_schema2
+
+
+
+#...creating activities for all rooms with corresponding activity groups and schema.
+#
+# activity groups:
+# - Tunet Z3
+# - Vädersträcken Z1
+# - Fyrbyn Z0
+# - Vindarnas hus Z2
+# - Skrakvik TC Z5
+#
+# activities (rooms) (see list)
+# 
+#
+#
+#
+
+def makeRoom(holly_rosa, title='', activity_group_id='',  capacity='', zorder=0 ):
+    new_room = dict(tags="", certificate_needed=None, bg_color='#fff', capacity=0, title='-', type="activity", zorder=0, do_not_delete=True, default_booking_state=0, subtype='room')
+    new_room['title'] = title
+    new_room['activity_group_id'] = activity_group_id
+    new_room['description']=title
+    new_room['capacity']=capacity
+    new_room['zorder']=zorder
+    new_id = 'room.'+title.lower()
+    new_id = new_id.replace('å', 'a')
+    new_id=new_id.replace('ä', 'a')
+    new_id=new_id.replace('ö', 'o')
+    new_id=new_id.replace(' ', '_')
+    new_id=new_id.replace('-', '_')
+
+    holly_rosa[new_id] = new_room
+    
+if True:
+    makeRoom(holly_couch,  'Grundkallen - Höger',  activity_group_id='roomgroup.fyrbyn', capacity=6,  zorder=0 )
+    makeRoom(holly_couch,  'Grundkallen - Vänster',  activity_group_id='roomgroup.fyrbyn',  capacity=6,  zorder=1 )
+    makeRoom(holly_couch,  'Märket - Höger',  activity_group_id='roomgroup.fyrbyn',  capacity=6,  zorder=2 )
+    makeRoom(holly_couch,  'Märket - Vänster',  activity_group_id='roomgroup.fyrbyn',  capacity=6,  zorder=3)
+    makeRoom(holly_couch,  'Svartklubben - Höger',  activity_group_id='roomgroup.fyrbyn',  capacity=6,  zorder=4 )
+    makeRoom(holly_couch,  'Svartklubben - Vänster',  activity_group_id='roomgroup.fyrbyn',  capacity=6,  zorder=5)
+    makeRoom(holly_couch,  'Understen - Höger',  activity_group_id='roomgroup.fyrbyn',  capacity=6,  zorder=6 )
+    makeRoom(holly_couch,  'Understen - Vänster',  activity_group_id='roomgroup.fyrbyn',  capacity=6,  zorder=7)
+    
+    makeRoom(holly_couch,  'Nordan - Höger',  activity_group_id='roomgroup.vaderstracken',  capacity=4,  zorder=10)
+    makeRoom(holly_couch,  'Nordan - Vänster',  activity_group_id='roomgroup.vaderstracken',  capacity=4,  zorder=11)
+    makeRoom(holly_couch,  'Sunnan - Höger',  activity_group_id='roomgroup.vaderstracken',  capacity=6,  zorder=11)
+    makeRoom(holly_couch,  'Sunnan - Vänster',  activity_group_id='roomgroup.vaderstracken',  capacity=6,  zorder=12)
+    makeRoom(holly_couch,  'Västan - Höger',  activity_group_id='roomgroup.vaderstracken',  capacity=4,  zorder=13)
+    makeRoom(holly_couch,  'Västan - Vänster',  activity_group_id='roomgroup.vaderstracken',  capacity=4,  zorder=14)
+    makeRoom(holly_couch,  'Östan - Höger',  activity_group_id='roomgroup.vaderstracken',  capacity=5,  zorder=15)
+    makeRoom(holly_couch,  'Östan - Vänster',  activity_group_id='roomgroup.vaderstracken',  capacity=6,  zorder=16)
+    makeRoom(holly_couch,  'Sydvästen - Nedre',  activity_group_id='roomgroup.vaderstracken',  capacity=3,  zorder=17)
+    makeRoom(holly_couch,  'Sydvästen - Övre',  activity_group_id='roomgroup.vaderstracken',  capacity=3,  zorder=18)
+    
+    makeRoom(holly_couch,  'Lugnet - Höger',  activity_group_id='roomgroup.vindarnashus',  capacity=2,  zorder=20)
+    makeRoom(holly_couch,  'Lugnet - Vänster',  activity_group_id='roomgroup.vindarnashus',  capacity=2,  zorder=21)
+    makeRoom(holly_couch,  'Brisen - Höger',  activity_group_id='roomgroup.vindarnashus',  capacity=2,  zorder=22)
+    makeRoom(holly_couch,  'Brisen - Vänster',  activity_group_id='roomgroup.vindarnashus',  capacity=2,  zorder=23)
+    makeRoom(holly_couch,  'Kulingen - Höger',  activity_group_id='roomgroup.vindarnashus',  capacity=2,  zorder=24)
+    makeRoom(holly_couch,  'Kulingen - Vänster',  activity_group_id='roomgroup.vindarnashus',  capacity=2,  zorder=25)
+    makeRoom(holly_couch,  'Stormen - Höger',  activity_group_id='roomgroup.vindarnashus',  capacity=2,  zorder=26)
+    makeRoom(holly_couch,  'Stormen - Vänster',  activity_group_id='roomgroup.vindarnashus',  capacity=2,  zorder=27)
+    makeRoom(holly_couch,  'Orkanen - Höger',  activity_group_id='roomgroup.vindarnashus',  capacity=2,  zorder=28)
+    makeRoom(holly_couch,  'Orkanen - Vänster',  activity_group_id='roomgroup.vindarnashus',  capacity=2,  zorder=29)
+    makeRoom(holly_couch,  'Bleket - Höger',  activity_group_id='roomgroup.vindarnashus',  capacity=2,  zorder=30)
+    makeRoom(holly_couch,  'Bleket - Vänster',  activity_group_id='roomgroup.vindarnashus',  capacity=2,  zorder=31)
+    
+    makeRoom(holly_couch,  'Kulan - Nedre Höger',  activity_group_id='roomgroup.tunet',  capacity=6,  zorder=40)
+    makeRoom(holly_couch,  'Kulan - Övre Höger',  activity_group_id='roomgroup.tunet',  capacity=3,  zorder=41)
+    makeRoom(holly_couch,  'Kulan - Nedre Vänster',  activity_group_id='roomgroup.tunet',  capacity=4,  zorder=42)
+    makeRoom(holly_couch,  'Kulan - Övre Vänster',  activity_group_id='roomgroup.tunet',  capacity=3,  zorder=43)
+    
+    makeRoom(holly_couch,  'Lillgårn - Nedre',  activity_group_id='roomgroup.tunet',  capacity=1,  zorder=44)
+    makeRoom(holly_couch,  'Lillgårn - Övre',  activity_group_id='roomgroup.tunet',  capacity=4,  zorder=45)
+
+    makeRoom(holly_couch,  'Magasinet - Höger',  activity_group_id='roomgroup.tunet',  capacity=1,  zorder=46)
+    makeRoom(holly_couch,  'Magasinet - Rakt Fram',  activity_group_id='roomgroup.tunet',  capacity=2,  zorder=47)
+
+    makeRoom(holly_couch,  'Matlådan - Singel',  activity_group_id='roomgroup.tunet',  capacity=1,  zorder=48)
+    makeRoom(holly_couch,  'Matlådan - Spis',  activity_group_id='roomgroup.tunet',  capacity=3,  zorder=49)
+    makeRoom(holly_couch,  'Matlådan - Viggen',  activity_group_id='roomgroup.tunet',  capacity=2,  zorder=50)
+    makeRoom(holly_couch,  'Matlådan - Vänster',  activity_group_id='roomgroup.tunet',  capacity=2,  zorder=51)
+    makeRoom(holly_couch,  'Storgårn - Sjukan',  activity_group_id='roomgroup.tunet',  capacity=4,  zorder=52)
+    
+    #...add Alphyddan group
+    makeRoom(holly_couch,  'Alphyddan - Norra Höger',  activity_group_id='roomgroup.alphyddorna',  capacity=2,  zorder=60)
+    makeRoom(holly_couch,  'Alphyddan - Norra Vänster',  activity_group_id='roomgroup.alphyddorna',  capacity=2,  zorder=61)
+    makeRoom(holly_couch,  'Alphyddan - Södra Höger',  activity_group_id='roomgroup.alphyddorna',  capacity=2,  zorder=62)
+    makeRoom(holly_couch,  'Alphyddan - Södra Vänster',  activity_group_id='roomgroup.alphyddorna',  capacity=2,  zorder=63)
+
+    #...add kojan group
+    makeRoom(holly_couch,  'Kojan - Höger',  activity_group_id='roomgroup.kojan',  capacity=2,  zorder=70)
+    makeRoom(holly_couch,  'Kojan - Vänster',  activity_group_id='roomgroup.kojan',  capacity=2,  zorder=71)
+    makeRoom(holly_couch,  'Grönkulla - Allrum',  activity_group_id='roomgroup.kojan',  capacity=4,  zorder=72)
+    
+    #...add Gökboet group
+    makeRoom(holly_couch,  'Gökboet',  activity_group_id='roomgroup.gokboet',  capacity=2,  zorder=80)
+
+
+    makeRoom(holly_couch,  'Bygget - Höger',  activity_group_id='roomgroup.skrakvik',  capacity=3,  zorder=81)
+    makeRoom(holly_couch,  'Bygget - Vänster',  activity_group_id='roomgroup.skrakvik',  capacity=3,  zorder=82)
+    makeRoom(holly_couch,  'Enskede/Prästgården - Höger',  activity_group_id='roomgroup.skrakvik',  capacity=2,  zorder=83)
+    makeRoom(holly_couch,  'Enskede/Prästgården - Vardagsrum',  activity_group_id='roomgroup.skrakvik',  capacity=2,  zorder=84)
+    makeRoom(holly_couch,  'Enskede/Prästgården - Vänster',  activity_group_id='roomgroup.skrakvik',  capacity=2,  zorder=85)
+    makeRoom(holly_couch,  'Gutegården - Höger',  activity_group_id='roomgroup.skrakvik',  capacity=3,  zorder=86)
+    makeRoom(holly_couch,  'Gutegården - Vänster',  activity_group_id='roomgroup.skrakvik',  capacity=3,  zorder=87)
+    
+    #...add group TC
+    makeRoom(holly_couch,  'Backstugan',  activity_group_id='roomgroup.tc',  capacity=4,  zorder=90)
+    
+    

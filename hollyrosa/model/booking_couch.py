@@ -185,7 +185,7 @@ def getSlotAndActivityIdOfBooking(holly_couch, booking,  subtype):
     if subtype=='program':
         schema_o = holly_couch[booking_day_o['day_schema_id']]
     elif subtype == 'live':
-        schema_o = holly_couch[ 'living_schema.38d0bf32cc18426381f01409aabaa8d2']  #booking_day_o['day_schema_id']]
+        schema_o = holly_couch[ booking_day_o['room_schema_id']]
     #schema_o = holly_couch[booking_day_o['day_schema_id']]
     slot_id = booking['slot_id']
     
@@ -300,7 +300,7 @@ def getSchemaSlotActivityMap(holly_couch, booking_day,  subtype):
     if subtype == 'program':
         day_schema_id = booking_day['day_schema_id']
     else:
-        day_schema_id = 'living_schema.38d0bf32cc18426381f01409aabaa8d2'
+        day_schema_id = booking_day['room_schema_id']
     try:
         tmp = _schema_slot_activity_map
         print 'found'
