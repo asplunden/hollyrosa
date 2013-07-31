@@ -533,10 +533,10 @@ class BookingDay(BaseController):
         if ag != '':
             tmp_ag = common_couch.getCouchDBDocument(holly_couch,  ag, 'activity_group')
             ag_title = tmp_ag['title'] #holly_couch[ag]['title']
-            slot_rows = [sr for sr in self.make_slot_rows__of_day_schema(day_schema,  activities_map) if sr.activity_group_id == ag]
+            slot_rows = [sr for sr in self.make_slot_rows__of_day_schema(day_schema,  activities_map, booking_day_o['date']) if sr.activity_group_id == ag]
         else:
             ag_title = 'All'  
-            slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map)
+            slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map, booking_day_o['date'])
 
         activity_slot_position_map = self.getActivitySlotPositionsMap(day_schema) 
 
@@ -821,7 +821,9 @@ class BookingDay(BaseController):
                 #...look up booking day by date
                 booking_day = getBookingDayOfDate(holly_couch,  booking_date.strftime('%Y-%m-%d'))
                 booking_day_id = booking_day['_id']
-                
+            else:
+                booking_day = holly_couch[ booking_day_id ]
+    
             old_booking['slot_id'] = slot_id
             old_booking['booking_day_id'] = booking_day_id
                 
@@ -1322,7 +1324,7 @@ class BookingDay(BaseController):
         activity_id = booking_o['activity_id']
         activities_map = self.getActivitiesMap(getAllActivities(holly_couch))
         
-        slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map)
+        slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map, booking_day['date'])
         
         slot_row = [s for s in slot_rows if s.activity_id == activity_id][0]
         
