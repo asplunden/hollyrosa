@@ -40,10 +40,11 @@
       add_redirect_menu_item(a_menu, a_sub_menu, a_name, l_params, a_url); 
 	}
     
-    function add_calc_sheet_redirect_menu_item(a_menu, a_sub_menu, a_name, a_vgid, a_live, a_url) {
+    function add_calc_sheet_redirect_menu_item(a_menu, a_sub_menu, a_name, a_vgid, a_live, change_schema, a_url) {
 		var l_params = {
       	visiting_group_id: a_vgid,
-        live: a_live
+        live: a_live,
+        change_schema: change_schema
          }
       add_redirect_menu_item(a_menu, a_sub_menu, a_name, l_params, a_url); 
 	}

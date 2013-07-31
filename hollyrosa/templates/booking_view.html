@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -26,7 +26,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa - ${activity.title} Booking</title>
+  <title>Hollyrosa - ${activity.title} ${booking.subtype} Booking</title>
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true, debugAtAllCosts: true"></script>
@@ -51,28 +51,25 @@ require(["common_menu", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit
   });
   </script>
   
-  
+  <?python
+  goto_url='day'
+  if booking['subtype'] == 'live':
+      goto_url = 'live'
+  ?>
 </head>
 <body class="tundra">
-    <h2>${activity.title} booking</h2>
+    <h2>${activity.title} ${booking.subtype} booking</h2>
     <h3>${booking.visiting_group_name}</h3>
     <div id="booking_info"> 
     	<p py:if="booking['slot_id'] != '' and booking['slot_id'] != None and booking_day != None">
-    		<a href="${tg.url('day', params={'day_id':booking_day.id})}">${formatDate(booking_day.date)}</a> <b py:if="booking.slot_id !=None"> ${slot_position.time_from} to ${slot_position.time_to} </b>  <b py:if="booking.slot_id ==None">booking has no slot row position </b>
+    		<a href="${tg.url(goto_url, params={'day_id':booking_day.id})}">${formatDate(booking_day.date)}</a> <b py:if="booking.slot_id !=None"> ${slot_position.time_from}</b><b py:if="(booking.slot_id !=None) and (end_slot==None)"> to ${slot_position.time_to} </b>  <b py:if="booking.slot_id ==None">booking has no slot row position </b> <span py:if="booking.has_key('booking_end_date')">Booking ends  <a href="${tg.url(goto_url, params={'day':booking.booking_end_date})}">${booking.booking_end_date}</a> at <b>${end_slot.time_to}</b></span>
     		<p py:if="None !=booking_day"><span class="workflow_state_${str(booking.booking_state)}">${workflow_map[booking.booking_state]}</span></p>
     	</p>
     	<p py:if="'' == booking.get('slot_id','')">
         	<span class="workflow_state_unscheduled">unscheduled</span>
         	requested from ${booking.get('valid_from','-')} to ${booking.get('valid_to','-')} requested date ${booking.get('requested_date','-')}
     	</p>
-    <!--
-    <ul class="any_menu context_inline_menu">
-                    <li py:if="None !=booking_day"><a href="${tg.url('/booking/edit_booked_booking', params={'return_to_day_id':booking.get('booking_day_id',''), 'id':booking.id})}">edit</a></li>
-                    <li py:if="None ==booking_day"><a href="${tg.url('/booking/edit_booking', params={'return_to_day_id':booking.get('booking_day_id',''), 'id':booking.id})}">edit</a></li>
-                    <li py:if="None !=booking_day"><a href="${tg.url('/booking/unschedule_booking', params={'booking_day_id':booking.get('booking_day_id',''), 'booking_id':booking.id})}">unschedule</a></li>
-                    <li py:if="None !=booking_day"><a href="${tg.url('/booking/multi_book', params={'booking_id':booking.id})}">multi-book</a></li>
-                </ul>
-  -->  
+        
     <div class="note" hollyrosa:bid="${booking.id}" hollyrosa:bdayid="${booking.booking_day_id}">${getRenderContent(booking)}</div>
    
   

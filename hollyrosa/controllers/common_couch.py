@@ -105,8 +105,8 @@ def getAttachment(holly_couch,  attachment_id):
     return getCouchDBDocument(holly_couch,  attachment_id,  doc_type='attachment')
 
 
-def createEmptyProgramBooking(valid_from='',  valid_to='',  requested_date=''):
-    return dict(type='booking', subtype='program',  valid_from=valid_from,  valid_to=valid_to,  requested_date=requested_date)
+def createEmptyProgramBooking(valid_from='',  valid_to='',  requested_date='',  subtype='program'):
+    return dict(type='booking', subtype=subtype,  valid_from=valid_from,  valid_to=valid_to,  requested_date=requested_date)
     
     
 def makeHouseBooking():

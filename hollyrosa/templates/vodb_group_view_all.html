@@ -156,6 +156,16 @@ function loadNotesFor(id) {
       leftClickToOpen: common_menu.load_left_click_menu()
    })); 
 
+   
+    var group_type_menu = new Menu();
+   filter_menu.addChild(new PopupMenuItem({
+   	label: "Group type...",
+      popup: group_type_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+   })); 
+
+   
+   
    var date_range_menu = new Menu();
    filter_menu.addChild(new PopupMenuItem({
    	label: "Date range...",
@@ -164,11 +174,13 @@ function loadNotesFor(id) {
    })); 
 
    
-   var l1 = ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in program_state_map.items()] ) +']' };
+   /*var l1 = ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in program_state_map.items()] ) +']' };*/
+   var l3 = [['program','program'],['staff','staff'],['course','course']];
    var l2 = ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in vodb_state_map.items()] ) +']' };
    
-   array.forEach(l1, function(l) {     
-   	common_menu.add_redirect_menu_item(filter_menu, bokn_status_menu, l[1], {program_state:l[0]}, '${tg.url('view_program_state')}');   
+   
+   array.forEach(l3, function(l) {     
+   	common_menu.add_redirect_menu_item(filter_menu, group_type_menu, l[1], {'group_type':l[0]}, '${tg.url('view_group_type')}');   
    });
    
    array.forEach(l2, function(l) {     

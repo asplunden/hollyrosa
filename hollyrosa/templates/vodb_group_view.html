@@ -129,17 +129,43 @@ function startup() {
    })); 
     
    
-   common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live outdoor', '${visiting_group.id}', 'outdoor','${tg.url('create_calculation_schema')}');
-   common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live indoor', '${visiting_group.id}', 'indoor', '${tg.url('create_calculation_schema')}');
-   common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live daytrip', '${visiting_group.id}', 'daytrip','${tg.url('create_calculation_schema')}');
+   common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live outdoor', '${visiting_group.id}', 'outdoor', 'live','${tg.url('create_calculation_schema')}');
+   common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live indoor', '${visiting_group.id}', 'indoor', 'live', '${tg.url('create_calculation_schema')}');
+   common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Live daytrip', '${visiting_group.id}', 'daytrip', 'live', '${tg.url('create_calculation_schema')}');
    
-   
+    common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Eat outdoor', '${visiting_group.id}', 'outdoor', 'eat','${tg.url('create_calculation_schema')}');
+    common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Eat indoor', '${visiting_group.id}', 'indoor', 'eat', '${tg.url('create_calculation_schema')}');
+    common_menu.add_calc_sheet_redirect_menu_item(menu, create_vodb_calculation_schema_menu, 'Eat own', '${visiting_group.id}', 'own', 'eat', '${tg.url('create_calculation_schema')}');
+  
    
 	common_menu.add_menu_separator(menu);   
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history...", '${visiting_group['id']}', '${tg.url('/history/show')}');
+    common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history...", '${visiting_group['id']}', '${tg.url('/history/show')}');
 	};
     
     
+    //...setup menu for each room booking
+	var room_menu = new Menu({
+   	targetNodeIds: ["room_bookings"],
+      selector: "div.booking_meta_info",
+      leftClickToOpen: common_menu.load_left_click_menu()
+      });   
+	
+	common_menu.add_booking_op_menu_item(room_menu, room_menu, "View booking", '${tg.url('/booking/view_booked_booking')}');
+	common_menu.add_booking_op_menu_item(room_menu, room_menu, "Edit booking", '${tg.url('/booking/edit_booked_booking')}');
+    common_menu.add_booking_op_menu_item(room_menu, room_menu, "Move booking", '${tg.url('/booking/move_booking')}');
+    common_menu.add_booking_op_menu_item(room_menu, room_menu, "Split booking", '${tg.url('/booking/split_booking')}');
+	common_menu.add_booking_op_menu_item(room_menu, room_menu, "Delete booking", '${tg.url('/booking/delete_booked_booking')}');
+
+   var rmore = new Menu();
+   room_menu.addChild(new PopupMenuItem({
+   	label: "Change room booking state...",
+   	leftClickToOpen: common_menu.load_left_click_menu(),
+      popup: rmore
+   }));  
+    
+    var set_state_url = '${tg.url('/workflow/set_state')}';       
+    
+    array.forEach(common_menu.state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(room_menu, rmore, x['name'], x['state'], 0, set_state_url);});
     
 	ready(function() {
 		startup();
@@ -152,7 +178,7 @@ function startup() {
 </head>
 
 <body class="tundra">
-    <h2 id="visiting_group_menu" hollyrosa:vgid="${visiting_group.id}" class="context_menu_symbol">${visiting_group.name}</h2> 
+    <h2 id="visiting_group_menu" hollyrosa:vgid="${visiting_group.id}" class="context_menu_symbol">${visiting_group.name} - ${visiting_group.get('subtype','')}</h2> 
     <p class="context_menu_symbol">${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
     
 
@@ -179,7 +205,6 @@ function startup() {
         	 
         	</div>
         </div>
-                
     </div>
     
     <p>${visiting_group.get('vodb_contact_name','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('vodb_contact_email','')}</a><br/>
@@ -187,7 +212,7 @@ function startup() {
     <p><pre>${visiting_group.get('vodb_contact_address','')}</pre></p> 
 
 
-
+    
 <h3>Properties</h3>
     
     <table class="data">
@@ -200,10 +225,19 @@ function startup() {
     </table>
 
 
-<p></p>
-<ul>
-
-</ul>
+<h3>Room Bookings</h3>
+<div id="room_bookings">
+ <div py:for="rb in room_bookings">
+    
+    <div py:if="None != rb.booking_day_id" class="booking_meta_info" hollyrosa:bid="${rb['id']}" hollyrosa:bdayid="${rb['booking_day_id']}">
+    <h4 class="context_menu_symbol"><a href="${tg.url('/booking/view_activity', {'activity_id':rb.activity['_id']})}">${rb.activity.title}</a></h4>
+        <span class="workflow_state_${rb.booking_state}"><a href="${tg.url('/booking/live', {'day_id':rb.booking_day_id})}">${reFormatDate(rb.booking_date)}</a> ${rb.start_time} - <a href="${tg.url('/booking/live', {'day':rb.booking_end_date})}">${reFormatDate(rb.booking_end_date)}</a> ${rb.end_time}
+        </span>
+        
+        <div class="note context_menu_symbol"> ${getRenderContent(rb)}</div>
+        </div>
+</div>
+</div>
 
 <h3>Computed Sheets</h3>
 <h4>Live Sheet</h4>

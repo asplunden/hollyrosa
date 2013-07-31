@@ -373,7 +373,18 @@ class VisitingGroup(BaseController):
         else:
             return cmp(a.slot['time_from'], b.slot['time_from'])
         
-
+    def getSlotMapOfBookingDay(self,  booking_day_slot_map,  tmp_booking_day,  subtype='program'):
+        
+        # in the future, select between bookings subtype
+        
+        tmp_schema_id = tmp_booking_day['day_schema_id']
+        
+        if not booking_day_slot_map.has_key(tmp_schema_id):
+            tmp_slot_map = getSchemaSlotActivityMap(holly_couch, tmp_booking_day, subtype=subtype)
+            booking_day_slot_map[tmp_schema_id] = tmp_slot_map
+        return booking_day_slot_map[tmp_schema_id]
+        
+        
     @expose('hollyrosa.templates.view_bookings_of_name')
     @validate(validators={"name":validators.UnicodeString(), "render_time":validators.UnicodeString(), "hide_comment":validators.Int(), "show_group":validators.Int()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
@@ -381,8 +392,10 @@ class VisitingGroup(BaseController):
         # TODO: its now possible to get bookings on both name and id
         bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, name, '<- MATCHES NO GROUP ->')]
         
-        slot_map = getSchemaSlotActivityMap(holly_couch, 'day_schema.1') # TODO: load for each different schema used
-        
+#        if len(bookings) > 0:
+#            slot_map = getSchemaSlotActivityMap(holly_couch, bookings[0],  subtype='program') # TODO: load for each different schema used
+#        else:
+#            slot_map = []
         
         visiting_group_id = None
         visiting_group = [v.doc for v in getVisitingGroupOfVisitingGroupName(holly_couch, name)]
@@ -394,8 +407,12 @@ class VisitingGroup(BaseController):
         #...now group all bookings in a dict mapping activity_id:content
         clustered_bookings = {}
         booking_day_map = dict()
+        booking_day_slot_map = dict()
         for bd in getBookingDays(holly_couch):
             booking_day_map[bd.doc['_id']] = bd.doc
+            
+            #...this is very time consuming, better list all slot map and build a map
+            #booking_day_slot_map[bd.doc['_id']] = getSchemaSlotActivityMap(holly_couch, bd.doc, subtype='program') 
         
         activities = dict()
         used_activities_keys = dict()
@@ -429,7 +446,8 @@ class VisitingGroup(BaseController):
                 if '' != booking_day_id:
                     tmp_booking_day = booking_day_map[booking_day_id]
                     slot_id = b['slot_id']
-                    slot_o = slot_map[slot_id]
+                    tmp_slot_map = self.getSlotMapOfBookingDay(booking_day_slot_map,  tmp_booking_day)
+                    slot_o = tmp_slot_map[slot_id]
             
             b2 = DataContainer(booking_state=b['booking_state'],  cache_content=b['cache_content'],  content=b['content'] ,  activity=activities[b['activity_id']],  id=b['_id'],  booking_day=tmp_booking_day ,  slot_id=slot_id ,  slot=slot_o,  booking_day_id=booking_day_id,  valid_from=b.get('valid_from',''),  valid_to=b.get('valid_to',''),  requested_date=b.get('requested_date',''))
             if clustered_bookings.has_key(key):

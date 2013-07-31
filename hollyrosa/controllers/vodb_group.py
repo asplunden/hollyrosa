@@ -35,7 +35,7 @@ log = logging.getLogger()
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, reFormatDate
 
-from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange
+from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange,  getVisitingGroupsByGroupType, getRoomBookingsOfVODBGroup,  getAllActivities
 from hollyrosa.controllers.booking_history import remember_tag_change,  remember_booking_vgroup_properties_change
 from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, vodb_status_map, makeVODBGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options
 from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange, updateVisitingGroupComputedSheets, computeAllUsedVisitingGroupsTagsForTagSheet,  program_visiting_group_properties_template,  staff_visiting_group_properties_template,  course_visiting_group_properties_template
@@ -103,7 +103,19 @@ class VODBGroup(BaseController):
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)  
         return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=v_group_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
 
-  
+
+    @expose('hollyrosa.templates.vodb_group_view_all')
+    @validate(validators={'group_type':validators.UnicodeString(not_empty=True)})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def view_group_type(self,  group_type=None):
+        #boknstatus=boknstatus[:4] # amateurish quick sanitation
+        #visiting_groups = get_visiting_groups_with_boknstatus(boknstatus) 
+        visiting_groups =[v.doc for v in getVisitingGroupsByGroupType(holly_couch, group_type)]
+        v_group_map = dict()
+        has_notes_map = getTargetNumberOfNotesMap(holly_couch)  
+        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=v_group_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
+
+
     @expose('hollyrosa.templates.vodb_group_edit')
     @require(Any(is_user('user.erspl'), has_level('pl'), has_level('staff'), msg='Only staff and pl may edit vodb group data'))
     def edit_group_data(self, visiting_group_id='', subtype=''):
@@ -383,9 +395,31 @@ class VODBGroup(BaseController):
         visiting_group_o.show_vodb_eat_sheet = json.dumps(dict(identifier='rid', items=visiting_group_o.get('vodb_eat_computed', list())))
         visiting_group_o.show_vodb_tag_sheet = json.dumps(dict(identifier='rid', items=visiting_group_o.get('vodb_tag_computed', list())))
 
+
+        #...find room_bookings
+        activities = dict()
+        for x in getAllActivities(holly_couch):
+            activities[x.key[1]] = x.doc
+            
+        room_bookings = list()
+        for b in getRoomBookingsOfVODBGroup(holly_couch,  visiting_group_id):
+            
+            #...lookup slot map
+            live_schema_id = 'living_schema.38d0bf32cc18426381f01409aabaa8d2'
+            tmp_slot_row_data = list(holly_couch.view('day_schema/slot_map',  keys=[[b['slot_id'],  live_schema_id], [b['booking_end_slot_id'],  live_schema_id]]))
+            
+            print 
+            print 'start time',  tmp_slot_row_data[0],tmp_slot_row_data[1]
+
+            start_time = tmp_slot_row_data[0].value[1]['time_from']
+            end_time = tmp_slot_row_data[1].value[1]['time_to']
+            b2 = DataContainer(booking_state=b['booking_state'],  cache_content=b['cache_content'],  content=b['content'] ,  activity=activities[b['activity_id']],  id=b['_id'],  booking_date=b.get('booking_date', 'Unknown'), booking_end_date=b.get('booking_end_date', 'Unknown'),  booking_day_id=b.get('booking_day_id', ''),  valid_from=b.get('valid_from',''),  valid_to=b.get('valid_to',''),  requested_date=b.get('requested_date',''),  start_time=start_time,  end_time=end_time)
+            
+            room_bookings.append(b2)
+        
         
         tag_layout_tags = json.dumps(visiting_group_o['tags'])
-        return dict(visiting_group=visiting_group_o, reFormatDate=reFormatDate, vodb_state_map=bokn_status_map, program_state_map=bokn_status_map, notes=notes, tag_layout_tags=tag_layout_tags)
+        return dict(visiting_group=visiting_group_o, reFormatDate=reFormatDate, vodb_state_map=bokn_status_map, program_state_map=bokn_status_map, notes=notes, tag_layout_tags=tag_layout_tags,  room_bookings=room_bookings,  getRenderContent=getRenderContent)
         
         
         
@@ -685,14 +719,23 @@ class VODBGroup(BaseController):
 
 
     @expose()
-    @validate(validators={'vodb_state':validators.UnicodeString(not_empty=True)})
+    @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True), 'live':validators.UnicodeString(not_empty=True), 'change_schema':validators.UnicodeString()})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may set up vodb calculation schemas'))
-    def create_calculation_schema(self,  visiting_group_id=None,  live='outdoor'):
+    def create_calculation_schema(self,  visiting_group_id=None,  live='outdoor',  change_schema='live'):
         # todo: accessor function making sure the type really is visiting_group
         visiting_group_o = holly_couch[visiting_group_id] 
         visiting_group_properties = visiting_group_o['visiting_group_properties']
         
+        time_row_schema = []
+        is_changing_live_sheet = False
+        is_changing_eat_sheet = False
         
+        if change_schema == 'live':
+            time_row_schema = ['fm', 'em', 'evening']
+            is_changing_live_sheet = True
+        elif change_schema == 'eat': # this one is more tricky since we dont want to have arrival and departure data set every day.
+            time_row_schema = ['breakfast', 'lunch', 'lunch_arrive', 'lunch_depart',  'dinner']
+            is_changing_eat_sheet = True
         
         
         # try create a live sheet for indoor living for the whole of the groups stay....fm em kvall
@@ -704,7 +747,7 @@ class VODBGroup(BaseController):
         new_live_sheet = dict(identifier='rid',  items=rows)
         for tmp_date in self.dateGen(from_date, to_date):
             i=0
-            for t in ['fm', 'em', 'evening']:
+            for t in time_row_schema:
                 i += 1
                 #...figure out properties in range.
                 prop_str_list = []
@@ -712,28 +755,30 @@ class VODBGroup(BaseController):
                     if tmp_prop['from_date'] <= tmp_date and tmp_prop['to_date'] >= tmp_date:
                         prop_str_list.append('$'+tmp_prop['property'])
                 tmp_r = dict(date=tmp_date,  time=t,  indoor=0,  outdoor=0,  daytrip=0,  rid=tmp_date+'_'+str(i))
-                tmp_r[live] = '+'.join(prop_str_list)
+                
+                if t not in ['lunch_arrive', 'lunch_depart']:
+                    tmp_r[live] = '+'.join(prop_str_list)
+                else:
+                    tmp_r[live] = 0
                 rows.append(tmp_r)
         
         rows[0][live] = 0
         rows[-2][live] = 0
         rows[-1][live] = 0
         
-        visiting_group_o['vodb_live_sheet'] = new_live_sheet
+        if is_changing_eat_sheet:
+            visiting_group_o['vodb_eat_sheet'] = new_live_sheet
+        elif is_changing_live_sheet:
+            visiting_group_o['vodb_live_sheet'] = new_live_sheet
+        
         
         #if eat_sheet != None:
          #   visiting_group_o['vodb_eat_sheet'] = json.loads(eat_sheet)
 
         #if live_sheet != None:
          #   visiting_group_o['vodb_live_sheet'] = json.loads(live_sheet)
-
-        #if tag_sheet != None:
-         #   vodb_tag_sheet = json.loads(tag_sheet)
-         #   visiting_group_o['vodb_tag_sheet'] = vodb_tag_sheet
         
         vodb_tag_times_tags = computeAllUsedVisitingGroupsTagsForTagSheet(visiting_group_o['tags'], visiting_group_o['vodb_tag_sheet']['items'])
-            
-         
 
         updateVisitingGroupComputedSheets(visiting_group_o, visiting_group_properties, sheet_map=dict(vodb_eat_sheet=vodb_eat_times_options, vodb_live_sheet=vodb_live_times_options, vodb_tag_sheet=vodb_tag_times_tags))
         
