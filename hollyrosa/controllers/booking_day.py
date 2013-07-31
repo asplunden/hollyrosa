@@ -451,10 +451,10 @@ class BookingDay(BaseController):
             booking_o_list.append(getBookingDayOfDate(holly_couch, str(tmp_date)))
         
         #...we have to assume all days belong to the same day schema, otherwise, we really shouldnt display that day
-        day_schema_id = 'living_schema.38d0bf32cc18426381f01409aabaa8d2'# MARTIN booking_day_o['day_schema_id']
-        day_schema = common_couch.getDaySchema(holly_couch,  day_schema_id)#holly_couch[day_schema_id]
+        room_schema_id = booking_day_o['room_schema_id']
+        room_schema = common_couch.getDaySchema(holly_couch,  room_schema_id)
         
-        slot_rows = self.make_slot_rows__of_day_schema(day_schema,  activities_map,  dates=dates)
+        slot_rows = self.make_slot_rows__of_day_schema(room_schema,  activities_map,  dates=dates)
         #...first, get booking_day for today
         all_bookings = dict()
         all_blockings = dict()
@@ -478,7 +478,7 @@ class BookingDay(BaseController):
         #
         #   the new version should be a list of rows. Each row is either a DataContainer or a dict (basically the same...)
         #    We need to know activity name, color, id and group (which we get from the activities) and we need a list of slot positions
-        activity_slot_position_map = self.getActivitySlotPositionsMap(day_schema) 
+        activity_slot_position_map = self.getActivitySlotPositionsMap(room_schema) 
         
         #...find all unscheduled bookings
         showing_sql_date = str(booking_day_o['date'])
@@ -492,7 +492,7 @@ class BookingDay(BaseController):
         days = self.getAllDays()
 
         ##activity_groups = [DataContainer(id=d.value['_id'],  title=d.value['title']) for d in getAllActivityGroups(holly_couch)] 
-        activity_groups = getActivityGroupNameAndIdList(holly_couch,  day_schema)
+        activity_groups = getActivityGroupNameAndIdList(holly_couch,  room_schema)
         return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=all_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=all_blockings,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups, headers=headers, reFormatDate = reFormatDate)
     
 
@@ -716,7 +716,7 @@ class BookingDay(BaseController):
         #...TODO: also extract the whole slot_row from the schema and remove the first entry. This will be needed for the date range to work correctly
         booking_o = DataContainer(content='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_id=slot_id)
     
-        end_slot_id_options = self.getEndSlotIdOptions('living_schema.38d0bf32cc18426381f01409aabaa8d2',  slot['activity_id'])
+        end_slot_id_options = self.getEndSlotIdOptions(booking_day['room_schema_id'],  slot['activity_id'])
         return dict(booking_day=booking_day, booking=booking_o, visiting_groups=visiting_groups, edit_this_visiting_group=0,  slot_position=slot,  end_slot_id_options=end_slot_id_options)
         
 
@@ -785,9 +785,9 @@ class BookingDay(BaseController):
         tmp_visiting_groups = getVisitingGroupsAtDate(holly_couch, booking_day['date']) 
         visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in tmp_visiting_groups]  
         
-        end_slot_id_options = self.getEndSlotIdOptions('living_schema.38d0bf32cc18426381f01409aabaa8d2',  slot_position['activity_id'])
+        end_slot_id_options = self.getEndSlotIdOptions(booking_day['room_schema_id'],  slot_position['activity_id'])
         
-        return dict(booking_day=booking_day, slot_position=slot_position, booking=booking_,  visiting_groups=visiting_groups, edit_this_visiting_group=booking_o['visiting_group_id'],  activity=activity,  end_slot_id_options=end_slot_id_options,  living_schema_id='living_schema.38d0bf32cc18426381f01409aabaa8d2')
+        return dict(booking_day=booking_day, slot_position=slot_position, booking=booking_,  visiting_groups=visiting_groups, edit_this_visiting_group=booking_o['visiting_group_id'],  activity=activity,  end_slot_id_options=end_slot_id_options,  living_schema_id=booking_day['room_schema_id'])
         
     
     # TODO is the error handler right?
@@ -877,7 +877,7 @@ class BookingDay(BaseController):
                 old_booking['booking_end_date'] = booking_end_date.strftime('%Y-%m-%d')
                 old_booking['booking_end_slot_id'] = booking_end_slot_id
                 old_booking['slot_id'] = slot_id # we dont change booking_date and slot_id on program bookings. They use the schedule method instead.
-                tmp_schema_id = 'living_schema.38d0bf32cc18426381f01409aabaa8d2'
+                tmp_schema_id = booking_day['room_schema_id']
                 slot_row_schema_of_activity = getSlotRowSchemaOfActivity(holly_couch,  tmp_schema_id,  tmp_activity_id)
                 slot_row_schema_of_activity = list(slot_row_schema_of_activity)[0].value[1:]
                 old_booking['slot_schema_row'] = slot_row_schema_of_activity
@@ -896,7 +896,7 @@ class BookingDay(BaseController):
                 old_booking['booking_date'] = booking_day['date']
                 old_booking['booking_end_date'] = booking_end_date.strftime('%Y-%m-%d')
                 old_booking['booking_end_slot_id'] = booking_end_slot_id
-                tmp_schema_id = 'living_schema.38d0bf32cc18426381f01409aabaa8d2'
+                tmp_schema_id = booking_day['room_schmea_id']
                 slot_row_schema_of_activity = getSlotRowSchemaOfActivity(holly_couch,  tmp_schema_id,  tmp_activity_id)
                 slot_row_schema_of_activity = list(slot_row_schema_of_activity)[0].value[1:]
                 old_booking['slot_schema_row'] = slot_row_schema_of_activity
@@ -1048,7 +1048,7 @@ class BookingDay(BaseController):
         if booking_o['subtype'] == 'program':
             schema_o = common_couch.getDaySchema(holly_couch,  booking_day_o['day_schema_id'])
         elif booking_o['subtype'] == 'live':
-             schema_o = common_couch.getDaySchema(holly_couch,  'living_schema.38d0bf32cc18426381f01409aabaa8d2')
+             schema_o = common_couch.getDaySchema(holly_couch,  booking_day_o['room_schema_id'])
              
         #...iterate thrue the schema first time looking for slot_id_position and activity
         the_schema = schema_o['schema']
