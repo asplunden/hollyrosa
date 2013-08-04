@@ -108,7 +108,7 @@ def dateRange2(from_date, count, format='%Y-%m-%d'):
         tmp_date = tmp_date + one_day
     return formated_dates
     
-def getVisitingGroupsInDatePeriod(holly_couch, from_date,  to_date):
+def getVisitingGroupsInDatePeriod(holly_couch, from_date,  to_date,  subtype='program'):
     """create one key for each day"""
     
     formated_dates = dateRange(from_date, to_date)
@@ -120,7 +120,8 @@ def getVisitingGroupsInDatePeriod(holly_couch, from_date,  to_date):
     r = list()
     for v in holly_couch.view("visiting_groups/all_visiting_groups_by_date",  keys=formated_dates,  include_docs=True):
         if not check.has_key(v.doc['_id']):
-            r.append(v)
+            if v.doc.get('subtype', 'program') == 'program':
+                r.append(v)
         check[v.doc['_id']] = 1 
     return r
     
