@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -110,7 +110,6 @@ class Calendar(BaseController):
     def overview(self):
         """Show an overview of all booking days"""
         today = datetime.date.today().strftime('%Y-%m-%d')
-        #today = '2011-08-01'
         return dict(booking_days=[b.doc for b in getBookingDays(holly_couch, from_date=today)])
     
 
@@ -687,10 +686,14 @@ class BookingDay(BaseController):
 
     def getEndSlotIdOptions(self,  living_schema_id,  activity_id):
         slot_row_schema = getSlotRowSchemaOfActivity(holly_couch,  living_schema_id,  activity_id) 
-        
+         
         end_slot_id_options = []
+        
+        print 'SLOT_ROW_SCHEMA',  slot_row_schema
         for t in slot_row_schema:
+            print 'ITER 1'
             for slot in t.value[1:]:
+                print 'SLOT',  slot 
                 end_slot_id_options.append((slot['slot_id'],  slot['title']))
         return end_slot_id_options
         
@@ -756,7 +759,7 @@ class BookingDay(BaseController):
         
         
     @expose('hollyrosa.templates.edit_booked_booking')
-    @validate(validators={'booking_id':validators.UnicodeString(not_empty=True), 'return_to_day':validators.UnicodeString(not_empty=False)})
+    @validate(validators={'id':validators.UnicodeString(not_empty=True), 'return_to_day':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def edit_booked_booking(self,  return_to_day_id=None,  booking_id=None,  **kw):
         
@@ -780,13 +783,13 @@ class BookingDay(BaseController):
         slot_position = slot_map[slot_id]
         activity_id = booking_o['activity_id']
         activity = common_couch.getActivity(holly_couch,  activity_id)
-        booking_ = DataContainer(activity_id=activity_id, slot_id=slot_id, activity=activity,  id=booking_o['_id'],  visiting_group_name=booking_o['visiting_group_name'],  visiting_group_id=booking_o['visiting_group_id'],  content=booking_o['content'], booking_date=booking_o.get('booking_date', '2013-07-01'), booking_end_date=booking_o.get('booking_end_date', '2013-07-24'), booking_end_slot_id=booking_o.get('booking_end_slot_id', ''),  return_to_day_id=return_to_day_id, booking_day_id=return_to_day_id )
+        booking_ = DataContainer(activity_id=activity_id, slot_id=slot_id, activity=activity,  booking_id=booking_o['_id'],  visiting_group_name=booking_o['visiting_group_name'],  visiting_group_id=booking_o['visiting_group_id'],  content=booking_o['content'], booking_date=booking_o.get('booking_date', '2013-07-01'), booking_end_date=booking_o.get('booking_end_date', '2013-07-24'), booking_end_slot_id=booking_o.get('booking_end_slot_id', ''),  return_to_day_id=return_to_day_id, booking_day_id=return_to_day_id )
         
         tmp_visiting_groups = getVisitingGroupsAtDate(holly_couch, booking_day['date']) 
         visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in tmp_visiting_groups]  
         
         end_slot_id_options = self.getEndSlotIdOptions(booking_day['room_schema_id'],  slot_position['activity_id'])
-        
+        #end_slot_id_options = booking_o['slot_schema_row']
         return dict(booking_day=booking_day, slot_position=slot_position, booking=booking_,  visiting_groups=visiting_groups, edit_this_visiting_group=booking_o['visiting_group_id'],  activity=activity,  end_slot_id_options=end_slot_id_options,  living_schema_id=booking_day['room_schema_id'])
         
     
@@ -798,7 +801,7 @@ class BookingDay(BaseController):
         tmp_activity_id = self.save_booked_booking_properties_helper(id,  content,  visiting_group_name,  visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  booking_date=booking_date,  block_after_book=block_after_book,  subtype='live',  booking_end_date=booking_end_date,  booking_end_slot_id=booking_end_slot_id)
         raise redirect('live?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id))
     
-    @validate(create_edit_book_slot_form, error_handler=edit_booked_booking)      
+    @validate(create_edit_book_slot_form, error_handler=edit_booked_booking) 
     @expose()
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def save_booked_booking_properties(self,  id=None,  content=None,  visiting_group_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  block_after_book=False ):

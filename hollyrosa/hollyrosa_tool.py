@@ -2,7 +2,7 @@
 """
 hollyrosa_tool.py
 
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -37,7 +37,7 @@ def dateRange(from_date, to_date, format='%a %b %d %Y'):
     
 #...read from ini file
 db_url = 'http://localhost:5989'
-db_name = 'hollyrosa_2013_test'
+db_name = 'hollyrosa_2014_prod'
 
 couch_server = couchdb.Server(url=db_url)
 try:
@@ -47,7 +47,7 @@ except couchdb.ResourceNotFound, e:
     
     
 
-if False:
+if True:
     for b in holly_couch.view('all_activities/erasure', include_docs=True):
         doc = b.doc
         dtype = doc['type']
@@ -61,20 +61,23 @@ if False:
         
 if False:
     #...try to generate all booking days. Ah, first generate day schema!
-    ds = holly_couch['day_schema.2012']
+    ds = holly_couch['summer_schema.2013']
     new_ds = copy.deepcopy(ds)
-    holly_couch['summer_schema.2013'] = ds
-    holly_couch['school_schema.2013'] = ds
-    holly_couch['60dn_schema.2013'] = ds
+    holly_couch['summer_schema.2014'] = ds
     
-if False:
-    pos = 1300
-    school_dates_spring = dateRange('2013-05-01', '2013-06-08', format='%Y-%m-%d')
-    summer_dates = dateRange('2013-06-09', '2013-08-02', format='%Y-%m-%d')
-    sixtydn_dates = dateRange('2013-08-03', '2013-08-18', format='%Y-%m-%d')
-    school_dates_autumn = dateRange('2013-08-19', '2013-10-20', format='%Y-%m-%d')
+    ds = holly_couch['school_schema.2013']
+    new_ds = copy.deepcopy(ds)
+    holly_couch['school_schema.2014'] = ds
     
-    worklist = [(school_dates_spring,  'school_schema.2013'), (summer_dates, 'summer_schema.2013'), (sixtydn_dates, '60dn_schema.2013'), (school_dates_autumn, 'school_schema.2013')]
+    
+if True:
+    pos = 1500
+    school_dates_spring = dateRange('2014-05-01', '2014-06-07', format='%Y-%m-%d')
+    summer_dates = dateRange('2014-06-08', '2014-08-17', format='%Y-%m-%d')
+    sixtydn_dates = [] #dateRange('2013-0', '2013-08-18', format='%Y-%m-%d')
+    school_dates_autumn = dateRange('2014-08-18', '2014-10-20', format='%Y-%m-%d')
+    
+    worklist = [(school_dates_spring,  'school_schema.2014'), (summer_dates, 'summer_schema.2014'), (sixtydn_dates, '60dn_schema.2014'), (school_dates_autumn, 'school_schema.2014')]
     
     for days, day_schema_id in worklist:
         for d in days:
@@ -194,7 +197,7 @@ def makeRoom(holly_rosa, title='', activity_group_id='',  capacity='', zorder=0 
 
     holly_rosa[new_id] = new_room
     
-if True:
+if False:
     makeRoom(holly_couch,  'Grundkallen - Höger',  activity_group_id='roomgroup.fyrbyn', capacity=6,  zorder=0 )
     makeRoom(holly_couch,  'Grundkallen - Vänster',  activity_group_id='roomgroup.fyrbyn',  capacity=6,  zorder=1 )
     makeRoom(holly_couch,  'Märket - Höger',  activity_group_id='roomgroup.fyrbyn',  capacity=6,  zorder=2 )

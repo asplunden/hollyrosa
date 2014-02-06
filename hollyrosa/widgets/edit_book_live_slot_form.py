@@ -30,7 +30,7 @@ class EditBookLiveSlotForm(TableForm):
     show_errors = True
 
     class fields(WidgetsList):
-        id = HiddenField(validator=UnicodeString)
+        booking_id = HiddenField(validator=UnicodeString)
         booking_day_id = HiddenField(validator=UnicodeString)
         #slot_id = HiddenField(validator=UnicodeString)
         activity_id = HiddenField(validator=UnicodeString)

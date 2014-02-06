@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -77,7 +77,7 @@ def getAllBookingDays(holly_couch):
     return holly_couch.view('booking_day/all_booking_days',  include_docs=True)
     
 
-def getBookingDays(holly_couch, from_date='2011-01-01',  to_date='2013-12-11'):
+def getBookingDays(holly_couch, from_date='2011-01-01',  to_date='2014-12-11'):
     """Helper function to get booking days from CouchDB"""
     return holly_couch.view('booking_day/all_booking_days',  startkey=from_date,  endkey=to_date,  include_docs=True)
 
@@ -325,7 +325,7 @@ def getSchemaSlotActivityMap(holly_couch, booking_day,  subtype):
     
 
 def getSlotRowSchemaOfActivity(holly_couch,  day_schema_id,  activity_id):
-    return holly_couch.view('day_schema/slot_schema_of_activity',  key=[day_schema_id,  activity_id])
+    return holly_couch.view('day_schema/slot_schema_of_activity',  key=[day_schema_id,  activity_id],  include_docs=True)
     
     
 def getAllSchemas(holly_couch):
