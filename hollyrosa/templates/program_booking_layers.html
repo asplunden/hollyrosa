@@ -33,14 +33,15 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
    
   <script>
 
-require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/request/xhr', 'dojo/dom', 'dojo/dom-construct', 'dojo/on','dojo/ready', 'dojo/domReady!'],
-  function(array, lang, locale, xhr, dom, domConstruct, on, ready, domReady ){
+require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/request/xhr', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-geometry', 'dojo/dom-style', 'dojo/query', 'dojo/on','dojo/ready', 'dojo/domReady!'],
+  function(array, lang, locale, xhr, dom, domConstruct, domGeom, style, query, on, ready, domReady ){
 
     var slot_id_time_map;
     var buckets = [];
     var activity_title_map;
+    var layer_time_divs = [];
   
-  function drawLayerGridAndSetData(data) {
+    function drawLayerGridAndSetData(data) {
 
     var layer_container = dom.byId('program_layers_container');
     
@@ -48,11 +49,11 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
     var program_layers_div = domConstruct.create('div', {style:"border:1px solid #444;"}, program_layers_container);
     
     //...create one div for each time. Add an extra header div on top
-    var layer_time_divs = [];
+    
     var layer_times = data.layer_time;
     var layer_time_header_div = domConstruct.create('div', {style:"background: #ccc;", id:'layer_time_header'}, program_layers_div);
     array.forEach(layer_times, function(t) {
-        var tmp_div = domConstruct.create('div', {id:'layer_time_'+t, 'hollyrosa:time':t}, program_layers_div);
+        var tmp_div = domConstruct.create('div', {id:'layer_time_'+t, 'hollyrosa:time':t, 'class':'program_layer_time_container'}, program_layers_div);
         layer_time_divs.push(tmp_div);
         });
     
@@ -70,24 +71,56 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
     
         //...first draw a div to contain the time (like fm/em)
         datetime_value = dv.attributes['hollyrosa:time'].value;
-        var tmp_div = domConstruct.create('div', {style:"border:1px solid #844; display:inline-block;", 'class':'program_layer_bucket_time_label'}, dv); // add atribues for slot id which is matching day and time, but how do we learn about that?
+        var tmp_div = domConstruct.create('div', {style:"display:inline-block;", 'class':'program_layer_bucket_time_label'}, dv); // add atribues for slot id which is matching day and time, but how do we learn about that?
         tmp_div.innerHTML = datetime_value;
             
         array.forEach(layer_days, function(t) {
             // also add class that makes it become inline
             var datetime_bucket_value = t.booking_day_id+':'+dv.attributes['hollyrosa:time'].value;
-            var tmp_div = domConstruct.create('div', {style:"border:1px solid #844; display:inline-block;", 'hollyrosa:datetime_bucket':datetime_bucket_value, 'class':'program_layer_bucket'}, dv); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            var tmp_div = domConstruct.create('div', {'hollyrosa:datetime_bucket':datetime_bucket_value, 'class':'program_layer_bucket'}, dv); // add atribues for slot id which is matching day and time, but how do we learn about that?
             //tmp_div.innerHTML = datetime_bucket_value + '<br/>';
             buckets[datetime_bucket_value] = tmp_div;
             });
     });
     
-    slot_id_time_map = data.slot_id_time_map;
-    activity_title_map= data.activity_title_map
-    //...now do get the bookings
-    get_program_layer_bookings_from_XHR(data.visiting_group_id);
-  }
-
+        slot_id_time_map = data.slot_id_time_map;
+        activity_title_map= data.activity_title_map
+        //...now do get the bookings
+        get_program_layer_bookings_from_XHR(data.visiting_group_id);
+       
+     // twice to simulate different layers
+     
+      //
+        array.forEach(data.program_layers, function(vgid) {
+            get_program_layer_bookings_from_XHR(vgid);
+        });
+    }
+  
+  
+    function adjustBucketHeights() {
+        //...for each layer time 
+        array.forEach(layer_time_divs, function(layer_time_div) {
+            
+            //...for each bucket in layer time, readout height, try to figure out max height
+            var max_height = 0;
+            var xpos = domGeom.position(layer_time_div, true);
+            
+             var bucket_divs = query('.program_layer_bucket', layer_time_div);
+            //...look for max height
+            array.forEach(bucket_divs, function(bucket_div) {
+                tmp_pos = domGeom.position(bucket_div, true);  
+                max_height = Math.max(tmp_pos.h+10, max_height);
+            });
+            
+            //...set max height
+            
+            array.forEach(bucket_divs, function(bucket_div) {
+                style.set(bucket_div, {height: max_height + 'px', top:'0px'});
+            });
+        });
+    
+    }
+    
     function doGotBookings(data) {
         //...start populate the layered grid
         
@@ -105,6 +138,8 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
             tmp_span_content.innerHTML = booking['cache_content'];
             
         });
+        
+        adjustBucketHeights();
     }
   
    function get_program_layer_days_from_XHR(visiting_group_id) {
@@ -180,26 +215,17 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
     
     <div>
     <h3>Drawing the grid to use for program bookings</h3>
-    <p>Here we will start drawing a grid using divs.</p>
-    <p>One div to conatin it all (this div)</p>
-    <p>In this div we will use dojo to draw one div for each day. + legends. Days have to be fetched using ajax call.</p>
     <p>Once we have drawn a div per day we can repeat almost the same thing but for layers. Fetch layers asynchronous and then draw one div/box for each layer en each FM EM KVALL AFTERH for each day.</p>
-    <p>One key problem is ging to be how we identify each booking withing layers within a day.  We can easily draw FM/EM on height and the days withinn, though the days NEED to be identified, because how else can we put a booking in the right place?
-    
-    A booking is identified by ... booking_day_id and slot_id. From slot id we will need to lookup if its fm/em/ etc to know where to draw. I think we have such a lookup.
-    
-    If one looks at the grid, there are several slots that could map into for example EM, So, what needs to be understood is how a given booking maps to a certain day And to a certain time-box. 
-    </p>
     <p>Im starting to think like this: Returning a set of bookings should be universal so the booking_day_id:slot_id identity is to be kept. That means our design has to contain all needed mappings. We need to figure out the connection from slot_id and bday_id to a day.</p>
-    <p>Further, when doing a new booking, we need to map from element into bday_id:slot_id depending on selected activity. </p>
-    <p>So first of all we need to construct this mapping bday_id:slot_id:layer_id -> layer_datetime_id, to me thats a javascript map.</p>
-    <p>What about returning one such map as well as a map mapping time/day to layer_datetime_id, that should give someting to start with.</p>
     <h3>Populating one layer with bookings from that layer</h3>'
-    <p>Drawing basic text </p>
     <p>Adding menu items.</p>
     <p>The real trick is going to figure out how to handle live updates to underlying data</p>
     <p></p>
-    
+    <h3>Apperance</h3>
+    <p>Draw using dojo positinn</p>
+    <h3>Draw layers</h3>
+    <p>list of layers = visiting group ids</p>
+    <p>color per visiting group</p>
 	</div>
     <div id="program_layers_container">
     Program layers

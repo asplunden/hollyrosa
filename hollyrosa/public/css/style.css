@@ -887,7 +887,7 @@ table.visiting_group_info_table tr td.info {
 /* bucket */
 
 .program_layer_bucket {
-	display:inline-block;"
+	display:inline-block;
 	font-size: 80%;
 	font-weight: normal;
 	width: 16em;
@@ -895,6 +895,8 @@ table.visiting_group_info_table tr td.info {
     padding-left:1em;
     padding-bottom:2em;
     border-left: 1px solid #444;
+    position: relative;
+    vertical-align:top;
 }
 
 .program_layer_bucket_date_header {
@@ -905,11 +907,16 @@ table.visiting_group_info_table tr td.info {
     display:inline-block;"
 	font-size: 80%;
 	font-weight: normal;
-	width: 8em;
-	background: #ccc;
+	width: 6em;
 }
 
 .program_layer_slot {
-    border:1px solid #884; 
+    border-bottom:1px dashed #888; 
     padding-bottom:0.5em;
+    display:block;
+    background-color: #ccf;
     }
+    
+.program_layer_time_container {
+    border-bottom: 1px solid #444;
+}

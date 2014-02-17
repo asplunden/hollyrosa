@@ -620,7 +620,7 @@ class VisitingGroup(BaseController):
             layer_days.append(tmp_item)
         
         #...
-        layers = [visiting_group_id]
+        program_layers = visiting_group.get('layers',  [])
         
         #...I need to build this mapping from booking_day_id:slot_id:layer_id to datetime bucket
         #   so iterate through all schema rows and look at time, 
@@ -636,7 +636,9 @@ class VisitingGroup(BaseController):
         # TODO return activity title map
         activity_title_map = getActivityTitleMap(holly_couch)
         
-        return dict(layer_time=layer_times,  layer_days=layer_days,  slot_id_time_map=slot_id_time_map,  visiting_group_id=visiting_group_id,  activity_title_map=activity_title_map)
+        
+        
+        return dict(layer_time=layer_times,  layer_days=layer_days,  slot_id_time_map=slot_id_time_map,  visiting_group_id=visiting_group_id,  activity_title_map=activity_title_map,  program_layers=program_layers)
         
     @expose("json")
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
