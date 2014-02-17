@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -25,7 +25,7 @@ from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
 from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus, getNotesForTarget, getBookingInfoNotesOfUsedActivities
-from hollyrosa.model.booking_couch import getBookingDays,  getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap, getVisitingGroupsByVodbState
+from hollyrosa.model.booking_couch import getBookingDays,  getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap, getVisitingGroupsByVodbState,  dateRange
 import datetime
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
@@ -549,3 +549,91 @@ class VisitingGroup(BaseController):
         visiting_group_o = common_couch.getVisitingGroup(holly_couch,  visiting_group_id) 
         self.do_set_vodb_state(holly_couch, visiting_group_id,  visiting_group_o, int(state))            
         raise redirect(request.referrer)
+
+
+    @expose('hollyrosa.templates.program_booking_layers')
+    @validate(validators={"visiting_group_id":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def layers(self, visiting_group_id):
+        vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        return dict(visiting_group=vgroup,  notes=[],  tags=[],  reFormatDate=reFormatDate)
+
+
+    @expose("json")
+    @validate(validators={"visiting_group_id":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def program_layer_get_days(self, visiting_group_id ):
+        print '****************** program layer get days', visiting_group_id
+        
+        # I need to construct the mapping (given a pre selected schema for now...) 
+        #
+        # booking_day_id:slot_id:layer_id -> datetime_layer_id
+        #
+        # This map is constructed from a day schema. Each activity has slots, these slots have time associated with them. 
+        #
+        # We also need a list of booking days for the given group, we could use the first boking day and guess the schema. That would be a short cut but a necessary one.
+        #
+        
+        visiting_group = holly_couch[visiting_group_id]
+        
+        date_range = dateRange(visiting_group['from_date'], visiting_group['to_date'])
+        
+        booking_days = [bd.doc for bd in getBookingDays(holly_couch,  visiting_group['from_date'], visiting_group['to_date'])]
+        
+        # TODO dangerous below, we can have diffreent schemas for different days
+        first_booking_day=booking_days[0]
+        
+        schema_id = first_booking_day['day_schema_id']
+        
+        schema_doc = holly_couch[schema_id]
+        schema = schema_doc['schema']
+        
+        # if we assume the same layout for every slot row, we can get first row in schema and use it as template
+        any_slot_row_in_schema = schema[schema.keys()[0]][1:] # skip first part, now we have four time-slots that can be used
+        
+        #...create temporary mapping title-> id, in the future, this should be based on time rather on the title (which can be dangerous)
+        time_id_mapping = dict(FM='fm',  EM='em')
+        time_id_mapping[u'Kväll'] = 'eve'
+        time_id_mapping['After hours'] = 'afh'
+        
+        #...it would be best if we now could clean out the slot_id from the mapping
+        generalized_slot_row = []
+        layer_times = []
+        for tmp_slot_row in any_slot_row_in_schema:
+            tmp_item = {}
+            for k, v in tmp_slot_row.items():
+                if k != 'slot_id':
+                    tmp_item[k] = v
+                if k == 'title':
+                    layer_times.append(time_id_mapping[v])
+            generalized_slot_row.append(tmp_item)
+        
+        datetime_map = []
+       
+        #...iterate through schema and find FM EM etc
+        
+        # iterate through schema and find the slot_id maping. 
+        
+        layer_days = []
+        for d in booking_days:
+            tmp_item = dict(booking_day_id=d['_id'],  date=d['date'])
+            layer_days.append(tmp_item)
+        
+        #...
+        layers = [visiting_group_id]
+        
+        #...I need to build this mapping from booking_day_id:slot_id:layer_id to datetime bucket
+        #   so iterate through all schema rows and look at time, 
+        #
+        # One thing I need to consider serriousely is how th handle layers. Is it a property of bookings within a bucket (essentially the visiting group id of the booking itself),
+        #   if so, I dont need to complicate the layer thing too much,
+        slot_id_time_map = {}
+        for tmp_activity_id,  tmp_activity_row in schema.items():
+            for tmp_slot in tmp_activity_row[1:]:
+                tmp_time = tmp_slot['title']
+                slot_id_time_map[tmp_slot['slot_id']] = time_id_mapping[tmp_time]
+                
+                
+        
+        return dict(layer_time=layer_times,  layer_days=layer_days,  slot_id_time_map=slot_id_time_map)
+    

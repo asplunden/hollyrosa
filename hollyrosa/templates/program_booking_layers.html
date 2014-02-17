@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:hollyrosa="http://asplunden.org/guldkant/hollyrosa"  xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Program Booking Layers ${visiting_group.name}</title>
+ 
+  <script>dojoConfig = {parseOnLoad: true}</script>
+  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true"></script>
+   
+  <script>
+
+require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/request/xhr', 'dojo/dom', 'dojo/dom-construct', 'dojo/on','dojo/ready', 'dojo/domReady!'],
+  function(array, lang, locale, xhr, dom, domConstruct, on, ready, domReady ){
+
+  function doSomething(data) {
+
+    var layer_container = dom.byId('program_layers_container');
+    
+    // look in data and create fm/em/kvall/afterhours
+    
+    var program_layers_div = domConstruct.create('div', {style:"border:1px solid #444;"}, program_layers_container);
+    
+    var layer_time_divs = [];
+    var layer_times = data.layer_time;
+    array.forEach(layer_times, function(t) {
+        var tmp_div = domConstruct.create('div', {style:"border:1px solid #448;", id:'layer_time_'+t, 'hollyrosa:time':t}, program_layers_div);
+        layer_time_divs.push(tmp_div);
+        });
+    
+    // look in data and create divs for all the days
+    var layer_days = data.layer_days;
+    array.forEach(layer_time_divs, function(dv) {
+        array.forEach(layer_days, function(t) {
+            // also add class that makes it become inline
+            var datetime_bucket_value = t.booking_day_id+':'+dv.attributes['hollyrosa:time'].value;
+            var tmp_div = domConstruct.create('div', {style:"border:1px solid #844; display:inline-block;", 'hollyrosa:datetime_bucket':datetime_bucket_value}, dv); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            tmp_div.innerHTML = datetime_bucket_value;
+            });
+    });
+    
+  }
+
+  
+   function get_program_layer_days_from_XHR(visiting_group_id) {
+    xhr("${tg.url('/visiting_group/program_layer_get_days')}", {
+    handleAs:"json",
+    method:"GET",
+    query: {'visiting_group_id':visiting_group_id}}).then( doSomething );
+}
+
+
+    function on_ready(){
+        get_program_layer_days_from_XHR('${visiting_group.id}');
+    }
+    	
+      ready(on_ready);
+});
+
+</script>
+
+
+  <!-- here was menu script -->
+  
+</head>
+
+<body class="tundra">
+    <h2 id="visiting_group_menu" hollyrosa:vgid="${visiting_group.id}" class="context_menu_symbol">${visiting_group.name}</h2> 
+    <p class="context_menu_symbol">${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
+
+	
+	<div class="note context_menu_symbol" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
+<a id="add_tag_href2" href="javascript:;">Add Tags</a>
+</form></div>
+
+<table class="visiting_group_info_table">
+<tr><td class="legend">bok.nr:</td><td class="info">${visiting_group.boknr}</td></tr>
+<tr><td class="legend">subtype:</td><td class="info">${visiting_group.get('subtype','')}</td></tr>
+<!--
+<tr><td class="legend">vodb status:</td><td class="info">${vodb_state_map.get(visiting_group.get('vodbstatus','-'))}</td></tr>
+<tr><td class="legend">program status:</td><td class="info">${program_state_map.get(visiting_group.boknstatus,'')}</td></tr>
+-->
+<tr><td class="legend">camping location:</td><td class="info">${visiting_group.camping_location}</td></tr>
+</table>
+
+<p>${HTML(visiting_group.info)}</p></div>
+<h3>Notes and attachments</h3>
+<p><i>These are currently not shown, info overload otherwise</i></p>
+    <div py:for="n in notes" >
+            
+        <div class="${n.type}2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i><b>${n.timestamp}</b> ${n.type} by ${n.last_changed_by}</i><br/><br/>
+        <div py:if="'note' == n.type">${HTML(n.text)}</div>
+        <div py:if="('attachment' == n.type)">${n.text}<br/><br/>
+        	<div py:for="at in n.get('_attachments',[''])"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n.id,'doc_id':at})}"><b>${at}</b> ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>
+        	 
+        	</div>
+        </div>
+                
+    </div>
+    
+    <p>${visiting_group.get('vodb_contact_name','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('vodb_contact_email','')}</a><br/>
+    </p>
+    <p><pre>${visiting_group.get('vodb_contact_address','')}</pre></p> 
+
+    
+    
+    
+    <div>
+    <h3>Drawing the grid to use for program bookings</h3>
+    <p>Here we will start drawing a grid using divs.</p>
+    <p>One div to conatin it all (this div)</p>
+    <p>In this div we will use dojo to draw one div for each day. + legends. Days have to be fetched using ajax call.</p>
+    <p>Once we have drawn a div per day we can repeat almost the same thing but for layers. Fetch layers asynchronous and then draw one div/box for each layer en each FM EM KVALL AFTERH for each day.</p>
+    <p>One key problem is ging to be how we identify each booking withing layers within a day.  We can easily draw FM/EM on height and the days withinn, though the days NEED to be identified, because how else can we put a booking in the right place?
+    
+    A booking is identified by ... booking_day_id and slot_id. From slot id we will need to lookup if its fm/em/ etc to know where to draw. I think we have such a lookup.
+    
+    If one looks at the grid, there are several slots that could map into for example EM, So, what needs to be understood is how a given booking maps to a certain day And to a certain time-box. 
+    </p>
+    <p>Im starting to think like this: Returning a set of bookings should be universal so the booking_day_id:slot_id identity is to be kept. That means our design has to contain all needed mappings. We need to figure out the connection from slot_id and bday_id to a day.</p>
+    <p>Further, when doing a new booking, we need to map from element into bday_id:slot_id depending on selected activity. </p>
+    <p>So first of all we need to construct this mapping bday_id:slot_id:layer_id -> layer_datetime_id, to me thats a javascript map.</p>
+    <p>What about returning one such map as well as a map mapping time/day to layer_datetime_id, that should give someting to start with.</p>
+    <h3>Populating one layer with bookings from that layer</h3>'
+    <p>Drawing basic text </p>
+    <p>Adding menu items.</p>
+    <p>The real trick is going to figure out how to handle live updates to underlying data</p>
+    <p></p>
+    
+	</div>
+    <div id="program_layers_container">
+    Program layers
+    </div>
+</body>
+</html>
