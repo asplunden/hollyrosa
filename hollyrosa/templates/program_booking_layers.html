@@ -36,43 +36,93 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/request/xhr', 'dojo/dom', 'dojo/dom-construct', 'dojo/on','dojo/ready', 'dojo/domReady!'],
   function(array, lang, locale, xhr, dom, domConstruct, on, ready, domReady ){
 
-  function doSomething(data) {
+    var slot_id_time_map;
+    var buckets = [];
+    var activity_title_map;
+  
+  function drawLayerGridAndSetData(data) {
 
     var layer_container = dom.byId('program_layers_container');
     
-    // look in data and create fm/em/kvall/afterhours
-    
+    // create container div for all layers
     var program_layers_div = domConstruct.create('div', {style:"border:1px solid #444;"}, program_layers_container);
     
+    //...create one div for each time. Add an extra header div on top
     var layer_time_divs = [];
     var layer_times = data.layer_time;
+    var layer_time_header_div = domConstruct.create('div', {style:"background: #ccc;", id:'layer_time_header'}, program_layers_div);
     array.forEach(layer_times, function(t) {
-        var tmp_div = domConstruct.create('div', {style:"border:1px solid #448;", id:'layer_time_'+t, 'hollyrosa:time':t}, program_layers_div);
+        var tmp_div = domConstruct.create('div', {id:'layer_time_'+t, 'hollyrosa:time':t}, program_layers_div);
         layer_time_divs.push(tmp_div);
         });
     
-    // look in data and create divs for all the days
     var layer_days = data.layer_days;
+    
+    //...draw dates in layer time header
+    var empty_header__div = domConstruct.create('div', {'class':'program_layer_bucket_time_label'}, layer_time_header_div); 
+    array.forEach(layer_days, function(t) {
+        var tmp_div = domConstruct.create('div', {'class':'program_layer_bucket program_layer_bucket_date_header'}, layer_time_header_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+        tmp_div.innerHTML = t.date;
+    });
+            
+    // look in data and create divs for all the days
     array.forEach(layer_time_divs, function(dv) {
+    
+        //...first draw a div to contain the time (like fm/em)
+        datetime_value = dv.attributes['hollyrosa:time'].value;
+        var tmp_div = domConstruct.create('div', {style:"border:1px solid #844; display:inline-block;", 'class':'program_layer_bucket_time_label'}, dv); // add atribues for slot id which is matching day and time, but how do we learn about that?
+        tmp_div.innerHTML = datetime_value;
+            
         array.forEach(layer_days, function(t) {
             // also add class that makes it become inline
             var datetime_bucket_value = t.booking_day_id+':'+dv.attributes['hollyrosa:time'].value;
-            var tmp_div = domConstruct.create('div', {style:"border:1px solid #844; display:inline-block;", 'hollyrosa:datetime_bucket':datetime_bucket_value}, dv); // add atribues for slot id which is matching day and time, but how do we learn about that?
-            tmp_div.innerHTML = datetime_bucket_value;
+            var tmp_div = domConstruct.create('div', {style:"border:1px solid #844; display:inline-block;", 'hollyrosa:datetime_bucket':datetime_bucket_value, 'class':'program_layer_bucket'}, dv); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            //tmp_div.innerHTML = datetime_bucket_value + '<br/>';
+            buckets[datetime_bucket_value] = tmp_div;
             });
     });
     
+    slot_id_time_map = data.slot_id_time_map;
+    activity_title_map= data.activity_title_map
+    //...now do get the bookings
+    get_program_layer_bookings_from_XHR(data.visiting_group_id);
   }
 
+    function doGotBookings(data) {
+        //...start populate the layered grid
+        
+        
+        //..this is not going to work for unscheduled bookings....
+        array.forEach(data.bookings, function(booking) {
+            var datetime_bucket_value = booking.booking_day_id+':'+slot_id_time_map[booking.slot_id];
+            var bucket_div = buckets[datetime_bucket_value];
+            
+            var tmp_div = domConstruct.create('div', {class:"program_layer_slot", 'hollyrosa:bid':booking['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            var tmp_span = domConstruct.create('span', {class:"workflow_state_"+booking['booking_state']}, tmp_div); 
+           //...need to pre-render content.... 
+            tmp_span.innerHTML = activity_title_map[booking['activity_id']]+"<br/>";
+            var tmp_span_content = domConstruct.create('span', {style:'padding-left:2em;'}, tmp_div); 
+            tmp_span_content.innerHTML = booking['cache_content'];
+            
+        });
+    }
   
    function get_program_layer_days_from_XHR(visiting_group_id) {
-    xhr("${tg.url('/visiting_group/program_layer_get_days')}", {
-    handleAs:"json",
-    method:"GET",
-    query: {'visiting_group_id':visiting_group_id}}).then( doSomething );
-}
+        xhr("${tg.url('/visiting_group/program_layer_get_days')}", {
+        handleAs:"json",
+        method:"GET",
+        query: {'visiting_group_id':visiting_group_id}}).then( drawLayerGridAndSetData );
+    }
 
 
+    function get_program_layer_bookings_from_XHR(visiting_group_id) {
+        xhr("${tg.url('/visiting_group/program_layer_get_bookings')}", {
+        handleAs:"json",
+        method:"GET",
+        query: {'visiting_group_id':visiting_group_id}}).then( doGotBookings );
+    }
+
+    
     function on_ready(){
         get_program_layer_days_from_XHR('${visiting_group.id}');
     }

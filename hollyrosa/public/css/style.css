@@ -883,3 +883,33 @@ table.visiting_group_info_table tr td.info {
     background-repeat: no-repeat;
     background-position: right top;
 }
+
+/* bucket */
+
+.program_layer_bucket {
+	display:inline-block;"
+	font-size: 80%;
+	font-weight: normal;
+	width: 16em;
+	color: #444;
+    padding-left:1em;
+    padding-bottom:2em;
+    border-left: 1px solid #444;
+}
+
+.program_layer_bucket_date_header {
+    font-weight: bold;
+}
+
+.program_layer_bucket_time_label {
+    display:inline-block;"
+	font-size: 80%;
+	font-weight: normal;
+	width: 8em;
+	background: #ccc;
+}
+
+.program_layer_slot {
+    border:1px solid #884; 
+    padding-bottom:0.5em;
+    }
