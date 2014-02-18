@@ -641,10 +641,16 @@ class VisitingGroup(BaseController):
         return dict(layer_time=layer_times,  layer_days=layer_days,  slot_id_time_map=slot_id_time_map,  visiting_group_id=visiting_group_id,  activity_title_map=activity_title_map,  program_layers=program_layers)
         
     @expose("json")
-    @validate(validators={"visiting_group_id":validators.UnicodeString()})
+    #@validate(validators={"visiting_group_id":validators.UnicodeString(),  "layer_title":validators.UnicodeString(),  "layer_colour":validators.UnicodeString()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def program_layer_get_bookings(self, visiting_group_id ):
+    def program_layer_get_bookings(self, visiting_group_id,  layer_title='',  layer_colour='#fff' ):
         visiting_group=holly_couch[visiting_group_id]
-        bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, visiting_group['name'], '<- MATCHES NO GROUP ->')]
+        bookings = []
+        for tmp in getBookingsOfVisitingGroup(holly_couch, visiting_group['name'], '<- MATCHES NO GROUP ->'):
+            tmp_doc = tmp.doc
+            tmp_doc['layer_title']=layer_title
+            tmp_doc['layer_colour'] = layer_colour
+            bookings.append(tmp_doc)
+        
         return dict(bookings=bookings)
     

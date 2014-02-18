@@ -91,7 +91,8 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
         get_program_layer_bookings_from_XHR(data.visiting_group_id);
        
         array.forEach(data.program_layers, function(vgid) {
-            get_program_layer_bookings_from_XHR(vgid);
+            var layer_id = vgid['layer_id'];
+            get_program_layer_bookings_from_XHR(layer_id, vgid['title'], vgid['colour']);
         });
     }
   
@@ -131,7 +132,9 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
             var datetime_bucket_value = booking.booking_day_id+':'+slot_id_time_map[booking.slot_id];
             var bucket_div = buckets[datetime_bucket_value];
             
-            var tmp_div = domConstruct.create('div', {class:"program_layer_slot", 'hollyrosa:bid':booking['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            var tmp_div = domConstruct.create('div', {style:"background-color: "+booking['layer_colour'], class:"program_layer_slot", 'hollyrosa:bid':booking['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic;'}, tmp_div);
+            tmp_layer_title_elem.innerHTML = '(' + booking['layer_title'] + ')<br/>';
             var tmp_span = domConstruct.create('span', {class:"workflow_state_"+booking['booking_state']}, tmp_div); 
            //...need to pre-render content.... 
             tmp_span.innerHTML = activity_title_map[booking['activity_id']]+"<br/>";
@@ -143,6 +146,9 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
         adjustBucketHeights();
     }
   
+/**
+* get data for drawing layer grid via ajax
+**/
    function get_program_layer_days_from_XHR(visiting_group_id) {
         xhr("${tg.url('/visiting_group/program_layer_get_days')}", {
         handleAs:"json",
@@ -151,16 +157,19 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
     }
 
 
-    function get_program_layer_bookings_from_XHR(visiting_group_id) {
+    /**
+    * get booking data for specific layer via ajax
+    **/
+    function get_program_layer_bookings_from_XHR(visiting_group_id, title, colour) {
         xhr("${tg.url('/visiting_group/program_layer_get_bookings')}", {
         handleAs:"json",
         method:"GET",
-        query: {'visiting_group_id':visiting_group_id}}).then( doGotBookings );
+        query: {'visiting_group_id':visiting_group_id, 'layer_title':title, 'layer_colour':colour}}).then( doGotBookings );
     }
 
-    
+    // , 'layer_title':title, 'layer_colour':colour
     function on_ready(){
-        get_program_layer_days_from_XHR('${visiting_group.id}');
+        get_program_layer_days_from_XHR('${visiting_group.id}', '${visiting_group.name}', '#fff');
     }
     	
       ready(on_ready);
