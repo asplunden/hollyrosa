@@ -901,6 +901,11 @@ table.visiting_group_info_table tr td.info {
 
 .program_layer_bucket_date_header {
     font-weight: bold;
+    text-align: center;
+    padding-top:0.1em;
+    padding-bottom:0.1em;
+    border-bottom: 1px solid #000;
+    margin-bottom:0.2em;
 }
 
 .program_layer_bucket_time_label {
@@ -914,7 +919,6 @@ table.visiting_group_info_table tr td.info {
     border-bottom:1px dashed #888; 
     padding-bottom:0.5em;
     display:block;
-    background-color: #ccf;
     }
     
 .program_layer_time_container {

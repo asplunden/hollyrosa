@@ -41,6 +41,9 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
     var activity_title_map;
     var layer_time_divs = [];
   
+    /**
+     *Draw the grid that all bookings will fit into
+     **/
     function drawLayerGridAndSetData(data) {
 
     var layer_container = dom.byId('program_layers_container');
@@ -53,7 +56,7 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
     var layer_times = data.layer_time;
     var layer_time_header_div = domConstruct.create('div', {style:"background: #ccc;", id:'layer_time_header'}, program_layers_div);
     array.forEach(layer_times, function(t) {
-        var tmp_div = domConstruct.create('div', {id:'layer_time_'+t, 'hollyrosa:time':t, 'class':'program_layer_time_container'}, program_layers_div);
+        var tmp_div = domConstruct.create('div', {id:'layer_time_'+t['symbol'], 'hollyrosa:title':t['title'], 'hollyrosa:time':t['symbol'], 'class':'program_layer_time_container'}, program_layers_div);
         layer_time_divs.push(tmp_div);
         });
     
@@ -70,15 +73,14 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
     array.forEach(layer_time_divs, function(dv) {
     
         //...first draw a div to contain the time (like fm/em)
-        datetime_value = dv.attributes['hollyrosa:time'].value;
+        datetime_value = dv.attributes['hollyrosa:title'].value;
         var tmp_div = domConstruct.create('div', {style:"display:inline-block;", 'class':'program_layer_bucket_time_label'}, dv); // add atribues for slot id which is matching day and time, but how do we learn about that?
         tmp_div.innerHTML = datetime_value;
             
         array.forEach(layer_days, function(t) {
             // also add class that makes it become inline
             var datetime_bucket_value = t.booking_day_id+':'+dv.attributes['hollyrosa:time'].value;
-            var tmp_div = domConstruct.create('div', {'hollyrosa:datetime_bucket':datetime_bucket_value, 'class':'program_layer_bucket'}, dv); // add atribues for slot id which is matching day and time, but how do we learn about that?
-            //tmp_div.innerHTML = datetime_bucket_value + '<br/>';
+            var tmp_div = domConstruct.create('div', {'hollyrosa:datetime_bucket':datetime_bucket_value, 'class':'program_layer_bucket'}, dv); 
             buckets[datetime_bucket_value] = tmp_div;
             });
     });
@@ -88,15 +90,14 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
         //...now do get the bookings
         get_program_layer_bookings_from_XHR(data.visiting_group_id);
        
-     // twice to simulate different layers
-     
-      //
         array.forEach(data.program_layers, function(vgid) {
             get_program_layer_bookings_from_XHR(vgid);
         });
     }
   
-  
+  /**
+   * Adjusting the layout of the grid according to the contents of the grid layer layout
+   **/
     function adjustBucketHeights() {
         //...for each layer time 
         array.forEach(layer_time_divs, function(layer_time_div) {
@@ -214,18 +215,14 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
     
     
     <div>
-    <h3>Drawing the grid to use for program bookings</h3>
-    <p>Once we have drawn a div per day we can repeat almost the same thing but for layers. Fetch layers asynchronous and then draw one div/box for each layer en each FM EM KVALL AFTERH for each day.</p>
-    <p>Im starting to think like this: Returning a set of bookings should be universal so the booking_day_id:slot_id identity is to be kept. That means our design has to contain all needed mappings. We need to figure out the connection from slot_id and bday_id to a day.</p>
     <h3>Populating one layer with bookings from that layer</h3>'
     <p>Adding menu items.</p>
     <p>The real trick is going to figure out how to handle live updates to underlying data</p>
     <p></p>
     <h3>Apperance</h3>
-    <p>Draw using dojo positinn</p>
     <h3>Draw layers</h3>
     <p>list of layers = visiting group ids</p>
-    <p>color per visiting group</p>
+    <p>color per visiting group, ot how do we do? Should the layer struct contain colours?</p>
 	</div>
     <div id="program_layers_container">
     Program layers

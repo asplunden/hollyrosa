@@ -605,7 +605,7 @@ class VisitingGroup(BaseController):
                 if k != 'slot_id':
                     tmp_item[k] = v
                 if k == 'title':
-                    layer_times.append(time_id_mapping[v])
+                    layer_times.append(dict(title=v,  symbol=time_id_mapping[v]))
             generalized_slot_row.append(tmp_item)
         
         datetime_map = []
