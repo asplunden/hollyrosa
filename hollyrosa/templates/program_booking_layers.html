@@ -40,6 +40,7 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
     var buckets = [];
     var activity_title_map;
     var layer_time_divs = [];
+    var total_width = 0;
   
     /**
      *Draw the grid that all bookings will fit into
@@ -49,7 +50,7 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
     var layer_container = dom.byId('program_layers_container');
     
     // create container div for all layers
-    var program_layers_div = domConstruct.create('div', {style:"border:1px solid #444;"}, program_layers_container);
+    var program_layers_div = domConstruct.create('div', {id:'program_layers_div', style:"border:1px solid #444;"}, program_layers_container);
     
     //...create one div for each time. Add an extra header div on top
     
@@ -64,9 +65,11 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
     
     //...draw dates in layer time header
     var empty_header__div = domConstruct.create('div', {'class':'program_layer_bucket_time_label'}, layer_time_header_div); 
+    total_width = total_width + domGeom.position(empty_header__div, true).w;  
     array.forEach(layer_days, function(t) {
         var tmp_div = domConstruct.create('div', {'class':'program_layer_bucket program_layer_bucket_date_header'}, layer_time_header_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
         tmp_div.innerHTML = t.date;
+        total_width = total_width + domGeom.position(tmp_div, true).w;  
     });
             
     // look in data and create divs for all the days
@@ -88,7 +91,7 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
         slot_id_time_map = data.slot_id_time_map;
         activity_title_map= data.activity_title_map
         //...now do get the bookings
-        get_program_layer_bookings_from_XHR(data.visiting_group_id);
+        get_program_layer_bookings_from_XHR(data.visiting_group_id, '${visiting_group.name}', '#fff');
        
         array.forEach(data.program_layers, function(vgid) {
             var layer_id = vgid['layer_id'];
@@ -111,7 +114,7 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
             //...look for max height
             array.forEach(bucket_divs, function(bucket_div) {
                 tmp_pos = domGeom.position(bucket_div, true);  
-                max_height = Math.max(tmp_pos.h+10, max_height);
+                max_height = Math.max(tmp_pos.h+20, max_height);
             });
             
             //...set max height
@@ -119,8 +122,11 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
             array.forEach(bucket_divs, function(bucket_div) {
                 style.set(bucket_div, {height: max_height + 'px', top:'0px'});
             });
+            
+            
         });
-    
+        tmp = dom.byId('program_layers_div');
+        style.set(tmp, {'width': total_width+'px'});
     }
     
     function doGotBookings(data) {
@@ -133,7 +139,7 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
             var bucket_div = buckets[datetime_bucket_value];
             
             var tmp_div = domConstruct.create('div', {style:"background-color: "+booking['layer_colour'], class:"program_layer_slot", 'hollyrosa:bid':booking['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
-            var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic;'}, tmp_div);
+            var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic; padding-left:2em;'}, tmp_div);
             tmp_layer_title_elem.innerHTML = '(' + booking['layer_title'] + ')<br/>';
             var tmp_span = domConstruct.create('span', {class:"workflow_state_"+booking['booking_state']}, tmp_div); 
            //...need to pre-render content.... 
@@ -169,7 +175,7 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
 
     // , 'layer_title':title, 'layer_colour':colour
     function on_ready(){
-        get_program_layer_days_from_XHR('${visiting_group.id}', '${visiting_group.name}', '#fff');
+        get_program_layer_days_from_XHR('${visiting_group.id}');
     }
     	
       ready(on_ready);
@@ -229,6 +235,8 @@ require(['dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/reques
     <p>The real trick is going to figure out how to handle live updates to underlying data</p>
     <p></p>
     <h3>Apperance</h3>
+    <p>Remove comments like doubble slash</p>
+    <p>adjust width and height of major containing grid</p>
     <h3>Draw layers</h3>
     <p>list of layers = visiting group ids</p>
     <p>color per visiting group, ot how do we do? Should the layer struct contain colours?</p>

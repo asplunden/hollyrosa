@@ -644,6 +644,7 @@ class VisitingGroup(BaseController):
     #@validate(validators={"visiting_group_id":validators.UnicodeString(),  "layer_title":validators.UnicodeString(),  "layer_colour":validators.UnicodeString()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def program_layer_get_bookings(self, visiting_group_id,  layer_title='',  layer_colour='#fff' ):
+        print '******* program_layer_get_bookings',  layer_title,  layer_colour
         visiting_group=holly_couch[visiting_group_id]
         bookings = []
         for tmp in getBookingsOfVisitingGroup(holly_couch, visiting_group['name'], '<- MATCHES NO GROUP ->'):
