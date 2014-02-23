@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2011, 2012 Martin Eliasson
+ * Copyright 2011, 2012, 2013, 2014 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *

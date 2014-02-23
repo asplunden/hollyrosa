@@ -655,3 +655,37 @@ class VisitingGroup(BaseController):
         
         return dict(bookings=bookings)
     
+
+    @expose("json")
+    def program_layer_edit_text(self,  visiting_group_id, layer_text_id=''):
+        is_new = (layer_text_id=='')
+        
+        if is_new:
+            text_doc = DataContainer(text='',  title='', program_layer_text_id='',  state=0)
+        else:
+            text_doc = holly_couch[layer_text_id]
+            
+        return dict(layer_text=text_doc)
+        
+        
+    @expose("json")
+    def program_layer_save_text(self,  visiting_group_id, program_layer_text_id='',  text='',  title=''):
+        is_new = (program_layer_text_id=='')
+        
+        if is_new:
+            id = genUID(type='program_layer_text')
+            text_doc = dict(type='program_layer_text',  subtype='text',  status=0,  booking_day_id=booking_day_id, slot_id=slot_id )
+            #...populate sheets and computed sheets?
+            
+            text_doc['text'] = text
+            text_doc['title'] = title
+            text_doc['visiting_group_id'] = visiting_group_id
+            holly_couch[id] = text_doc
+        else:
+            text_doc = holly_couch[layer_text_id]
+            text_doc['text'] = text
+            text_doc['title'] = title
+            text_doc['visiting_group_id'] = visiting_group_id
+            holly_couch[id] = text_doc
+            
+        return dict(layer_text=text_doc)
