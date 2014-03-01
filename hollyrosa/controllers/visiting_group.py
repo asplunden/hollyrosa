@@ -25,7 +25,7 @@ from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
 from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus, getNotesForTarget, getBookingInfoNotesOfUsedActivities
-from hollyrosa.model.booking_couch import getBookingDays,  getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap, getVisitingGroupsByVodbState,  dateRange,  getActivityTitleMap,  getAllProgramLayerBucketTexts
+from hollyrosa.model.booking_couch import getBookingDays,  getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap, getVisitingGroupsByVodbState,  dateRange,  getActivityTitleMap,  getAllProgramLayerBucketTexts,  getProgramLayerBucketTextByDayAndTime
 import datetime
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
@@ -663,10 +663,7 @@ class VisitingGroup(BaseController):
         return dict(bookings=bookings,  bucket_texts=bucket_texts)
         
         
-        
-        
     
-
     @expose("json")
     def program_layer_edit_text(self,  visiting_group_id, layer_text_id=''):
         is_new = (layer_text_id=='')
@@ -681,7 +678,9 @@ class VisitingGroup(BaseController):
         
     @expose("json")
     def program_layer_save_bucket_text(self,  visiting_group_id='', booking_day_id='',  bucket_time='', program_layer_text_id='',  text='',  title=''):
-        is_new = (program_layer_text_id=='')
+        #is_new = (program_layer_text_id=='')
+        
+        
         
         print "##########"
         print '   ', visiting_group_id
@@ -690,6 +689,17 @@ class VisitingGroup(BaseController):
         print '   ', program_layer_text_id
         print '   ', text
         print '   ', title
+        
+        
+        text_doc = None
+        bucket_texts = getProgramLayerBucketTextByDayAndTime(holly_couch,  visiting_group_id,  booking_day_id,  bucket_time)
+        for b in bucket_texts:
+            text_doc = b.doc
+            print ' ???????????????????',  text_doc
+            break
+        
+        is_new = (None == text_doc)
+        
         
         if is_new:
             id = genUID(type='program_layer_text')
@@ -704,9 +714,25 @@ class VisitingGroup(BaseController):
             text_doc['visiting_group_id'] = visiting_group_id
             holly_couch[id] = text_doc
         else:
-            text_doc = holly_couch[layer_text_id]
+            #text_doc = holly_couch[layer_text_id]
+            
+            
             text_doc['text'] = text
             text_doc['title'] = title
-            holly_couch[id] = text_doc
+            holly_couch[text_doc['_id']] = text_doc
             
         return dict(layer_text=text_doc)
+
+    @expose("json")
+    def program_layer_get_bucket_text(self,  visiting_group_id='',  booking_day_id='',  bucket_time=''):
+        #load matching doc from hllyrosa  visiting_group,id, booking_day_id, bucket_time
+        
+        bucket_texts = getProgramLayerBucketTextByDayAndTime(holly_couch,  visiting_group_id,  booking_day_id,  bucket_time)
+        
+        doc = dict(type='program_layer_text',  subtype='bucket_text',  status=0, booking_day_id=booking_day_id, bucket_time=bucket_time,  text='',  title='' ,  visiting_group_id=visiting_group_id)
+        for b in bucket_texts:
+            doc = b.doc
+            break
+        
+        bucket_text = doc
+        return dict(bucket_text=bucket_text)

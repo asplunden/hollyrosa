@@ -83,7 +83,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
         array.forEach(layer_days, function(t) {
             // also add class that makes it become inline
             var datetime_bucket_value = t.booking_day_id+':'+dv.attributes['hollyrosa:time'].value;
-            var tmp_div = domConstruct.create('div', {'hollyrosa:datetime_bucket':datetime_bucket_value, 'hollyrosa:vgid':'${visiting_group._id}', 'hollyrosa:bdayid':t.booking_day_id, 'hollyrosa:buckettime':dv.attributes['hollyrosa:time'].value, 'class':'program_layer_bucket'}, dv); 
+            var tmp_div = domConstruct.create('div', {'hollyrosa:datetime_bucket':datetime_bucket_value, 'hollyrosa:vgid':'${visiting_group._id}', 'hollyrosa:bdayid':t.booking_day_id, 'hollyrosa:bucket_time':dv.attributes['hollyrosa:time'].value, 'class':'program_layer_bucket'}, dv); 
             buckets[datetime_bucket_value] = tmp_div;
             });
     });
@@ -129,6 +129,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
         style.set(tmp, {'width': total_width+'px'});
     }
     
+    
     function doGotBookings(data) {
         //...start populate the layered grid
         
@@ -157,7 +158,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
             var tmp_div = domConstruct.create('div', {style:"background-color: "+bucket_text['layer_colour'], class:"program_layer_slot", 'hollyrosa:id':bucket_text['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
             var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic; padding-left:2em;'}, tmp_div);
             tmp_layer_title_elem.innerHTML = '(' + bucket_text['layer_title'] +')<br/>';
-            var tmp_span = domConstruct.create('span', {}, tmp_div); 
+            var tmp_span = domConstruct.create('span', {style:'font-weight:bold'}, tmp_div); 
            //...need to pre-render content.... 
             tmp_span.innerHTML = bucket_text['title']+"<br/>";
             var tmp_span_content = domConstruct.create('span', {style:'padding-left:2em;'}, tmp_div); 
@@ -208,22 +209,23 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
     var program_layer_text_form = new dijitForm();
     
     var program_layer_text_form_title_input = new dijitTextBox({
-        name: "Ttile",
+        name: "title",
         value: "" /* no or empty value! */,
         placeHolder: "type in your name"
     }, 'title').placeAt(program_layer_text_form.containerNode);
     
     var program_layer_text_form_content_input = new dijitTextarea({
-        name: "textarea",
-        value: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.",
-        style: "width:30em;"
-    }, "myarea").placeAt(program_layer_text_form.containerNode);
+        name: "text",
+        value: "---",
+        style: "width:30em; height:10em;"
+    }, "text").placeAt(program_layer_text_form.containerNode);
 
     var program_layer_text_form_OK = new dijitButton({
         label: "Save",
         onClick: function(){
             // Do something:
-            alert('ok');
+            form_values = program_layer_text_form.getValues();
+            
             // ... send xhr request and close dialog. Lost is lost
             
             // it should be doable to use the attributes since we somewhere had a reference to the node that the popup menu was attached to
@@ -233,20 +235,35 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
             xhr("${tg.url('/visiting_group/program_layer_save_bucket_text')}", {
             handleAs:"json",
             method:"GET",
-            query: {'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':program_layer_text_dialog.hollyrosa_attrs['buckettime']}}).then( doGotBucketText );
+            query: {'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':program_layer_text_dialog.hollyrosa_attrs['bucket_time'], title:form_values.title, text:form_values.text}}).then( doGotBucketText );
         }
     }, "progButtonNode").placeAt(program_layer_text_form.containerNode); 
     
     program_layer_text_dialog.set('content', program_layer_text_form);
     
+    
+    function doEditBucketText(data) {
+        program_layer_text_dialog.hollyrosa_attrs = {'bdayid':data.bucket_text['booking_day_id'], 'vgid':data.bucket_text['visiting_group_id'], 'bucket_time':data.bucket_text['bucket_time']};
+        form_values = program_layer_text_form.getValues();
+        form_values.title=data.bucket_text['title'];
+        form_values.text = data.bucket_text['text'];
+        program_layer_text_form.setValues(form_values);
+        program_layer_text_dialog.show();
+    }
+    
+    
     function show_edit_text_dialog(node) {
         var bdayid = node.attributes["hollyrosa:bdayid"].value;
         var vgid = node.attributes["hollyrosa:vgid"].value;
-        var buckettime = node.attributes["hollyrosa:buckettime"].value;
+        var buckettime = node.attributes["hollyrosa:bucket_time"].value;
         
-        program_layer_text_dialog.hollyrosa_attrs = {'bdayid':bdayid, 'vgid':vgid, 'buckettime':buckettime, 'sid':''};
-        
-        program_layer_text_dialog.show();
+        program_layer_text_dialog.hollyrosa_attrs = {'bdayid':bdayid, 'vgid':vgid, 'bucket_time':buckettime};
+       
+        //...need to load values either thrue XHR or looking into the node itself.
+        xhr("${tg.url('/visiting_group/program_layer_get_bucket_text')}", {
+            handleAs:"json",
+            method:"GET",
+            query: {'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':buckettime}}).then( doEditBucketText );
     }
     
     //...build menues
