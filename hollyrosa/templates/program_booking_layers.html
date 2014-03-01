@@ -83,7 +83,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
         array.forEach(layer_days, function(t) {
             // also add class that makes it become inline
             var datetime_bucket_value = t.booking_day_id+':'+dv.attributes['hollyrosa:time'].value;
-            var tmp_div = domConstruct.create('div', {'hollyrosa:datetime_bucket':datetime_bucket_value, 'hollyrosa:vgid':'${visiting_group._id}', 'class':'program_layer_bucket'}, dv); 
+            var tmp_div = domConstruct.create('div', {'hollyrosa:datetime_bucket':datetime_bucket_value, 'hollyrosa:vgid':'${visiting_group._id}', 'hollyrosa:bdayid':t.booking_day_id, 'hollyrosa:buckettime':dv.attributes['hollyrosa:time'].value, 'class':'program_layer_bucket'}, dv); 
             buckets[datetime_bucket_value] = tmp_div;
             });
     });
@@ -138,7 +138,8 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
             var datetime_bucket_value = booking.booking_day_id+':'+slot_id_time_map[booking.slot_id];
             var bucket_div = buckets[datetime_bucket_value];
             
-            var tmp_div = domConstruct.create('div', {style:"background-color: "+booking['layer_colour'], class:"program_layer_slot", 'hollyrosa:bid':booking['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            // BDAYID is set to BOOKING:DI which is WRONG!
+            var tmp_div = domConstruct.create('div', {style:"background-color: "+booking['layer_colour'], class:"program_layer_slot", 'hollyrosa:bdayid':booking['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
             var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic; padding-left:2em;'}, tmp_div);
             tmp_layer_title_elem.innerHTML = '(' + booking['layer_title'] + ')<br/>';
             var tmp_span = domConstruct.create('span', {class:"workflow_state_"+booking['booking_state']}, tmp_div); 
@@ -149,8 +150,27 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
             
         });
         
+        array.forEach(data.bucket_texts, function(bucket_text) {
+            var datetime_bucket_value = bucket_text.booking_day_id+':'+bucket_text.bucket_time;
+            var bucket_div = buckets[datetime_bucket_value];
+            
+            var tmp_div = domConstruct.create('div', {style:"background-color: "+bucket_text['layer_colour'], class:"program_layer_slot", 'hollyrosa:id':bucket_text['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic; padding-left:2em;'}, tmp_div);
+            tmp_layer_title_elem.innerHTML = '(' + bucket_text['layer_title'] +')<br/>';
+            var tmp_span = domConstruct.create('span', {}, tmp_div); 
+           //...need to pre-render content.... 
+            tmp_span.innerHTML = bucket_text['title']+"<br/>";
+            var tmp_span_content = domConstruct.create('span', {style:'padding-left:2em;'}, tmp_div); 
+            tmp_span_content.innerHTML = bucket_text['text'];
+            
+        });
+        
         adjustBucketHeights();
     }
+    
+    function doGotBucketText(data) {
+        alert('got bucket text');
+  }
   
 /**
 * get data for drawing layer grid via ajax
@@ -182,7 +202,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
     
     var program_layer_text_dialog = new Dialog({
         title: "Edit Program Layer Text",
-        style: "width: 40em"
+        style: "width: 40em, height: 10em;"
     });
     
     var program_layer_text_form = new dijitForm();
@@ -205,12 +225,27 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
             // Do something:
             alert('ok');
             // ... send xhr request and close dialog. Lost is lost
+            
+            // it should be doable to use the attributes since we somewhere had a reference to the node that the popup menu was attached to
+            program_layer_text_dialog.hide();
+            
+            // use those values and do an XHR call that populates the grid
+            xhr("${tg.url('/visiting_group/program_layer_save_bucket_text')}", {
+            handleAs:"json",
+            method:"GET",
+            query: {'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':program_layer_text_dialog.hollyrosa_attrs['buckettime']}}).then( doGotBucketText );
         }
     }, "progButtonNode").placeAt(program_layer_text_form.containerNode); 
     
     program_layer_text_dialog.set('content', program_layer_text_form);
     
-    function show_edit_text_dialog() {
+    function show_edit_text_dialog(node) {
+        var bdayid = node.attributes["hollyrosa:bdayid"].value;
+        var vgid = node.attributes["hollyrosa:vgid"].value;
+        var buckettime = node.attributes["hollyrosa:buckettime"].value;
+        
+        program_layer_text_dialog.hollyrosa_attrs = {'bdayid':bdayid, 'vgid':vgid, 'buckettime':buckettime, 'sid':''};
+        
         program_layer_text_dialog.show();
     }
     

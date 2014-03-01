@@ -25,7 +25,7 @@ from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
 from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus, getNotesForTarget, getBookingInfoNotesOfUsedActivities
-from hollyrosa.model.booking_couch import getBookingDays,  getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap, getVisitingGroupsByVodbState,  dateRange,  getActivityTitleMap
+from hollyrosa.model.booking_couch import getBookingDays,  getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap, getVisitingGroupsByVodbState,  dateRange,  getActivityTitleMap,  getAllProgramLayerBucketTexts
 import datetime
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
@@ -653,7 +653,18 @@ class VisitingGroup(BaseController):
             tmp_doc['layer_colour'] = layer_colour
             bookings.append(tmp_doc)
         
-        return dict(bookings=bookings)
+        bucket_texts = []
+        for tmp in getAllProgramLayerBucketTexts(holly_couch,  visiting_group_id):
+            tmp_doc = tmp.doc
+            tmp_doc['layer_title']=visiting_group['name']
+            tmp_doc['layer_colour'] = layer_colour
+            bucket_texts.append(tmp_doc)
+        
+        return dict(bookings=bookings,  bucket_texts=bucket_texts)
+        
+        
+        
+        
     
 
     @expose("json")
@@ -669,12 +680,23 @@ class VisitingGroup(BaseController):
         
         
     @expose("json")
-    def program_layer_save_text(self,  visiting_group_id, program_layer_text_id='',  text='',  title=''):
+    def program_layer_save_bucket_text(self,  visiting_group_id='', booking_day_id='',  bucket_time='', program_layer_text_id='',  text='',  title=''):
         is_new = (program_layer_text_id=='')
+        
+        print "##########"
+        print '   ', visiting_group_id
+        print '   ', booking_day_id
+        print '   ', bucket_time
+        print '   ', program_layer_text_id
+        print '   ', text
+        print '   ', title
         
         if is_new:
             id = genUID(type='program_layer_text')
-            text_doc = dict(type='program_layer_text',  subtype='text',  status=0,  booking_day_id=booking_day_id, slot_id=slot_id )
+            
+            #...if slot_id is none, we need to figure out slot_id of bucket_time OR we simply save bucket_time
+            
+            text_doc = dict(type='program_layer_text',  subtype='bucket_text',  status=0,  booking_day_id=booking_day_id, bucket_time=bucket_time )
             #...populate sheets and computed sheets?
             
             text_doc['text'] = text
@@ -685,7 +707,6 @@ class VisitingGroup(BaseController):
             text_doc = holly_couch[layer_text_id]
             text_doc['text'] = text
             text_doc['title'] = title
-            text_doc['visiting_group_id'] = visiting_group_id
             holly_couch[id] = text_doc
             
         return dict(layer_text=text_doc)
