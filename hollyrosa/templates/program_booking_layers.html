@@ -254,7 +254,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
             xhr("${tg.url('/visiting_group/program_layer_save_bucket_text')}", {
             handleAs:"json",
             method:"GET",
-            query: {'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':program_layer_text_dialog.hollyrosa_attrs['bucket_time'], title:form_values.title, text:form_values.text}}).then( on_recieved_layer_text );
+            query: {'layer_text_id':program_layer_text_dialog.hollyrosa_attrs['layer_text_id'], 'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':program_layer_text_dialog.hollyrosa_attrs['bucket_time'], title:form_values.title, text:form_values.text}}).then( on_recieved_layer_text );
         }
     }, "progButtonNode").placeAt(program_layer_text_form.containerNode); 
     
@@ -262,7 +262,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
     
     
     function do_edit_bucket_text(data) {
-        program_layer_text_dialog.hollyrosa_attrs = {'bdayid':data.bucket_text['booking_day_id'], 'vgid':data.bucket_text['visiting_group_id'], 'bucket_time':data.bucket_text['bucket_time']};
+        program_layer_text_dialog.hollyrosa_attrs = {'bdayid':data.bucket_text['booking_day_id'], 'vgid':data.bucket_text['visiting_group_id'], 'bucket_time':data.bucket_text['bucket_time'], 'layer_text_id':data.bucket_text['layer_text_id']};
         form_values = program_layer_text_form.getValues();
         form_values.title=data.bucket_text['title'];
         form_values.text = data.bucket_text['text'];
@@ -270,19 +270,48 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
         program_layer_text_dialog.show();
     }
     
+    function show_delete_layer_text_dialog(node) {
+        var layer_text_id = node.attributes["hollyrosa:layer_text_id"].value;
+        
+        if (confirm('Really delete layer text?')) {
+            xhr("${tg.url('/visiting_group/program_layer_delete_layer_text')}", {
+                handleAs:"json",
+                method:"GET",
+                query: {'layer_text_id':layer_text_id}}).then( function(data) {
+                    domConstruct.destroy(node);
+                    adjustBucketHeights();
+                });
+        }
+    }
     
-    function show_edit_text_dialog(node) {
+    
+    function show_new_text_dialog(node) {
         var bdayid = node.attributes["hollyrosa:bdayid"].value;
         var vgid = node.attributes["hollyrosa:vgid"].value;
         var buckettime = node.attributes["hollyrosa:bucket_time"].value;
         
-        program_layer_text_dialog.hollyrosa_attrs = {'bdayid':bdayid, 'vgid':vgid, 'bucket_time':buckettime};
+        program_layer_text_dialog.hollyrosa_attrs = {'bdayid':bdayid, 'vgid':vgid, 'bucket_time':buckettime, 'layer_text_id':''};
        
         //...need to load values either thrue XHR or looking into the node itself.
-        xhr("${tg.url('/visiting_group/program_layer_get_bucket_text')}", {
+        xhr("${tg.url('/visiting_group/program_layer_new_layer_text')}", {
             handleAs:"json",
             method:"GET",
             query: {'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':buckettime}}).then( do_edit_bucket_text );
+    }
+    
+    function show_edit_text_dialog(node) {
+        var layer_text_id = node.attributes["hollyrosa:layer_text_id"].value;
+        var bdayid = node.attributes["hollyrosa:bdayid"].value;
+        var vgid = node.attributes["hollyrosa:vgid"].value;
+        var buckettime = node.attributes["hollyrosa:bucket_time"].value;
+        
+        program_layer_text_dialog.hollyrosa_attrs = {'bdayid':bdayid, 'vgid':vgid, 'bucket_time':buckettime, 'layer_text_id':layer_text_id};
+       
+        //...need to load values either thrue XHR or looking into the node itself.
+        xhr("${tg.url('/visiting_group/program_layer_get_layer_text')}", {
+            handleAs:"json",
+            method:"GET",
+            query: {'layer_text_id':layer_text_id}}).then( do_edit_bucket_text );
     }
     
     //...build menues
@@ -306,7 +335,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
     // refactor later
     // not in VODB view common_menu.add_visiting_group_menu_item(menu, menu, "New booking request...", '${tg.url('/booking/edit_booking')}');
    //common_menu.add_menu_separator(menu);   
-   common_menu.add_call_function_menu_item(menu, menu, "Add layer text...",  show_edit_text_dialog);
+   common_menu.add_call_function_menu_item(menu, menu, "Add layer text...",  show_new_text_dialog);
    common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add note...", '${tg.url('/note/add_note')}');
    common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add attachment...", '${tg.url('/note/add_note')}');
     	
@@ -321,7 +350,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
     });
 
    common_menu.add_call_function_menu_item(layer_text_menu, layer_text_menu, "Edit layer text...",  show_edit_text_dialog);
-   common_menu.add_visiting_group_add_note_menu_item(layer_text_menu, layer_text_menu, "Delete layer text...", '${tg.url('/note/add_note')}');
+   common_menu.add_call_function_menu_item(layer_text_menu, layer_text_menu, "Delete layer text...", show_delete_layer_text_dialog);
    
     ready(on_ready);
 });
