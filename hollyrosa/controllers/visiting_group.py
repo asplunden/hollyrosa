@@ -680,22 +680,10 @@ class VisitingGroup(BaseController):
     def program_layer_save_bucket_text(self,  visiting_group_id='', booking_day_id='',  bucket_time='', program_layer_text_id='',  text='',  title=''):
         #is_new = (program_layer_text_id=='')
         
-        
-        
-        print "##########"
-        print '   ', visiting_group_id
-        print '   ', booking_day_id
-        print '   ', bucket_time
-        print '   ', program_layer_text_id
-        print '   ', text
-        print '   ', title
-        
-        
         text_doc = None
         bucket_texts = getProgramLayerBucketTextByDayAndTime(holly_couch,  visiting_group_id,  booking_day_id,  bucket_time)
         for b in bucket_texts:
             text_doc = b.doc
-            print ' ???????????????????',  text_doc
             break
         
         is_new = (None == text_doc)
@@ -720,8 +708,13 @@ class VisitingGroup(BaseController):
             text_doc['text'] = text
             text_doc['title'] = title
             holly_couch[text_doc['_id']] = text_doc
+            # TODO call it bucket text or layer text ?
             
-        return dict(layer_text=text_doc)
+        visiting_group=holly_couch[visiting_group_id]
+        text_doc['layer_title']=visiting_group['name']
+        text_doc['layer_colour'] = "#fff"
+        return dict(bucket_text=text_doc) 
+
 
     @expose("json")
     def program_layer_get_bucket_text(self,  visiting_group_id='',  booking_day_id='',  bucket_time=''):
@@ -735,4 +728,8 @@ class VisitingGroup(BaseController):
             break
         
         bucket_text = doc
+        #...repeat
+        visiting_group=holly_couch[visiting_group_id]
+        bucket_text['layer_title']=visiting_group['name']
+        bucket_text['layer_colour'] = "#fff"
         return dict(bucket_text=bucket_text)
