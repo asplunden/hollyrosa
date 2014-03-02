@@ -36,8 +36,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/PopupMenuItem", 'dijit/Dialog', 'dijit/form/Form', 'dijit/form/TextBox', "dijit/form/Textarea", "dijit/form/Button", 'dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/request/xhr', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-geometry', 'dojo/dom-style', 'dojo/query', 'dojo/on','dojo/ready', 'dojo/domReady!'],
   function(common_menu, registry, Menu, MenuItem, PopupMenuItem, Dialog, dijitForm, dijitTextBox, dijitTextarea, dijitButton, array, lang, locale, xhr, dom, domConstruct, domGeom, style, query, on, ready, domReady ){
 
-    var slot_id_time_map;
-    var buckets = [];
+    var g_slot_id_time_map;
+    var g_bucket_divs = [];
     var activity_title_map;
     var layer_time_divs = [];
     var total_width = 0;
@@ -83,11 +83,11 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
                 // also add class that makes it become inline
                 var datetime_bucket_value = t.booking_day_id+':'+dv.attributes['hollyrosa:time'].value;
                 var tmp_div = domConstruct.create('div', {'hollyrosa:datetime_bucket':datetime_bucket_value, 'hollyrosa:vgid':'${visiting_group._id}', 'hollyrosa:bdayid':t.booking_day_id, 'hollyrosa:bucket_time':dv.attributes['hollyrosa:time'].value, 'class':'program_layer_bucket'}, dv); 
-                buckets[datetime_bucket_value] = tmp_div;
+                g_bucket_divs[datetime_bucket_value] = tmp_div;
                 });
         });
     
-        slot_id_time_map = data.slot_id_time_map;
+        g_slot_id_time_map = data.slot_id_time_map;
         activity_title_map= data.activity_title_map
         //...now do get the bookings
         get_program_layer_bookings_from_XHR(data.visiting_group_id, '${visiting_group.name}', '#ffffef');
@@ -129,17 +129,24 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
     }
     
     
-    function doGotBookings(data) {
-        //...start populate the layered grid
-        
-        
+    function on_recieved_bookings(data) {
+        draw_layer_bookings(data.bookings, g_bucket_divs, g_slot_id_time_map);
+        draw_layer_texts(data.bucket_texts, g_bucket_divs);
+        adjustBucketHeights();
+    }
+    
+    function get_program_layer_bucket_id(booking, slot_id_time_map) {
+        return booking.booking_day_id+':'+slot_id_time_map[booking.slot_id];
+    }
+    
+    function draw_layer_bookings(layer_bookings, bucket_divs, slot_id_time_map) {
         //..this is not going to work for unscheduled bookings....
-        array.forEach(data.bookings, function(booking) {
-            var datetime_bucket_value = booking.booking_day_id+':'+slot_id_time_map[booking.slot_id];
-            var bucket_div = buckets[datetime_bucket_value];
+        array.forEach(layer_bookings, function(booking) {
+            var datetime_bucket_value = get_program_layer_bucket_id(booking, slot_id_time_map);
+            var bucket_div = bucket_divs[datetime_bucket_value];
             
             // BDAYID is set to BOOKING:DI which is WRONG!
-            var tmp_div = domConstruct.create('div', {style:"background-color: "+booking['layer_colour'], class:"program_layer_slot", 'hollyrosa:bdayid':booking['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            var tmp_div = domConstruct.create('div', {style:"background-color: "+booking['layer_colour'], class:"program_layer_slot", 'hollyrosa:layer_booking_id':booking['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
             var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic; padding-left:2em;'}, tmp_div);
             tmp_layer_title_elem.innerHTML = '(' + booking['layer_title'] + ')<br/>';
             var tmp_span = domConstruct.create('span', {class:"workflow_state_"+booking['booking_state']}, tmp_div); 
@@ -149,52 +156,40 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
             tmp_span_content.innerHTML = booking['cache_content'];
             
         });
-        
-        array.forEach(data.bucket_texts, function(bucket_text) {
-            var datetime_bucket_value = bucket_text.booking_day_id+':'+bucket_text.bucket_time;
-            var bucket_div = buckets[datetime_bucket_value];
-            
-            var tmp_div = domConstruct.create('div', {style:"background-color: "+bucket_text['layer_colour'], class:"program_layer_slot", 'hollyrosa:btid':bucket_text['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
-            var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic; padding-left:2em;'}, tmp_div);
-            tmp_layer_title_elem.innerHTML = '(' + bucket_text['layer_title'] +')<br/>';
-            var tmp_span = domConstruct.create('span', {style:'font-weight:bold'}, tmp_div); 
-           //...need to pre-render content.... 
-            tmp_span.innerHTML = bucket_text['title']+"<br/>";
-            var tmp_span_content = domConstruct.create('span', {style:'padding-left:2em;'}, tmp_div); 
-            tmp_span_content.innerHTML = bucket_text['text'];
-            
-        });
-        
-        adjustBucketHeights();
     }
     
-    
-    function doGotBucketText(data) {        
-        // delete the bucket text from data (copy code else where)
-        var elems_to_destroy = query('[hollyrosa:btid=\"'+data.bucket_text['_id']+'\"]') //query('#visiting_group_properties_table >');
+    function destroy_layer_text(layer_text) {
+        var elems_to_destroy = query('[hollyrosa:layer_text_id=\"'+layer_text['_id']+'\"]')
         array.forEach(elems_to_destroy, function(g){
             domConstruct.destroy(g);
-    });
+        });
+    }
     
-    //...copied! - maybe add destructor before creator!
-    bucket_texts = [data.bucket_text];
-    
-    array.forEach(bucket_texts, function(bucket_text) {
-            var datetime_bucket_value = bucket_text.booking_day_id+':'+bucket_text.bucket_time;
-            var bucket_div = buckets[datetime_bucket_value];
+    function draw_layer_texts(layer_texts, bucket_divs) {
+        array.forEach(layer_texts, function(layer_text) {
+            destroy_layer_text(layer_text)
             
-            var tmp_div = domConstruct.create('div', {style:"background-color: "+bucket_text['layer_colour'], class:"program_layer_slot", 'hollyrosa:btid':bucket_text['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            var datetime_bucket_value = layer_text.booking_day_id+':'+layer_text.bucket_time;
+            
+            var bucket_div = bucket_divs[datetime_bucket_value];
+            
+            var tmp_div = domConstruct.create('div', {style:"background-color: "+layer_text['layer_colour'], class:"program_layer_text", 'hollyrosa:layer_text_id':layer_text['_id'], 'hollyrosa:vgid':layer_text['visiting_group_id'], 'hollyrosa:bucket_time':layer_text['bucket_time'], 'hollyrosa:bdayid':layer_text['booking_day_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
             var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic; padding-left:2em;'}, tmp_div);
-            tmp_layer_title_elem.innerHTML = '(' + bucket_text['layer_title'] +')<br/>';
+            tmp_layer_title_elem.innerHTML = '(' + layer_text['layer_title'] +')<br/>';
             var tmp_span = domConstruct.create('span', {style:'font-weight:bold'}, tmp_div); 
            //...need to pre-render content.... 
-            tmp_span.innerHTML = bucket_text['title']+"<br/>";
+            tmp_span.innerHTML = layer_text['title']+"<br/>";
             var tmp_span_content = domConstruct.create('span', {style:'padding-left:2em;'}, tmp_div); 
-            tmp_span_content.innerHTML = bucket_text['text'];
+            tmp_span_content.innerHTML = layer_text['text'];
             
-        });
+            });
+        }
         
-    adjustBucketHeights();
+    function on_recieved_layer_text(data) {
+        //...copied! - maybe add destructor before creator!
+        layer_texts = [data.bucket_text];
+        draw_layer_texts(layer_texts, g_bucket_divs);
+        adjustBucketHeights();
   }
   
 /**
@@ -215,7 +210,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
         xhr("${tg.url('/visiting_group/program_layer_get_bookings')}", {
         handleAs:"json",
         method:"GET",
-        query: {'visiting_group_id':visiting_group_id, 'layer_title':title, 'layer_colour':colour}}).then( doGotBookings );
+        query: {'visiting_group_id':visiting_group_id, 'layer_title':title, 'layer_colour':colour}}).then( on_recieved_bookings );
     }
 
     // , 'layer_title':title, 'layer_colour':colour
@@ -259,14 +254,14 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
             xhr("${tg.url('/visiting_group/program_layer_save_bucket_text')}", {
             handleAs:"json",
             method:"GET",
-            query: {'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':program_layer_text_dialog.hollyrosa_attrs['bucket_time'], title:form_values.title, text:form_values.text}}).then( doGotBucketText );
+            query: {'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':program_layer_text_dialog.hollyrosa_attrs['bucket_time'], title:form_values.title, text:form_values.text}}).then( on_recieved_layer_text );
         }
     }, "progButtonNode").placeAt(program_layer_text_form.containerNode); 
     
     program_layer_text_dialog.set('content', program_layer_text_form);
     
     
-    function doEditBucketText(data) {
+    function do_edit_bucket_text(data) {
         program_layer_text_dialog.hollyrosa_attrs = {'bdayid':data.bucket_text['booking_day_id'], 'vgid':data.bucket_text['visiting_group_id'], 'bucket_time':data.bucket_text['bucket_time']};
         form_values = program_layer_text_form.getValues();
         form_values.title=data.bucket_text['title'];
@@ -287,7 +282,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
         xhr("${tg.url('/visiting_group/program_layer_get_bucket_text')}", {
             handleAs:"json",
             method:"GET",
-            query: {'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':buckettime}}).then( doEditBucketText );
+            query: {'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':buckettime}}).then( do_edit_bucket_text );
     }
     
     //...build menues
@@ -306,16 +301,29 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
 	     //    load_notes_menu_item.disabled = true;
 	     //} 
        } // end function
-       });
+    });
 
     // refactor later
-   // not in VODB view common_menu.add_visiting_group_menu_item(menu, menu, "New booking request...", '${tg.url('/booking/edit_booking')}');
-   common_menu.add_menu_separator(menu);   
-   common_menu.add_call_function_menu_item(menu, menu, "Edit text...",  show_edit_text_dialog);
+    // not in VODB view common_menu.add_visiting_group_menu_item(menu, menu, "New booking request...", '${tg.url('/booking/edit_booking')}');
+   //common_menu.add_menu_separator(menu);   
+   common_menu.add_call_function_menu_item(menu, menu, "Add layer text...",  show_edit_text_dialog);
    common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add note...", '${tg.url('/note/add_note')}');
    common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add attachment...", '${tg.url('/note/add_note')}');
     	
-      ready(on_ready);
+        
+    var layer_text_menu = new Menu({
+    targetNodeIds: ["program_layers_container"],
+    selector: "div.program_layer_text",
+    leftClickToOpen: common_menu.load_left_click_menu(),
+    onOpen: function(evt) {
+        var node = menu.currentTarget;
+       }
+    });
+
+   common_menu.add_call_function_menu_item(layer_text_menu, layer_text_menu, "Edit layer text...",  show_edit_text_dialog);
+   common_menu.add_visiting_group_add_note_menu_item(layer_text_menu, layer_text_menu, "Delete layer text...", '${tg.url('/note/add_note')}');
+   
+    ready(on_ready);
 });
 
 </script>
