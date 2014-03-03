@@ -558,23 +558,23 @@ class VisitingGroup(BaseController):
         vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         return dict(visiting_group=vgroup,  notes=[],  tags=[],  reFormatDate=reFormatDate)
 
-
+    
+    def getDoc(self,  id,  type,  subtype=None):
+        doc = holly_couch[id]
+        if doc['type'] != type:
+            raise KeyError,  "document with id %s is not of type %s" % (id,  type)
+        if subtype != None:
+            if doc['subtype'] != subtype:
+               raise KeyError,  "document with id %s is not of subtype %s" % (id,  subtype) 
+            
+        return doc
+        
+        
     @expose("json")
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def program_layer_get_days(self, visiting_group_id ):
-        print '****************** program layer get days', visiting_group_id
-        
-        # I need to construct the mapping (given a pre selected schema for now...) 
-        #
-        # booking_day_id:slot_id:layer_id -> datetime_layer_id
-        #
-        # This map is constructed from a day schema. Each activity has slots, these slots have time associated with them. 
-        #
-        # We also need a list of booking days for the given group, we could use the first boking day and guess the schema. That would be a short cut but a necessary one.
-        #
-        
-        visiting_group = holly_couch[visiting_group_id]
+        visiting_group = self.getDoc(visiting_group_id,  'visiting_group')
         
         date_range = dateRange(visiting_group['from_date'], visiting_group['to_date'])
         
@@ -641,10 +641,10 @@ class VisitingGroup(BaseController):
         return dict(layer_time=layer_times,  layer_days=layer_days,  slot_id_time_map=slot_id_time_map,  visiting_group_id=visiting_group_id,  activity_title_map=activity_title_map,  program_layers=program_layers)
         
     @expose("json")
-    #@validate(validators={"visiting_group_id":validators.UnicodeString(),  "layer_title":validators.UnicodeString(),  "layer_colour":validators.UnicodeString()})
+    @validate(validators={"visiting_group_id":validators.UnicodeString(),  "layer_title":validators.UnicodeString(),  "layer_colour":validators.UnicodeString()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def program_layer_get_bookings(self, visiting_group_id,  layer_title='',  layer_colour='#fff' ):
-        visiting_group=holly_couch[visiting_group_id]
+        visiting_group = self.getDoc(visiting_group_id,  'visiting_group')
         bookings = []
         for tmp in getBookingsOfVisitingGroup(holly_couch, visiting_group['name'], '<- MATCHES NO GROUP ->'):
             tmp_doc = tmp.doc
@@ -664,97 +664,81 @@ class VisitingGroup(BaseController):
         
     
     @expose("json")
+    @validate(validators={"visiting_group_id":validators.UnicodeString(),  "layer_text_id":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def program_layer_edit_text(self,  visiting_group_id, layer_text_id=''):
         is_new = (layer_text_id=='')
         
         if is_new:
-            text_doc = DataContainer(text='',  title='', program_layer_text_id='',  state=0)
+            layer_text = DataContainer(text='',  title='', program_layer_text_id='',  state=0)
         else:
-            text_doc = holly_couch[layer_text_id]
+            layer_text = self.getDoc(layer_text_id,  'program_layer_text',  subtype='layer_text')
             
-        return dict(layer_text=text_doc)
+        return dict(layer_text=layer_text)
         
         
     @expose("json")
-    def program_layer_save_bucket_text(self,  visiting_group_id='', booking_day_id='',  bucket_time='', layer_text_id='',  text='',  title=''):
+    @validate(validators={"visiting_group_id":validators.UnicodeString(),  "booking_day_id":validators.UnicodeString(),  "bucket_time":validators.UnicodeString(),  "layer_text_id":validators.UnicodeString(),  "text":validators.UnicodeString(),  "title":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def program_layer_save_layer_text(self,  visiting_group_id='', booking_day_id='',  bucket_time='', layer_text_id='',  text='',  title=''):
         is_new = (layer_text_id=='')
-        
-        #text_doc = None
-        #bucket_texts = getProgramLayerBucketTextByDayAndTime(holly_couch,  visiting_group_id,  booking_day_id,  bucket_time)
-        #for b in bucket_texts:
-         #   text_doc = b.doc
-         #   break
-        
-        #is_new = (None == text_doc)
-        
         
         if is_new:
             id = genUID(type='program_layer_text')
             
             #...if slot_id is none, we need to figure out slot_id of bucket_time OR we simply save bucket_time
             
-            text_doc = dict(type='program_layer_text',  subtype='bucket_text',  state=0,  booking_day_id=booking_day_id, bucket_time=bucket_time )
+            layer_text = dict(type='program_layer_text',  subtype='layer_text',  state=0,  booking_day_id=booking_day_id, bucket_time=bucket_time )
             #...populate sheets and computed sheets?
             
-            text_doc['text'] = text
-            text_doc['title'] = title
-            text_doc['visiting_group_id'] = visiting_group_id
-            holly_couch[id] = text_doc
+            layer_text['text'] = text
+            layer_text['title'] = title
+            layer_text['visiting_group_id'] = visiting_group_id
+            holly_couch[id] = layer_text
         else:
-            text_doc = holly_couch[layer_text_id]
+            layer_text = self.getDoc(layer_text_id,  'program_layer_text',  subtype='layer_text')
             
             
-            text_doc['text'] = text
-            text_doc['title'] = title
-            holly_couch[text_doc['_id']] = text_doc
+            layer_text['text'] = text
+            layer_text['title'] = title
+            holly_couch[layer_text['_id']] = layer_text
             # TODO call it bucket text or layer text ?
             
-        visiting_group=holly_couch[visiting_group_id]
-        text_doc['layer_title']=visiting_group['name']
-        text_doc['layer_colour'] = "#fff"
-        return dict(bucket_text=text_doc) 
+        visiting_group = self.getDoc(visiting_group_id,  'visiting_group')
+        layer_text['layer_title']=visiting_group['name']
+        layer_text['layer_colour'] = "#fff"
+        return dict(layer_text=layer_text) 
 
 
     @expose("json")
+    @validate(validators={"visiting_group_id":validators.UnicodeString(),  "booking_day_id":validators.UnicodeString(),  "bucket_time":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def program_layer_new_layer_text(self,  visiting_group_id='',  booking_day_id='',  bucket_time=''):
-        #load matching doc from hllyrosa  visiting_group,id, booking_day_id, bucket_time
+        layer_text = dict(type='program_layer_text',  subtype='layer_text',  status=0, booking_day_id=booking_day_id, bucket_time=bucket_time,  text='',  title='' ,  visiting_group_id=visiting_group_id)
+        visiting_group = self.getDoc(visiting_group_id,  'visiting_group')
+        layer_text['layer_title']=visiting_group['name']
+        layer_text['layer_colour'] = "#fff"
+        return dict(layer_text=layer_text)
         
-        bucket_texts = [] #getProgramLayerBucketTextByDayAndTime(holly_couch,  visiting_group_id,  booking_day_id,  bucket_time)
-        
-        doc = dict(type='program_layer_text',  subtype='bucket_text',  status=0, booking_day_id=booking_day_id, bucket_time=bucket_time,  text='',  title='' ,  visiting_group_id=visiting_group_id)
-        for b in bucket_texts:
-            doc = b.doc
-            break
-        
-        bucket_text = doc
-        #...repeat
-        visiting_group=holly_couch[visiting_group_id]
-        bucket_text['layer_title']=visiting_group['name']
-        bucket_text['layer_colour'] = "#fff"
-        return dict(bucket_text=bucket_text)
         
     @expose("json")
+    @validate(validators={"layer_text_id":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def program_layer_get_layer_text(self,  layer_text_id=''):
-        #load matching doc from hllyrosa  visiting_group,id, booking_day_id, bucket_time
+        layer_text = self.getDoc(layer_text_id,  'program_layer_text',  subtype='layer_text')
+        visiting_group = self.getDoc(layer_text['visiting_group_id'],  'visiting_group')
         
-        layer_text = holly_couch[layer_text_id]
-        
-        #doc = dict(type='program_layer_text',  subtype='bucket_text',  status=0, booking_day_id=booking_day_id, bucket_time=bucket_time,  text='',  title='' ,  visiting_group_id=visiting_group_id)
-        #for b in bucket_texts:
-         #   doc = b.doc
-         #   break
-        
-        #bucket_text = doc
-        #...repeat
-        visiting_group=holly_couch[layer_text['visiting_group_id']]
         layer_text['layer_title']=visiting_group['name']
         layer_text['layer_colour'] = "#fff"
         layer_text['layer_text_id'] = layer_text['_id']
-        return dict(bucket_text=layer_text)
+        return dict(layer_text=layer_text)
+        
         
     @expose("json")
+    @validate(validators={"layer_text_id":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def program_layer_delete_layer_text(self, layer_text_id):
-        layer_text = holly_couch[layer_text_id]
+        layer_text = self.getDoc(layer_text_id,  'program_layer_text',  subtype='layer_text')
         layer_text['state'] = -100
         holly_couch[layer_text_id] = layer_text
         return dict()
