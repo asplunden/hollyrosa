@@ -884,7 +884,28 @@ table.visiting_group_info_table tr td.info {
     background-position: right top;
 }
 
-/* bucket */
+/* program layers. Break out to separate CSS */
+
+#program_layers_grid {
+    border:1px solid #444;
+    }
+    
+div.program_layer_time_container {
+    border-bottom: 1px solid #444;
+}
+
+tr.program_layer_time_container {
+    border-bottom: 1px solid #444;
+    padding: 1em;
+    margin:1em;
+}
+
+tr.program_layer_time_container td {
+    border-left: 1px solid #444;
+    border-collapse:collapse;
+}
+
+
 
 .program_layer_bucket {
 	display:inline-block;
@@ -921,9 +942,6 @@ table.visiting_group_info_table tr td.info {
     display:block;
     }
     
-.program_layer_time_container {
-    border-bottom: 1px solid #444;
-}
 
 .program_layer_text {
     border-bottom:1px dashed #888; 

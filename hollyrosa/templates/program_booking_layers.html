@@ -49,25 +49,27 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
     function drawLayerGridAndSetData(data) {
 
         var layer_container = dom.byId('program_layers_container');
+        var div_or_table = {'grid':'table','row':'tr','bucket':'td','bucket_head':'th'};
+        div_or_table = {'grid':'div','row':'div','bucket':'div','bucket_head':'div'};
     
         //...create container div for all layers
-        var program_layers_div = domConstruct.create('div', {id:'program_layers_div', style:"border:1px solid #444;"}, program_layers_container);
+        var program_layers_div = domConstruct.create(div_or_table['grid'], {id:'program_layers_grid'}, program_layers_container);
     
         //...create one div for each time. Add an extra header div on top
         var layer_times = data.layer_time;
-        var layer_time_header_div = domConstruct.create('div', {style:"background: #ccc;", id:'layer_time_header'}, program_layers_div);
+        var layer_time_header_div = domConstruct.create(div_or_table['row'], {style:"background: #ccc;", id:'layer_time_header'}, program_layers_div);
         array.forEach(layer_times, function(t) {
-            var tmp_div = domConstruct.create('div', {id:'layer_time_'+t['symbol'], 'hollyrosa:title':t['title'], 'hollyrosa:time':t['symbol'], 'class':'program_layer_time_container'}, program_layers_div);
+            var tmp_div = domConstruct.create(div_or_table['row'], {id:'layer_time_'+t['symbol'], 'hollyrosa:title':t['title'], 'hollyrosa:time':t['symbol'], 'class':'program_layer_time_container'}, program_layers_div);
             layer_time_divs.push(tmp_div);
             });
     
         var layer_days = data.layer_days;
     
         //...draw dates in layer time header
-        var empty_header__div = domConstruct.create('div', {'class':'program_layer_bucket_time_label'}, layer_time_header_div); 
+        var empty_header__div = domConstruct.create(div_or_table['bucket_head'], {'class':'program_layer_bucket_time_label'}, layer_time_header_div); 
         total_width = total_width + domGeom.position(empty_header__div, true).w;  
         array.forEach(layer_days, function(t) {
-            var tmp_div = domConstruct.create('div', {'class':'program_layer_bucket program_layer_bucket_date_header'}, layer_time_header_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            var tmp_div = domConstruct.create(div_or_table['bucket_head'], {'class':'program_layer_bucket program_layer_bucket_date_header'}, layer_time_header_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
             tmp_div.innerHTML = t.date;
             total_width = total_width + domGeom.position(tmp_div, true).w;  
         });
@@ -77,13 +79,13 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
     
             //...first draw a div to contain the time (like fm/em)
             datetime_value = dv.attributes['hollyrosa:title'].value;
-            var tmp_div = domConstruct.create('div', {style:"display:inline-block;", 'class':'program_layer_bucket_time_label'}, dv); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            var tmp_div = domConstruct.create(div_or_table['bucket'], {style:"display:inline-block;", 'class':'program_layer_bucket_time_label'}, dv); // add atribues for slot id which is matching day and time, but how do we learn about that?
             tmp_div.innerHTML = datetime_value;
             
             array.forEach(layer_days, function(t) {
                 // also add class that makes it become inline
                 var datetime_bucket_value = t.booking_day_id+':'+dv.attributes['hollyrosa:time'].value;
-                var tmp_div = domConstruct.create('div', {'hollyrosa:datetime_bucket':datetime_bucket_value, 'hollyrosa:vgid':'${visiting_group._id}', 'hollyrosa:bdayid':t.booking_day_id, 'hollyrosa:bucket_time':dv.attributes['hollyrosa:time'].value, 'class':'program_layer_bucket'}, dv); 
+                var tmp_div = domConstruct.create(div_or_table['bucket'], {'hollyrosa:datetime_bucket':datetime_bucket_value, 'hollyrosa:vgid':'${visiting_group._id}', 'hollyrosa:bdayid':t.booking_day_id, 'hollyrosa:bucket_time':dv.attributes['hollyrosa:time'].value, 'class':'program_layer_bucket'}, dv); 
                 g_bucket_divs[datetime_bucket_value] = tmp_div;
                 });
         });
@@ -103,6 +105,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
    * Adjusting the layout of the grid according to the contents of the grid layer layout
    **/
     function adjustBucketHeights() {
+        //return;
         //...for each layer time 
         array.forEach(layer_time_divs, function(layer_time_div) {
             
@@ -125,7 +128,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
             
             
         });
-        tmp = dom.byId('program_layers_div');
+        tmp = dom.byId('program_layers_grid');
         style.set(tmp, {'width': total_width+'px'});
     }
     
@@ -332,7 +335,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
     //...build menues
     var menu = new Menu({
        targetNodeIds: ["program_layers_container"],
-       selector: "div.program_layer_bucket",
+       selector: ".program_layer_bucket",
        leftClickToOpen: common_menu.load_left_click_menu(),
        onOpen: function(evt) {
           var node = menu.currentTarget;
