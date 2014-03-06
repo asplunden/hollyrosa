@@ -557,6 +557,54 @@ class VisitingGroup(BaseController):
     def layers(self, visiting_group_id):
         vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         return dict(visiting_group=vgroup,  notes=[],  tags=[],  reFormatDate=reFormatDate)
+        
+        
+    def get_program_layer_bookings(self,  visiting_group,  layer_title,  layer_colour):
+        bookings = []
+        for tmp in getBookingsOfVisitingGroup(holly_couch, visiting_group['name'], '<- MATCHES NO GROUP ->'):
+            tmp_doc = tmp.doc
+            tmp_doc['layer_title'] = layer_title
+            tmp_doc['layer_colour'] = layer_colour
+            bookings.append(tmp_doc)
+        return bookings
+            
+    @expose('hollyrosa.templates.program_booking_layers_show_printable_table')
+    @validate(validators={"visiting_group_id":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def layers_printable(self, visiting_group_id):
+        visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        
+        
+            
+        #...TODO organize bookings per layer bucket
+        result = self.program_layer_get_days_helper(visiting_group_id)
+        
+        result['notes'] = []
+        result['tags'] = []
+        result['reFormatDate'] = reFormatDate
+        result['visiting_group'] = visiting_group
+        
+        slot_id_time_id_map = result['slot_id_time_map']
+        bookings = dict()
+        
+        layers = visiting_group['layers']
+        
+        layers.append(dict(title=visiting_group['name'],  colour='#ffe',  layer_id=visiting_group_id))
+        
+        for tmp_layer in layers:
+            tmp_visiting_group = common_couch.getVisitingGroup(holly_couch,  tmp_layer['layer_id'])
+            bookings_list = self.get_program_layer_bookings(tmp_visiting_group,  tmp_visiting_group['name'],  tmp_layer['colour'])
+        
+            for tmp_booking in bookings_list:
+                tmp_booking['layer_colour'] = tmp_layer['colour']
+                tmp_time_id = slot_id_time_id_map[tmp_booking['slot_id']]
+                tmp_id = tmp_booking['booking_day_id'] + ':' +tmp_time_id
+                if not bookings.has_key(tmp_id):
+                    bookings[tmp_id] = list()
+                bookings[tmp_id].append(tmp_booking)
+        
+        result['bookings'] = bookings
+        return result
 
     
     def getDoc(self,  id,  type,  subtype=None):
@@ -574,6 +622,10 @@ class VisitingGroup(BaseController):
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def program_layer_get_days(self, visiting_group_id ):
+        return program_layer_get_days_helper(visiting_group_id)
+        
+        
+    def program_layer_get_days_helper(self, visiting_group_id ):
         visiting_group = self.getDoc(visiting_group_id,  'visiting_group')
         
         date_range = dateRange(visiting_group['from_date'], visiting_group['to_date'])
@@ -624,9 +676,6 @@ class VisitingGroup(BaseController):
         
         #...I need to build this mapping from booking_day_id:slot_id:layer_id to datetime bucket
         #   so iterate through all schema rows and look at time, 
-        #
-        # One thing I need to consider serriousely is how th handle layers. Is it a property of bookings within a bucket (essentially the visiting group id of the booking itself),
-        #   if so, I dont need to complicate the layer thing too much,
         slot_id_time_map = {}
         for tmp_activity_id,  tmp_activity_row in schema.items():
             for tmp_slot in tmp_activity_row[1:]:
@@ -636,21 +685,15 @@ class VisitingGroup(BaseController):
         # TODO return activity title map
         activity_title_map = getActivityTitleMap(holly_couch)
         
-        
-        
         return dict(layer_time=layer_times,  layer_days=layer_days,  slot_id_time_map=slot_id_time_map,  visiting_group_id=visiting_group_id,  activity_title_map=activity_title_map,  program_layers=program_layers)
+        
         
     @expose("json")
     @validate(validators={"visiting_group_id":validators.UnicodeString(),  "layer_title":validators.UnicodeString(),  "layer_colour":validators.UnicodeString()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def program_layer_get_bookings(self, visiting_group_id,  layer_title='',  layer_colour='#fff' ):
         visiting_group = self.getDoc(visiting_group_id,  'visiting_group')
-        bookings = []
-        for tmp in getBookingsOfVisitingGroup(holly_couch, visiting_group['name'], '<- MATCHES NO GROUP ->'):
-            tmp_doc = tmp.doc
-            tmp_doc['layer_title']=layer_title
-            tmp_doc['layer_colour'] = layer_colour
-            bookings.append(tmp_doc)
+        bookings = self.get_program_layer_bookings(visiting_group,  layer_title,  layer_colour)
         
         bucket_texts = []
         for tmp in getAllProgramLayerBucketTexts(holly_couch,  visiting_group_id):

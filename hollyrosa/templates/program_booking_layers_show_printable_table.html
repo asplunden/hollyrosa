@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:hollyrosa="http://asplunden.org/guldkant/hollyrosa"  xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Program Bookings ${visiting_group.name}</title>
+  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true"></script>
+
+
+  <!-- here was menu script -->
+  
+</head>
+
+<body class="tundra">
+    <h2 id="visiting_group_menu" hollyrosa:vgid="${visiting_group.id}" class="context_menu_symbol">${visiting_group.name}</h2> 
+    <p class="context_menu_symbol">${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
+
+	
+	<div class="note context_menu_symbol" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form id="add_tag_form"><input id="tag_input" type="text" name="tags" value="" />
+<a id="add_tag_href2" href="javascript:;">Add Tags</a>
+</form></div>
+
+<table class="visiting_group_info_table">
+<tr><td class="legend">bok.nr:</td><td class="info">${visiting_group.boknr}</td></tr>
+<tr><td class="legend">subtype:</td><td class="info">${visiting_group.get('subtype','')}</td></tr>
+<!--
+<tr><td class="legend">vodb status:</td><td class="info">${vodb_state_map.get(visiting_group.get('vodbstatus','-'))}</td></tr>
+<tr><td class="legend">program status:</td><td class="info">${program_state_map.get(visiting_group.boknstatus,'')}</td></tr>
+-->
+<tr><td class="legend">camping location:</td><td class="info">${visiting_group.camping_location}</td></tr>
+</table>
+
+<p>${HTML(visiting_group.info)}</p></div>
+<h3>Notes and attachments</h3>
+<p><i>These are currently not shown, info overload otherwise</i></p>
+    <div py:for="n in notes" >
+            
+        <div class="${n.type}2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i><b>${n.timestamp}</b> ${n.type} by ${n.last_changed_by}</i><br/><br/>
+        <div py:if="'note' == n.type">${HTML(n.text)}</div>
+        <div py:if="('attachment' == n.type)">${n.text}<br/><br/>
+        	<div py:for="at in n.get('_attachments',[''])"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n.id,'doc_id':at})}"><b>${at}</b> ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>
+        	</div>
+        </div>
+                
+    </div>
+    
+    <p>${visiting_group.get('vodb_contact_name','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('vodb_contact_email','')}</a><br/>
+    </p>
+    <p><pre>${visiting_group.get('vodb_contact_address','')}</pre></p> 
+
+    <table class="program_layers_printable_table">
+        <tr> <!--- header -->
+            <th class="program_layers_printable_table_time_label">&nbsp;</th>
+            <th class="program_layers_printable_table" py:for="layer_day in layer_days">${layer_day['date']}</th>
+        </tr>
+        <tdata>
+            <tr py:for="tmp_layer_time in layer_time">
+                <td class="program_layers_printable_table_time_label">${tmp_layer_time['title']}</td>
+                <td py:for="layer_day in layer_days" class="program_layers_printable_table">
+                    <div py:for="booking in bookings.get(layer_day['booking_day_id'] +':'+ tmp_layer_time['symbol'] ,[])" class="program_layer_slot" hollyrosa:layer_booking_id="${booking['_id']}" style="background-color: ${booking['layer_colour']}">
+                        <span style="font-style:italic; padding-left:2em;">${booking['layer_title']}</span><br/>
+                        <span class="workflow_state_${booking['booking_state']}">${activity_title_map[booking['activity_id']]}</span><br/>
+                        <span style="padding-left:2em;">${booking['cache_content']}</span> 
+                    </div>
+                </td>
+            </tr>
+        </tdata>
+    </table>
+</body>
+</html>

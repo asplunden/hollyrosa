@@ -890,19 +890,20 @@ table.visiting_group_info_table tr td.info {
     border:1px solid #444;
     }
     
+    
+
+    
 div.program_layer_time_container {
     border-bottom: 1px solid #444;
 }
 
 tr.program_layer_time_container {
-    border-bottom: 1px solid #444;
-    padding: 1em;
-    margin:1em;
+    
 }
 
 tr.program_layer_time_container td {
     border-left: 1px solid #444;
-    border-collapse:collapse;
+    border-bottom: 1px solid #444;
 }
 
 
@@ -936,6 +937,13 @@ tr.program_layer_time_container td {
 	width: 6em;
 }
 
+.program_layer_bucket_time_label_empty {
+    display:inline-block;"
+	font-size: 80%;
+	font-weight: normal;
+	width: 6em;
+}
+
 .program_layer_slot {
     border-bottom:1px dashed #888; 
     padding-bottom:0.5em;
@@ -950,3 +958,37 @@ tr.program_layer_time_container td {
     white-space: pre;
     overflow:visible; // auto or hidden might be better
     }
+
+table.program_layers_printable_table {
+    border: 1px solid #444;
+    }
+    
+th.program_layers_printable_table {
+    border-left: 1px solid #444;
+    border-bottom: 1px solid #444;
+    background: #ddd;
+    font-weight: bold;
+    text-align: center;
+    padding-top:0.1em;
+    padding-bottom:0.1em;
+    border-bottom: 1px solid #000;
+    }
+    
+.program_layers_printable_table_time_label {
+    border-bottom: 1px solid #444;
+    background: #ddd;
+    font-weight: bold;
+    text-align: center;
+    padding-top:0.1em;
+    padding-bottom:0.1em;
+    border-bottom: 1px solid #000;
+}
+
+td.program_layers_printable_table {
+    border-left: 1px solid #444;
+    border-bottom: 1px solid #000;
+}
+
+#add_tag_form {
+    display:inline;
+}

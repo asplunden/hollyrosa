@@ -41,16 +41,19 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
     var activity_title_map;
     var layer_time_divs = [];
     var total_width = 0;
+    var calls_that_want_to_adjust_bucket_heights = 0;
   
     /**
      * Draw the grid that all bookings will fit into
      * Expand functionality to draw div or table (table seems necessary for printint)
+     *
+     * Called as callback from initial request for data to load onto page
      **/
-    function drawLayerGridAndSetData(data) {
+    function draw_layer_grid_and_set_data(data) {
 
         var layer_container = dom.byId('program_layers_container');
         var div_or_table = {'grid':'table','row':'tr','bucket':'td','bucket_head':'th'};
-        div_or_table = {'grid':'div','row':'div','bucket':'div','bucket_head':'div'};
+        //div_or_table = {'grid':'div','row':'div','bucket':'div','bucket_head':'div'};
     
         //...create container div for all layers
         var program_layers_div = domConstruct.create(div_or_table['grid'], {id:'program_layers_grid'}, program_layers_container);
@@ -66,7 +69,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
         var layer_days = data.layer_days;
     
         //...draw dates in layer time header
-        var empty_header__div = domConstruct.create(div_or_table['bucket_head'], {'class':'program_layer_bucket_time_label'}, layer_time_header_div); 
+        var empty_header__div = domConstruct.create(div_or_table['bucket_head'], {'class':'program_layer_bucket_time_label_empty'}, layer_time_header_div); 
         total_width = total_width + domGeom.position(empty_header__div, true).w;  
         array.forEach(layer_days, function(t) {
             var tmp_div = domConstruct.create(div_or_table['bucket_head'], {'class':'program_layer_bucket program_layer_bucket_date_header'}, layer_time_header_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
@@ -104,8 +107,10 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
   /**
    * Adjusting the layout of the grid according to the contents of the grid layer layout
    **/
-    function adjustBucketHeights() {
-        //return;
+    function adjust_bucket_heights() {
+        calls_that_want_to_adjust_bucket_heights = calls_that_want_to_adjust_bucket_heights -1;
+        if (0 == calls_that_want_to_adjust_bucket_heights) {
+        
         //...for each layer time 
         array.forEach(layer_time_divs, function(layer_time_div) {
             
@@ -117,29 +122,33 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
             //...look for max height
             array.forEach(bucket_divs, function(bucket_div) {
                 tmp_pos = domGeom.position(bucket_div, true);  
-                max_height = Math.max(tmp_pos.h+20, max_height);
+                max_height = Math.max(tmp_pos.h, max_height);
             });
             
             //...set max height
-            
             array.forEach(bucket_divs, function(bucket_div) {
-                style.set(bucket_div, {height: max_height + 'px', top:'0px'});
+                style.set(bucket_div, {height: max_height + 20 + 'px', top:'0px'});
             });
             
+            array.forEach(query('.program_layer_bucket_time_label'), function(bucket_div) {
+                style.set(bucket_div, {height: (max_height + 0) + 'px', top:'40px', background:'#0f0'});
+            });
             
         });
         tmp = dom.byId('program_layers_grid');
-        style.set(tmp, {'width': total_width+'px'});
+        ///// not for table! style.set(tmp, {'width': total_width+'px'});
+        calls_that_want_to_adjust_bucket_heights = 0;
     }
-    
+    }
     
     /**
     * This function is a callback to be called when a xhr request to get all bookings and layer texts for a visiting group returns
     **/
     function on_recieved_bookings(data) {
+        calls_that_want_to_adjust_bucket_heights = calls_that_want_to_adjust_bucket_heights + 1;
         draw_layer_bookings(data.bookings, g_bucket_divs, g_slot_id_time_map);
         draw_layer_texts(data.bucket_texts, g_bucket_divs);
-        adjustBucketHeights();
+        adjust_bucket_heights();
     }
     
     
@@ -197,7 +206,6 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
             tmp_span.innerHTML = layer_text['title']+"<br/>";
             var tmp_span_content = domConstruct.create('span', {style:'padding-left:2em;'}, tmp_div); 
             tmp_span_content.innerHTML = layer_text['text'];
-            
             });
         }
         
@@ -207,10 +215,11 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
     **/
     function on_recieved_layer_text(data) {
         //...copied! - maybe add destructor before creator!
+        calls_that_want_to_adjust_bucket_heights = calls_that_want_to_adjust_bucket_heights + 1;
         program_layer_text_dialog.hide();
         layer_texts = [data.layer_text];
         draw_layer_texts(layer_texts, g_bucket_divs);
-        adjustBucketHeights();
+        adjust_bucket_heights();
     }
   
   
@@ -221,7 +230,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
         xhr("${tg.url('/visiting_group/program_layer_get_days')}", {
         handleAs:"json",
         method:"GET",
-        query: {'visiting_group_id':visiting_group_id}}).then( drawLayerGridAndSetData );
+        query: {'visiting_group_id':visiting_group_id}}).then( draw_layer_grid_and_set_data );
     }
 
 
@@ -244,9 +253,13 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
     
     var program_layer_text_form = new dijitForm();
     
+    var title_label_div = domConstruct.create('div', program_layer_text_form.containerNode);
+    var title_label = domConstruct.create('div', title_label_div);
+    title_label.innerHTML = 'title';
+    
     var program_layer_text_form_title_input = new dijitTextBox({
         name: "title",
-        value: "" /* no or empty value! */,
+        value: "",
         placeHolder: "type in your name"
     }, 'title').placeAt(program_layer_text_form.containerNode);
     
@@ -297,7 +310,7 @@ require(["common_menu", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/Po
                 method:"GET",
                 query: {'layer_text_id':layer_text_id}}).then( function(data) {
                     domConstruct.destroy(node);
-                    adjustBucketHeights();
+                    adjust_bucket_heights();
                 });
         }
     }
