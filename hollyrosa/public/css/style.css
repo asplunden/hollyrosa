@@ -831,9 +831,16 @@ div.tag_list form input {
    border: 1px solid #cc8;
 }
 
+/*
 div.tag_list:hover form {
 visibility:visible;
 }
+*/
+
+#add_tag_form {
+    display:inline;
+}
+
 
 ul.tag_list {
   margin-left:0px;
@@ -989,6 +996,3 @@ td.program_layers_printable_table {
     border-bottom: 1px solid #000;
 }
 
-#add_tag_form {
-    display:inline;
-}

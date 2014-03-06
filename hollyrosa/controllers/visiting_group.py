@@ -622,7 +622,7 @@ class VisitingGroup(BaseController):
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def program_layer_get_days(self, visiting_group_id ):
-        return program_layer_get_days_helper(visiting_group_id)
+        return self.program_layer_get_days_helper(visiting_group_id)
         
         
     def program_layer_get_days_helper(self, visiting_group_id ):
