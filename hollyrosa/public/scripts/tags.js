@@ -36,11 +36,16 @@ function updateTags(data) {
 }
 
 
-function add_visiting_group_tags_XHR(ajax_url, visiting_group_id, tags) {   
-    xhr(ajax_url, {
-    query: {'id': visiting_group_id, 'tags': tags},
-    handleAs: "json",
-    method: "GET"}).then( updateTags );
+function add_visiting_group_tags_XHR(ajax_url, visiting_group_id, tags) {
+    tags = tags.trim();
+    if ('' != tags) {
+        xhr(ajax_url, {
+        query: {'id': visiting_group_id, 'tags': tags},
+        handleAs: "json",
+        method: "GET"}).then( updateTags );
+    } else {
+        domStyle.set(dom.byId('add_tag_form'), 'visibility','hidden');
+    }
 }
 
 
