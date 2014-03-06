@@ -587,7 +587,7 @@ class VisitingGroup(BaseController):
         slot_id_time_id_map = result['slot_id_time_map']
         bookings = dict()
         
-        layers = visiting_group['layers']
+        layers = visiting_group.get('layers',  list())
         
         layers.append(dict(title=visiting_group['name'],  colour='#ffe',  layer_id=visiting_group_id))
         

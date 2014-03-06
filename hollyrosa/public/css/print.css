@@ -630,6 +630,7 @@ th.program_layers_printable_table {
 td.program_layers_printable_table {
     border-left: 1px solid #444;
     border-bottom: 1px solid #000;
+    vertical-align:top;
 }
 
 #add_tag_form { 
