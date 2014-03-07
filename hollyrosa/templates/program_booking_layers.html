@@ -96,6 +96,9 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
         g_slot_id_time_map = data.slot_id_time_map;
         activity_title_map= data.activity_title_map
         //...now do get the bookings
+        
+        calls_that_want_to_adjust_bucket_heights = 1 + data.program_layers.length; //calls_that_want_to_adjust_bucket_heights + 1;
+        
         get_program_layer_bookings_from_XHR(data.visiting_group_id, '${visiting_group.name}', '#ffffef');
        
         array.forEach(data.program_layers, function(vgid) {
@@ -104,16 +107,21 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
         });
     }
   
+  
   /**
-   * Adjusting the layout of the grid according to the contents of the grid layer layout
+   * Adjusting the layout of the grid according to the contents of the grid layer layout.
+   *
+   * Bucket widths must be adjusted first since it impacts the heights.
    **/
     function adjust_bucket_heights() {
         calls_that_want_to_adjust_bucket_heights = calls_that_want_to_adjust_bucket_heights -1;
         if (0 == calls_that_want_to_adjust_bucket_heights) {
         
+        tmp = dom.byId('program_layers_grid');
+        style.set(tmp, {'width': total_width+'px'});
+        
         //...for each layer time 
         array.forEach(layer_time_divs, function(layer_time_div) {
-            
             //...for each bucket in layer time, readout height, try to figure out max height
             var max_height = 0;
             var xpos = domGeom.position(layer_time_div, true);
@@ -121,13 +129,20 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
              var bucket_divs = query('.program_layer_bucket', layer_time_div);
             //...look for max height
             array.forEach(bucket_divs, function(bucket_div) {
+            
                 tmp_pos = domGeom.position(bucket_div, true);  
                 max_height = Math.max(tmp_pos.h, max_height);
             });
             
-            //...set max height
+            //...set max height on both buckets AND the  layer_times
+            //style.set(layer_time_div, 'height', max_height + 0 + 'px');
+            //style.set(layer_time_div, 'background', '#ffc');
+            
             array.forEach(bucket_divs, function(bucket_div) {
-                style.set(bucket_div, {height: max_height + 20 + 'px', top:'0px'});
+                //style.set(bucket_div, {height: max_height + 0 + 'px', top:'0px'});
+                  
+                style.set(bucket_div, 'height', max_height + 0 + 'px');
+                style.set(bucket_div, 'top', '0px');
             });
             
             /*
@@ -137,8 +152,10 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
             */
             
         });
-        tmp = dom.byId('program_layers_grid');
-        style.set(tmp, {'width': total_width+'px'});
+    
+        
+        
+        
         calls_that_want_to_adjust_bucket_heights = 0;
     }
     }
@@ -147,7 +164,6 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
     * This function is a callback to be called when a xhr request to get all bookings and layer texts for a visiting group returns
     **/
     function on_recieved_bookings(data) {
-        calls_that_want_to_adjust_bucket_heights = calls_that_want_to_adjust_bucket_heights + 1;
         draw_layer_bookings(data.bookings, g_bucket_divs, g_slot_id_time_map);
         draw_layer_texts(data.bucket_texts, g_bucket_divs);
         adjust_bucket_heights();
