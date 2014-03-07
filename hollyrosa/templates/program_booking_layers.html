@@ -382,9 +382,8 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
 
     // refactor later
     // not in VODB view common_menu.add_visiting_group_menu_item(menu, menu, "New booking request...", '${tg.url('/booking/edit_booking')}');
-   //common_menu.add_menu_separator(menu);   
    common_menu.add_call_function_menu_item(menu, menu, "Add layer text...",  show_new_text_dialog);
-   common_menu.add_call_function_menu_item(menu, menu, "Add tags",  tags.showTagsForm);
+   //common_menu.add_call_function_menu_item(menu, menu, "Add tags",  tags.showTagsForm);
    common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add note...", '${tg.url('/note/add_note')}');
    common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add attachment...", '${tg.url('/note/add_note')}');
     	
@@ -460,9 +459,6 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
     <h3>Adding menu items.</h3>
     <p>The real trick is going to figure out how to handle live updates to underlying data</p>
     <p>Notes and attachments can be represented as a bulleted list with links</p>
-    
-    <h3>Apperance</h3>
-    <p>Remove comments like doubble slash</p>
     
     <h3>Draw layers</h3>
     <p>list of layers = visiting group ids</p>

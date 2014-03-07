@@ -385,6 +385,13 @@ class VisitingGroup(BaseController):
         return booking_day_slot_map[tmp_schema_id]
         
         
+    def hide_cache_content_in_booking(self,  booking):
+        tmp = booking['cache_content'] 
+        i = tmp.find('//')
+        if i > 0:
+            booking['cache_content'] = booking['cache_content'][:i]
+            
+            
     @expose('hollyrosa.templates.view_bookings_of_name')
     @validate(validators={"name":validators.UnicodeString(), "render_time":validators.UnicodeString(), "hide_comment":validators.Int(), "show_group":validators.Int()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
@@ -422,10 +429,11 @@ class VisitingGroup(BaseController):
         
         for b in bookings: # TODO: There will be quite a few multiples if we search on both id and name!
             if hide_comment==1:
-                tmp = b['cache_content'] 
-                i = tmp.find('//')
-                if i > 0:
-                    b['cache_content'] = b['cache_content'][:i]
+                self.hide_cache_content_in_booking(b)
+                #tmp = b['cache_content'] 
+                #i = tmp.find('//')
+                #if i > 0:
+                #    b['cache_content'] = b['cache_content'][:i]
                          
             key = str(b['activity_id'])+':'+b['content']
             if None == b.get('booking_day_id',  None):
@@ -569,9 +577,9 @@ class VisitingGroup(BaseController):
         return bookings
             
     @expose('hollyrosa.templates.program_booking_layers_show_printable_table')
-    @validate(validators={"visiting_group_id":validators.UnicodeString()})
+    @validate(validators={"visiting_group_id":validators.UnicodeString(),  "hide_comment":validators.Int()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def layers_printable(self, visiting_group_id):
+    def layers_printable(self, visiting_group_id,  hide_comment=1):
         visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         
         
@@ -598,6 +606,9 @@ class VisitingGroup(BaseController):
             for tmp_booking in bookings_list:
                 tmp_booking['layer_colour'] = tmp_layer['colour']
                 tmp_time_id = slot_id_time_id_map[tmp_booking['slot_id']]
+                #if hide_comment==1:
+                self.hide_cache_content_in_booking(tmp_booking)
+                    
                 tmp_id = tmp_booking['booking_day_id'] + ':' +tmp_time_id
                 if not bookings.has_key(tmp_id):
                     bookings[tmp_id] = list()
@@ -695,14 +706,22 @@ class VisitingGroup(BaseController):
         visiting_group = self.getDoc(visiting_group_id,  'visiting_group')
         bookings = self.get_program_layer_bookings(visiting_group,  layer_title,  layer_colour)
         
+        processed_bookings = list()
+        for b in bookings:
+            self.hide_cache_content_in_booking(b)
+            processed_bookings.append(b)
+        
         bucket_texts = []
         for tmp in getAllProgramLayerBucketTexts(holly_couch,  visiting_group_id):
             tmp_doc = tmp.doc
             tmp_doc['layer_title']=visiting_group['name']
             tmp_doc['layer_colour'] = '#fff'# layer_colour
+            
+            # TODO: check if we want to hide comments. Really. Probably more dependent on who is logged in. Like program staff or visiting group
+            #self.hide_cache_content_in_booking(tmp_doc)
             bucket_texts.append(tmp_doc)
         
-        return dict(bookings=bookings,  bucket_texts=bucket_texts)
+        return dict(bookings=processed_bookings,  bucket_texts=bucket_texts)
         
         
     
