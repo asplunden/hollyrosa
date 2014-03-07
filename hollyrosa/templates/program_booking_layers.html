@@ -53,7 +53,7 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
 
         var layer_container = dom.byId('program_layers_container');
         var div_or_table = {'grid':'table','row':'tr','bucket':'td','bucket_head':'th'};
-        //div_or_table = {'grid':'div','row':'div','bucket':'div','bucket_head':'div'};
+        div_or_table = {'grid':'div','row':'div','bucket':'div','bucket_head':'div'};
     
         //...create container div for all layers
         var program_layers_div = domConstruct.create(div_or_table['grid'], {id:'program_layers_grid'}, program_layers_container);
@@ -130,13 +130,15 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
                 style.set(bucket_div, {height: max_height + 20 + 'px', top:'0px'});
             });
             
+            /*
             array.forEach(query('.program_layer_bucket_time_label'), function(bucket_div) {
                 style.set(bucket_div, {height: (max_height + 0) + 'px', top:'40px', background:'#0f0'});
             });
+            */
             
         });
         tmp = dom.byId('program_layers_grid');
-        ///// not for table! style.set(tmp, {'width': total_width+'px'});
+        style.set(tmp, {'width': total_width+'px'});
         calls_that_want_to_adjust_bucket_heights = 0;
     }
     }
@@ -243,7 +245,6 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
         method:"GET",
         query: {'visiting_group_id':visiting_group_id, 'layer_title':title, 'layer_colour':colour}}).then( on_recieved_bookings );
     }
-
     
     
     var program_layer_text_dialog = new Dialog({
@@ -329,6 +330,7 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
             method:"GET",
             query: {'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':buckettime}}).then( do_edit_bucket_text );
     }
+    
     
     function show_edit_text_dialog(node) {
         var layer_text_id = node.attributes["hollyrosa:layer_text_id"].value;
@@ -438,9 +440,6 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
     <p>${visiting_group.get('vodb_contact_name','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('vodb_contact_email','')}</a><br/>
     </p>
     <p><pre>${visiting_group.get('vodb_contact_address','')}</pre></p> 
-
-    
-    
     
     <div>
     <h3>Adding menu items.</h3>
@@ -450,12 +449,15 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
     </p>
     <p>Notes and attachments can be represented as a bulleted list with links</p>
     <p>Text can be represented as edit text  - always. There will only be one text per layer bucket. If it doesent exist it will be created. The bucket text is identified by vgroup-bookingday-symbol triplet</p>
+    
     <h3>Apperance</h3>
     <p>Remove comments like doubble slash</p>
+    
     <h3>Draw layers</h3>
     <p>list of layers = visiting group ids</p>
     <p>I still havent decided on multiple number of bucket texts (maybe they should be called layer texts) and they need to subsitue NL for br by the way. It might be good if one have several avdelningar. Next step is probably to set edit menu on the bucket text instead of on the bucket itself</p>
-    <p>If we have several bucket texts to edit, we will need delete (through state change as usual) and some menu alternatives will be repeated on empty and filled bucket</p>
+    <p>We need a spreadsheet for selecting layers and editing layer colours</p>
+    <p>Equal table width will be requested - count days and compute percent width</p>
 	</div>
     <div id="program_layers_container">
     Program layers

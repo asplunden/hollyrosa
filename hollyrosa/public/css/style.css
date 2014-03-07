@@ -962,8 +962,8 @@ tr.program_layer_time_container td {
     border-bottom:1px dashed #888; 
     padding-bottom:0.5em;
     display:block;
-    white-space: pre;
-    overflow:visible; // auto or hidden might be better
+    /* white-space: pre; */
+    overflow:hidden; // visible, auto or hidden might be better
     }
 
 table.program_layers_printable_table {
