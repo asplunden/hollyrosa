@@ -129,18 +129,17 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
              var bucket_divs = query('.program_layer_bucket', layer_time_div);
             //...look for max height
             array.forEach(bucket_divs, function(bucket_div) {
-            
+                //...can we look into the bucket_divs and find each div of type
+                var data_divs_in_bucket = query('.program_layer_data', bucket_div);
+                var height_sum = 0;
+                array.forEach(data_divs_in_bucket, function(data_div) {
+                    height_sum = height_sum + domGeom.position(data_div).h;
+                });
                 tmp_pos = domGeom.position(bucket_div, true);  
-                max_height = Math.max(tmp_pos.h, max_height);
+                max_height = Math.max(/*tmp_pos.h*/ height_sum, max_height);
             });
             
-            //...set max height on both buckets AND the  layer_times
-            //style.set(layer_time_div, 'height', max_height + 0 + 'px');
-            //style.set(layer_time_div, 'background', '#ffc');
-            
             array.forEach(bucket_divs, function(bucket_div) {
-                //style.set(bucket_div, {height: max_height + 0 + 'px', top:'0px'});
-                  
                 style.set(bucket_div, 'height', max_height + 0 + 'px');
                 style.set(bucket_div, 'top', '0px');
             });
@@ -184,7 +183,7 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
             var datetime_bucket_value = get_program_layer_bucket_id(booking, slot_id_time_map);
             var bucket_div = bucket_divs[datetime_bucket_value];
             
-            var tmp_div = domConstruct.create('div', {style:"background-color: "+booking['layer_colour'], class:"program_layer_slot", 'hollyrosa:layer_booking_id':booking['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            var tmp_div = domConstruct.create('div', {style:"background-color: "+booking['layer_colour'], class:"program_layer_slot program_layer_data", 'hollyrosa:layer_booking_id':booking['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
             var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic; padding-left:2em;'}, tmp_div);
             tmp_layer_title_elem.innerHTML = '(' + booking['layer_title'] + ')<br/>';
             var tmp_span = domConstruct.create('span', {class:"workflow_state_"+booking['booking_state']}, tmp_div); 
@@ -216,7 +215,7 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
             
             var bucket_div = bucket_divs[datetime_bucket_value];
             
-            var tmp_div = domConstruct.create('div', {style:"background-color: "+layer_text['layer_colour'], class:"program_layer_text", 'hollyrosa:layer_text_id':layer_text['_id'], 'hollyrosa:vgid':layer_text['visiting_group_id'], 'hollyrosa:bucket_time':layer_text['bucket_time'], 'hollyrosa:bdayid':layer_text['booking_day_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            var tmp_div = domConstruct.create('div', {style:"background-color: "+layer_text['layer_colour'], class:"program_layer_text program_layer_data", 'hollyrosa:layer_text_id':layer_text['_id'], 'hollyrosa:vgid':layer_text['visiting_group_id'], 'hollyrosa:bucket_time':layer_text['bucket_time'], 'hollyrosa:bdayid':layer_text['booking_day_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
             var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic; padding-left:2em;'}, tmp_div);
             tmp_layer_title_elem.innerHTML = '(' + layer_text['layer_title'] +')<br/>';
             var tmp_span = domConstruct.create('span', {style:'font-weight:bold'}, tmp_div); 
@@ -438,13 +437,13 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
 <tr><td class="legend">camping location:</td><td class="info">${visiting_group.camping_location}</td></tr>
 </table>
 
-<p>${HTML(visiting_group.info)}</p></div>
+<p><!--${HTML(visiting_group.info)}--></p></div>
 <h3>Notes and attachments</h3>
 <p><i>These are currently not shown, info overload otherwise</i></p>
     <div py:for="n in notes" >
             
         <div class="${n.type}2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i><b>${n.timestamp}</b> ${n.type} by ${n.last_changed_by}</i><br/><br/>
-        <div py:if="'note' == n.type">${HTML(n.text)}</div>
+        <div py:if="'note' == n.type"><!--${HTML(n.text)}--></div>
         <div py:if="('attachment' == n.type)">${n.text}<br/><br/>
         	<div py:for="at in n.get('_attachments',[''])"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n.id,'doc_id':at})}"><b>${at}</b> ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>
         	 
@@ -460,18 +459,14 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
     <div>
     <h3>Adding menu items.</h3>
     <p>The real trick is going to figure out how to handle live updates to underlying data</p>
-    <p>My main thought right now is how much is needed on the layer grid. Maybe just a simple_note (text only) that is like a note but simpler (textarea) and if so maybe we can ajax edit it.
-    The two main advatages is that it is easier to implement and easier to put in the grid. The value of a full note is also questionable. Maybe therr should be some notes in a list that can be edited?
-    </p>
     <p>Notes and attachments can be represented as a bulleted list with links</p>
-    <p>Text can be represented as edit text  - always. There will only be one text per layer bucket. If it doesent exist it will be created. The bucket text is identified by vgroup-bookingday-symbol triplet</p>
     
     <h3>Apperance</h3>
     <p>Remove comments like doubble slash</p>
     
     <h3>Draw layers</h3>
     <p>list of layers = visiting group ids</p>
-    <p>I still havent decided on multiple number of bucket texts (maybe they should be called layer texts) and they need to subsitue NL for br by the way. It might be good if one have several avdelningar. Next step is probably to set edit menu on the bucket text instead of on the bucket itself</p>
+
     <p>We need a spreadsheet for selecting layers and editing layer colours</p>
     <p>Equal table width will be requested - count days and compute percent width</p>
 	</div>
