@@ -26,7 +26,7 @@ from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
 from hollyrosa.model.booking_couch import getAllActivities,  getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus, getNotesForTarget, getBookingInfoNotesOfUsedActivities
 from hollyrosa.model.booking_couch import getBookingDays,  getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap, getVisitingGroupsByVodbState,  dateRange,  getActivityTitleMap,  getAllProgramLayerBucketTexts,  getProgramLayerBucketTextByDayAndTime
-import datetime
+import datetime,  json
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
@@ -559,11 +559,67 @@ class VisitingGroup(BaseController):
         raise redirect(request.referrer)
 
 
+    @expose('hollyrosa.templates.visiting_group_edit_layers')
+    @validate(validators={"visiting_group_id":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def edit_layers(self, visiting_group_id):
+        vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        vgroup_layers = vgroup.get('layers',  list())
+        
+        #...make map of layers from list of layers, keyed on id
+        vgroup_layers_map = dict()
+        for tmp_vgroup_layer in vgroup_layers:
+            vgroup_layers_map[tmp_vgroup_layer['layer_id']] = tmp_vgroup_layer
+        
+        #...get all visiting group that possibly could be mapped
+        vgroups_in_daterange = getVisitingGroupsInDatePeriod(holly_couch,  vgroup['from_date'],  vgroup['to_date'])
+        
+        #...build data struct for dojo spreadsheet / grid
+        grid_items= list()
+        for tmp_vgroup_row in vgroups_in_daterange:
+            tmp_vgroup = tmp_vgroup_row.doc
+            if tmp_vgroup['_id'] != vgroup['_id']:
+                if tmp_vgroup['_id'] in vgroup_layers_map.keys():
+                    grid_items.append(dict(layer_id=tmp_vgroup['_id'],  name=tmp_vgroup['name'],  connect=True, colour=vgroup_layers_map[tmp_vgroup['_id']]['colour'] )) # change colours
+                else:
+                    grid_items.append(dict(layer_id=tmp_vgroup['_id'],  name=tmp_vgroup['name'],  connect=False, colour="#fff" ))
+        
+        grid_data = dict(identifier='layer_id', items=grid_items)
+        layer_data = json.dumps(grid_data)
+        return dict(visiting_group=vgroup,  layer_data=layer_data,  reFormatDate=reFormatDate)
+
+
+    @expose()
+    @validate(validators={"visiting_group_id":validators.UnicodeString()})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    def update_visiting_group_program_layers(self, visiting_group_id,  save_button=None,  layer_data=''):
+        vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        vgroup_layers = vgroup.get('layers',  list())
+        
+        layer_json = json.loads(layer_data)
+        layer_to_save = list()
+        print '*************',  layer_json
+        
+        for tmp_layer_data in layer_json['items']:
+            if tmp_layer_data['connect']:
+                layer_to_save.append(dict(layer_id=tmp_layer_data['layer_id'],  colour=tmp_layer_data['colour'],  name=tmp_layer_data['name'])) 
+        
+        vgroup['layers'] = layer_to_save
+        
+        holly_couch[vgroup['_id']] = vgroup
+        
+        raise redirect(request.referer)
+
+        return dict()
+
+
     @expose('hollyrosa.templates.program_booking_layers')
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def layers(self, visiting_group_id):
         vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        
+        
         return dict(visiting_group=vgroup,  notes=[],  tags=[],  reFormatDate=reFormatDate)
         
         
@@ -582,8 +638,10 @@ class VisitingGroup(BaseController):
     def layers_printable(self, visiting_group_id,  hide_comment=1):
         visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         
+        date_range = dateRange(visiting_group['from_date'], visiting_group['to_date'])
+        number_of_days = len(date_range)
+        width_ratio = (100.0 / (number_of_days+1))
         
-            
         #...TODO organize bookings per layer bucket
         result = self.program_layer_get_days_helper(visiting_group_id)
         
@@ -615,6 +673,7 @@ class VisitingGroup(BaseController):
                 bookings[tmp_id].append(tmp_booking)
         
         result['bookings'] = bookings
+        result['width_ratio'] = width_ratio
         return result
 
     
