@@ -33,8 +33,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
    
   <script>
 
-require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/PopupMenuItem", 'dijit/Dialog', 'dijit/form/Form', 'dijit/form/TextBox', "dijit/form/Textarea", "dijit/form/Button", 'dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/request/xhr', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-geometry', 'dojo/dom-style', 'dojo/query', 'dojo/on','dojo/ready', 'dojo/domReady!'],
-  function(common_menu, tags, registry, Menu, MenuItem, PopupMenuItem, Dialog, dijitForm, dijitTextBox, dijitTextarea, dijitButton, array, lang, locale, xhr, dom, domConstruct, domGeom, style, query, on, ready, domReady ){
+require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/PopupMenuItem", 'dijit/Dialog', 'dijit/form/Form', 'dijit/form/TextBox', "dijit/form/Textarea", "dijit/form/Button", 'dojox/layout/TableContainer', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/request/xhr', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-geometry', 'dojo/dom-style', 'dojo/query', 'dojo/on','dojo/ready', 'dojo/domReady!'],
+  function(common_menu, tags, registry, Menu, MenuItem, PopupMenuItem, Dialog, dijitForm, dijitTextBox, dijitTextarea, dijitButton, tableContainer, array, lang, locale, xhr, dom, domConstruct, domGeom, style, query, on, ready, domReady ){
 
     var g_slot_id_time_map;
     var g_bucket_divs = [];
@@ -264,27 +264,31 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
     
     var program_layer_text_dialog = new Dialog({
         title: "Edit Program Layer Text",
-        style: "width: 40em, height: 10em;"
+        style: ""
     });
     
     var program_layer_text_form = new dijitForm();
     
-    var title_label_div = domConstruct.create('div', program_layer_text_form.containerNode);
-    var title_label = domConstruct.create('div', title_label_div);
-    title_label.innerHTML = 'title';
+    var tabContainer = new tableContainer({cols:1, id:'tabcont'}, program_layer_text_form.containerNode);
     
     var program_layer_text_form_title_input = new dijitTextBox({
         name: "title",
+        label: "Title",
         value: "",
         placeHolder: "type in your name"
-    }, 'title').placeAt(program_layer_text_form.containerNode);
+    }, 'title'); //.placeAt(tabContainer.containerNode);
+    tabContainer.addChild(program_layer_text_form_title_input);
+    
     
     var program_layer_text_form_content_input = new dijitTextarea({
         name: "text",
+        id: "my_textarea",
+        label: "Text",
         value: "---",
-        style: "width:30em; height:10em;"
-    }, "text").placeAt(program_layer_text_form.containerNode);
-
+        style: "width:30em;min-height:200px;_height:200px;",
+    }, "text"); //.placeAt(tabContainer.containerNode);
+    tabContainer.addChild(program_layer_text_form_content_input);
+    
     var program_layer_text_form_OK = new dijitButton({
         label: "Save",
         onClick: function(){
@@ -295,7 +299,8 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
             method:"POST",
             query: {'layer_text_id':program_layer_text_dialog.hollyrosa_attrs['layer_text_id'], 'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':program_layer_text_dialog.hollyrosa_attrs['bucket_time'], title:form_values.title, text:form_values.text}}).then( on_recieved_layer_text );
         }
-    }, "progButtonNode").placeAt(program_layer_text_form.containerNode); 
+    }, "progButtonNode"); //.placeAt(tabContainer.containerNode); 
+    tabContainer.addChild(program_layer_text_form_OK);
     
     program_layer_text_dialog.set('content', program_layer_text_form);
     
