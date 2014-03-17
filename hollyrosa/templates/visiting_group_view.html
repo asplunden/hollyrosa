@@ -72,7 +72,10 @@ function startup() {
    common_menu.add_menu_separator(menu);
    common_menu.add_visiting_group_menu_item(menu, menu, "Ext. Booking Request", '${tg.url('/visiting_group_program_request/edit_request')}');
    common_menu.add_list_bookings_redirect_menu_item(menu, menu, "List bookings of group...", '${visiting_group['name']}', '${tg.url('/visiting_group/view_bookings_of_name')}');
-      
+    common_menu.add_visiting_group_menu_item(menu, menu, "Program layers...", '${tg.url('/visiting_group/layers')}');
+   common_menu.add_visiting_group_menu_item(menu, menu, "Calendar layers...", '${tg.url('/visiting_group/layers_printable')}');
+   common_menu.add_visiting_group_menu_item(menu, menu, "Edit layers...", '${tg.url('/visiting_group/edit_layers')}');
+   
    //...attach the add tag handler
 	var the_add_tag_href_elem = dom.byId('add_tag_href2');
 	on(the_add_tag_href_elem, 'click', addTagHelper);

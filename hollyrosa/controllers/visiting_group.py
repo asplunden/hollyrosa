@@ -598,19 +598,14 @@ class VisitingGroup(BaseController):
         
         layer_json = json.loads(layer_data)
         layer_to_save = list()
-        print '*************',  layer_json
         
         for tmp_layer_data in layer_json['items']:
             if tmp_layer_data['connect']:
                 layer_to_save.append(dict(layer_id=tmp_layer_data['layer_id'],  colour=tmp_layer_data['colour'],  name=tmp_layer_data['name'])) 
         
         vgroup['layers'] = layer_to_save
-        
         holly_couch[vgroup['_id']] = vgroup
-        
         raise redirect(request.referer)
-
-        return dict()
 
 
     @expose('hollyrosa.templates.program_booking_layers')
@@ -631,6 +626,7 @@ class VisitingGroup(BaseController):
             tmp_doc['layer_colour'] = layer_colour
             bookings.append(tmp_doc)
         return bookings
+            
             
     @expose('hollyrosa.templates.program_booking_layers_show_printable_table')
     @validate(validators={"visiting_group_id":validators.UnicodeString(),  "hide_comment":validators.Int()})

@@ -103,7 +103,7 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
        
         array.forEach(data.program_layers, function(vgid) {
             var layer_id = vgid['layer_id'];
-            get_program_layer_bookings_from_XHR(layer_id, vgid['title'], vgid['colour']);
+            get_program_layer_bookings_from_XHR(layer_id, vgid['name'], vgid['colour']);
         });
     }
   
