@@ -383,3 +383,10 @@ def getBookingEatOverview(holly_couch, from_date, to_date, group_level=9999, red
 
 def getRoomBookingsOfVODBGroup(holly_couch,  visiting_group_id):
     return [b.doc for b in holly_couch.view('visiting_groups/live_bookings_of_visiting_group',  include_docs=True,  startkey=[visiting_group_id, ''],  endkey=[visiting_group_id, 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'])]
+
+
+def getAllProgramLayerBucketTexts(holly_couch,  visiting_group_id):
+    return holly_couch.view('program_layer/all_bucket_texts', include_docs=True,  keys=[visiting_group_id])
+    
+def getProgramLayerBucketTextByDayAndTime(holly_couch,  visiting_group_id,  booking_day_id,  bucket_time):
+    return holly_couch.view('program_layer/bucket_text_by_day_and_time', include_docs=True,  keys=[(visiting_group_id,  booking_day_id,  bucket_time)])

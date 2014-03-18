@@ -29,8 +29,6 @@ from genshi import HTML, XML
         <li py:if="request.identity" ><a href="${tg.url('/visiting_group/view_all')}">Visiting groups</a></li>
         <li py:if="request.identity" ><a href="${tg.url('/vodb_group/view_all')}">VODB groups</a></li>
         <li py:if="request.identity"><a href="${tg.url('/tools/show')}" id="toolslink">Tools</a></li>
-	<!-- <li py:if="request.identity"><a href="${tg.url('/visiting_group/edit_visiting_group')}">New visiting group</a></li>
-        <li py:if="request.identity"><a href="${tg.url('/booking/edit_booking')}">New booking</a></li>-->
 
 		<li py:if="request.identity"><a href="${tg.url('/me/settings')}">Me</a></li>
 

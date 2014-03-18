@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Martin Eliasson
+ * Copyright 2012, 2013, 2014 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *
@@ -18,7 +18,7 @@
  **/
 
  
-define(["dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], function(array, registry, Menu, MenuItem, query, dom, domConstruct, xhr, ready){
+define(["dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/dom", "dojo/dom-style", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], function(array, registry, Menu, MenuItem, query, dom, domStyle, domConstruct, xhr, ready){
 
 function updateTags(data) {
     var all_tags = query('.tag');
@@ -32,14 +32,20 @@ function updateTags(data) {
       domConstruct.create("li", {innerHTML:tags[t]+' <a href="javascript:;" class="tag">(X)</a>'}, ul_tag_list);
     }
     dom.byId('tag_input').value = '';
+    domStyle.set(dom.byId('add_tag_form'), 'visibility','hidden');
 }
 
 
-function add_visiting_group_tags_XHR(ajax_url, visiting_group_id, tags) {   
-    xhr(ajax_url, {
-    query: {'id': visiting_group_id, 'tags': tags},
-    handleAs: "json",
-    method: "GET"}).then( updateTags );
+function add_visiting_group_tags_XHR(ajax_url, visiting_group_id, tags) {
+    tags = tags.trim();
+    if ('' != tags) {
+        xhr(ajax_url, {
+        query: {'id': visiting_group_id, 'tags': tags},
+        handleAs: "json",
+        method: "GET"}).then( updateTags );
+    } else {
+        domStyle.set(dom.byId('add_tag_form'), 'visibility','hidden');
+    }
 }
 
 
@@ -66,6 +72,11 @@ addTags:function addTags(ajax_url, visiting_group_id, element_id) {
     var input = dom.byId(element_id);
     var text = input.value;
     add_visiting_group_tags_XHR(ajax_url, visiting_group_id, text);
+},
+
+showTagsForm:function showTagsForm() {
+    var tags_form = dom.byId('add_tag_form');
+    domStyle.set(tags_form, 'visibility','visible');
 }
 
 }});
