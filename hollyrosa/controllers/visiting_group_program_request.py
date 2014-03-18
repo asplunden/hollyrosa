@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -191,7 +191,10 @@ class VisitingGroupProgramRequest(BaseController):
         visiting_group_o.program_request_info = visiting_group_o.get('program_request_info','message to program!')
         visiting_group_o.program_request_have_skippers = visiting_group_o.get('program_request_have_skippers',0)
         visiting_group_o.program_request_miniscout = visiting_group_o.get('program_request_miniscout',0)
-        
+        visiting_group_o.contact_person = visiting_group_o.get('contact_person','')
+        visiting_group_o.contact_person_email = visiting_group_o.get('contact_person_email','')
+        visiting_group_o.contact_person_phone = visiting_group_o.get('contact_person_phone','')
+
         #...construct a program request template. It's going to be a json document. Hard coded.
         #...supply booking request if it exists
         
@@ -423,7 +426,7 @@ class VisitingGroupProgramRequest(BaseController):
                                 
                                 new_booking['booking_state'] = activity_o['default_booking_state']                                
                                 
-                                slot_map  = getSchemaSlotActivityMap(holly_couch, day_schema_id)
+                                slot_map  = getSchemaSlotActivityMap(holly_couch, booking_day_o, subtype='program')
                                 slot = slot_map[match_slot_id]
                                 new_uid = genUID(type='booking')
                                 
@@ -436,5 +439,5 @@ class VisitingGroupProgramRequest(BaseController):
                                 break
                                 
                 visiting_group_o['boknstatus'] = 5 # TODO: use constant
-                
+                holly_couch[visiting_group_o['_id']] = visiting_group_o
         raise redirect(request.referrer)
