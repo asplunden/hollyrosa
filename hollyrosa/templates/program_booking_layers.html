@@ -367,6 +367,13 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
             query: {'layer_text_id':layer_text_id}}).then( do_edit_bucket_text );
     }
     
+    /**************** show text dialog ********************/
+    
+    var program_layer_view_text_dialog = new Dialog({
+        title: "View Program Layer Text",
+        style: ""
+    });
+    
     //...build menues
     var menu = new Menu({
        targetNodeIds: ["program_layers_container"],
@@ -464,12 +471,8 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
     <h3>Adding menu items.</h3>
     <p>The real trick is going to figure out how to handle live updates to underlying data</p>
     <p>Notes and attachments can be represented as a bulleted list with links</p>
-    
-    <h3>Draw layers</h3>
-    <p>list of layers = visiting group ids</p>
-
-    <p>We need a spreadsheet for selecting layers and editing layer colours</p>
-    <p>Equal table width will be requested - count days and compute percent width</p>
+    <p>view layer text - Hoover?</p>
+    <p>Move it all to separate module (code) calle program_booking_layer</p>
 	</div>
     <div id="program_layers_container">
     Program layers

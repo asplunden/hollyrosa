@@ -472,7 +472,7 @@ class VisitingGroup(BaseController):
             bl.sort(self.fn_cmp_booking_timestamps)
         
         if True: #show_group==1:    
-            booking_info_notes = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())]            
+            booking_info_notes = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())] 
         else:
             booking_info_notes = []
         return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time, visiting_group=first_visiting_group, bokn_status_map=bokn_status_map, notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)], show_group=show_group)
@@ -653,6 +653,12 @@ class VisitingGroup(BaseController):
         
         layers.append(dict(title=visiting_group['name'],  colour='#ffe',  layer_id=visiting_group_id))
         
+        #...code repeat for making used_activities
+        activities = dict()
+        used_activities_keys = dict()
+        for x in getAllActivities(holly_couch):
+            activities[x.key[1]] = x.doc
+        
         for tmp_layer in layers:
             tmp_visiting_group = common_couch.getVisitingGroup(holly_couch,  tmp_layer['layer_id'])
             bookings_list = self.get_program_layer_bookings(tmp_visiting_group,  tmp_visiting_group['name'],  tmp_layer['colour'])
@@ -667,9 +673,16 @@ class VisitingGroup(BaseController):
                 if not bookings.has_key(tmp_id):
                     bookings[tmp_id] = list()
                 bookings[tmp_id].append(tmp_booking)
+                
+                #...fix used activities
+                used_activities_keys[tmp_booking['activity_id']] = 1
+                used_activities_keys[activities[tmp_booking['activity_id']]['activity_group_id']] = 1
         
         result['bookings'] = bookings
         result['width_ratio'] = width_ratio
+        
+        
+        result['booking_info_notes'] = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())]            
         return result
 
     
