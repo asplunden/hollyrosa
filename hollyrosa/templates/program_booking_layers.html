@@ -33,8 +33,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
    
   <script>
 
-require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/PopupMenuItem", 'dijit/Dialog', 'dijit/form/Form', 'dijit/form/TextBox', "dijit/form/Textarea", "dijit/form/Button", 'dojox/layout/TableContainer', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/request/xhr', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-geometry', 'dojo/dom-style', 'dojo/query', 'dojo/on','dojo/ready', 'dojo/domReady!'],
-  function(common_menu, tags, registry, Menu, MenuItem, PopupMenuItem, Dialog, dijitForm, dijitTextBox, dijitTextarea, dijitButton, tableContainer, array, lang, locale, xhr, dom, domConstruct, domGeom, style, query, on, ready, domReady ){
+require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/PopupMenuItem", 'dijit/Dialog', 'dijit/form/Form', 'dijit/form/TextBox', "dijit/form/Textarea", "dijit/form/Button", "dijit/layout/ContentPane", 'dojox/layout/TableContainer', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/request/xhr', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-geometry', 'dojo/dom-style', 'dojo/query', 'dojo/on','dojo/ready', 'dojo/domReady!'],
+  function(common_menu, tags, registry, Menu, MenuItem, PopupMenuItem, Dialog, dijitForm, dijitTextBox, dijitTextarea, dijitButton, contentPane, tableContainer, array, lang, locale, xhr, dom, domConstruct, domGeom, style, query, on, ready, domReady ){
 
     var g_slot_id_time_map;
     var g_bucket_divs = [];
@@ -261,7 +261,7 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
         query: {'visiting_group_id':visiting_group_id, 'layer_title':title, 'layer_colour':colour}}).then( on_recieved_bookings );
     }
     
-    
+    /*** create edit layer text dialog *****/
     var program_layer_text_dialog = new Dialog({
         title: "Edit Program Layer Text",
         style: ""
@@ -322,7 +322,7 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
     /**
     * This functuon shows a yes/no dialog and if yes is choosen asks the server to destroy the layer text. If server answers ok, the layer text is removed from the grid.
     **/
-    function show_delete_layer_text_dialog(node) {
+    function show_program_layer_delete_text_dialog(node) {
         var layer_text_id = node.attributes["hollyrosa:layer_text_id"].value;
         
         if (confirm('Really delete layer text?')) {
@@ -352,7 +352,7 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
     }
     
     
-    function show_edit_text_dialog(node) {
+    function show_program_layer_edit_text_dialog(node) {
         var layer_text_id = node.attributes["hollyrosa:layer_text_id"].value;
         var bdayid = node.attributes["hollyrosa:bdayid"].value;
         var vgid = node.attributes["hollyrosa:vgid"].value;
@@ -373,6 +373,16 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
         title: "View Program Layer Text",
         style: ""
     });
+    
+    var program_layer_view_text_title_content = new contentPane({style:'height:125px;'}).placeAt(program_layer_view_text_dialog); 
+    program_layer_view_text_dialog.dat = program_layer_view_text_title_content;
+    /**
+     *
+     **/
+    function show_program_layer_view_text_dialog(node) {
+        program_layer_view_text_dialog.dat.set('content', '<div style="white-space: pre;">' + node.innerHTML + '</div>');
+        program_layer_view_text_dialog.show();
+    }
     
     //...build menues
     var menu = new Menu({
@@ -409,8 +419,9 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
        }
     });
 
-   common_menu.add_call_function_menu_item(layer_text_menu, layer_text_menu, "Edit layer text...",  show_edit_text_dialog);
-   common_menu.add_call_function_menu_item(layer_text_menu, layer_text_menu, "Delete layer text...", show_delete_layer_text_dialog);
+   common_menu.add_call_function_menu_item(layer_text_menu, layer_text_menu, "Edit layer text...",  show_program_layer_edit_text_dialog);
+   common_menu.add_call_function_menu_item(layer_text_menu, layer_text_menu, "View layer text...",  show_program_layer_view_text_dialog);
+   common_menu.add_call_function_menu_item(layer_text_menu, layer_text_menu, "Delete layer text...", show_program_layer_delete_text_dialog);
    
     //...end of menus
    
