@@ -103,6 +103,9 @@ def getNote(holly_couch,  note_id):
     
 def getAttachment(holly_couch,  attachment_id):
     return getCouchDBDocument(holly_couch,  attachment_id,  doc_type='attachment')
+    
+def getLayerText(holly_couch,  layer_text_id):
+    return getCouchDBDocument(holly_couch,  layer_text_id,  doc_type='program_layer_text',  doc_subtype='layer_text')
 
 
 def createEmptyProgramBooking(valid_from='',  valid_to='',  requested_date='',  subtype='program'):

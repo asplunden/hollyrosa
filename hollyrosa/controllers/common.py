@@ -98,7 +98,6 @@ def getFormatedDate(date_obj):
         return date_obj.strftime('%A %d %B')
 
 
-
 def getRenderContent(booking):
     if booking.cache_content=='' or booking.cache_content == None:
         return booking.content
@@ -106,12 +105,19 @@ def getRenderContent(booking):
         return booking.cache_content
         
         
-        
 def getRenderContentDict(booking):
     if booking['cache_content']=='' or booking['cache_content'] == None:
         return booking['content']
     else:
         return booking['cache_content']
+
+
+def hide_cache_content_in_booking(booking):
+    """warn - changes booking in-place"""
+    tmp = booking['cache_content'] 
+    i = tmp.find('//')
+    if i > 0:
+        booking['cache_content'] = booking['cache_content'][:i]
 
 
 class DataContainer(object):
