@@ -558,6 +558,21 @@ class VisitingGroup(BaseController):
         self.do_set_vodb_state(holly_couch, visiting_group_id,  visiting_group_o, int(state))            
         raise redirect(request.referrer)
 
+    @expose()
+    @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True)})    
+    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
+    def copy_vodb_contact_info(self, visiting_group_id=None):
+        visiting_group_o = common_couch.getVisitingGroup(holly_couch,  visiting_group_id) 
+        
+        if visiting_group_o.get('contact_person', '')  == '': 
+            visiting_group_o['contact_person'] = visiting_group_o.get('vodb_contact_name', '')
+        if visiting_group_o.get('contact_person_email', '') == '':
+            visiting_group_o['contact_person_email'] = visiting_group_o.get('vodb_contact_email', '')
+        if visiting_group_o.get('contact_person_phone', '') == '':
+            visiting_group_o['contact_person_phone'] = visiting_group_o.get('vodb_contact_phone', '')
+        holly_couch[visiting_group_id] = visiting_group_o
+        raise redirect(request.referrer)
+
 
     @expose('hollyrosa.templates.visiting_group_edit_layers')
     @validate(validators={"visiting_group_id":validators.UnicodeString()})

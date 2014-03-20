@@ -70,11 +70,24 @@ function startup() {
    common_menu.add_note_redirect_menu_item(menu, menu, "Add note...", '${visiting_group.id}', '${tg.url('/note/add_note')}');
    common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${visiting_group.id}', '${tg.url('/note/add_attachment')}');
    common_menu.add_menu_separator(menu);
-   common_menu.add_visiting_group_menu_item(menu, menu, "Ext. Booking Request", '${tg.url('/visiting_group_program_request/edit_request')}');
+   
    common_menu.add_list_bookings_redirect_menu_item(menu, menu, "List bookings of group...", '${visiting_group['name']}', '${tg.url('/visiting_group/view_bookings_of_name')}');
-    common_menu.add_visiting_group_menu_item(menu, menu, "Program layers...", '${tg.url('/visiting_group/layers')}');
-   common_menu.add_visiting_group_menu_item(menu, menu, "Calendar layers...", '${tg.url('/visiting_group/layers_printable')}');
-   common_menu.add_visiting_group_menu_item(menu, menu, "Edit layers...", '${tg.url('/visiting_group/edit_layers')}');
+   
+   
+   var program_layers_menu = new Menu();
+    menu.addChild(new PopupMenuItem({
+   	label: "Program Layers ->",
+      popup: program_layers_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+   })); 
+   
+   common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Printable ...", '${tg.url('/visiting_group/layers_printable')}');   
+   common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Live Calendar...", '${tg.url('/visiting_group/layers')}');
+   common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Edit Connected Layers...", '${tg.url('/visiting_group/edit_layers')}');
+   common_menu.add_menu_separator(menu);
+   common_menu.add_vgid_redirect_menu_item(menu, menu, "Copy vodb contact info", '${visiting_group.id}', '${tg.url('copy_vodb_contact_info')}');
+   common_menu.add_visiting_group_menu_item(menu, menu, "Ext. Booking Request", '${tg.url('/visiting_group_program_request/edit_request')}');
+   
    
    //...attach the add tag handler
 	var the_add_tag_href_elem = dom.byId('add_tag_href2');
@@ -113,7 +126,7 @@ function startup() {
     common_menu.add_menu_separator(menu);   
     var change_program_status_menu = new Menu();
     menu.addChild(new PopupMenuItem({
-   	label: "Change program status",
+   	label: "Change program status ->",
       popup: change_program_status_menu,
       leftClickToOpen: common_menu.load_left_click_menu()
    })); 
