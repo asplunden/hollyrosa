@@ -47,6 +47,12 @@ function addTagHelper() {
    tags.addTags("${tg.url('/tag/add_tags')}", "${visiting_group.id}", tag_input);
 }
 
+var tag_dialog = tags.createAddTagDialog( '${tg.url('/tag/add_tags')}', tags.updateTags );
+
+
+function show_add_tag_dialog_ng() {
+    tags.showAddTagDialog('${visiting_group.id}', tag_dialog);
+}
 
 function startup() {
 	//...setup main menu for visiting group  	
@@ -67,6 +73,7 @@ function startup() {
    common_menu.add_menu_separator(menu);   
    common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit...", '${visiting_group.id}', '${tg.url('edit_visiting_group')}');
    common_menu.add_call_function_menu_item(menu, menu, "Add tags",  tags.showTagsForm);
+   common_menu.add_call_function_menu_item(menu, menu, "Add tags NG",  show_add_tag_dialog_ng  );
    common_menu.add_note_redirect_menu_item(menu, menu, "Add note...", '${visiting_group.id}', '${tg.url('/note/add_note')}');
    common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${visiting_group.id}', '${tg.url('/note/add_attachment')}');
    common_menu.add_menu_separator(menu);
@@ -81,9 +88,9 @@ function startup() {
       leftClickToOpen: common_menu.load_left_click_menu()
    })); 
    
-   common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Printable ...", '${tg.url('/visiting_group/layers_printable')}');   
-   common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Live Calendar...", '${tg.url('/visiting_group/layers')}');
-   common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Edit Connected Layers...", '${tg.url('/visiting_group/edit_layers')}');
+   common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Printable ...", '${tg.url('/program_layer/layers_printable')}');   
+   common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Live Calendar...", '${tg.url('/program_layer/layers')}');
+   common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Edit Connected Layers...", '${tg.url('/program_layer/edit_layers')}');
    common_menu.add_menu_separator(menu);
    common_menu.add_vgid_redirect_menu_item(menu, menu, "Copy vodb contact info", '${visiting_group.id}', '${tg.url('copy_vodb_contact_info')}');
    common_menu.add_visiting_group_menu_item(menu, menu, "Ext. Booking Request", '${tg.url('/visiting_group_program_request/edit_request')}');

@@ -18,8 +18,11 @@
  **/
 
  
-define(["dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/dom", "dojo/dom-style", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], function(array, registry, Menu, MenuItem, query, dom, domStyle, domConstruct, xhr, ready){
+define(["dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem", 'dijit/Dialog', 'dijit/form/Form', 'dijit/form/TextBox', "dijit/form/Button", "dijit/layout/ContentPane", 'dojox/layout/TableContainer',    "dojo/query!css2", "dojo/dom", "dojo/dom-style", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], 
+    function(array, registry, Menu, MenuItem, dijitDialog, dijitForm, dijitTextBox, dijitButton, contentPane, tableContainer, query, dom, domStyle, domConstruct, xhr, ready){
 
+
+    
 function updateTags(data) {
     var all_tags = query('.tag');
     
@@ -33,6 +36,22 @@ function updateTags(data) {
     }
     dom.byId('tag_input').value = '';
     domStyle.set(dom.byId('add_tag_form'), 'visibility','hidden');
+}
+
+function updateTagsNG(data, tag_dialog, id) {
+    var all_tags = query('.tag');
+    
+    array.forEach(all_tags, function(t) {domConstruct.destroy(t.parentElement) } );
+    
+    var tags = data['tags'];
+    var ul_tag_list = dom.byId("taglist");
+
+    for (t in tags) {
+      domConstruct.create("li", {innerHTML:tags[t]+' <a href="javascript:;" class="tag">(X)</a>'}, ul_tag_list);
+    }
+    //dom.byId('tag_input').value = '';
+    //domStyle.set(dom.byId('add_tag_form'), 'visibility','hidden');
+    tag_dialog.hide();
 }
 
 
@@ -49,9 +68,60 @@ function add_visiting_group_tags_XHR(ajax_url, visiting_group_id, tags) {
 }
 
 
+function createAddTagDialog(ajax_url, on_tags_added) { // callback that XHR calls with the result, it needs to know the target node id thoug...
+    var tag_dialog = new dijitDialog({
+        title: "Add Tags",
+        style: ""
+    });
+
+    var tag_form = new dijitForm();
+    var tag_text_input = new dijitTextBox({
+        name: "tags",
+        label: "Tags",
+        value: "",
+        placeHolder: "type in your tags"
+    }, 'tags').placeAt(tag_form.containerNode);
+    
+    
+    var add_tag_button = new dijitButton({
+        label: "Add",
+        onClick: function(){
+            form_values = tag_form.getValues();
+            tags = form_values['tags'];
+            tags.trim();
+            if ('' != tags) {
+                xhr(ajax_url, {
+                handleAs:"json",
+                method:"POST",
+                query: {'id':tag_dialog.hollyrosa_id, 'tags':tags}}).then( function(data) { on_tags_added(data, tag_dialog, tag_dialog.hollyrosa_id); } );
+            } else { 
+                tag_dialog.hide(); 
+            }
+            tag_form_values = tag_form.getValues();
+            tag_form_values.tags = '';
+            tag_form.setValues(tag_form_values);
+        }
+    }, "add_tag_button_node").placeAt(tag_form.containerNode); 
+    
+    tag_dialog.set('content', tag_form);
+    
+    return tag_dialog;
+}
+
+    
+function showAddTagDialog(id, dialog) {
+    dialog.hollyrosa_id =  id;
+    dialog.show();
+}
+
+
+
 return {
-updateTags:updateTags,
-  
+updateTags:updateTagsNG,
+createAddTagDialog:createAddTagDialog,
+showAddTagDialog:showAddTagDialog,
+    
+    
 getTags:function get_visiting_group_tags_from_XHR(ajax_url, visiting_group_id) {
     xhr(ajax_url, {
     query: {id: visiting_group_id},
