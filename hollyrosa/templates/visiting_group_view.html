@@ -175,9 +175,7 @@ function startup() {
     <p class="context_menu_symbol">${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
     
 
-    <div class="note context_menu_symbol" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><!-- <form id="add_tag_form"><input id="tag_input" type="text" name="tags" value="" />
-<a id="add_tag_href2" href="javascript:;">Add Tags</a>
-</form>--></div>
+    <div class="note context_menu_symbol" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul></div>
 <table class="visiting_group_info_table">
 <tr><td class="legend">bok.nr:</td><td class="info">${visiting_group.boknr}</td></tr>
 <tr><td class="legend">subtype:</td><td class="info">${visiting_group.get('subtype','')}</td></tr>
@@ -217,15 +215,5 @@ function startup() {
             <td class="info">$$$prop.property = $prop.value $prop.unit</td><td class="info">$prop.description</td><td class="info">$prop.from_date</td><td class="info">$prop.to_date</td>
         </tr>
     </table>
-    
-    <!--<h4>attachments: DEPRECATED</h4>
-    <ul py:for="at in visiting_group.get('_attachments',[])"><li><a href="${tg.url('download_attachment', params={'visiting_group_id':visiting_group.id, 'doc_id':at})}">${at}</a></li></ul>
-     <form method="post" action="upload_attachment" enctype="multipart/form-data">
-        <input type="file" name="file"/>
-        <input type="hidden" name="vgrpid" value="${visiting_group.id}"/> 
-        <input type="submit"/>
-    </form>
--->
-  
 </body>
 </html>
