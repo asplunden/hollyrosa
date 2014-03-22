@@ -23,7 +23,7 @@
     	menu.addChild(new MenuSeparator());
     }
     
-                
+    
 	function add_redirect_menu_item(a_menu, a_sub_menu, a_name, a_params, a_url) {
       a_sub_menu.addChild(new MenuItem({
       	label: a_name,
@@ -49,7 +49,7 @@
       add_redirect_menu_item(a_menu, a_sub_menu, a_name, l_params, a_url); 
 	}
 	
-		         
+    
    function add_note_redirect_menu_item(a_menu, a_sub_menu, a_name, a_target_id, a_url) {
 		var l_params = {
       	target_id: a_target_id
@@ -317,9 +317,9 @@
 	return {
 		add_redirect_menu_item:add_redirect_menu_item, 
         add_call_function_menu_item:add_call_function_menu_item,
-	   add_vgid_redirect_menu_item:add_vgid_redirect_menu_item, 
-	   add_note_redirect_menu_item:add_note_redirect_menu_item, 
-	   add_list_bookings_redirect_menu_item:add_list_bookings_redirect_menu_item, 
+	    add_vgid_redirect_menu_item:add_vgid_redirect_menu_item, 
+	    add_note_redirect_menu_item:add_note_redirect_menu_item, 
+	    add_list_bookings_redirect_menu_item:add_list_bookings_redirect_menu_item, 
 		add_change_booking_state_menu_item:add_change_booking_state_menu_item, state_change_list:state_change_list, 
 		add_booking_op_menu_item:add_booking_op_menu_item, add_visiting_group_menu_item:add_visiting_group_menu_item,
 		add_visiting_group_add_note_menu_item:add_visiting_group_add_note_menu_item, 

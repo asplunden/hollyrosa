@@ -26,12 +26,13 @@ define(["dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem", 'dij
  *
  **/
 function updateTags(data, visiting_group_id, node_id) {
-    var all_tags = query('#'+node_id+' .tag');
+    var query_str = '#'+node_id+' .tag';
+    var all_tags = query(query_str);
     
     array.forEach(all_tags, function(t) {domConstruct.destroy(t.parentElement) } );
     
     var tags = data['tags'];
-    var ul_tag_list = dom.byId("taglist");
+    var ul_tag_list = dom.byId(node_id);
 
     for (t in tags) {
       domConstruct.create("li", {innerHTML:tags[t]+' <a href="javascript:;" class="tag">(X)</a>'}, ul_tag_list);
