@@ -1112,8 +1112,14 @@ class BookingDay(BaseController):
         activity_title_map = getActivityTitleMap(holly_couch)
         
         # TODO: remember move booking
+        # TODO: problem is taht if move is done on a booking of type live we end up in the rong place...
+        if  booking_o.get('subtype','program') == 'program':
+            return_path = 'day'
+        else:
+            return_path = 'live'
         remember_booking_move(holly_couch, booking=booking_o,  booking_day=booking_day_o,  old_activity_title=activity_title_map[old_activity_id],  new_activity_title=activity_title_map[activity_id])
-        raise redirect('/booking/day?day_id='+str(return_to_day_id)) 
+        
+        raise redirect('/booking/'+return_path+'?day_id='+str(return_to_day_id)) 
         
         
     @validate(create_edit_new_booking_request_form, error_handler=edit_booking) 
