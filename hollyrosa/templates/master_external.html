@@ -23,15 +23,17 @@ from genshi import HTML, XML
 
 <body py:match="body" py:attrs="select('@*')">
   ${header()}
-  <ul id="mainmenu" class="any_menu internal_mainmenu">
-        <li class="first"><a href="${tg.url('/')}">Frontpage</a></li>
-        <li><a href="${tg.url('/calendar/overview')}">Calendar overview</a></li>
-        <li py:if="request.identity" ><a href="${tg.url('/visiting_group/view_all')}">Visiting groups</a></li>
-        <li py:if="request.identity" ><a href="${tg.url('/vodb_group/view_all')}">VODB groups</a></li>
-        <li py:if="request.identity"><a href="${tg.url('/tools/show')}" id="toolslink">Tools</a></li>
+  <ul id="mainmenu" class="any_menu external_mainmenu">
+        <li py:if="request.identity.user.get('type','') == 'user'" class="first"><a href="${tg.url('/')}">Frontpage</a></li>
+        <li py:if="request.identity.user.get('type','') == 'user'"><a href="${tg.url('/calendar/overview')}">Calendar overview</a></li>
+        <li py:if="request.identity.user.get('type','') == 'user'" ><a href="${tg.url('/visiting_group/view_all')}">Visiting groups</a></li>
+        <li py:if="request.identity.user.get('type','') == 'user'" ><a href="${tg.url('/vodb_group/view_all')}">VODB groups</a></li>
+        <li py:if="request.identity.user.get('type','') == 'user'"><a href="${tg.url('/tools/show')}" id="toolslink">Tools</a></li>
+		<li py:if="request.identity.user.get('type','') == 'user'"><a href="${tg.url('/me/settings')}">Me</a></li>
 
-		<li py:if="request.identity"><a href="${tg.url('/me/settings')}">Me</a></li>
-
+    <li py:if="request.identity.user.get('type','') == 'visiting_group'"><a href="${tg.url('/program_layer/layers', params={'visiting_group_id':request.identity.user.get('_id','')})}">Program Layers</a></li>
+    <li py:if="request.identity.user.get('type','') == 'visiting_group'"><a href="${tg.url('/program_layer/layers_printable', params={'visiting_group_id':request.identity.user.get('_id','')})}">Program Layers (Printable)</a></li>
+    <li py:if="request.identity.user.get('type','') == 'visiting_group'"><a href="${tg.url('/visiting_group_program_request/edit_request', params={'visiting_group_id':request.identity.user.get('_id','')})}">Booking Requests</a></li>
     <span py:if="tg.auth_stack_enabled" py:strip="True">
         <li><a href="${tg.url('/about')}" class="${('', 'active')[defined('page') and page==page=='about']}">About</a></li>
         <li py:if="not request.identity" id="login" class="loginlogout"><a href="${tg.url('/login')}">Login</a></li>

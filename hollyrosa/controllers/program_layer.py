@@ -40,7 +40,7 @@ class ProgramLayer(BaseController):
     
     @expose('hollyrosa.templates.visiting_group_edit_layers')
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only PL and staff members may change layers configuration'))
     def edit_layers(self, visiting_group_id):
         vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         vgroup_layers = vgroup.get('layers',  list())
@@ -70,7 +70,7 @@ class ProgramLayer(BaseController):
 
     @expose()
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(is_user('root'), has_level('pl'), msg='Only PL and staff members may change layers configuration'))
     def update_visiting_group_program_layers(self, visiting_group_id,  save_button=None,  layer_data=''):
         vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         vgroup_layers = vgroup.get('layers',  list())
@@ -89,12 +89,11 @@ class ProgramLayer(BaseController):
 
     @expose('hollyrosa.templates.program_booking_layers')
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def layers(self, visiting_group_id):
         vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         
-        
-        return dict(visiting_group=vgroup,  notes=[],  tags=[],  reFormatDate=reFormatDate)
+        return dict(visiting_group=vgroup,  notes=[],  tags=[],  reFormatDate=reFormatDate,  program_state_map=bokn_status_map)
         
         
     def get_program_layer_bookings(self,  visiting_group,  layer_title,  layer_colour):
@@ -109,7 +108,7 @@ class ProgramLayer(BaseController):
             
     @expose('hollyrosa.templates.program_booking_layers_show_printable_table')
     @validate(validators={"visiting_group_id":validators.UnicodeString(),  "hide_comment":validators.Int()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'),  has_level('view'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def layers_printable(self, visiting_group_id,  hide_comment=1):
         visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         
@@ -163,22 +162,11 @@ class ProgramLayer(BaseController):
         
         result['booking_info_notes'] = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())]            
         return result
-
-#    # TODO should be in common_couch
-#    def getDoc(self,  id,  type,  subtype=None):
-#        doc = holly_couch[id]
-#        if doc['type'] != type:
-#            raise KeyError,  "document with id %s is not of type %s" % (id,  type)
-#        if subtype != None:
-#            if doc['subtype'] != subtype:
-#               raise KeyError,  "document with id %s is not of subtype %s" % (id,  subtype) 
-#            
-#        return doc
         
         
     @expose("json")
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def program_layer_get_days(self, visiting_group_id ):
         return self.program_layer_get_days_helper(visiting_group_id)
         
@@ -248,7 +236,7 @@ class ProgramLayer(BaseController):
         
     @expose("json")
     @validate(validators={"visiting_group_id":validators.UnicodeString(),  "layer_title":validators.UnicodeString(),  "layer_colour":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def program_layer_get_bookings(self, visiting_group_id,  layer_title='',  layer_colour='#fff' ):
         visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         bookings = self.get_program_layer_bookings(visiting_group,  layer_title,  layer_colour)
@@ -269,12 +257,11 @@ class ProgramLayer(BaseController):
             bucket_texts.append(tmp_doc)
         
         return dict(bookings=processed_bookings,  bucket_texts=bucket_texts)
-        
-        
+
     
     @expose("json")
     @validate(validators={"visiting_group_id":validators.UnicodeString(),  "layer_text_id":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def program_layer_edit_text(self,  visiting_group_id, layer_text_id=''):
         is_new = (layer_text_id=='')
         
@@ -288,7 +275,7 @@ class ProgramLayer(BaseController):
         
     @expose("json")
     @validate(validators={"visiting_group_id":validators.UnicodeString(),  "booking_day_id":validators.UnicodeString(),  "bucket_time":validators.UnicodeString(),  "layer_text_id":validators.UnicodeString(),  "text":validators.UnicodeString(),  "title":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def program_layer_save_layer_text(self,  visiting_group_id='', booking_day_id='',  bucket_time='', layer_text_id='',  text='',  title=''):
         is_new = (layer_text_id=='')
         
@@ -321,7 +308,7 @@ class ProgramLayer(BaseController):
 
     @expose("json")
     @validate(validators={"visiting_group_id":validators.UnicodeString(),  "booking_day_id":validators.UnicodeString(),  "bucket_time":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def program_layer_new_layer_text(self,  visiting_group_id='',  booking_day_id='',  bucket_time=''):
         layer_text = dict(type='program_layer_text',  subtype='layer_text',  status=0, booking_day_id=booking_day_id, bucket_time=bucket_time,  text='',  title='' ,  visiting_group_id=visiting_group_id)
         visiting_group =  common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
@@ -332,7 +319,7 @@ class ProgramLayer(BaseController):
         
     @expose("json")
     @validate(validators={"layer_text_id":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def program_layer_get_layer_text(self,  layer_text_id=''):
         layer_text = common_couch.getLayerText(holly_couch, layer_text_id)
         visiting_group =  common_couch.getVisitingGroup(holly_couch,  layer_text['visiting_group_id'])
@@ -345,10 +332,9 @@ class ProgramLayer(BaseController):
         
     @expose("json")
     @validate(validators={"layer_text_id":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def program_layer_delete_layer_text(self, layer_text_id):
         layer_text = common_couch.getLayerText(holly_couch, layer_text_id)
         layer_text['state'] = -100
         holly_couch[layer_text_id] = layer_text
         return dict()
-        

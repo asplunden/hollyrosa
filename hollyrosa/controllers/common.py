@@ -140,11 +140,27 @@ class DataContainer(object):
 class DummyIdentity(object):
     def __init__(self):
         self.display_name = 'not logged in'
+        
+    def __getitem__(self, key):
+        try:
+            return self.__getattribute__(key)
+        except AttributeError:
+            raise KeyError, 'key "%s" not found' % key
+            
+    def has_key(self, key):
+        return self.__hasattr__(key)
+    
 dummy_identity = DummyIdentity()
 
 
 def getLoggedInDisplayName(request):
-    return request.identity.get('user', dummy_identity)['display_name']
+    user = request.identity.get('user', None)
+    if user.has_key('display_name'):
+        return user['display_name']
+    else:
+        return user.get('name', 'Unknown')
+    
+    #return request.identity.get('user', dummy_identity)['display_name']
     
     
 def getLoggedInUser(request):

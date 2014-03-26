@@ -22,7 +22,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:hollyrosa="http://asplunden.org/guldkant/hollyrosa"  xmlns:xi="http://www.w3.org/2001/XInclude">
 
-  <xi:include href="master.html" />
+  <xi:include href="master_external.html" />
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
@@ -143,18 +143,7 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
                 style.set(bucket_div, 'height', max_height + 0 + 'px');
                 style.set(bucket_div, 'top', '0px');
             });
-            
-            /*
-            array.forEach(query('.program_layer_bucket_time_label'), function(bucket_div) {
-                style.set(bucket_div, {height: (max_height + 0) + 'px', top:'40px', background:'#0f0'});
-            });
-            */
-            
         });
-    
-        
-        
-        
         calls_that_want_to_adjust_bucket_heights = 0;
     }
     }
@@ -406,8 +395,8 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
     // not in VODB view common_menu.add_visiting_group_menu_item(menu, menu, "New booking request...", '${tg.url('/booking/edit_booking')}');
    common_menu.add_call_function_menu_item(menu, menu, "Add layer text...",  show_new_text_dialog);
    //common_menu.add_call_function_menu_item(menu, menu, "Add tags",  tags.showTagsForm);
-   common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add note...", '${tg.url('/note/add_note')}');
-   common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add attachment...", '${tg.url('/note/add_note')}');
+   //common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add note...", '${tg.url('/note/add_note')}');
+   //common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add attachment...", '${tg.url('/note/add_note')}');
     	
         
     var layer_text_menu = new Menu({
@@ -428,6 +417,9 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
     function on_ready(){
         program_layer_text_form.startup();
         get_program_layer_days_from_XHR('${visiting_group.id}');
+        
+        //...load all tags for visiting group
+	tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group.id}", 'taglist');
     }
     
     ready(on_ready);
@@ -445,17 +437,13 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
     <p class="context_menu_symbol">${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
 
 	
-	<div class="note context_menu_symbol" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
-<a id="add_tag_href2" href="javascript:;">Add Tags</a>
-</form></div>
+	<div class="note" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul></div>
 
 <table class="visiting_group_info_table">
 <tr><td class="legend">bok.nr:</td><td class="info">${visiting_group.boknr}</td></tr>
 <tr><td class="legend">subtype:</td><td class="info">${visiting_group.get('subtype','')}</td></tr>
-<!--
-<tr><td class="legend">vodb status:</td><td class="info">${vodb_state_map.get(visiting_group.get('vodbstatus','-'))}</td></tr>
+<!--<tr><td class="legend">vodb status:</td><td class="info">${vodb_state_map.get(visiting_group.get('vodbstatus','-'))}</td></tr>-->
 <tr><td class="legend">program status:</td><td class="info">${program_state_map.get(visiting_group.boknstatus,'')}</td></tr>
--->
 <tr><td class="legend">camping location:</td><td class="info">${visiting_group.camping_location}</td></tr>
 </table>
 
@@ -482,8 +470,6 @@ require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem",
     <h3>Adding menu items.</h3>
     <p>The real trick is going to figure out how to handle live updates to underlying data</p>
     <p>Notes and attachments can be represented as a bulleted list with links</p>
-    <p>view layer text - Hoover?</p>
-    <p>Move it all to separate module (code) calle program_booking_layer</p>
 	</div>
     <div id="program_layers_container">
     Program layers

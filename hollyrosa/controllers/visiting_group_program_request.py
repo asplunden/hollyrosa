@@ -159,30 +159,6 @@ class VisitingGroupProgramRequest(BaseController):
             raise redirect('edit_request', visiting_group_id=vgroup_list[0]['id'])
         return dict()
         
-    
-    	
-#    @expose('hollyrosa.templates.visiting_group_program_request_edit')
-#    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
-#    def edit(self):
-#        tmpl_context.form = create_edit_visiting_group_program_request_form
-#        vgpr = dict()
-#        vgpr['name'] = 'test vgroup'
-#        vgpr['info'] = 'this is some info text'
-#        vgpr['contact_person'] = 'john doe'
-#        vgpr['from_date'] = '2012-06-01' 
-#        vgpr['to_date'] = '2012-06-06'
-#        
-#        #...construct the age group list. It's going to be a json document. Hard coded.
-#        #... if we are to partially load from database and check that we can process it, we do need to go from python to json. (and back)
-#        
-#        
-#        #vgpr['age_group_data'] = age_group_data
-#        
-#        #...construct a program request template. It's going to be a json document. Hard coded.
-#        
-#        return dict(visiting_group_program_request=vgpr)
-        
-        
         
     @expose('hollyrosa.templates.visiting_group_program_request_edit2')
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få ändra i dina programönskemål'))    
@@ -197,8 +173,6 @@ class VisitingGroupProgramRequest(BaseController):
 
         #...construct a program request template. It's going to be a json document. Hard coded.
         #...supply booking request if it exists
-        
-        
         age_group_data_tmp = json.loads(age_group_data_raw)
         for tmp_item in age_group_data_tmp['items']:
         	log.debug('TMP ITEM' + str( tmp_item ))
@@ -216,12 +190,6 @@ class VisitingGroupProgramRequest(BaseController):
         visiting_group_o.program_request = visiting_group_o.get('program_request', program_request_data)
         
         return dict(visiting_group_program_request=visiting_group_o, reFormatDate=reFormatDate, bokn_status_map=bokn_status_map,  hasValidationErrors=hasValidationErrors)
-        
-        
-    @expose('hollyrosa.templates.visiting_group_program_request_edit')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
-    def view2(self):
-        return dict(visiting_group_program_request=visiting_group_program_request)
         
         
     @expose()

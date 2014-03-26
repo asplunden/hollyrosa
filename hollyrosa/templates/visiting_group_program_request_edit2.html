@@ -22,7 +22,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
 
-  <xi:include href="master.html" />
+  <xi:include href="master_external.html" />
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
@@ -174,16 +174,22 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
       var submit_button = dijit.byId('submit_button');
       var save_button = dijit.byId('save_button');
       
-      on( submit_button , 'click', on_save_grid_to_input );
-      on( save_button , 'click', on_save_grid_to_input );
-      on( submit_button , 'click', function() {
       
+      if (submit_button) {
+        on( submit_button , 'click', on_save_grid_to_input );
+      
+        on( submit_button , 'click', function() {
 			dom.byId('ready_to_process').value = 'True';      
-      });
+        });
         
-    on( submit_button , 'click', on_validate_finalize);  
-    on( save_button , 'click', on_validate); 
-		
+        on( submit_button , 'click', on_validate_finalize);
+    }
+    
+    if (save_button) {
+        on( save_button , 'click', on_save_grid_to_input );
+        on( save_button , 'click', on_validate); 
+    }
+    
     age_group_grid.placeAt('age_group_div');
     age_group_grid.startup();
     program_request_grid.placeAt('age_group_div');
@@ -277,15 +283,9 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
 	<input type="hidden" name="vgroup_id" value="$visiting_group_program_request._id"/>
 	<input type="hidden" id="ready_to_process" name="ready_to_process" value="False"/>
 	<input type="hidden" name="program_request_info" id="program_request_info" />
-    <!-- <button data-dojo-type="dijit/form/Button" type="button" onClick="console.log(myForm.getValues())">Get Values from form!</button> -->
-    <button data-dojo-type="dijit/form/Button" type="submit" name="saveButton" value="Save" id="save_button">Spara som utkasst</button>
-    <button data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Finalize-and-send" id="submit_button">Spara och processa</button>
+    <button py:if="visiting_group_program_request.boknstatus==0" data-dojo-type="dijit/form/Button" type="submit" name="saveButton" value="Save" id="save_button">Spara som utkasst</button>
+    <button py:if="visiting_group_program_request.boknstatus==0" data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Finalize-and-send" id="submit_button">Spara och processa</button>
 
 </div>
-
-
-
-        
-    
 </body>
 </html>

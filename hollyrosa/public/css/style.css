@@ -64,10 +64,20 @@ a:hover {
 ul#mainmenu {
 	margin: 0;
 	padding: 0 5px;
-	background: #286571;
+	
+	height: 16px; 
+}
+
+.external_mainmenu {
+    background: #286571;
     border-bottom: 4px solid #286571;
     border-top: 4px solid #286571;
-	height: 16px; 
+}
+
+.internal_mainmenu {
+    background: #286571;
+    border-bottom: 4px solid #286571;
+    border-top: 4px solid #286571;
 }
 
 ul#mainmenu li {
