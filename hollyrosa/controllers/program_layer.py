@@ -30,7 +30,7 @@ from hollyrosa.controllers import common_couch
 import datetime,  json
 
 from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, makeVisitingGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options,  hide_cache_content_in_booking
-from hollyrosa.model.booking_couch import getVisitingGroupsInDatePeriod,  getAllProgramLayerBucketTexts,  getBookingsOfVisitingGroup,  getAllActivities,  getBookingDays,  getActivityTitleMap,  getBookingInfoNotesOfUsedActivities
+from hollyrosa.model.booking_couch import getVisitingGroupsInDatePeriod,  getAllProgramLayerBucketTexts,  getBookingsOfVisitingGroup,  getAllActivities,  getBookingDays,  getActivityTitleMap,  getBookingInfoNotesOfUsedActivities,  getNotesForTarget
 from hollyrosa.model.booking_couch import dateRange
 
 __all__ = ['ProgramLayer']
@@ -92,8 +92,8 @@ class ProgramLayer(BaseController):
     @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def layers(self, visiting_group_id):
         vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
-        
-        return dict(visiting_group=vgroup,  notes=[],  tags=[],  reFormatDate=reFormatDate,  program_state_map=bokn_status_map)
+        notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)]
+        return dict(visiting_group=vgroup,  notes=notes,  tags=[],  reFormatDate=reFormatDate,  program_state_map=bokn_status_map)
         
         
     def get_program_layer_bookings(self,  visiting_group,  layer_title,  layer_colour):
@@ -130,7 +130,7 @@ class ProgramLayer(BaseController):
         layers = visiting_group.get('layers',  list())
         
         layers.append(dict(title=visiting_group['name'],  colour='#ffe',  layer_id=visiting_group_id))
-        
+        unscheduled_bookings = []
         #...code repeat for making used_activities
         activities = dict()
         used_activities_keys = dict()
@@ -143,15 +143,18 @@ class ProgramLayer(BaseController):
         
             for tmp_booking in bookings_list:
                 tmp_booking['layer_colour'] = tmp_layer['colour']
-                tmp_time_id = slot_id_time_id_map[tmp_booking['slot_id']]
-                #if hide_comment==1:
-                hide_cache_content_in_booking(tmp_booking)
+                if '' != tmp_booking['slot_id']:
+                    tmp_time_id = slot_id_time_id_map[tmp_booking['slot_id']]
+                    #if hide_comment==1:
+                    hide_cache_content_in_booking(tmp_booking)
                     
-                tmp_id = tmp_booking['booking_day_id'] + ':' +tmp_time_id
-                if not bookings.has_key(tmp_id):
-                    bookings[tmp_id] = list()
-                bookings[tmp_id].append(tmp_booking)
-                
+                    tmp_id = tmp_booking['booking_day_id'] + ':' +tmp_time_id
+                    if not bookings.has_key(tmp_id):
+                        bookings[tmp_id] = list()
+                    bookings[tmp_id].append(tmp_booking)
+                else:
+                    hide_cache_content_in_booking(tmp_booking)
+                    unscheduled_bookings.append(tmp_booking)
                 #...fix used activities
                 used_activities_keys[tmp_booking['activity_id']] = 1
                 used_activities_keys[activities[tmp_booking['activity_id']]['activity_group_id']] = 1
@@ -159,8 +162,8 @@ class ProgramLayer(BaseController):
         result['bookings'] = bookings
         result['width_ratio'] = width_ratio
         
-        
-        result['booking_info_notes'] = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())]            
+        result['unscheduled_bookings'] = unscheduled_bookings
+        result['booking_info_notes'] = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())]
         return result
         
         
