@@ -95,21 +95,6 @@ if True:
 
 # never delete eternal documents
 
-
-if True:
-    design_view_names = ['all_activities', 'booking_day', 'day_schema','history', 'notes','statistics','tag_statistics','tags','user', 'visiting_groups', 'vodb_overview', 'workflow', 'booking_day_live' ]
-    
-    for tmp_name in design_view_names:
-        tmp_dv = '_design/%s' % tmp_name
-        dv_doc = holly_couch[tmp_dv]
-        print dv_doc
-        print dv_doc['views']
-        
-        file_name = 'design_views/%s.viewfunc' % tmp_name
-        f = open(file_name, 'w')
-        f.write(str(dv_doc))
-        f.close()
-        
         
 # Creating a tmp day schema
 if False:    
