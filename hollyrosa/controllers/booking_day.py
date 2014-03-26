@@ -726,6 +726,7 @@ class BookingDay(BaseController):
 
     @expose('hollyrosa.templates.booking_view')
     @validate(validators={'booking_id':validators.UnicodeString(not_empty=True), 'return_to_day_id':validators.UnicodeString(not_empty=False)})
+    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def view_booked_booking(self,  return_to_day_id=None,  booking_id=None):
        
         #...find booking day and booking row

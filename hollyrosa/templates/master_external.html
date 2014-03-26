@@ -31,8 +31,9 @@ from genshi import HTML, XML
         <li py:if="request.identity.user.get('type','') == 'user'"><a href="${tg.url('/tools/show')}" id="toolslink">Tools</a></li>
 		<li py:if="request.identity.user.get('type','') == 'user'"><a href="${tg.url('/me/settings')}">Me</a></li>
 
-    <li py:if="request.identity.user.get('type','') == 'visiting_group'"><a href="${tg.url('/program_layer/layers', params={'visiting_group_id':request.identity.user.get('_id','')})}">Program Layers</a></li>
-    <li py:if="request.identity.user.get('type','') == 'visiting_group'"><a href="${tg.url('/program_layer/layers_printable', params={'visiting_group_id':request.identity.user.get('_id','')})}">Program Layers (Printable)</a></li>
+    <li py:if="request.identity.user.get('type','') == 'visiting_group'"><a href="${tg.url('/program_layer/layers', params={'visiting_group_id':request.identity.user.get('_id','')})}">Live Calendar</a></li>
+    <li py:if="request.identity.user.get('type','') == 'visiting_group'"><a href="${tg.url('/program_layer/layers_printable', params={'visiting_group_id':request.identity.user.get('_id','')})}">Printable Program Layer</a></li>
+    <li py:if="request.identity.user.get('type','') == 'visiting_group'"><a href="${tg.url('/visiting_group/view_bookings_of_name', params={'name':request.identity.user.get('name','')})}">Printable Program Listing</a></li>
     <li py:if="request.identity.user.get('type','') == 'visiting_group'"><a href="${tg.url('/visiting_group_program_request/edit_request', params={'visiting_group_id':request.identity.user.get('_id','')})}">Booking Requests</a></li>
     <span py:if="tg.auth_stack_enabled" py:strip="True">
         <li><a href="${tg.url('/about')}" class="${('', 'active')[defined('page') and page==page=='about']}">About</a></li>
