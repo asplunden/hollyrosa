@@ -318,7 +318,7 @@ class VisitingGroupProgramRequest(BaseController):
         # TODO: We should have a two step process: first construct all bookings (make a list) and if it all is successfull and no validation errors, thats when we actually write them to the db.
         
         # for the program request , iterate through it
-        if may_change_request_data and len(validation_error_messages) == 0:
+        if may_change_request_data and not validation_error_messages.hasErrors():
             if 'True' == ready_to_process:
                 program_request_list = json.loads(program_request_input)
                 for tmp_request in program_request_list['items']:
@@ -334,7 +334,7 @@ class VisitingGroupProgramRequest(BaseController):
                         if not ((requested_date >= visiting_group_o['from_date']) and (requested_date <= visiting_group_o['to_date'])):
                             validation_error_messages.report('booking request',  u'Det efterfrågade datumet %s är inte mellan din grupps från- och till- datum.' % tmp_request['requested_date'], problematic_value=tmp_request['requested_date'],  explanation_key='date_range')
                         # TODO: reuse the parsing of the date
-                        requested_date_o = time.strptime(requested_date, "%Y-%M-%d" )
+                        requested_date_o = time.strptime(requested_date, "%Y-%m-%d" )
                         requested_time = tmp_request['requested_time']
                         requested_activity_id = tmp_request['requested_activity']
                         
@@ -366,7 +366,10 @@ class VisitingGroupProgramRequest(BaseController):
                         #   dont forget to give the date formatter to the templating engine
                         
                         time_selection_translator = dict(EVENING=u'kväll')
-                                          
+                        if validation_error_messages.hasErrors():
+                            holly_couch[visiting_group_o['_id']] = visiting_group_o
+                            raise redirect(request.referrer)
+                            
                         for tmp_slot_info in tmp_activity_row[1:]:
                             if (tmp_slot_info['time_from'] < time_selection_lookup[requested_time]) and (tmp_slot_info['time_to'] > time_selection_lookup[requested_time]):
                                 match_slot_id = tmp_slot_info['slot_id']
@@ -385,7 +388,7 @@ class VisitingGroupProgramRequest(BaseController):
                                 activity_o = common_couch.getActivity(holly_couch, requested_activity_id)
                                 
                                 # TODO: the line below gts the properties wrong
-                                content = u'%s (önskar %s %s %s) %s' % ( ' '.join(['$$%s'%a for a in request_for_age_groups ]) ,activity_selection_map.get(requested_activity_id, activity_o['title']), time.strftime("%d/%M", requested_date_o).replace('0',''), time_selection_translator.get(requested_time, requested_time), tmp_request['note'] )                                 
+                                content = u'%s (önskar %s %d/%d %s) %s' % ( ' '.join(['$$%s'%a for a in request_for_age_groups ]) ,activity_selection_map.get(requested_activity_id, activity_o['title']), int(time.strftime("%d", requested_date_o)),  int(time.strftime("%m", requested_date_o)), time_selection_translator.get(requested_time, requested_time), tmp_request['note'] )                                 
                                 
                                 new_booking['content'] = content
                                 new_booking['cache_content'] = computeCacheContent(holly_couch[visiting_group_id], content)
