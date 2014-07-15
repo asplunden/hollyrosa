@@ -341,6 +341,7 @@ def getBookingInfoNotesOfUsedActivities(holly_couch, keys):
 
 
 def getTargetNumberOfNotesMap(holly_couch):
+    """It also includes number of attachments"""
     number_of_notes = holly_couch.view("notes/number_of_notes_per_target", reduce=True, group=True)
     the_map = dict()
     for x in number_of_notes:
