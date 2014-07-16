@@ -26,7 +26,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa - Viewing All Bookings for ${name}</title>
+  <title>Hollyrosa - Program Bookings for ${name}</title>
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
   
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
@@ -172,7 +172,7 @@ ready(function() {
     
     </div> <!-- end  show group info -->
     
-    <h2 id="visiting_group_menu" class="context_menu_symbol">Viewing all bookings for ${name}</h2>
+    <h2 id="visiting_group_menu" class="context_menu_symbol">Program Bookings for ${name}</h2>
     <div py:if="show_group!=1"> <!-- else show group info (tags) -->
         <div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul></div>
     </div> <!-- end else -->

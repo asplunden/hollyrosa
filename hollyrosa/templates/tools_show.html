@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -32,7 +32,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   
 </head>
 
-<body>
+<body class="tundra">
     <h2>Tools for $show_day</h2>
     <ul>
         <li py:if="request.identity"><a href="${tg.url('/history/show')}">History</a></li>
@@ -41,11 +41,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         
 
     </ul>
-<!--    <h3>Daily overview per activity group</h3>
-    <ul>
-        <li py:for="ag in activity_groups"><a href="${tg.url('/booking/fladan_day', day=show_day, ag=ag.title)}">$ag.title</a></li>
-    </ul>
-    -->
+
     <h3>Statistics</h3>
     <ul>
         <!-- <li><a href="${tg.url('booking_statistics')}">Booking Statistics</a></li> -->
