@@ -37,7 +37,7 @@ from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
 from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
 from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
 from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
-from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, makeVisitingGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options,  hide_cache_content_in_booking,  getLoggedInUser
+from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, makeVisitingGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options,  hide_cache_content_in_booking,  getLoggedInUser,  vodb_status_map
 from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange,  updateVisitingGroupComputedSheets,  computeAllUsedVisitingGroupsTagsForTagSheet,  program_visiting_group_properties_template,  staff_visiting_group_properties_template,  course_visiting_group_properties_template
 from hollyrosa.controllers.booking_history import remember_tag_change
 from hollyrosa.controllers import common_couch
@@ -111,7 +111,9 @@ class VisitingGroup(BaseController):
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)
         return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=remaining_visiting_groups_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
 
-
+    def fnSortBySecondItem(self,  a,  b):
+        return cmp(a[0],  b[0])
+        
     #...in the future, return the maps, but change contents depending on wether the user is logged in or not
     @expose("json")
     @require(Any(is_user('erspl'), has_level('view'),   msg='Only staff members and viewers may view visiting group properties'))
@@ -119,7 +121,17 @@ class VisitingGroup(BaseController):
         if None == getLoggedInUser(request):
             return dict(all_tags={})
         else:
-            return dict(all_tags=[t.key for t in getAllTags(holly_couch)])
+            bokn_status_map_list = []
+            for k, v in bokn_status_map.items():
+                bokn_status_map_list.append([k,  v])
+            bokn_status_map_list.sort(self.fnSortBySecondItem)
+            
+            vodb_status_map_list = []
+            for k, v in vodb_status_map.items():
+                vodb_status_map_list.append([k,  v])
+            vodb_status_map_list.sort(self.fnSortBySecondItem)
+            
+            return dict(all_tags=[t.key for t in getAllTags(holly_couch)],  bokn_status_map=bokn_status_map_list,  vodb_status_map=vodb_status_map_list)
         
         
     @expose('hollyrosa.templates.visiting_group_view_all')

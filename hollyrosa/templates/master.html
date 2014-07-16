@@ -80,19 +80,6 @@ from genshi import HTML, XML
       popup: date_range_menu,
       leftClickToOpen: common_menu.load_left_click_menu()
    })); 
-
-   
-   var l1 = common_menu.program_state_map;
-   var l2 = common_menu.vodb_state_map;
-   
-   array.forEach(l1, function(l) {     
-   	common_menu.add_redirect_menu_item(filter_menu, bokn_status_menu, l[1], {program_state:l[0]}, '${tg.url('/visiting_group/view_program_state')}');   
-   });
-   
-   array.forEach(l2, function(l) {     
-   	common_menu.add_redirect_menu_item(filter_menu, vodb_state_menu, l[1], {'vodb_state':l[0]}, '${tg.url('/visiting_group/view_vodb_state')}');   
-   });
-   
    
 
     xhr("${tg.url('/visiting_group/get_all_tags_and_vodb_state_maps')}", {
@@ -102,6 +89,13 @@ from genshi import HTML, XML
         array.forEach(all_tags, function(l) { 
             common_menu.add_redirect_menu_item(filter_menu, tag_menu, l, {tag:l}, '${tg.url('/visiting_group/view_tags')}');   
             });
+        array.forEach(data.bokn_status_map, function(l) {     
+            common_menu.add_redirect_menu_item(filter_menu, bokn_status_menu, l[1], {program_state:l[0]}, '${tg.url('/visiting_group/view_program_state')}');   
+            });
+        array.forEach(data.vodb_status_map, function(l) {     
+            common_menu.add_redirect_menu_item(filter_menu, vodb_state_menu, l[1], {'vodb_state':l[0]}, '${tg.url('/visiting_group/view_vodb_state')}');   
+            });
+            
         });
 	
    
