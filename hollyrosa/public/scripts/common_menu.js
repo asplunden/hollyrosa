@@ -27,8 +27,12 @@
 	function add_redirect_menu_item(a_menu, a_sub_menu, a_name, a_params, a_url) {
       a_sub_menu.addChild(new MenuItem({
       	label: a_name,
-         onClick: function(evt) {   
-               window.location = a_url + '?' + ioQuery.objectToQuery(a_params);
+         onClick: function(evt) {
+                if ('' != a_params) {
+                    window.location = a_url + '?' + ioQuery.objectToQuery(a_params); 
+                    } else {
+                    window.location = a_url; 
+                    }
            }}));
    }
    
@@ -312,7 +316,10 @@
            }}));
    }    	
 	
-	
+    //...better load via ajax
+    program_state_map = [["0","new"],["5","created"],["10","preliminary"],["50","island"],["20","confirmed"],["-10","canceled"],["-100","deleted"]];
+    vodb_state_map = [["0","new"],["5","created"],["10","preliminary"],["50","island"],["20","confirmed"],["-10","canceled"],["-100","deleted"]];
+    
 	
 	return {
 		add_redirect_menu_item:add_redirect_menu_item, 
@@ -334,7 +341,8 @@
 		add_change_program_state_menu_item:add_change_program_state_menu_item,
 		program_state_change_list:program_state_change_list,
 		vodb_state_change_list:program_state_change_list,
-        add_calc_sheet_redirect_menu_item:add_calc_sheet_redirect_menu_item
+        add_calc_sheet_redirect_menu_item:add_calc_sheet_redirect_menu_item,
+        program_state_map:program_state_map, vodb_state_map:vodb_state_map
 		  };
 	});
 	

@@ -27,6 +27,7 @@ import couchdb,  json
 db_url = 'http://localhost:5989'
 db_name = 'hollyrosa_2015_prod'
 
+
 couch_server = couchdb.Server(url=db_url)
 couch_server.resource.credentials = ('username','password')
 try:
@@ -35,8 +36,8 @@ except couchdb.ResourceNotFound, e:
     holly_couch = couch_server.create(db_name)
     
 design_view_names = ['all_activities', 'booking_day', 'day_schema','history', 'notes','statistics','tag_statistics','tags','user', 'visiting_groups', 'vodb_overview', 'workflow', 'booking_day_live' , 'program_layer']
-save_from = False
-upload_to = True
+save_from = True
+upload_to = False
 
 
 

@@ -18,7 +18,91 @@ from genshi import HTML, XML
     <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/style.css')}" />
     <link rel="stylesheet" type="text/css" media="print" href="${tg.url('/css/print.css')}" />
     <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
+    
+    <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
+    <script>
+  
+    require(["common_menu", "tags", "dojo/_base/array","dojo/request/xhr", "dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/on", "dojo/ready", "dojo/_base/window"], function(common_menu, tags, array, xhr, Menu, MenuItem, PopupMenuItem, query, ioQuery, dom, on, ready, win) {
+    
+    ready(function() {
 
+   //...setup menu for tools
+	var tools_menu = new Menu({
+   	targetNodeIds: ["mainmenu"],
+      selector: "li.mainmenu_tools_choice",
+      leftClickToOpen: common_menu.load_left_click_menu()
+      });
+      
+
+   common_menu.add_redirect_menu_item(tools_menu, tools_menu, "Sanity check property usage", '', '${tg.url('/tools/sanity_check_property_usage')}'); 
+   common_menu.add_menu_separator(tools_menu);
+   common_menu.add_redirect_menu_item(tools_menu, tools_menu, "Age group statistics", '', '${tg.url('/tools/visitor_statistics')}'); 
+   common_menu.add_redirect_menu_item(tools_menu, tools_menu, "VODB booking overview", '', '${tg.url('/vodb_group/vodb_booking_overview')}'); 
+   common_menu.add_menu_separator(tools_menu);
+   common_menu.add_redirect_menu_item(tools_menu, tools_menu, "List all users", '', '${tg.url('/user/show')}'); 
+   common_menu.add_redirect_menu_item(tools_menu, tools_menu, "History", '', '${tg.url('/history/show')}'); 
+   common_menu.add_redirect_menu_item(tools_menu, tools_menu, "Workflow", '', '${tg.url('/workflow/overview')}'); 
+   
+   /* assemblingthe filter booking status menu */
+   var filter_menu = new Menu({
+       targetNodeIds: ["mainmenu"],
+       selector: "li.mainmenu_visiting_groups_choice",
+       leftClickToOpen: common_menu.load_left_click_menu()
+       });
+       
+    common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All visiting groups", '', '${tg.url('/visiting_group/view_all')}'); 
+    common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All visiting groups today", '', '${tg.url('/visiting_group/view_today')}'); 
+
+   var bokn_status_menu = new Menu();
+   filter_menu.addChild(new PopupMenuItem({
+   	label: "Program status...",
+      popup: bokn_status_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+   })); 
+   
+   var vodb_state_menu = new Menu();
+   filter_menu.addChild(new PopupMenuItem({
+   	label: "VODB status...",
+      popup: vodb_state_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+   })); 
+   
+   var tag_menu = new Menu();
+   filter_menu.addChild(new PopupMenuItem({
+   	label: "Tags...",
+      popup: tag_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+   })); 
+
+   var date_range_menu = new Menu();
+   filter_menu.addChild(new PopupMenuItem({
+   	label: "Date range...",
+      popup: date_range_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+   })); 
+   
+
+    xhr("${tg.url('/visiting_group/get_all_tags_and_vodb_state_maps')}", {
+    handleAs: "json",
+    method: "GET"}).then(function(data){  
+        var all_tags = data.all_tags;
+        array.forEach(all_tags, function(l) { 
+            common_menu.add_redirect_menu_item(filter_menu, tag_menu, l, {tag:l}, '${tg.url('/visiting_group/view_tags')}');   
+            });
+        array.forEach(data.bokn_status_map, function(l) {     
+            common_menu.add_redirect_menu_item(filter_menu, bokn_status_menu, l[1], {program_state:l[0]}, '${tg.url('/visiting_group/view_program_state')}');   
+            });
+        array.forEach(data.vodb_status_map, function(l) {     
+            common_menu.add_redirect_menu_item(filter_menu, vodb_state_menu, l[1], {'vodb_state':l[0]}, '${tg.url('/visiting_group/view_vodb_state')}');   
+            });
+            
+        });
+	
+   
+   
+	});
+    });
+    </script>
 </head>
 
 <body py:match="body" py:attrs="select('@*')">
@@ -26,9 +110,9 @@ from genshi import HTML, XML
   <ul id="mainmenu" class="any_menu internal_mainmenu">
         <li class="first"><a href="${tg.url('/')}">Frontpage</a></li>
         <li><a href="${tg.url('/calendar/overview')}">Calendar overview</a></li>
-        <li py:if="request.identity" ><a href="${tg.url('/visiting_group/view_all')}">Visiting groups</a></li>
+        <li py:if="request.identity" class="mainmenu_visiting_groups_choice" ><a href="${tg.url('/visiting_group/view_all')}">Visiting groups</a></li>
         <li py:if="request.identity" ><a href="${tg.url('/vodb_group/view_all')}">VODB groups</a></li>
-        <li py:if="request.identity"><a href="${tg.url('/tools/show')}" id="toolslink">Tools</a></li>
+        <li py:if="request.identity" class="mainmenu_tools_choice"><a href="${tg.url('/tools/show')}" id="toolslink">Tools</a></li>
 
 		<li py:if="request.identity"><a href="${tg.url('/me/settings')}">Me</a></li>
 

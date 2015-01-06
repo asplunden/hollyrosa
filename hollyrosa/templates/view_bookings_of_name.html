@@ -26,18 +26,33 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa - Viewing All Bookings for ${name}</title>
+  <title>Hollyrosa - Program Bookings for ${name}</title>
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
   
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
   
-require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/on", "dojo/ready"], function(common_menu, tags, array, Menu, MenuItem, PopupMenuItem, query, ioQuery, dom, on, ready) {
+require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/on", "dojo/ready", "dojo/_base/window"], function(common_menu, tags, array, Menu, MenuItem, PopupMenuItem, query, ioQuery, dom, on, ready, win) {
+
+
+function deleteTagHelper(evt) {
+   var tag_elem = evt.srcElement.parentElement;
+   var inner_text = tag_elem.innerText;
+   inner_text = inner_text.replace(' (X)',''); 
+   tags.deleteTag("${tg.url('/tag/delete_tag')}", "${visiting_group.id}", 'taglist', inner_text);
+}
 
 
 function addTagHelper() {
-   tags.addTags("${tg.url('/tag/add_tags')}", "${visiting_group['_id']}", tag_input);
+   tags.addTags("${tg.url('/tag/add_tags')}", "${visiting_group.id}", tag_input);
+}
+
+var tag_dialog = tags.createAddTagDialog( '${tg.url('/tag/add_tags')}', tags.updateTagsCloseDialog );
+
+
+function show_add_tag_dialog_ng() {
+    tags.showAddTagDialog(tag_dialog, '${visiting_group.id}', 'taglist');
 }
  
  
@@ -94,11 +109,14 @@ ready(function() {
 	common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "View visiting group", '${visiting_group['id']}', '${tg.url('show_visiting_group')}');   
    common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Edit visiting group", '${visiting_group['id']}', '${tg.url('edit_visiting_group')}');
    common_menu.add_menu_separator(vgroup_menu);
+   common_menu.add_call_function_menu_item(vgroup_menu, vgroup_menu, "Add tags...",  show_add_tag_dialog_ng  );
    common_menu.add_note_redirect_menu_item(vgroup_menu, vgroup_menu, "Add note", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
+   common_menu.add_note_redirect_menu_item(vgroup_menu, vgroup_menu, "Add attachment...", '${visiting_group.id}', '${tg.url('/note/add_attachment')}');
    common_menu.add_menu_separator(vgroup_menu);
    common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Show history", '${visiting_group['id']}', '${tg.url('/history/show')}');
    
-
+    //...link delete tag handler to any element with class .tag in document.
+	on(win.doc, '.tag:click', deleteTagHelper);
 	
 	//...attach the add tag handler, wont work if show_group is 0 so I disable it here
 	/*
@@ -122,10 +140,6 @@ ready(function() {
     <div class="note" >
       <div class="tag_list">
         <ul style="display:inline;" id="taglist" class="tag_list"></ul>
-        <form style="display:inline;">
-          <input id="tag_input" type="text" name="tags" value="" />
-          <a id="add_tag_href2" href="javascript:;">Add Tags</a>
-        </form>
       </div>
     <p>bok.nr: <b>${visiting_group.boknr}</b><br/>
     boknstatus: <b>${bokn_status_map.get(visiting_group.boknstatus,'')}</b><br/>
@@ -158,19 +172,20 @@ ready(function() {
     
     </div> <!-- end  show group info -->
     
-    
-    <h2 id="visiting_group_menu">Viewing all bookings for ${name}</h2>
-         
+    <h2 id="visiting_group_menu" class="context_menu_symbol">Program Bookings for ${name}</h2>
+    <div py:if="show_group!=1"> <!-- else show group info (tags) -->
+        <div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul></div>
+    </div> <!-- end else -->
     <div id="clustered_booking_list">
                 
         <div py:for="cb in clustered_bookings">
           <h3><a href="${tg.url('/booking/view_activity', {'activity_id':cb[0].activity['_id']})}">${cb[0].activity.title}</a></h3>
-            <div style="margin-left:2em;" class="cluster_meta_info" hollyrosa:bid="${cb[0].id}">
+            <div style="margin-left:2em;" class="cluster_meta_info context_menu_symbol" hollyrosa:bid="${cb[0].id}">
                 <div class="note"> ${getRenderContent(cb[0])}</div>
            </div>
 
           <div py:for="b in cb">
-            <div py:if="None != b.booking_day" class="booking_meta_info" hollyrosa:bid="${b['id']}" hollyrosa:bdayid="${b['booking_day_id']}">
+            <div py:if="None != b.booking_day" class="booking_meta_info context_menu_symbol" hollyrosa:bid="${b['id']}" hollyrosa:bdayid="${b['booking_day_id']}">
                 <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day', {'day_id':b.booking_day.id})}">${formatDate(b.booking_day.date)}</a>
                 <span py:if="b.slot_id!=None"> 
                   <span py:if="render_time=='time'" ><b>${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b></span>
@@ -195,7 +210,7 @@ ready(function() {
         
 	</div>
 	<div py:if="len(booking_info_notes)" style="border: 1px dashed red; padding:1em;margin:2em;">
-   <h2>Att tänka på</h2>
+   <h2>Att t채nka p책</h2>
        <div py:for="n in booking_info_notes" style="padding:2em;">${HTML(n.get('text','missing text for note %s' % n['_id']))}</div>
    </div>
 </body>
