@@ -2,7 +2,7 @@
 """
 hollyrosa_tool.py
 
-Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013, 2014, 2015 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -25,9 +25,11 @@ import couchdb,  json
     
 #...read from ini file
 db_url = 'http://localhost:5989'
-db_name = 'hollyrosa_2014_dev'
+db_name = 'hollyrosa_2015_prod'
+
 
 couch_server = couchdb.Server(url=db_url)
+couch_server.resource.credentials = ('username','password')
 try:
     holly_couch = couch_server[db_name]
 except couchdb.ResourceNotFound, e:
@@ -36,6 +38,7 @@ except couchdb.ResourceNotFound, e:
 design_view_names = ['all_activities', 'booking_day', 'day_schema','history', 'notes','statistics','tag_statistics','tags','user', 'visiting_groups', 'vodb_overview', 'workflow', 'booking_day_live' , 'program_layer']
 save_from = True
 upload_to = False
+
 
 
 if save_from:
@@ -51,7 +54,7 @@ if save_from:
         f.close()
     
 
-if upload_to:    
+if upload_to:
     for tmp_name in design_view_names:
         tmp_dv = '_design/%s' % tmp_name
         print 'looking for ', tmp_dv

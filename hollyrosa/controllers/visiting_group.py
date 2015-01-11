@@ -428,6 +428,9 @@ class VisitingGroup(BaseController):
         
         visiting_group_id = None
         visiting_group = [v.doc for v in getVisitingGroupOfVisitingGroupName(holly_couch, name)]
+        if len(visiting_group) > 1:
+            log.error("two visiting groups with the same name")
+
         if len(visiting_group) == 1:
             visiting_group_id = visiting_group[0]['_id']
             

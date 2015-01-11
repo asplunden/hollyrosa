@@ -65,7 +65,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
             </tr>
         </tdata>
     </table>
-    <h3>Unscheduled bookings</h3>
+    <h3 py:if="0 != len(unscheduled_bookings)">Unscheduled bookings</h3>
     
     <div py:for="booking in unscheduled_bookings" class="program_layer_slot" hollyrosa:layer_booking_id="${booking['_id']}" style="background-color: ${booking['layer_colour']}; width:20em; ">
         <span style="font-style:italic; padding-left:2em;">${booking['layer_title']}</span><br/>
