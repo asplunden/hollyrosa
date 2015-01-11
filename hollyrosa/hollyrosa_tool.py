@@ -2,7 +2,7 @@
 """
 hollyrosa_tool.py
 
-Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
+Copyright 2010-2015 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -20,7 +20,7 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import copy,  datetime
+import copy, datetime, logging, argparse
 import couchdb
 
 
@@ -35,11 +35,38 @@ def dateRange(from_date, to_date, format='%a %b %d %Y'):
     return formated_dates
     
     
+    
+    
+parser = argparse.ArgumentParser()
+parser.add_argument("--couch", help="url to couch db", default='http://localhost:5989')
+parser.add_argument("--database", help="name of database in couch", default='hollyrosa_2015_prod')
+parser.add_argument("--username", help="login username", default=None)
+parser.add_argument("--password", help="login password", default=None)
+parser.add_argument("--save-views", help="save all views code to file from database", action="store_true")
+parser.add_argument("--load-views", help="load all views code from file to database", action="store_true")
+parser.add_argument("-v", "--verbose", help="turn on verbose logging", action="store_true")
+args = parser.parse_args()
+
+#...init logging'
+log = logging.getLogger("hollyrosa_view_tool")
+
+if args.verbose:
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.WARN)
+    
+    
 #...read from ini file
-db_url = 'http://localhost:5989'
-db_name = 'hollyrosa_2014_prod'
+db_url = args.couch
+db_name = args.database
+db_username = args.username
+db_password = args.password
 
 couch_server = couchdb.Server(url=db_url)
+
+if db_username != None:
+    couch_server.resource.credentials = (db_username, db_password)
+
 try:
     holly_couch = couch_server[db_name]
 except couchdb.ResourceNotFound, e:
@@ -152,20 +179,6 @@ if False:
 
 
 #...creating activities for all rooms with corresponding activity groups and schema.
-#
-# activity groups:
-# - Tunet Z3
-# - Vädersträcken Z1
-# - Fyrbyn Z0
-# - Vindarnas hus Z2
-# - Skrakvik TC Z5
-#
-# activities (rooms) (see list)
-# 
-#
-#
-#
-
 def makeRoom(holly_rosa, title='', activity_group_id='',  capacity='', zorder=0 ):
     new_room = dict(tags="", certificate_needed=None, bg_color='#fff', capacity=0, title='-', type="activity", zorder=0, do_not_delete=True, default_booking_state=0, subtype='room')
     new_room['title'] = title

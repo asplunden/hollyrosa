@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
+Copyright 2010-2015 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -943,7 +943,7 @@ class BookingDay(BaseController):
         else:
             try:
                 activity = common_couch.getActivity(holly_couch,  activity_id) 
-                #activity['id'] = activity_id 
+                activity['id'] = activity_id 
             except:
                 activity = DataContainer(id=activity_id,  title='', info='', default_booking_state=0)
                 
