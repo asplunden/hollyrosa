@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+Copyright 2010, 2011, 2012, 2013, 2014, 2015 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful, 
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Activity Statistics</title>
+  
+  <script type="text/javascript" src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" ></script>
+  <script type="text/javascript">
+  
+ 
+  </script>
+</head>
+
+<body>
+    <h2>Activity Statistics</h2>
+    
+    <table class="data">
+        <tr><th>Activity</th><th>Activity Group</th><th>Bookings</th></tr>
+        <tr py:for="d in statistics">
+            <td class="data info">${d['activity']}</td><td class="data info">${d['activity_group']}</td><td class="data info">${d['totals']}</td>        
+        </tr>
+    </table>
+</body>
+</html>
