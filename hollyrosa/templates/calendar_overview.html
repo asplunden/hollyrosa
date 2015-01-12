@@ -63,7 +63,21 @@ def makeDate(s):
            var node = menu.currentTarget;
            var bdayid = node.attributes["hollyrosa:bdayid"].value;
            var ioq = {
-               day_id: bdayid
+               day_id: bdayid,
+               schema_type: 'room_schema_id'
+               };
+           window.location = '${tg.url('/booking/live')}' + '?' + ioQuery.objectToQuery(ioq);
+           }
+       }));
+       
+       menu.addChild(new MenuItem({
+       label: "Funk overview",
+       onClick: function(evt) {
+           var node = menu.currentTarget;
+           var bdayid = node.attributes["hollyrosa:bdayid"].value;
+           var ioq = {
+               day_id: bdayid,
+               schema_type: 'funk_schema_id'
                };
            window.location = '${tg.url('/booking/live')}' + '?' + ioQuery.objectToQuery(ioq);
            }

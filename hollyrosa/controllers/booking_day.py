@@ -412,8 +412,8 @@ class BookingDay(BaseController):
     
     
     @expose('hollyrosa.templates.live_day')
-    @validate(validators={'day_id':validators.Int(not_empty=False), 'day':validators.DateValidator(not_empty=False)})
-    def live(self,  day=None,  day_id=None):
+    @validate(validators={'day_id':validators.Int(not_empty=False), 'day':validators.DateValidator(not_empty=False), 'schema_type':validators.UnicodeString(not_empty=False)})
+    def live(self,  day=None,  day_id=None,  schema_type='room_schema_id'):
         """Show a complete booking day"""
         
         # TODO: we really need to get only the slot rows related to our booking day schema or things will go wrong at some point when we have more than one schema to work with.
@@ -450,8 +450,8 @@ class BookingDay(BaseController):
             booking_o_list.append(getBookingDayOfDate(holly_couch, str(tmp_date)))
         
         #...we have to assume all days belong to the same day schema, otherwise, we really shouldnt display that day
-        room_schema_id = booking_day_o['room_schema_id']
-        room_schema_id = booking_day_o['funk_schema_id']
+        room_schema_id = booking_day_o[schema_type]
+        
         room_schema = common_couch.getDaySchema(holly_couch,  room_schema_id)
         
         slot_rows = self.make_slot_rows__of_day_schema(room_schema,  activities_map,  dates=dates)
