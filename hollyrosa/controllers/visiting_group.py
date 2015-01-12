@@ -415,13 +415,11 @@ class VisitingGroup(BaseController):
             
     
     @expose('hollyrosa.templates.view_bookings_of_name')
-    @validate(validators={"vgid":validators.UnicodeString(), "render_time":validators.UnicodeString(), "hide_comment":validators.Int(), "show_group":validators.Int()})
+    @validate(validators={"visiting_group_id":validators.UnicodeString(), "render_time":validators.UnicodeString(), "hide_comment":validators.Int(), "show_group":validators.Int()})
     @require(Any(is_user('root'), has_level('staff'), has_level('view'), has_level('pl'), has_level('vgroup'),  msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
-    def view_bookings_of_visiting_group_id(self,  vgid=None, render_time='', hide_comment=0, show_group=0):
-        # TODO: its now possible to get bookings on both name and id
-        bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, '<- MATCHES NO GROUP ->', vgid)]
+    def view_bookings_of_visiting_group_id(self, visiting_group_id=None, render_time='', hide_comment=0, show_group=0):
         
-        visiting_group_id = vgid
+        bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, '<- MATCHES NO GROUP ->', visiting_group_id)]
         visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         return self.view_bookings_of_visiting_group(visiting_group, visiting_group_id, visiting_group['name'], bookings, hide_comment=hide_comment, show_group=show_group, render_time=render_time)
     
