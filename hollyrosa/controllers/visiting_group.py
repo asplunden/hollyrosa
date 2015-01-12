@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
+Copyright 2010-2015 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -413,6 +413,19 @@ class VisitingGroup(BaseController):
 #        if i > 0:
 #            booking['cache_content'] = booking['cache_content'][:i]
             
+    
+    @expose('hollyrosa.templates.view_bookings_of_name')
+    @validate(validators={"vgid":validators.UnicodeString(), "render_time":validators.UnicodeString(), "hide_comment":validators.Int(), "show_group":validators.Int()})
+    @require(Any(is_user('root'), has_level('staff'), has_level('view'), has_level('pl'), has_level('vgroup'),  msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
+    def view_bookings_of_visiting_group_id(self,  vgid=None, render_time='', hide_comment=0, show_group=0):
+        # TODO: its now possible to get bookings on both name and id
+        bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, '<- MATCHES NO GROUP ->', vgid)]
+        
+        visiting_group_id = vgid
+        visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        return self.view_bookings_of_visiting_group(visiting_group, visiting_group_id, visiting_group['name'], bookings, hide_comment=hide_comment, show_group=show_group, render_time=render_time)
+    
+    
             
     @expose('hollyrosa.templates.view_bookings_of_name')
     @validate(validators={"name":validators.UnicodeString(), "render_time":validators.UnicodeString(), "hide_comment":validators.Int(), "show_group":validators.Int()})
@@ -420,11 +433,6 @@ class VisitingGroup(BaseController):
     def view_bookings_of_name(self,  name=None, render_time='', hide_comment=0, show_group=0):
         # TODO: its now possible to get bookings on both name and id
         bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, name, '<- MATCHES NO GROUP ->')]
-        
-#        if len(bookings) > 0:
-#            slot_map = getSchemaSlotActivityMap(holly_couch, bookings[0],  subtype='program') # TODO: load for each different schema used
-#        else:
-#            slot_map = []
         
         visiting_group_id = None
         visiting_group = [v.doc for v in getVisitingGroupOfVisitingGroupName(holly_couch, name)]
@@ -435,7 +443,11 @@ class VisitingGroup(BaseController):
             visiting_group_id = visiting_group[0]['_id']
             
             first_visiting_group = visiting_group[0]
+        
+        return self.view_bookings_of_visiting_group(first_visiting_group, visiting_group_id, name, bookings, hide_comment=hide_comment, show_group=show_group, render_time=render_time)
+    
             
+    def view_bookings_of_visiting_group(self, visiting_group, visiting_group_id, name, bookings, hide_comment=0, show_group=0, render_time=''):
         #...now group all bookings in a dict mapping activity_id:content
         clustered_bookings = {}
         booking_day_map = dict()
@@ -500,7 +512,7 @@ class VisitingGroup(BaseController):
             booking_info_notes = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())] 
         else:
             booking_info_notes = []
-        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time, visiting_group=first_visiting_group, bokn_status_map=bokn_status_map, notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)], show_group=show_group)
+        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time, visiting_group=visiting_group, bokn_status_map=bokn_status_map, notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)], show_group=show_group)
 
 
     @expose(content_type=CUSTOM_CONTENT_TYPE)
