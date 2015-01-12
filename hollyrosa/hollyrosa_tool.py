@@ -74,7 +74,7 @@ except couchdb.ResourceNotFound, e:
     
     
 
-if True:
+if False:
     for b in holly_couch.view('all_activities/erasure', include_docs=True):
         doc = b.doc
         dtype = doc['type']
@@ -97,7 +97,7 @@ if False:
     holly_couch['school_schema.2014'] = ds
     
     
-if True:
+if False:
     pos = 1500
     school_dates_spring = dateRange('2014-05-01', '2014-06-07', format='%Y-%m-%d')
     summer_dates = dateRange('2014-06-08', '2014-08-17', format='%Y-%m-%d')
@@ -178,15 +178,25 @@ if False:
 
 
 
+def makeSlotRow(slot_id_start, zorder, activity_id):
+    result = list()
+    result.append({u'zorder': zorder, u'id': activity_id})
+    result.append({u'duration': u'12:00:00', u'time_to': u'12:00:00', u'slot_id': u'slot.%d' % slot_id_start, u'time_from': u'00:00:00', u'title': u'FM'})
+    slot_id_start += 1 
+    result.append({u'duration': u'12:00:00', u'time_to': u'23:59:59', u'slot_id': u'slot.%d' % slot_id_start, u'time_from': u'12:00:00', u'title': u'EM'})
+    slot_id_start += 1
+    return result, slot_id_start
+
+
 #...creating activities for all rooms with corresponding activity groups and schema.
-def makeRoom(holly_rosa, title='', activity_group_id='',  capacity='', zorder=0 ):
+def makeRoom(holly_rosa, title='', activity_group_id='',  capacity='', zorder=0, schema=None, max_slot_id=0 ):
     new_room = dict(tags="", certificate_needed=None, bg_color='#fff', capacity=0, title='-', type="activity", zorder=0, do_not_delete=True, default_booking_state=0, subtype='room')
     new_room['title'] = title
     new_room['activity_group_id'] = activity_group_id
     new_room['description']=title
     new_room['capacity']=capacity
     new_room['zorder']=zorder
-    new_id = 'room.'+title.lower()
+    new_id = 'funk.'+title.lower()
     new_id = new_id.replace('å', 'a')
     new_id=new_id.replace('ä', 'a')
     new_id=new_id.replace('ö', 'o')
@@ -194,6 +204,12 @@ def makeRoom(holly_rosa, title='', activity_group_id='',  capacity='', zorder=0 
     new_id=new_id.replace('-', '_')
 
     holly_rosa[new_id] = new_room
+    
+    tmp_slot_row, max_slot_id = makeSlotRow(max_slot_id, max_slot_id, new_id)
+    schema[new_id] = tmp_slot_row
+    
+    return max_slot_id
+
     
 if False:
     makeRoom(holly_couch,  'Grundkallen - Höger',  activity_group_id='roomgroup.fyrbyn', capacity=6,  zorder=0 )
@@ -273,3 +289,52 @@ if False:
     makeRoom(holly_couch,  'Backstugan',  activity_group_id='roomgroup.tc',  capacity=4,  zorder=90)
     
     
+
+
+if False:
+    #...find funk schema
+    doc = holly_couch['funk_schema.2015']
+    schema = doc['schema']
+    print schema
+    
+    #...find max slot id
+    max_slot_id = 0
+    for k, v in schema.items():
+        #...v is a list of slots
+        for tmp_slot in v[1:]:
+            print tmp_slot
+            tmp_slot_id_num = int(tmp_slot['slot_id'].replace('slot.',''))
+            max_slot_id = max(max_slot_id, tmp_slot_id_num)
+            
+    print 'max_slot_id', max_slot_id
+    #copy last slot row inserting more slot rows
+    max_slot_id += 1
+    
+    #...add funk/add rooms
+    
+    
+    max_slot_id = makeRoom(holly_couch,  'Kökslags chef',  activity_group_id='funkgroup.kok', capacity=0,  zorder=200, schema=schema, max_slot_id=max_slot_id )
+    max_slot_id = makeRoom(holly_couch,  'Kök',  activity_group_id='funkgroup.kok', capacity=0,  zorder=201, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Inten PL',  activity_group_id='funkgroup.inten', capacity=0,  zorder=202, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Inten',  activity_group_id='funkgroup.inten', capacity=0,  zorder=203, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Bagar PL',  activity_group_id='funkgroup.bagare', capacity=0,  zorder=204, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Bagare',  activity_group_id='funkgroup.bagare', capacity=0,  zorder=205, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Lillis PL',  activity_group_id='funkgroup.lillis', capacity=0,  zorder=206, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Lillis',  activity_group_id='funkgroup.lillis', capacity=0,  zorder=207, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Skeppare',  activity_group_id='funkgroup.rederiet', capacity=0,  zorder=208, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Matros',  activity_group_id='funkgroup.rederiet', capacity=0,  zorder=209, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Assistent',  activity_group_id='funkgroup.island', capacity=0,  zorder=210, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Arbetshäst',  activity_group_id='funkgroup.island', capacity=0,  zorder=211, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Lägerdoktor',  activity_group_id='funkgroup.island', capacity=0,  zorder=212, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Sjöledare',  activity_group_id='funkgroup.fladan', capacity=0,  zorder=213, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Fladian',  activity_group_id='funkgroup.fladan', capacity=0,  zorder=214, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Programledare',  activity_group_id='funkgroup.program', capacity=0,  zorder=215, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Programmare',  activity_group_id='funkgroup.program', capacity=0,  zorder=216, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Läger',  activity_group_id='funkgroup.program', capacity=0,  zorder=217, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Traktor chef',  activity_group_id='funkgroup.traktor', capacity=0,  zorder=218, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Traktor',  activity_group_id='funkgroup.traktor', capacity=0,  zorder=219, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Storgårn PL',  activity_group_id='funkgroup.storgarn', capacity=0,  zorder=220, schema=schema, max_slot_id=max_slot_id  )
+    max_slot_id = makeRoom(holly_couch,  'Storgårn',  activity_group_id='funkgroup.storgarn', capacity=0,  zorder=221, schema=schema, max_slot_id=max_slot_id  )
+    
+    #...we need to make a schema with no slot rows and then add the above to the schema
+    holly_couch['funk_schema.2015'] = doc

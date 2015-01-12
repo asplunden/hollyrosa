@@ -451,6 +451,7 @@ class BookingDay(BaseController):
         
         #...we have to assume all days belong to the same day schema, otherwise, we really shouldnt display that day
         room_schema_id = booking_day_o['room_schema_id']
+        room_schema_id = booking_day_o['funk_schema_id']
         room_schema = common_couch.getDaySchema(holly_couch,  room_schema_id)
         
         slot_rows = self.make_slot_rows__of_day_schema(room_schema,  activities_map,  dates=dates)

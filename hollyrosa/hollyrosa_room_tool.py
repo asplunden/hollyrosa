@@ -131,7 +131,7 @@ def makeSlotRow(slot_id_start, zorder, activity_id):
     return result, slot_id_start
 
 
-if True:
+if False:
     doc = holly_couch['arcanum_schema.2015']
     schema = doc['schema']
     print schema
@@ -163,3 +163,6 @@ if True:
         
         
     holly_couch['arcanum_schema.2015'] = doc
+    
+    
+    
