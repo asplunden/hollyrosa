@@ -659,9 +659,9 @@ class BookingDay(BaseController):
         
         
     @expose('hollyrosa.templates.edit_booked_booking')
-    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True)})
+    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True), 'subtype':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may book a slot'))
-    def book_slot(self,  booking_day_id=None,  slot_id=None):
+    def book_slot(self,  booking_day_id=None,  slot_id=None, subtype='program'):
         tmpl_context.form = create_edit_book_slot_form
          
         #...find booking day and booking row
@@ -703,9 +703,9 @@ class BookingDay(BaseController):
         
         
     @expose('hollyrosa.templates.edit_booked_live_booking')
-    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True)})
+    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True), 'subtype':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may book a slot'))
-    def book_live_slot(self,  booking_day_id=None,  slot_id=None):
+    def book_live_slot(self,  booking_day_id=None,  slot_id=None, subtype='live'):
         tmpl_context.form = create_edit_book_live_slot_form
          
         #...find booking day and booking row
@@ -716,14 +716,19 @@ class BookingDay(BaseController):
         visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in tmp_visiting_groups] 
         
         #...find out activity of slot_id for booking_day
-        slot_map= getSchemaSlotActivityMap(holly_couch, booking_day,  subtype='live')
+        slot_map= getSchemaSlotActivityMap(holly_couch, booking_day,  subtype=subtype)
         slot = slot_map[slot_id]
         activity = common_couch.getActivity(holly_couch,  slot['activity_id'])
        
         #...TODO: also extract the whole slot_row from the schema and remove the first entry. This will be needed for the date range to work correctly
         booking_o = DataContainer(content='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_id=slot_id, booking_id=None)
     
-        end_slot_id_options = self.getEndSlotIdOptions(booking_day['room_schema_id'],  slot['activity_id'])
+        #...get schema from subtype
+        schema_id_name_map = dict(live='room_schema_id', funk='funk_schema_id')
+        schema_id = schema_id_name_map[subtype]
+        
+        schema_o = booking_day[schema_id] 
+        end_slot_id_options = self.getEndSlotIdOptions(schema_o,  slot['activity_id'])
         return dict(booking_day=booking_day, booking=booking_o, visiting_groups=visiting_groups, edit_this_visiting_group=0,  slot_position=slot,  end_slot_id_options=end_slot_id_options)
         
 
@@ -1270,15 +1275,17 @@ class BookingDay(BaseController):
         raise redirect('/booking/day?day_id='+str(new_booking['booking_day_id']) + make_booking_day_activity_anchor(new_booking['activity_id'])) 
 
 
-    def getActivityIdOfBooking(self, holly_couch, booking_day_id,  slot_id):
+    def getActivityIdOfBooking(self, holly_couch, booking_day_id,  slot_id, subtype='program'):
         """
         try to find activity given booking day and slot_id
         
-        We need to find booking day, then schema, in schema there are rows per activity. Somewhere in that schema is the answear.
+        We need to find booking day, then schema, in schema there are rows per activity. Somewhere in that schema is the answer.
         """
         # TODO: refactor, should be able to use existing view
         booking_day_o = common_couch.getBookingDay(holly_couch,  booking_day_id)
-        schema_o = common_couch.getDaySchema(holly_couch,  booking_day_o['day_schema_id'])
+        schema_name_map = dict(program='day_schema_id', live='room_schema_id', room='room_schema_id', funk='funk_schema_id')
+        schema_name = booking_day_o[schema_name_map[subtype]]
+        schema_o = common_couch.getDaySchema(holly_couch,  schema_name)
         
         #...iterate thrue the schema
         for tmp_activity_id,  tmp_activity_row in schema_o['schema'].items():
@@ -1289,30 +1296,32 @@ class BookingDay(BaseController):
         # TODO: I dont think it is unreasonable that each schema has a lookuptable slot_id -> activity that is updated if the schema is updated.
         
 
-    def block_slot_helper(self, holly_couch, booking_day_id,  slot_id,  level = 1):
+    def block_slot_helper(self, holly_couch, booking_day_id,  slot_id,  level = 1, subtype='program'):
         slot_state = dict(slot_id=slot_id,  booking_day_id=booking_day_id, level=level,  type='slot_state')
         holly_couch[genUID(type='slot_state')] = slot_state 
         # TODO: set state variable when it has been introduced
         
         booking_day = common_couch.getBookingDay(holly_couch,  booking_day_id)
-        slot_map = getSchemaSlotActivityMap(holly_couch, booking_day,  subtype='program')
+        slot_map = getSchemaSlotActivityMap(holly_couch, booking_day,  subtype=subtype)
         slot = slot_map[slot_id]
         remember_block_slot(holly_couch, slot_row_position=slot, booking_day=booking_day,  level=level,  changed_by=getLoggedInUserId(request),  activity_title=common_couch.getActivity(holly_couch,  slot['activity_id'] )['title'])
         
         
     @expose()
-    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True), 'level':validators.UnicodeString(not_empty=True)})
+    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True), 'level':validators.UnicodeString(not_empty=True), 'subtype':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
-    def block_slot(self, booking_day_id=None,  slot_id=None,  level = 1):
+    def block_slot(self, booking_day_id=None,  slot_id=None,  level = 1, subtype='program'):
         self.block_slot_helper(holly_couch, booking_day_id, slot_id, level=level)
-        activity_id = self.getActivityIdOfBooking(holly_couch, booking_day_id,  slot_id)
-        raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(activity_id))
-        
+        activity_id = self.getActivityIdOfBooking(holly_couch, booking_day_id,  slot_id, subtype=subtype)
+        if subtype == 'program':
+            raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(activity_id))
+        raise redirect('live?day_id='+booking_day_id+'&schema_type='+subtype + make_booking_day_activity_anchor(activity_id))
+    
 
     @expose()
-    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True)})
+    @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True), 'subtype':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
-    def unblock_slot(self, booking_day_id=None,  slot_id=None):
+    def unblock_slot(self, booking_day_id=None,  slot_id=None, subtype='program'):
         
         # todo: set state variable when it has been introduced
         tmp_slot_state_ids = self.getSlotStateOfBookingDayIdAndSlotId(holly_couch,  booking_day_id,  slot_id)
@@ -1322,13 +1331,15 @@ class BookingDay(BaseController):
             holly_couch.delete(deleteme)
         
         booking_day = common_couch.getBookingDay(holly_couch,  booking_day_id)
-        slot_map = getSchemaSlotActivityMap(holly_couch, booking_day,  subtype='program')
+        slot_map = getSchemaSlotActivityMap(holly_couch, booking_day,  subtype=subtype)
         slot = slot_map[slot_id]
         activity_id = slot['activity_id']
         remember_unblock_slot(holly_couch, slot_row_position=slot, booking_day=booking_day,  changed_by=getLoggedInUserId(request),  level=0,  activity_title=common_couch.getActivity(holly_couch,  activity_id)['title'])
 
-        raise redirect('day?day_id='+str(booking_day_id) + make_booking_day_activity_anchor(activity_id)) 
-        
+        if subtype == 'program':
+            raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(activity_id))
+        raise redirect('live?day_id='+booking_day_id+'&schema_type='+subtype + make_booking_day_activity_anchor(activity_id))
+    
 
     @expose('hollyrosa.templates.edit_multi_book')
     @validate(validators={'booking_id':validators.UnicodeString(not_empty=True)})

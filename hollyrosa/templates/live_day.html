@@ -103,7 +103,7 @@ ready(function() {
            }
 		});
            
-      var menu_new_booking_choice = common_menu.add_booking_op_menu_item_for_block(menu, menu, "New booking...", '${tg.url('book_live_slot')}');
+      var menu_new_booking_choice = common_menu.add_booking_op_menu_item_for_block(menu, menu, "New booking...", '${tg.url('book_live_slot')}','${schema_type}');
       common_menu.add_menu_separator(menu);
       common_menu.add_booking_op_menu_item(menu, menu, "View...", '${tg.url('/booking/view_booked_booking')}');
       common_menu.add_booking_op_menu_item(menu, menu, "Edit...", '${tg.url('/booking/edit_booked_booking')}');
@@ -139,8 +139,8 @@ ready(function() {
 
 
       common_menu.add_menu_separator(menu);     
-		var menu_block_slot_choice = common_menu.add_booking_op_menu_item_for_block(menu, menu, "Block slot", '${tg.url('block_slot')}');
-      var menu_unblock_slot_choice = common_menu.add_booking_op_menu_item_for_block(menu, menu, "Unblock slot", '${tg.url('unblock_slot')}');
+		var menu_block_slot_choice = common_menu.add_booking_op_menu_item_for_block(menu, menu, "Block slot", '${tg.url('block_slot')}','${schema_type}');
+      var menu_unblock_slot_choice = common_menu.add_booking_op_menu_item_for_block(menu, menu, "Unblock slot", '${tg.url('unblock_slot')}','${schema_type}');
            
        
        /*..........................*/
@@ -166,10 +166,10 @@ ready(function() {
               }
            });
            
-           var book_menu_new_booking_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "New booking...", '${tg.url('book_live_slot')}');
+           var book_menu_new_booking_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "New booking...", '${tg.url('book_live_slot')}','${schema_type}');
            common_menu.add_menu_separator(book_menu);
-           var book_menu_block_slot_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "Block slot", '${tg.url('block_slot')}');
-		     var book_menu_unblock_slot_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "Unblock slot", '${tg.url('unblock_slot')}');
+           var book_menu_block_slot_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "Block slot", '${tg.url('block_slot')}','${schema_type}');
+		     var book_menu_unblock_slot_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "Unblock slot", '${tg.url('unblock_slot')}','${schema_type}');
            
            
            

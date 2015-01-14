@@ -117,7 +117,7 @@
     }
     
 	
-	function add_booking_op_menu_item_for_block(a_menu, a_sub_menu, a_name, a_url) {
+	function add_booking_op_menu_item_for_block(a_menu, a_sub_menu, a_name, a_url, a_subtype) {
    	var menu_item =new MenuItem({
                label: a_name,
                onOpen: function(evt) { console.log(evt); },
@@ -126,6 +126,7 @@
                    var sid = node.attributes["hollyrosa:sid"].value;
                    var ioq = {
                        slot_id: sid,
+                       subtype:a_subtype,
                        booking_day_id: node.attributes["hollyrosa:bdayid"].value
                    };
                console.log(a_url + '?' + ioQuery.objectToQuery(ioq));
