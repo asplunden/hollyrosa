@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010-2015 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -27,7 +27,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa Live Overview - ${booking_day.date}</title>
+  <title>Hollyrosa $title_hint Overview - ${booking_day.date}</title>
   
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
 <style type="text/css">
@@ -39,16 +39,17 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
 
-require(["dojo/dom", "dojo/query!css2", "dojo/dom-form", "dojo/dom-attr", "dojo/_base/array", "dojo/query", "dojo/cookie", "dojo/date", "dijit/Calendar", "dojo/on", "dojo/parser", "dojo/ready", "dojo/json"], function(dom, query, domForm, domAttr, array, query, cookie, date, calendar, on, parser, ready, json) {
+require(["dojo/dom", "dojo/query!css2", "dojo/dom-form", "dojo/dom-attr", "dojo/_base/array", "dojo/query", "dojo/cookie", "dojo/date", "dijit/Calendar", "dojo/on", "dojo/parser", "dojo/io-query", "dojo/ready", "dojo/json"], function(dom, query, domForm, domAttr, array, query, cookie, date, calendar, on, parser, ioQuery, ready, json) {
 /* todo: move into its own dojo module so it doesent have to be loaded every time  */
 var jdata = {};
 
  
+    
 
 ready(function() {
     var e = dom.byId('navigation_calendar'); 
     domAttr.set(e, 'dojoType', 'dijit.Calendar'); 
-    domAttr.set(e, 'onChange', 'navigation_calendar_clicked'); 
+    domAttr.set(e, 'onChange', 'navigation_calendar_clicked');
     domAttr.set(e, 'isDisabledDate','navigation_calendar_is_disabled');
     parser.parse(e.parentNode);
     
@@ -57,13 +58,20 @@ ready(function() {
     domAttr.get(tools_link_elem, "href", href + "?day=" + "${booking_day.date}" );
 });
 
+
 });
 
-
-function navigation_calendar_clicked(x) {
+    
+  function navigation_calendar_clicked(x) {
         var selected_date = dojo.date.locale.format(x, {datePattern: "yyyy-MM-dd", selector: "date"});
+        
+               
         if ("${booking_day.date}" != selected_date) {
-            window.location.assign('live?day=' + selected_date);
+        		/*var ioq = {
+               day: selected_date,
+               schema_type: '${schema_type}'
+               };*/
+            window.location.assign('${tg.url('/booking/live')}' + '?day=' + selected_date+'&amp;'[0]+'schema_type=${schema_type}');
         }
     }
     
@@ -223,7 +231,7 @@ function navigation_calendar_clicked(x) {
         	</ul>
     </div>
    
-    <h2>Live Overview ${reFormatDate(booking_day.date)}</h2>
+    <h2>$title_hint Overview ${reFormatDate(booking_day.date)}</h2>
 
     <div class="note"><h2>${booking_day.get('title','')}</h2>
     <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day.events">$e</li></ul>${HTML(booking_day.note)}

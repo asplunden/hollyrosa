@@ -457,6 +457,7 @@ div.note { /* should have been called info_note */
     border-right: 1px solid #ccc;
     margin-top:1em;
     margin-bottom: 1em;
+    min-height: 10em;
 }
 
 div.note2 { /* for notes found as note documents*/

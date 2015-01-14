@@ -413,8 +413,10 @@ class BookingDay(BaseController):
     
     @expose('hollyrosa.templates.live_day')
     @validate(validators={'day_id':validators.Int(not_empty=False), 'day':validators.DateValidator(not_empty=False), 'schema_type':validators.UnicodeString(not_empty=False)})
-    def live(self,  day=None,  day_id=None,  schema_type='room_schema_id'):
+    def live(self, day=None, day_id=None, schema_type='room'):
         """Show a complete booking day"""
+        
+        
         
         # TODO: we really need to get only the slot rows related to our booking day schema or things will go wrong at some point when we have more than one schema to work with.
         
@@ -450,11 +452,12 @@ class BookingDay(BaseController):
             booking_o_list.append(getBookingDayOfDate(holly_couch, str(tmp_date)))
         
         #...we have to assume all days belong to the same day schema, otherwise, we really shouldnt display that day
-        room_schema_id = booking_day_o[schema_type]
+        schema_id = booking_day_o[schema_type+'_schema_id']
+        schema = common_couch.getDaySchema(holly_couch,  schema_id)
+        schema_type = schema['subtype']
+        title_hint = schema['title_hint']
         
-        room_schema = common_couch.getDaySchema(holly_couch,  room_schema_id)
-        
-        slot_rows = self.make_slot_rows__of_day_schema(room_schema,  activities_map,  dates=dates)
+        slot_rows = self.make_slot_rows__of_day_schema(schema,  activities_map,  dates=dates)
         #...first, get booking_day for today
         all_bookings = dict()
         all_blockings = dict()
@@ -478,7 +481,7 @@ class BookingDay(BaseController):
         #
         #   the new version should be a list of rows. Each row is either a DataContainer or a dict (basically the same...)
         #    We need to know activity name, color, id and group (which we get from the activities) and we need a list of slot positions
-        activity_slot_position_map = self.getActivitySlotPositionsMap(room_schema) 
+        activity_slot_position_map = self.getActivitySlotPositionsMap(schema) 
         
         #...find all unscheduled bookings
         showing_sql_date = str(booking_day_o['date'])
@@ -492,8 +495,8 @@ class BookingDay(BaseController):
         days = self.getAllDays()
 
         ##activity_groups = [DataContainer(id=d.value['_id'],  title=d.value['title']) for d in getAllActivityGroups(holly_couch)] 
-        activity_groups = getActivityGroupNameAndIdList(holly_couch,  room_schema)
-        return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=all_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=all_blockings,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups, headers=headers, reFormatDate = reFormatDate)
+        activity_groups = getActivityGroupNameAndIdList(holly_couch,  schema)
+        return dict(booking_day=booking_day_o,  slot_rows=slot_rows,  bookings=all_bookings,  unscheduled_bookings=unscheduled_bookings,  activity_slot_position_map=activity_slot_position_map,  blockings_map=all_blockings,  workflow_map=workflow_map,  days=days,  getRenderContent=getRenderContent,  activity_groups=activity_groups, headers=headers, reFormatDate = reFormatDate, title_hint=title_hint, schema_type=schema_type)
     
 
 
@@ -718,7 +721,7 @@ class BookingDay(BaseController):
         activity = common_couch.getActivity(holly_couch,  slot['activity_id'])
        
         #...TODO: also extract the whole slot_row from the schema and remove the first entry. This will be needed for the date range to work correctly
-        booking_o = DataContainer(content='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_id=slot_id)
+        booking_o = DataContainer(content='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_id=slot_id, booking_id=None)
     
         end_slot_id_options = self.getEndSlotIdOptions(booking_day['room_schema_id'],  slot['activity_id'])
         return dict(booking_day=booking_day, booking=booking_o, visiting_groups=visiting_groups, edit_this_visiting_group=0,  slot_position=slot,  end_slot_id_options=end_slot_id_options)
@@ -925,7 +928,13 @@ class BookingDay(BaseController):
     @expose('hollyrosa.templates.view_activity')
     @validate(validators={'activity_id':validators.Int(not_empty=True)})
     def view_activity(self,  activity_id=None):
-        return dict(activity=common_couch.getActivity(holly_couch, activity_id))
+        activity = common_couch.getActivity(holly_couch, activity_id)
+        
+        #...replace missing fields with empty string
+        for tmp_field in ['print_on_demand_link','external_link','internal_link','guides_per_slot','guides_per_day','equipment_needed','education_needed']:
+            if not activity.has_key(tmp_field):
+                activity[tmp_field] = ''
+        return dict(activity=activity)
         
     
     @expose('hollyrosa.templates.edit_activity')
