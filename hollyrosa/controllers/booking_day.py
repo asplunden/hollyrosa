@@ -713,7 +713,7 @@ class BookingDay(BaseController):
         
         #...TODO: only list visiting groups that lives indoors. That means they have a non-zero entry in the live sheet in the indoor column.
         tmp_visiting_groups = getVisitingGroupsAtDate(holly_couch, booking_day['date']) 
-        visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in tmp_visiting_groups] 
+        visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in tmp_visiting_groups]
         
         #...find out activity of slot_id for booking_day
         slot_map= getSchemaSlotActivityMap(holly_couch, booking_day,  subtype=subtype)
