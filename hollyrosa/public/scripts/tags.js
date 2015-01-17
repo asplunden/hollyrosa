@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013, 2014 Martin Eliasson
+ * Copyright 2010-2015 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *
@@ -49,21 +49,6 @@ function updateTagsCloseDialog(data, visiting_group_id, node_id, tag_dialog) {
 }
 
 
-/**
- *
- **
-function add_visiting_group_tags_XHR(ajax_url, visiting_group_id, tags) {
-    tags = tags.trim();
-    if ('' != tags) {
-        xhr(ajax_url, {
-        query: {'id': visiting_group_id, 'tags': tags},
-        handleAs: "json",
-        method: "POST"}).then( updateTags );
-    } else {
-        domStyle.set(dom.byId('add_tag_form'), 'visibility','hidden');
-    }
-}
-*/
 
 /**
  *
