@@ -301,10 +301,14 @@ def getUserNameMap(holly_couch):
 
 # TODO: VERY DNGEROUS TO CACHE
 def getSchemaSlotActivityMap(holly_couch, booking_day,  subtype):
-    if subtype == 'program':
-        day_schema_id = booking_day['day_schema_id']
-    else:
-        day_schema_id = booking_day['room_schema_id']
+    # TODO: refactor
+    
+    subtype_name_map = dict(program='day_schema_id', room='room_schema_id', staff='staff_schema_id')
+    subtype_name = subtype_name_map[subtype]
+    day_schema_id = booking_day[subtype_name]
+    
+    day_schema_id = booking_day['room_schema_id']
+    
     try:
         tmp = _schema_slot_activity_map
         print 'found'
