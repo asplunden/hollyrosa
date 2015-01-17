@@ -36,8 +36,10 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
 
 
 function deleteTagHelper(evt) {
-   var tag_elem = evt.srcElement.parentElement;
-   var inner_text = tag_elem.innerText;
+   //var tag_elem = evt.srcElement.parentElement;
+   //var inner_text = tag_elem.innerText;
+   var tag_elem = evt.target.parentElement;
+   var inner_text = tag_elem.textContent;
    inner_text = inner_text.replace(' (X)',''); 
    tags.deleteTag("${tg.url('/tag/delete_tag')}", "${visiting_group.id}", 'taglist',inner_text);
 }
