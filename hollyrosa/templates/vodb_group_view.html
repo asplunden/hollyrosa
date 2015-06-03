@@ -37,15 +37,17 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
 
 
 function deleteTagHelper(evt) {
-   var tag_elem = evt.srcElement.parentElement;
-   var inner_text = tag_elem.innerText;
+   var tag_elem = evt.target.parentElement;
+   var inner_text = tag_elem.textContent;
    inner_text = inner_text.replace(' (X)',''); 
-   tags.deleteTag("${tg.url('/tag/delete_tag')}", "${visiting_group.id}", inner_text);
+   tags.deleteTag("${tg.url('/tag/delete_tag')}", "${visiting_group.id}", 'taglist', inner_text);
 }
 
+var tag_dialog = tags.createAddTagDialog( '${tg.url('/tag/add_tags')}', tags.updateTagsCloseDialog );
 
-function addTagHelper() {
-   tags.addTags("${tg.url('/tag/add_tags')}", "${visiting_group.id}", tag_input);
+
+function show_add_tag_dialog_ng() {
+    tags.showAddTagDialog(tag_dialog, '${visiting_group.id}', 'taglist');
 }
 
 
@@ -59,25 +61,21 @@ function startup() {
        leftClickToOpen: use_left_click_menu
        });
        
-
 	//...load all tags for visiting group
-	tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group.id}");
+	tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group.id}", 'taglist');
    
    
    common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request...", '${visiting_group.id}', '${tg.url('/booking/edit_booking')}'); 
    common_menu.add_menu_separator(menu);   
    common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb data...", '${visiting_group.id}', '${tg.url('edit_group_data')}');
    common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb Sheet...", '${visiting_group.id}', '${tg.url('edit_group_sheet')}');
-   common_menu.add_call_function_menu_item(menu, menu, "Add tags",  tags.showTagsForm);
+   common_menu.add_call_function_menu_item(menu, menu, "Add tags",  show_add_tag_dialog_ng);
    common_menu.add_note_redirect_menu_item(menu, menu, "Add note...", '${visiting_group.id}', '${tg.url('/note/add_note')}');
    common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${visiting_group.id}', '${tg.url('/note/add_attachment')}');
    common_menu.add_menu_separator(menu);
    common_menu.add_visiting_group_menu_item(menu, menu, "List bookings of group...", '${tg.url('/visiting_group/view_bookings_of_visiting_group_id')}');
       
-   //...attach the add tag handler
-	var the_add_tag_href_elem = dom.byId('add_tag_href2');
-	on(the_add_tag_href_elem, 'click', addTagHelper);
-	
+   
 	//...link delete tag handler to any element with class .tag in document.
 	on(win.doc, '.tag:click', deleteTagHelper);
 	
@@ -182,9 +180,7 @@ function startup() {
     <p class="context_menu_symbol">${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
     
 
-    <div class="note context_menu_symbol" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form id="add_tag_form"><input id="tag_input" type="text" name="tags" value="" />
-<a id="add_tag_href2" href="javascript:;">Add Tags</a>
-</form></div>
+    <div class="note context_menu_symbol" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul></div>
 <table class="visiting_group_info_table">
 <tr><td class="legend">bok.nr:</td><td class="info">${visiting_group.boknr}</td></tr>
 <tr><td class="legend">subtype:</td><td class="info">${visiting_group.get('subtype','')}</td></tr>

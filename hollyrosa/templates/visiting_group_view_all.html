@@ -73,8 +73,8 @@ function updateNotes(data) {
 
 /** need to fix this deleteTagHelper so it **/
 function deleteTagHelper(evt) {
-   var tag_elem = evt.srcElement.parentElement;
-   var inner_text = tag_elem.innerText;
+   var tag_elem = evt.target.parentElement;
+   var inner_text = tag_elem.textContent;
    inner_text = inner_text.replace(' (X)',''); 
    var visiting_group_id = tag_elem.attributes['hollyrosa:vgid'].value;
    tags.deleteTag("${tg.url('/tag/delete_tag')}", visiting_group_id, tag_elem.parentElement.id, inner_text);

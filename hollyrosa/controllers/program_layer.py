@@ -174,13 +174,43 @@ class ProgramLayer(BaseController):
         return self.program_layer_get_days_helper(visiting_group_id)
         
         
+
+    def getTimeIdMapping(self):
+        time_id_mapping = dict(FM='fm', EM='em')
+        time_id_mapping[u'Kväll'] = 'eve'
+        time_id_mapping['After hours'] = 'afh'
+        return time_id_mapping
+    
+
+
+    def fillInGeneralizedSlotRow(self, time_id_mapping, any_slot_row_in_schema, generalized_slot_row, layer_times):
+        for tmp_slot_row in any_slot_row_in_schema:
+            tmp_item = {}
+            for k, v in tmp_slot_row.items():
+                if k != 'slot_id':
+                    tmp_item[k] = v
+                if k == 'title':
+                    layer_times.append(dict(title=v, symbol=time_id_mapping[v]))
+            
+            generalized_slot_row.append(tmp_item)
+    
+
     def program_layer_get_days_helper(self, visiting_group_id ):
         visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         
-        date_range = dateRange(visiting_group['from_date'], visiting_group['to_date'])
+        ####date_range = dateRange(visiting_group['from_date'], visiting_group['to_date'])
+        
+        #...create temporary mapping title-> id, in the future, this should be based on time rather on the title (which can be dangerous)
+        time_id_mapping = self.getTimeIdMapping()
+        
         
         booking_days = [bd.doc for bd in getBookingDays(holly_couch,  visiting_group['from_date'], visiting_group['to_date'])]
-        
+        schema_id_map = dict()
+        for b in booking_days:
+            schema_id_map[b['day_schema_id']] = b
+            
+            
+        #...now, if we have too many day schema ids, we have a problem...    
         # TODO dangerous below, we can have diffreent schemas for different days
         first_booking_day=booking_days[0]
         
@@ -189,27 +219,18 @@ class ProgramLayer(BaseController):
         schema_doc = holly_couch[schema_id]
         schema = schema_doc['schema']
         
-        # if we assume the same layout for every slot row, we can get first row in schema and use it as template
+        #...if we assume the same layout for every slot row, we can get first row in schema and use it as template
         any_slot_row_in_schema = schema[schema.keys()[0]][1:] # skip first part, now we have four time-slots that can be used
         
-        #...create temporary mapping title-> id, in the future, this should be based on time rather on the title (which can be dangerous)
-        time_id_mapping = dict(FM='fm',  EM='em')
-        time_id_mapping[u'Kväll'] = 'eve'
-        time_id_mapping['After hours'] = 'afh'
         
         #...it would be best if we now could clean out the slot_id from the mapping
         generalized_slot_row = []
         layer_times = []
-        for tmp_slot_row in any_slot_row_in_schema:
-            tmp_item = {}
-            for k, v in tmp_slot_row.items():
-                if k != 'slot_id':
-                    tmp_item[k] = v
-                if k == 'title':
-                    layer_times.append(dict(title=v,  symbol=time_id_mapping[v]))
-            generalized_slot_row.append(tmp_item)
         
-        datetime_map = []
+        #...will change its parameters
+        self.fillInGeneralizedSlotRow(time_id_mapping, any_slot_row_in_schema, generalized_slot_row, layer_times)
+        
+        ####datetime_map = []
        
         #...iterate through schema and find FM EM etc
         
@@ -226,10 +247,14 @@ class ProgramLayer(BaseController):
         #...I need to build this mapping from booking_day_id:slot_id:layer_id to datetime bucket
         #   so iterate through all schema rows and look at time, 
         slot_id_time_map = {}
-        for tmp_activity_id,  tmp_activity_row in schema.items():
-            for tmp_slot in tmp_activity_row[1:]:
-                tmp_time = tmp_slot['title']
-                slot_id_time_map[tmp_slot['slot_id']] = time_id_mapping[tmp_time]
+        for tmp_schema_id in schema_id_map.keys():
+            tmp_schema_doc = holly_couch[tmp_schema_id]
+            tmp_schema = tmp_schema_doc['schema']
+        
+            for tmp_activity_id, tmp_activity_row in tmp_schema.items():
+                for tmp_slot in tmp_activity_row[1:]:
+                    tmp_time = tmp_slot['title']
+                    slot_id_time_map[tmp_slot['slot_id']] = time_id_mapping[tmp_time]
                 
         # TODO return activity title map
         activity_title_map = getActivityTitleMap(holly_couch)

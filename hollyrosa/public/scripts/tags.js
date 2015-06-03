@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2013, 2014 Martin Eliasson
+ * Copyright 2010-2015 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *
@@ -18,8 +18,8 @@
  **/
 
  
-define(["dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem", 'dijit/Dialog', 'dijit/form/Form', 'dijit/form/TextBox', "dijit/form/Button", "dijit/layout/ContentPane", 'dojox/layout/TableContainer',    "dojo/query!css2", "dojo/dom", "dojo/dom-style", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], 
-    function(array, registry, Menu, MenuItem, dijitDialog, dijitForm, dijitTextBox, dijitButton, contentPane, tableContainer, query, dom, domStyle, domConstruct, xhr, ready){
+define(["dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem", 'dijit/Dialog', 'dijit/form/Form', 'dijit/form/TextBox', "dijit/form/Button", "dijit/layout/ContentPane", 'dojox/layout/TableContainer',    "dojo/query!css2", "dojo/dom", "dojo/dom-style", "dojo/dom-construct", "dojo/request/xhr", "dojo/on", "dojo/keys", "dojo/ready"], 
+    function(array, registry, Menu, MenuItem, dijitDialog, dijitForm, dijitTextBox, dijitButton, contentPane, tableContainer, query, dom, domStyle, domConstruct, xhr, on, keys, ready){
 
 
 /**
@@ -49,21 +49,6 @@ function updateTagsCloseDialog(data, visiting_group_id, node_id, tag_dialog) {
 }
 
 
-/**
- *
- **
-function add_visiting_group_tags_XHR(ajax_url, visiting_group_id, tags) {
-    tags = tags.trim();
-    if ('' != tags) {
-        xhr(ajax_url, {
-        query: {'id': visiting_group_id, 'tags': tags},
-        handleAs: "json",
-        method: "POST"}).then( updateTags );
-    } else {
-        domStyle.set(dom.byId('add_tag_form'), 'visibility','hidden');
-    }
-}
-*/
 
 /**
  *
@@ -83,9 +68,7 @@ function createAddTagDialog(ajax_url, on_tags_added) { // callback that XHR call
     }, 'tags').placeAt(tag_form.containerNode);
     
     
-    var add_tag_button = new dijitButton({
-        label: "Add",
-        onClick: function(){
+    function tag_form_submit_handler() {
             form_values = tag_form.getValues();
             tags = form_values['tags'];
             tags.trim();
@@ -101,9 +84,37 @@ function createAddTagDialog(ajax_url, on_tags_added) { // callback that XHR call
             tag_form_values.tags = '';
             tag_form.setValues(tag_form_values);
         }
+        
+    
+    var add_tag_button = new dijitButton({
+        label: "Add",
+        onClick: tag_form_submit_handler
     }, "add_tag_button_node").placeAt(tag_form.containerNode); 
     
     tag_dialog.set('content', tag_form);
+    
+    //...setting up key event handler so we can react to return pressed
+    var inputs = query("input");
+ 
+    on(tag_form, "keydown", function(event) {
+        //var node = query.NodeList([event.target]);
+        //node.
+        //var nextNode;
+ 
+        //on listens for the keydown events inside of the div node, on all form elements
+        switch(event.keyCode) {
+            case keys.ENTER:
+                event.preventDefault();
+                //prevent default keeps the form from submitting when the enter button is pressed
+                //on the submit button
+                // submit the form
+                console.log("form submitted!");
+                tag_form_submit_handler();
+                break;
+            default:
+                console.log("some other key: " + event.keyCode);
+        }
+    });
     
     return tag_dialog;
 }

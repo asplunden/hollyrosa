@@ -58,26 +58,26 @@ def makeDate(s):
        }));
        
        menu.addChild(new MenuItem({
-       label: "Live overview",
+       label: "Room overview",
        onClick: function(evt) {
            var node = menu.currentTarget;
            var bdayid = node.attributes["hollyrosa:bdayid"].value;
            var ioq = {
                day_id: bdayid,
-               schema_type: 'room'
+               subtype: 'room'
                };
            window.location = '${tg.url('/booking/live')}' + '?' + ioQuery.objectToQuery(ioq);
            }
        }));
        
        menu.addChild(new MenuItem({
-       label: "Funk overview",
+       label: "Staff overview",
        onClick: function(evt) {
            var node = menu.currentTarget;
            var bdayid = node.attributes["hollyrosa:bdayid"].value;
            var ioq = {
                day_id: bdayid,
-               schema_type: 'funk'
+               subtype: 'staff'
                };
            window.location = '${tg.url('/booking/live')}' + '?' + ioQuery.objectToQuery(ioq);
            }

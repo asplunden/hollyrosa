@@ -39,7 +39,7 @@ def dateRange(from_date, to_date, format='%a %b %d %Y'):
     
 parser = argparse.ArgumentParser() 
 parser.add_argument("--couch", help="url to couch db", default='http://localhost:5989')
-parser.add_argument("--database", help="name of database in couch", default='hollyrosa_2015_dev')
+parser.add_argument("--database", help="name of database in couch", default='hollyrosa_2015_prod')
 parser.add_argument("--username", help="login username", default=None)
 parser.add_argument("--password", help="login password", default=None)
 parser.add_argument("-v", "--verbose", help="turn on verbose logging", action="store_true")
@@ -72,13 +72,11 @@ except couchdb.ResourceNotFound, e:
     
 
     
-if False:
-    for b in holly_couch.view('day_schema/day_schema', include_docs=True):
 
+if True:
+    for b in holly_couch.view('booking_day/all_booking_days', include_docs=True):
         doc = holly_couch[b.doc['_id']]
-        print doc
-        doc['title_hint'] = 'Program'
-        doc['subtype'] = 'program'
+        doc['staff_schema_id'] = 'funk_schema.2015'
         holly_couch[b.doc['_id']] = doc
         
 if True:
