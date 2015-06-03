@@ -131,7 +131,7 @@ def makeSlotRow(slot_id_start, zorder, activity_id):
     return result, slot_id_start
 
 
-if False:
+if True:
     doc = holly_couch['arcanum_schema.2015']
     schema = doc['schema']
     print schema
@@ -151,15 +151,15 @@ if False:
     
     #...add the first 8 activities
     for i in range(8):
-        tmp_activity_id = "activity.arcanum_%d" % (i+1)
+        tmp_activity_id = "activity.arcanum_%d" % (i+20+1)
         print max_slot_id
         tmp_slot_row, max_slot_id = makeSlotRow(max_slot_id, 100+i, tmp_activity_id)
         schema[tmp_activity_id] = tmp_slot_row
         
-    for i in range(8):
-        tmp_activity_id = "activity.arcanum_%d" % (i+1+8)
-        tmp_slot_row, max_slot_id = makeSlotRow(max_slot_id, 110+i, tmp_activity_id)
-        schema[tmp_activity_id] = tmp_slot_row
+#    for i in range(12):
+#        tmp_activity_id = "activity.arcanum_%d" % (i+1+8+8+12)
+#        tmp_slot_row, max_slot_id = makeSlotRow(max_slot_id, 110+i, tmp_activity_id)
+#        schema[tmp_activity_id] = tmp_slot_row
         
         
     holly_couch['arcanum_schema.2015'] = doc
