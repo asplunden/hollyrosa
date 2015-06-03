@@ -416,7 +416,8 @@ class BookingDay(BaseController):
     def live(self, day=None, day_id=None, schema_type='room'):
         """Show a complete booking day"""
         
-        
+        if schema_type=='funk':
+            schema_type='staff'
         
         # TODO: we really need to get only the slot rows related to our booking day schema or things will go wrong at some point when we have more than one schema to work with.
         
