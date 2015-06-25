@@ -1034,9 +1034,11 @@ class BookingDay(BaseController):
         else:
             booking_day_o = common_couch.getBookingDay(holly_couch,  return_to_day_id)
             visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in getVisitingGroupsAtDate(holly_couch, booking_day_o['date'])]
-            
-        tmp_visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         
+        if '' != visiting_group_id:
+            tmp_visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        else:
+            tmp_visiting_group_id = None
         
         #...patch since this is the way we will be called if validator for new will fail
         if (visiting_group_id != '') and (visiting_group_id != None):

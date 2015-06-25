@@ -30,6 +30,8 @@ def getCouchDBDocument(holly_couch, id, doc_type=None, doc_subtype=None):
     l_doc = holly_couch[id]
     
     if None != doc_type:
+        if not l_doc.has_key('type'):
+            raise KeyError, "Document found in holly_couch but it lacks the require type field. Doc id: %s" % id
         if l_doc['type'] != doc_type:
             raise KeyError,  "Document found in holly_couch, but there is a document type missmatch for document with id %s, the supplied document type was %s but in document it is %s" % (id, doc_type,  l_doc['type'])
 
