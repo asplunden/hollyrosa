@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010-2015 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -216,7 +216,7 @@ function loadNotesFor(id) {
    
     on(win.doc, '.tag:click', deleteTagHelper);
 
-ready(function() { 
+  ready(function() { 
     var tag_ul_elems = xq('.tag_list');
     
     array.forEach(tag_ul_elems, function(ul_tag_elem) {
@@ -224,7 +224,25 @@ ready(function() {
         var vgid = ul_tag_elem.attributes['hollyrosa:vgid'].value;
        tags.getTags("${tg.url('/tag/get_tags')}", vgid, node_id ) ;
         });
-    }); 
+    });
+    
+    
+    var agroups = ${"[" + ','.join( ['["'+a.id + '", "' + a.title +'"]' for a in visiting_group_types]   )   + "]"};           
+         
+    var vgt_status = common_menu.load_ag_checkbox_status();         
+           
+    var view_vgt_menu = new Menu({
+               targetNodeIds: ["view_ag_menu"],
+               leftClickToOpen: common_menu.load_left_click_menu()
+               });
+               
+         
+    array.forEach(agroups, function(a) {
+        common_menu.add_ag_checkbox_menu_item(view_vgt_menu, a[1], a[0], vgt_status, common_menu.update_visiting_group_type_visible_rows);	         
+    });
+         
+    
+    common_menu.update_visiting_group_type_visible_rows(vgt_status);
 });
   
   </script>
@@ -268,17 +286,15 @@ function loadNotesFor(id) {
 </head>
 
 <body class="tundra">
-    Choose time period: <ul class="any_menu">
-
+    Choose time period:
+    <ul class="any_menu">
         <li><a href="${tg.url('view_today')}">today</a></li>
-        <li id="bokn_status_menu" class="context_menu_symbol">Filter booking status</li>
-        
-
-    
+        <li id="bokn_status_menu" class="context_menu_symbol">Filter booking status</li>    
     </ul>
-    <h2>Viewing visiting groups</h2>
+    
+    <h2 id="view_ag_menu">Viewing visiting groups</h2>
     <table id="vgroup_listing">
-        <tr py:for="visiting_group in visiting_groups" class="name_menu" hollyrosa:vgid="${visiting_group._id}" hollyrosa:taglist_node_id="taglist_for_${hash(visiting_group._id)}" hollyrosa:vgname="${visiting_group.name}" hollyrosa:has_notes="${has_notes_map.has_key(visiting_group._id)}">
+        <tr py:for="visiting_group in visiting_groups" class="name_menu" hollyrosa:vgid="${visiting_group._id}" hollyrosa:taglist_node_id="taglist_for_${hash(visiting_group._id)}" hollyrosa:vgname="${visiting_group.name}" hollyrosa:vgtid="${visiting_group.subtype}" hollyrosa:has_notes="${has_notes_map.has_key(visiting_group._id)}">
             <td class="info data context_menu_symbol">${visiting_group.name}<a name="vgroupid_${visiting_group._id}"/></td>
             <td class="info data context_menu_symbol">[${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}]<br/><br/>${visiting_group.get('contact_person','')}<br/>${visiting_group.get('contact_person_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('contact_person_email','')}</a></td>
             <td class="info data context_menu_symbol">

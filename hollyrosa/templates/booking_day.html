@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010-2015 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -196,13 +196,13 @@ function navigation_calendar_clicked(x) {
   			var ag_status = common_menu.load_ag_checkbox_status();         
            
        	var view_ag_menu = new Menu({
-               targetNodeIds: ["view_ag_menu"],
+               targetNodeIds: ["view_ag_menu", "main_note"],
                leftClickToOpen: common_menu.load_left_click_menu()
                });
                
          
          array.forEach(agroups, function(a) {
-				common_menu.add_ag_checkbox_menu_item(view_ag_menu, a[1], a[0], ag_status);	         
+				common_menu.add_ag_checkbox_menu_item(view_ag_menu, a[1], a[0], ag_status, common_menu.update_activity_group_visible_rows);	         
          });
          
          common_menu.update_activity_group_visible_rows(ag_status);
@@ -222,13 +222,13 @@ function navigation_calendar_clicked(x) {
         		<li>
             	<div dojoType="dijit.Calendar" id="navigation_calendar" value="${booking_day.date}">Calendar widget if dijit works</div>
         		</li>
-        		<li id="view_ag_menu" class="context_menu_symbol">view activity groups </li>
+        		<!-- <li id="view_ag_menu" class="context_menu_symbol">view activity groups</li> -->
         	</ul>
     </div>
    
-    <h2>Program Day ${reFormatDate(booking_day.date)}</h2>
+    <h2 id="view_ag_menu" class="context_menu_symbol">Program Day ${reFormatDate(booking_day.date)}</h2>
 
-    <div class="note"><h2>${booking_day.get('title','')}</h2>
+    <div class="note context_menu_symbol" id="main_note"><h2>${booking_day.get('title','')}</h2>
     <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day.events">$e</li></ul>${HTML(booking_day.note)}
     <br/>
     <a href="${tg.url('/calendar/edit_booking_day',params={'id':booking_day.id})}">edit</a>

@@ -401,3 +401,10 @@ def getAllProgramLayerBucketTexts(holly_couch,  visiting_group_id):
     
 def getProgramLayerBucketTextByDayAndTime(holly_couch,  visiting_group_id,  booking_day_id,  bucket_time):
     return holly_couch.view('program_layer/bucket_text_by_day_and_time', include_docs=True,  keys=[(visiting_group_id,  booking_day_id,  bucket_time)])
+
+
+
+#---
+
+def getVisitingGroupTypes(holly_couch):
+    return [dict(title="program", id="program"), dict(title="staff", id="staff"), dict(title="course", id="course")]

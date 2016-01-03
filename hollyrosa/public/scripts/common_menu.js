@@ -258,22 +258,37 @@
 		
 
 	function update_activity_group_visible_rows(a_ag_status) {    
-    //...we now have a list of agc ids to show, all other should be hidden
-    var elems = query("[hollyrosa:acgid]");
-    array.forEach(elems, function(elem) {
-        var agc_val = domAttr.get(elem, 'hollyrosa:acgid');
-        if (a_ag_status[agc_val]) {
-            dojo.style(elem, {display: 'block'});
-        } else if (null == a_ag_status[agc_val]) {
-            dojo.style(elem, {display: 'block'});
-        } else {
-            dojo.style(elem, {display: 'none'});
-        }
-    });
- }
+       //...we now have a list of agc ids to show, all other should be hidden
+       var elems = query("[hollyrosa:acgid]");
+       array.forEach(elems, function(elem) {
+           var agc_val = domAttr.get(elem, 'hollyrosa:acgid');
+           if (a_ag_status[agc_val]) {
+               dojo.style(elem, {display: 'block'});
+           } else if (null == a_ag_status[agc_val]) {
+               dojo.style(elem, {display: 'block'});
+            } else {
+                dojo.style(elem, {display: 'none'});
+            }
+        });
+    }
+    
+    function update_visiting_group_type_visible_rows(a_vgt_status) {    
+        //...we now have a list of agc ids to show, all other should be hidden
+        var elems = query("[hollyrosa:vgtid]");
+        array.forEach(elems, function(elem) {
+            var vgt_val = domAttr.get(elem, 'hollyrosa:vgtid');
+            if (a_vgt_status[vgt_val]) {
+                dojo.style(elem, {display: 'table-row'});
+            } else if (null == a_vgt_status[vgt_val]) {
+                dojo.style(elem, {display: 'table-row'});
+            } else {
+                dojo.style(elem, {display: 'none'});
+            }
+        });
+     }
 	
 	
-	function add_ag_checkbox_menu_item(a_menu, a_name, a_id, a_ag_status) {
+	function add_ag_checkbox_menu_item(a_menu, a_name, a_id, a_ag_status, update_func) {
 		var l_is_checked = true;
 		if (a_id in a_ag_status) {
 			l_is_checked = a_ag_status[a_id];
@@ -286,7 +301,8 @@
 					
 					a_ag_status[a_id] = selected;
 					save_ag_checkbox_status(a_ag_status);
-            		update_activity_group_visible_rows(a_ag_status);
+            	//update_activity_group_visible_rows(a_ag_status);
+					update_func(a_ag_status);             
                }}
            ))} 
 	
@@ -381,7 +397,8 @@
 		program_state_change_list:program_state_change_list,
 		vodb_state_change_list:program_state_change_list, user_level_change_list:user_level_change_list,
         add_calc_sheet_redirect_menu_item:add_calc_sheet_redirect_menu_item,
-        program_state_map:program_state_map, vodb_state_map:vodb_state_map
+        program_state_map:program_state_map, vodb_state_map:vodb_state_map,
+        update_visiting_group_type_visible_rows:update_visiting_group_type_visible_rows
 		  };
 	});
 	
