@@ -222,7 +222,8 @@ class has_level(Predicate):
         if self.level not in environ['repoze.who.identity']['user_level']:
             #self.unmet(post_id=post_id, author=post.author_userid)
             self.unmet(level=self.level) # self.level
-        
+        if not environ['repoze.who.identity']['user_active']:
+            self.unmet(active=True)
 
 
 

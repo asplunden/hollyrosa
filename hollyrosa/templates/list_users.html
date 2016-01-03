@@ -57,13 +57,36 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
            }*/
 		});
            
-      
+      common_menu.add_user_management_op_menu_item(menu, menu, "New User...", '${tg.url('new')}');
       common_menu.add_user_management_op_menu_item(menu, menu, "Edit...", '${tg.url('edit')}');
       common_menu.add_user_management_op_menu_item(menu, menu, "Change Password...", '${tg.url('change_password')}');
+      common_menu.add_user_management_op_menu_item(menu, menu, "Activate", '${tg.url('activate')}');
+      common_menu.add_user_management_op_menu_item(menu, menu, "Dectivate", '${tg.url('deactivate')}');      
       common_menu.add_user_management_op_menu_item(menu, menu, "History", '${tg.url('/history/show')}');		      
       common_menu.add_menu_separator(menu);	
-			 
+      
+      
+      /* add submenu with more entries  */
            
+      var more = new Menu();
+    	menu.addChild(new PopupMenuItem({
+         label: "Set Access Level...",
+         leftClickToOpen: common_menu.load_left_click_menu(),
+        	popup: more
+      }));
+           
+		/*common_menu.add_booking_op_menu_item(menu, more, "Move...", '${tg.url('/booking/move_booking')}');
+		common_menu.add_booking_op_menu_item(menu, more, "Prolong", '${tg.url('/booking/prolong')}');
+		           
+      common_menu.add_menu_separator(more);     
+		
+        */              
+      var set_level_url = '${tg.url('/user/set_level')}';
+      
+      
+    	array.forEach(common_menu.user_level_change_list, function(x) {common_menu.add_change_user_level_menu_item(menu, more, x['name'], x['level'], 0, set_level_url);});
+    	
+      common_menu.add_menu_separator(more);
                    
        }); /* end ready */
                  
@@ -74,17 +97,15 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <body class="tundra">
     <h2>Show users</h2>
-    <a href="${tg.url('edit')}">New user</a>
-    
     <table class="data" id="user_listing">
         <tr>
-            <th>user name</th><th>display name</th><th>level</th><th>op</th>
+            <th>user name</th><th>display name</th><th>level</th><th>active</th>
         </tr>
-        <tr py:for="u in users" class="active_user" hollyrosa:userid="${u.user_name}">
+        <tr py:for="u in users" class="active_user" hollyrosa:userid="${u._id}">
             <td class="data info context_menu_symbol" >${u.user_name}</td>
             <td class="data info context_menu_symbol">${u.display_name}</td>
-            <td class="data info context_menu_symbol"><ul py:for="l in u.level"><li>${l}</li></ul></td>
-            <td class="data info context_menu_symbol"></td>
+            <td class="data info context_menu_symbol"><ul py:for="l in u.get('level',[])" style="display:inline"><li style="display:inline">${l}</li></ul></td>
+            <td class="data info context_menu_symbol">${u.get('active',False)}</td>
         </tr>    
     </table>
 </body>

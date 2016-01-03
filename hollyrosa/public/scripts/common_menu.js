@@ -118,6 +118,22 @@
                }
            })); 
 	}
+	
+	
+	function add_change_user_level_menu_item(a_menu, a_sub_menu, a_state_name, level_value, a_all, a_url) {
+      a_sub_menu.addChild(new MenuItem({
+      	label: a_state_name,
+         onClick: function(evt) {
+            var node = a_menu.currentTarget;
+            var user_id = node.attributes["hollyrosa:userid"].value;
+           
+            var ioq = {
+                       user_id: user_id,
+                       level: level_value
+                   };        
+               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+           }}));
+   }    	
     
     
     function add_call_function_menu_item(a_menu, a_sub_menu, a_name, a_func) {
@@ -315,6 +331,12 @@
 //        	{name:"Delete booking", state:-100}
     ];
 
+	var user_level_change_list = [
+			{name:"> None", level:""}, 
+			{name:"> Viewer", level:"viewer"}, 
+    		{name:"> Staff", level:"staff"},
+        	{name:"> PL", level:"pl"}
+	];
 
 
 	function add_change_program_state_menu_item(a_menu, a_sub_menu, a_state_name, state_value, a_all, a_url) {
@@ -330,7 +352,7 @@
                    };        
                window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
            }}));
-   }    	
+   }
 	
     //...better load via ajax
     program_state_map = [["0","new"],["5","created"],["10","preliminary"],["50","island"],["20","confirmed"],["-10","canceled"],["-100","deleted"]];
@@ -345,7 +367,7 @@
 	   add_list_bookings_redirect_menu_item:add_list_bookings_redirect_menu_item, 
 		add_change_booking_state_menu_item:add_change_booking_state_menu_item, state_change_list:state_change_list, 
 		add_booking_op_menu_item:add_booking_op_menu_item, add_visiting_group_menu_item:add_visiting_group_menu_item,
-      add_user_management_op_menu_item:add_user_management_op_menu_item,		
+      add_user_management_op_menu_item:add_user_management_op_menu_item, add_change_user_level_menu_item:add_change_user_level_menu_item,
 		add_visiting_group_add_note_menu_item:add_visiting_group_add_note_menu_item, 
 		add_visiting_group_list_bookings_menu_item:add_visiting_group_list_bookings_menu_item,
 		add_booking_op_menu_item_for_block:add_booking_op_menu_item_for_block,
@@ -357,7 +379,7 @@
 		load_left_click_menu:load_left_click_menu,
 		add_change_program_state_menu_item:add_change_program_state_menu_item,
 		program_state_change_list:program_state_change_list,
-		vodb_state_change_list:program_state_change_list,
+		vodb_state_change_list:program_state_change_list, user_level_change_list:user_level_change_list,
         add_calc_sheet_redirect_menu_item:add_calc_sheet_redirect_menu_item,
         program_state_map:program_state_map, vodb_state_map:vodb_state_map
 		  };

@@ -73,6 +73,7 @@ class CouchUserMDPlugin(object):
         if user_doc:
             identity['user'] = user_doc
             identity['user_level'] = user_doc['level']
+            identity['user_active'] = user_doc.get('active', False)
             return True
         else:
             vgroup_list = getVisitingGroupByBoknr(model.holly_couch, user_name)

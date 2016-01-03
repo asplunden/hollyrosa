@@ -43,7 +43,7 @@ from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedu
 from booking_history import  remember_workflow_state_change
 from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level
 
-from hollyrosa.model.booking_couch import getAllUsers
+from hollyrosa.model.booking_couch import getAllUsers, getAllActiveUsers
 from hollyrosa.controllers.common_couch import getCouchDBDocument
 
 __all__ = ['User']
@@ -63,10 +63,12 @@ class User(BaseController):
     
     
     @expose('hollyrosa.templates.list_users')
-    @require(Any(has_level('pl'),  msg='Only PL can take a look at booking statistics'))
-    def show(self):
+    @validate(validators={'show_deactive':validators.StringBool(not_empty=False)})
+    @require(Any(has_level('staff'), has_level('pl'), msg='Only staff and pl may look at user listings'))
+    def show(self, show_deactive=False):
         """Show an overview of all users"""
-        all_users = [h.doc for h in getAllUsers(holly_couch)]
+        
+        all_users = [h.doc for h in getAllActiveUsers(holly_couch, show_deactive=show_deactive)]
         return dict(users=all_users)
         
 
@@ -74,39 +76,86 @@ class User(BaseController):
     @require(Any(has_level('pl'),  msg='Only PL can edit users right now'))
     def edit(self, user_id=''):
         """edit user properties"""
-        db_user_id = 'user.' + user_id
         tmpl_context.form = create_edit_user_form
-        user_o = getCouchDBDocument(holly_couch, db_user_id, doc_type='user') #, doc_subtype=None)
-        levels = ['viewer','staff','pl'] # todo: make parameter, perhaps in db
-        return dict(user=user_o, levels=levels)
+        user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
+        return dict(user=user_o)
+
+
+    @expose('hollyrosa.templates.edit_user')
+    @require(Any(has_level('pl'),  msg='Only PL can create users right now'))
+    def new(self, user_id=''):
+        """New user"""
+        user_id='' # safety measure since we get a user id from the user who requested a user creation
+        tmpl_context.form = create_edit_user_form
+        user_o = dict(type='user', level=['viewer'])
+        return dict(user=user_o)
 
          
     @expose()   
     @validate(validators={'_id':validators.UnicodeString(not_empty=False), 'user_name':validators.UnicodeString(not_empty=True), 'display_name':validators.UnicodeString(not_empty=True)})
     @require(Any(has_level('pl'),  msg='Only PL can save user properties right now'))
-    def save_user(self, _id='', display_name='', user_name='', level=''):
+    def save_user(self, _id='', display_name='', user_name=''):
         """edit user properties""" 
         if _id != '':
             user_o = getCouchDBDocument(holly_couch, _id, doc_type='user') #, doc_subtype=None)
         else:
-            user_o = dict(type='user', level=['viewer','staff'])
+            user_o = dict(type='user')
             _id = 'user.'+user_name
         user_o['display_name'] = display_name
         user_o['user_name'] = user_name
+        user_o['level'] = []
         
         holly_couch[_id] = user_o
         
         raise redirect('show')
     
     
+    
+    @expose()
+    @validate(validators={'user_id':validators.UnicodeString(not_empty=False), 'level':validators.UnicodeString(not_empty=True)})
+    @require(Any(has_level('pl'),  msg='Only PL can change user levels for other users'))
+    def set_level(self, user_id='', level=''):
+        user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
+        
+        # Rules for setting levels.
+        user_o['level'] = [level]
+        holly_couch[user_id] = user_o
+        
+        raise redirect('show')
+    
+    
+    @expose()
+    @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
+    @require(Any(has_level('pl'),  msg='Only PL can change user levels for other users'))
+    def deactivate(self, user_id=''):
+        user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
+        
+        # Rules for setting levels.
+        user_o['active'] = False
+        holly_couch[user_id] = user_o
+        
+        raise redirect('show')
+    
+    
+    @expose()
+    @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
+    @require(Any(has_level('pl'),  msg='Only PL can change user levels for other users'))
+    def activate(self, user_id=''):
+        user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
+        
+        # Rules for setting levels.
+        user_o['active'] = True
+        holly_couch[user_id] = user_o
+        
+        raise redirect('show')
+    
         
     @expose('hollyrosa.templates.change_password')
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('pl'),  msg='Only PL can change passwords'))    
     def change_password(self, user_id):
-        db_user_id = 'user.' + user_id
         tmpl_context.form = create_change_password_form
-        user_o = getCouchDBDocument(holly_couch, db_user_id, doc_type='user') #, doc_subtype=None)
+        user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
             
         return dict(user=dict(user_id=user_id), user_name=user_o['user_name'])
     

@@ -1,5 +1,5 @@
 """
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013, 2014, 2015, 2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -17,8 +17,6 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-# http://wiki.moxiecode.com/index.php/TinyMCE:Control_reference
-
 from tw.api import WidgetsList
 from tw.forms import TableForm, TextField, TextArea, HiddenField, CheckBox
 
@@ -34,9 +32,6 @@ class EditUserForm(TableForm):
         _id = HiddenField(validator=UnicodeString)
         user_name = TextField(validator=UnicodeString)
         display_name = TextField(validator=UnicodeString)
-        level = TextField()
         
         
-        
-
 create_edit_user_form = EditUserForm("create_edit_user_form")

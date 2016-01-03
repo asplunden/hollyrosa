@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2015 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -368,6 +368,9 @@ def getAllTags(holly_couch):
 
 def getAllUsers(holly_couch):
     return holly_couch.view('user/all_users', include_docs=True)
+
+def getAllActiveUsers(holly_couch, show_deactive=False):
+    return holly_couch.view('user/all_users', include_docs=True, startkey=[(not show_deactive), ''], endkey=[True, 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'])
     
 def getAllUtelunchBookings(holly_couch):
     return holly_couch.view('user/utelunch', include_docs=True)
