@@ -126,7 +126,7 @@ class User(BaseController):
         user_o['level'] = level_map.get(level,[])
         holly_couch[user_id] = user_o
         
-        raise redirect('show')
+        raise redirect(request.referrer)
     
     
     @expose()
@@ -139,7 +139,7 @@ class User(BaseController):
         user_o['active'] = False
         holly_couch[user_id] = user_o
         
-        raise redirect('show')
+        raise redirect(request.referrer)
     
     
     @expose()
@@ -152,7 +152,7 @@ class User(BaseController):
         user_o['active'] = True
         holly_couch[user_id] = user_o
         
-        raise redirect('show')
+        raise redirect(request.referrer)
     
         
     @expose('hollyrosa.templates.change_password')

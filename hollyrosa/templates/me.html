@@ -68,6 +68,15 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <body>
     <h2>Your Settings ${request.identity['user']['display_name']}</h2>
+    <div style="border:1px dotted black;">
+      Authorization: 
+      <ul><li py:for="l in request.identity['user']['level']">$l</li></ul>
+      Active: ${request.identity['user']['active']}
+    </div>
+    <ul>
+    	<li><a href="${tg.url('/user/change_password', params={'user_id':request.identity['user']['id']})}" >Change Password</a></li>
+		<li><a href="${tg.url('/history/show', params={'user_id':request.identity['user']['id']})}" >History</a></li>		
+    </ul>
     <p>
     <fieldset>
     <form>

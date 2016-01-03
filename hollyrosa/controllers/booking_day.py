@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2015 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -69,7 +69,7 @@ from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLogge
 from hollyrosa.controllers import common_couch
 from hollyrosa.model import holly_couch
 
-__all__ = ['BookingDay',  'Calendar']
+__all__ = ['BookingDay']
     
 
     
@@ -94,77 +94,7 @@ def getNextBookingDayId(holly_couch, booking_day):
     return bdays2[0].value
     
     
-class Calendar(BaseController):
-    def view(self, url):
-        """Abort the request with a 404 HTTP status code."""
-        abort(404)
-        
 
-    @expose('hollyrosa.templates.calendar_overview')
-    def overview_all(self):
-        """Show an overview of all booking days"""
-        return dict(booking_days=[b.doc for b in getAllBookingDays(holly_couch)])
-
-
-    @expose('hollyrosa.templates.calendar_overview')
-    def overview(self):
-        """Show an overview of all booking days"""
-        today = datetime.date.today().strftime('%Y-%m-%d')
-        return dict(booking_days=[b.doc for b in getBookingDays(holly_couch, from_date=today)])
-    
-
-    @expose('hollyrosa.templates.calendar_upcoming')
-    def upcoming(self):
-        """Show an overview of all booking days"""
-        today_date_str = datetime.date.today().strftime('%Y-%m-%d')
-        
-        end_date_str = (datetime.date.today()+datetime.timedelta(5)).strftime('%Y-%m-%d')
-
-        #today_date_str = '2012-08-01'
-        #end_date_str = '2012-08-04'
-        
-        booking_days = getBookingDays(holly_couch, from_date=today_date_str,  to_date=end_date_str) 
-
-
-        vgroups = getVisitingGroupsInDatePeriod(holly_couch, today_date_str,  end_date_str) # TODO: fix view later.  get_visiting_groups(from_date=today_date_str,  to_date=end_date_str)
-
-        group_info = dict()
-        bdays = list()
-        for tmp in booking_days:
-            b_day = tmp.doc
-            tmp_date_today_str = b_day['date']             
-            bdays.append(b_day)
-            
-            group_info[tmp_date_today_str] = dict(arrives=[v.doc for v in vgroups if v.doc.get('from_date','') == tmp_date_today_str], leaves=[v.doc for v in vgroups if v.doc.get('to_date','') == tmp_date_today_str], stays=[v.doc for v in vgroups if v.doc.get('to_date','') > tmp_date_today_str and v.doc.get('from_date','') < tmp_date_today_str])
-
-        return dict(booking_days=bdays, group_info=group_info)
-        
-        
-    @expose('hollyrosa.templates.booking_day_properties')
-    @validate(validators={'id':validators.Int(not_empty=True)})
-    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booking day properties'))
-    def edit_booking_day(self,  id=None,  **kw):
-        booking_day = common_couch.getBookingDay(holly_couch, id)
-        if not booking_day.has_key('title'):
-            booking_day['title'] = ''
-        tmpl_context.form = create_edit_booking_day_form
-        return dict(booking_day=booking_day,  usage='edit')
-        
-        
-    @validate(create_edit_booking_day_form, error_handler=edit_booking_day)      
-    @expose()
-    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booking day properties'))
-    def save_booking_day_properties(self,  _id=None,  note='', title='', num_program_crew_members=0,  num_fladan_crew_members=0):
-        
-        booking_day_c = common_couch.getBookingDay(holly_couch, _id)
-        booking_day_c['note'] = note
-        booking_day_c['title'] = title
-        booking_day_c['num_program_crew_members'] = num_program_crew_members
-        booking_day_c['num_fladan_crew_members'] = num_fladan_crew_members
-        holly_couch[_id]=booking_day_c
-        
-        raise redirect('/booking/day?day_id='+str(_id))
-        
 
         
 class BookingDay(BaseController):

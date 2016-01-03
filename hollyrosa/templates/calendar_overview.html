@@ -85,6 +85,19 @@ def makeDate(s):
 
    common_menu.add_menu_separator(menu);
    menu.addChild(new MenuItem({
+       label: "Edit...",
+       onClick: function(evt) {
+           var node = menu.currentTarget;
+           var bdayid = node.attributes["hollyrosa:bdayid"].value;
+           var ioq = {
+               id: bdayid
+               };
+           window.location = '${tg.url('/calendar/edit_booking_day')}' + '?' + ioQuery.objectToQuery(ioq);
+           }
+       }));
+   common_menu.add_menu_separator(menu);
+   
+   menu.addChild(new MenuItem({
        label: "Visiting groups this day",
        onClick: function(evt) {
            var node = menu.currentTarget;

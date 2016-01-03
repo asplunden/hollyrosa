@@ -240,14 +240,13 @@ class History(BaseController):
             vgroup = holly_couch[visiting_group_id]
             for_group_name = vgroup['name']
         elif user_id != '':
-            db_user_id = 'user.' + user_id
-            user_o = getCouchDBDocument(holly_couch, db_user_id, doc_type='user') #, doc_subtype=None)
+            user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
             history = self.getBookingHistoryForUser(holly_couch, user_o['display_name'])
             
             for_group_name = 'for user ' + user_o['display_name']
 
         else:
-            history = self.getBookingHistory(holly_couch, limit=25) 
+            history = self.getBookingHistory(holly_couch, limit=250) 
         return dict(history=history,  change_op_map=change_op_map, for_group_name=for_group_name)
         
 
