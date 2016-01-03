@@ -54,8 +54,9 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
     <h3>Visiting Group Attributes out-of-range</h3>
     <ul>
       <li><a href="${tg.url('sanity_check_property_usage')}">Check</a></li>
-      <li><a href="${tg.url('/user/show')}">list all users</a></li>
-    </ul>
+      <li><a href="${tg.url('/user/show')}">List all Active Users</a></li>
+		<li><a href="${tg.url('/user/show', params={'show_deactive':True})}">List all Users</a></li>
+	</ul>
 <!--    <h3>Transfer to booking treeware template</h3>
     <form name="create_program_day" action="${tg.url('make_program_day_doc')}" method="post" enctype="multipart/form-data">
         <input type="file" name="file" id="file"/>

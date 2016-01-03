@@ -118,7 +118,12 @@ class User(BaseController):
         user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
         
         # Rules for setting levels.
-        user_o['level'] = [level]
+        level_map = dict()
+        level_map['viewer'] = ['viewer']
+        level_map['staff'] = ['viewer','staff']
+        level_map['pl'] = ['viewer','staff','pl']
+        
+        user_o['level'] = level_map.get(level,[])
         holly_couch[user_id] = user_o
         
         raise redirect('show')
