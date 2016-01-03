@@ -227,7 +227,7 @@ function loadNotesFor(id) {
     });
     
     
-    var agroups = ${"[" + ','.join( ['["'+a.id + '", "' + a.title +'"]' for a in visiting_group_types]   )   + "]"};           
+    var vgtgroups = ${"[" + ','.join( ['["'+a.id + '", "' + a.title +'"]' for a in visiting_group_types]   )   + "]"};           
          
     var vgt_status = common_menu.load_ag_checkbox_status();         
            
@@ -237,7 +237,7 @@ function loadNotesFor(id) {
                });
                
          
-    array.forEach(agroups, function(a) {
+    array.forEach(vgtgroups, function(a) {
         common_menu.add_ag_checkbox_menu_item(view_vgt_menu, a[1], a[0], vgt_status, common_menu.update_visiting_group_type_visible_rows);	         
     });
          

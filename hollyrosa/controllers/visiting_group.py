@@ -91,7 +91,7 @@ class VisitingGroup(BaseController):
         visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(holly_couch, from_date,  to_date)]
         v_group_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=fromdate,  to_date=todate)
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)        
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch))
 
     
     @expose('hollyrosa.templates.visiting_group_view_all')
@@ -101,7 +101,7 @@ class VisitingGroup(BaseController):
         visiting_groups = [v.doc for v in getDocumentsByTag(holly_couch, tag)] 
         remaining_visiting_groups_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups)
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  vodb_state_map=bokn_status_map,  program_state_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map)
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  vodb_state_map=bokn_status_map,  program_state_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch))
 
     
     @expose('hollyrosa.templates.visiting_group_view_all')
@@ -194,7 +194,7 @@ class VisitingGroup(BaseController):
         visiting_groups = [v.doc for v in getVisitingGroupsAtDate(holly_couch, at_date)] 
         v_group_map = {} #self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=at_date,  to_date=at_date)        
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)         
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map, program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, has_notes_map=has_notes_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)])
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map, program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, has_notes_map=has_notes_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], visiting_group_types=getVisitingGroupTypes(holly_couch))
 
 
     @expose('hollyrosa.templates.visiting_group_view_all')
@@ -204,7 +204,7 @@ class VisitingGroup(BaseController):
         visiting_groups = [v.doc for v in getVisitingGroupsAtDate(holly_couch, at_date)] 
         v_group_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=at_date,  to_date=at_date)
         has_notes_map = getTargetNumberOfNotesMap(holly_couch) 
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map, program_state_map=bokn_status_map)
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=v_group_map.keys(), bokn_status_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map, program_state_map=bokn_status_map, visiting_group_types=getVisitingGroupTypes(holly_couch))
 
 
     @expose("json")
