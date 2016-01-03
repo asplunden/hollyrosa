@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013, 2014, 2015, 2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -44,6 +44,7 @@ from booking_history import  remember_workflow_state_change
 from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level
 
 from hollyrosa.model.booking_couch import getAllUsers
+from hollyrosa.controllers.common_couch import getCouchDBDocument
 
 __all__ = ['User']
 
@@ -73,8 +74,9 @@ class User(BaseController):
     @require(Any(has_level('pl'),  msg='Only PL can edit users right now'))
     def edit(self, user_id=''):
         """edit user properties"""
-        tmpl_context.form = create_edit_user_form        
-        user_o = holly_couch[user_id]
+        db_user_id = 'user.' + user_id
+        tmpl_context.form = create_edit_user_form
+        user_o = getCouchDBDocument(holly_couch, db_user_id, doc_type='user') #, doc_subtype=None)
         levels = ['viewer','staff','pl'] # todo: make parameter, perhaps in db
         return dict(user=user_o, levels=levels)
 
@@ -85,7 +87,7 @@ class User(BaseController):
     def save_user(self, _id='', display_name='', user_name='', level=''):
         """edit user properties""" 
         if _id != '':
-            user_o = holly_couch[_id]
+            user_o = getCouchDBDocument(holly_couch, _id, doc_type='user') #, doc_subtype=None)
         else:
             user_o = dict(type='user', level=['viewer','staff'])
             _id = 'user.'+user_name
@@ -94,7 +96,6 @@ class User(BaseController):
         
         holly_couch[_id] = user_o
         
-#       levels = ['viewer','staff','pl'] # todo: make parameter, perhaps in db
         raise redirect('show')
     
     
@@ -103,11 +104,9 @@ class User(BaseController):
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('pl'),  msg='Only PL can change passwords'))    
     def change_password(self, user_id):
+        db_user_id = 'user.' + user_id
         tmpl_context.form = create_change_password_form
-        user_o = holly_couch[user_id]
-        
-        if not user_o['type'] == 'user':
-            raise IOError, 'document must be of type user'
+        user_o = getCouchDBDocument(holly_couch, db_user_id, doc_type='user') #, doc_subtype=None)
             
         return dict(user=dict(user_id=user_id), user_name=user_o['user_name'])
     
@@ -119,11 +118,8 @@ class User(BaseController):
         if not password==password2:
             raise IOError, 'passwords must agree'
  
- 
-        s = holly_couch[user_id]
-        if not s['type'] == 'user':
-            raise IOError, 'document must be of type user'
-
+        s = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
+    
         # todo make salt part of development.ini
         h = hashlib.sha256('gninyd') # salt
         h.update(password)

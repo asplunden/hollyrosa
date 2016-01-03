@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, 2012, 2013, 2014 Martin Eliasson
+ * Copyright 2011, 2012, 2013, 2014, 2015, 2016 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *
@@ -98,6 +98,21 @@
                    var ioq = {
                        booking_id: bid,
                        return_to_day_id: node.attributes["hollyrosa:bdayid"].value
+                   };
+               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+               }
+           })); 
+	}
+	
+	
+	function add_user_management_op_menu_item(a_menu, a_sub_menu, a_name, a_url) {
+        a_sub_menu.addChild(new MenuItem({
+               label: a_name,
+               onClick: function(evt) {
+                   var node = a_menu.currentTarget;
+                   var user_id = node.attributes["hollyrosa:userid"].value;
+                   var ioq = {
+                       user_id: user_id
                    };
                window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
                }
@@ -324,12 +339,13 @@
 	
 	return {
 		add_redirect_menu_item:add_redirect_menu_item, 
-        add_call_function_menu_item:add_call_function_menu_item,
-	    add_vgid_redirect_menu_item:add_vgid_redirect_menu_item, 
-	    add_note_redirect_menu_item:add_note_redirect_menu_item, 
-	    add_list_bookings_redirect_menu_item:add_list_bookings_redirect_menu_item, 
+      add_call_function_menu_item:add_call_function_menu_item,
+	   add_vgid_redirect_menu_item:add_vgid_redirect_menu_item, 
+	   add_note_redirect_menu_item:add_note_redirect_menu_item, 
+	   add_list_bookings_redirect_menu_item:add_list_bookings_redirect_menu_item, 
 		add_change_booking_state_menu_item:add_change_booking_state_menu_item, state_change_list:state_change_list, 
 		add_booking_op_menu_item:add_booking_op_menu_item, add_visiting_group_menu_item:add_visiting_group_menu_item,
+      add_user_management_op_menu_item:add_user_management_op_menu_item,		
 		add_visiting_group_add_note_menu_item:add_visiting_group_add_note_menu_item, 
 		add_visiting_group_list_bookings_menu_item:add_visiting_group_list_bookings_menu_item,
 		add_booking_op_menu_item_for_block:add_booking_op_menu_item_for_block,

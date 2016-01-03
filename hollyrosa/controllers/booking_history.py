@@ -29,6 +29,7 @@ from hollyrosa.model import holly_couch
 from sqlalchemy import and_
 import datetime,  types
 from hollyrosa.controllers.common import workflow_map,  getFormatedDate,  getLoggedInDisplayName,  change_op_map,  change_op_lookup,  has_level
+from hollyrosa.controllers.common_couch import getCouchDBDocument
 
 __all__ = ['History']
 
@@ -202,6 +203,7 @@ def remember_ignore_booking_warning(holly_couch, booking=None, slot_row_position
     
     remember_booking_change(holly_couch, booking_id=booking.id, visiting_group_id=booking['visiting_group_id'], change_op=1,  change_text=text,  changed_by=changed_by,  booking_day_id=booking_day.id)
 
+
 class History(BaseController):
     def view(self, url):
         """Abort the request with a 404 HTTP status code."""
@@ -238,10 +240,11 @@ class History(BaseController):
             vgroup = holly_couch[visiting_group_id]
             for_group_name = vgroup['name']
         elif user_id != '':
-
-            history = self.getBookingHistoryForUser(holly_couch, user_id)
+            db_user_id = 'user.' + user_id
+            user_o = getCouchDBDocument(holly_couch, db_user_id, doc_type='user') #, doc_subtype=None)
+            history = self.getBookingHistoryForUser(holly_couch, user_o['display_name'])
             
-            for_group_name = 'for user ' + str(user_id)
+            for_group_name = 'for user ' + user_o['display_name']
 
         else:
             history = self.getBookingHistory(holly_couch, limit=25) 

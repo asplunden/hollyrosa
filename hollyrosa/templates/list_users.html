@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010, 2011, 2012, 2013, 2014, 2015, 2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -20,7 +20,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
 
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:hollyrosa="http://asplunden.org/guldkant/hollyrosa" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <xi:include href="master.html" />
 
@@ -28,28 +28,63 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Show users</title>
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
+  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
+  <script>
+   require(["common_menu","dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dijit/CheckedMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/ready"], function(common_menu, array, Menu, MenuItem, PopupMenuItem, CheckedMenuItem, xq, ioQuery, ready) {
+ 
+   
+   ready(function() {
+   
+		var menu = new Menu({
+      	targetNodeIds: ["user_listing"],
+         selector: "tr.active_user",
+         leftClickToOpen: common_menu.load_left_click_menu()
+/*         
+         onOpen: function(evt) {
+                   var node = menu.currentTarget;
+                   var locked = node.attributes["hollyrosa:lock"].value;
+               		console.log( locked );
+               		
+               	 if (locked == 'block') {
+                   	 menu_new_booking_choice.disabled=true;
+                      menu_block_slot_choice.disabled = true;
+                      menu_unblock_slot_choice.disabled = false;               	 
+               	 } else {
+                    	 menu_new_booking_choice.disabled=false;
+                      menu_block_slot_choice.disabled = false;
+                      menu_unblock_slot_choice.disabled = true;   
+               	 }
+           }*/
+		});
+           
+      
+      common_menu.add_user_management_op_menu_item(menu, menu, "Edit...", '${tg.url('edit')}');
+      common_menu.add_user_management_op_menu_item(menu, menu, "Change Password...", '${tg.url('change_password')}');
+      common_menu.add_user_management_op_menu_item(menu, menu, "History", '${tg.url('/history/show')}');		      
+      common_menu.add_menu_separator(menu);	
+			 
+           
+                   
+       }); /* end ready */
+                 
+}); /* end require */
+</script>
   
 </head>
 
-<body>
+<body class="tundra">
     <h2>Show users</h2>
     <a href="${tg.url('edit')}">New user</a>
     
-    <table class="data">
+    <table class="data" id="user_listing">
         <tr>
             <th>user name</th><th>display name</th><th>level</th><th>op</th>
         </tr>
-        <tr py:for="u in users">
-            <td class="data info">${u.user_name}
-              <ul class="any_menu context_inline_menu">
-                <li><a href="${tg.url('edit', {'user_id':u.id})}">edit</a></li>
-                <li><a href="${tg.url('change_password', {'user_id':u.id})}">change password</a></li>
-                <li><a href="${tg.url('/history/show', {'user_id':u.display_name})}">history</a></li> 
-              </ul>            
-            </td>
-            <td class="data info">${u.display_name}</td>
-            <td class="data info"><ul py:for="l in u.level"><li>${l}</li></ul></td>
-            <td class="data info"></td>
+        <tr py:for="u in users" class="active_user" hollyrosa:userid="${u.user_name}">
+            <td class="data info context_menu_symbol" >${u.user_name}</td>
+            <td class="data info context_menu_symbol">${u.display_name}</td>
+            <td class="data info context_menu_symbol"><ul py:for="l in u.level"><li>${l}</li></ul></td>
+            <td class="data info context_menu_symbol"></td>
         </tr>    
     </table>
 </body>
