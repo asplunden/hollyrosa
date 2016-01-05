@@ -31,7 +31,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
 
-require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dijit/Dialog", "dojo/ready"], function(edit_booking, dom, on, xhr, Memory, FilteringSelect, Dialog, ready) { 
+require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/Button", "dijit/form/FilteringSelect", "dijit/Dialog", "dojo/ready"], function(edit_booking, dom, on, xhr, Memory, Button, FilteringSelect, Dialog, ready) { 
 
 function get_visiting_group_data_from_XHR_helper(visiting_group_id, value) {
     xhr("${tg.url('/visiting_group/show_visiting_group_data')}", {
@@ -71,6 +71,22 @@ function set_activity_id(value) {
 	edit_booking.set_form_field_value('create_edit_new_booking_request_form_activity_id', value);
 }
 
+
+/**
+http://stackoverflow.com/questions/3844995/preventing-form-submission-with-dojo
+**/
+function validate_form(evt, filtering_select) {
+
+	if (!filtering_select.validate()) {
+			alert("checking failed");
+			evt.preventDefault();			
+			//evt.stop();
+			return false;
+	}
+	return true;
+}
+
+
 ready(function(){
 	 //...this sets up dojo handling changes to visiting group select field
     var elem = dom.byId('create_edit_new_booking_request_form_visiting_group_id');
@@ -108,11 +124,18 @@ ready(function(){
         searchAttr: "name"
     }, "create_edit_new_booking_request_form_activity_name");
     
+//    var submit_button_elem = dom.byId("create_edit_new_booking_request_form_submit");
+//    on(submit_button_elem, "click", function(evt) { return validate_form(evt, filteringSelect); }  );
+    
+    var submit_button_elem = dom.byId("create_edit_new_booking_request_form");
+    on(submit_button_elem, "submit", function(evt) { return validate_form(evt, filteringSelect); }  );
+    
 });
 
 
 });
 </script>
+
 </head>
 
 <body class="tundra">
