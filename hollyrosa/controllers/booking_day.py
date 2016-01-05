@@ -1000,7 +1000,7 @@ class BookingDay(BaseController):
         
         #...patch since this is the way we will be called if validator for new will fail
         if (visiting_group_id != '') and (visiting_group_id != None):
-            booking_o = DataContainer(id='', content='', visiting_group_id = visiting_group_id, visiting_group_name=tmp_visiting_group['name'])
+            booking_o = DataContainer(id='', content='', visiting_group_id = visiting_group_id, visiting_group_name=tmp_visiting_group['name'], activity_id='')
             edit_this_visiting_group = 0 #visiting_group_id
         elif booking_id=='' or booking_id==None:
             booking_o = DataContainer(id='', content='')
@@ -1016,7 +1016,7 @@ class BookingDay(BaseController):
         
         activity_entries = json.dumps( [dict(name=a[1], id=a[0]) for a in activities] )
         visiting_group_options = json.dumps([dict(name=a[1], id=a[0]) for a in visiting_groups] )
-        return dict(visiting_groups=visiting_groups,  activities=activities, booking=booking_o,  edit_this_visiting_group=edit_this_visiting_group, activity_entries=activity_entries, visiting_group_options=visiting_group_options)
+        return dict(visiting_groups=visiting_groups, activities=activities, booking=booking_o,  edit_this_visiting_group=edit_this_visiting_group, activity_entries=activity_entries, visiting_group_options=visiting_group_options)
         
         
     @expose('hollyrosa.templates.move_booking')

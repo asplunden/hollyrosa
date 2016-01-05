@@ -98,27 +98,11 @@ function validate_form(evt, activity_select, visiting_group_filtering_select) {
 
 ready(function(){
 	 //...this sets up dojo handling changes to visiting group select field
-    //var elem = dom.byId('create_edit_new_booking_request_form_visiting_group_id');
-    //on( elem, "change", propagate_selected_value);
-    //on( elem, "change", get_visiting_group_data_from_XHR);
     on( dom.byId('fromdate_href'), "click", transfer_from_date);
     on( dom.byId('todate_href'), "click", transfer_to_date);
     
     is_new_booking = '0' == '${edit_this_visiting_group}' ;
-    if ( ! is_new_booking ) {
-      get_visiting_group_data_from_XHR_helper('${edit_this_visiting_group}');
-    } else {
-        //...load N/A group (should be the first in the list)
-        /* TODO: fix in antorher way::: value = elem.options[elem.selectedIndex].text;
-        edit_booking.set_form_field_value('create_edit_new_booking_request_form_visiting_group_name', value);
-        id_value = elem.options[elem.selectedIndex].value;
-        
-        
-        get_visiting_group_data_from_XHR_helper(value, id_value);
-        
-        */
-    }
-    
+    get_visiting_group_data_from_XHR_helper('${booking.visiting_group_id}');
     
     //...set up filtering select for activity
     var visiting_group_options = ${visiting_group_options};
@@ -129,7 +113,7 @@ ready(function(){
     var visiting_group_filtering_select = new FilteringSelect({
         id: "create_edit_new_booking_request_form_visiting_group_name",
         name: "create_edit_new_booking_request_form_visiting_group_name",
-        value: "",
+        value: "${booking.visiting_group_id}",
         onChange: function(value) {
         		set_visiting_group_id(value);
     			},
@@ -148,7 +132,7 @@ ready(function(){
     var activity_filtering_select = new FilteringSelect({
         id: "create_edit_new_booking_request_form_activity_name",
         name: "create_edit_new_booking_request_form_activity_name",
-        value: "NA",
+        value: "${booking.activity_id}",
         onChange: function(value) {
         		set_activity_id(value);
     			},
