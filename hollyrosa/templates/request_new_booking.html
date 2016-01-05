@@ -64,21 +64,8 @@ function transfer_to_date(event) {
     date_elem = dom.byId("visiting_group_data_todate");
     date = date_elem.innerHTML;
     dom.byId("create_edit_new_booking_request_form_valid_to").value = date;
-}
+}  
 
-
-var myDialog = new Dialog({
-        title: "My Dialog",
-        content: "Test content.",
-        style: "width: 300px"
-    });
-    
-  
-
-
-function show_activity_alternatives(event) {
-myDialog.show();
-}
 
 function set_activity_id(value) {
 	edit_booking.set_form_field_value('create_edit_new_booking_request_form_activity_id', value);
@@ -104,33 +91,12 @@ ready(function(){
     }
     
     
-    //...set up some kind of callback when user clicks the activity_name field
-    
-    var activity_name_elem = dom.byId('create_edit_new_booking_request_form_activity_name');
-    on( activity_name_elem, "click", show_activity_alternatives );
-    
-    
-    var activity_entries = ${activity_entries}; 
-    
-//...add inner content like a entry field
-var stateStore = new Memory({
+    //...set up filtering select for activity
+    var activity_entries = ${activity_entries};
+	 var stateStore = new Memory({
         data:activity_entries });
-        /* [
-            {name:"Alabama", id:"AL"},
-            {name:"Alaska", id:"AK"},
-            {name:"American Samoa", id:"AS"},
-            {name:"Arizona", id:"AZ"},
-            {name:"Arkansas", id:"AR"},
-            {name:"Armed Forces Europe", id:"AE"},
-            {name:"Armed Forces Pacific", id:"AP"},
-            {name:"Armed Forces the Americas", id:"AA"},
-            {name:"California", id:"CA"},
-            {name:"Colorado", id:"CO"},
-            {name:"Connecticut", id:"CT"},
-            {name:"Delaware", id:"DE"}
-        ]
-    });
-*/
+
+
     var filteringSelect = new FilteringSelect({
         id: "create_edit_new_booking_request_form_activity_name",
         name: "state",
@@ -140,15 +106,7 @@ var stateStore = new Memory({
     			},
         store: stateStore,
         searchAttr: "name"
-    }, "create_edit_new_booking_request_form_activity_name");//.startup();//placeAt(myDialog);
-		
-		// how do we make name and id propagate the right way ???
-	//on(filteringSelect, "change", function() { set_activity_id(filteringSelect) } ); 
-    
-    
-   
-    
-    
+    }, "create_edit_new_booking_request_form_activity_name");
     
 });
 

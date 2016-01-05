@@ -35,7 +35,7 @@ http://turbogears.org/2.0/docs/main/Auth/Authorization.html#module-repoze.what.p
 
 import datetime, logging, json
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 from tg import expose, flash, require, url, request, redirect,  validate,  override_template
 
@@ -1123,8 +1123,10 @@ class BookingDay(BaseController):
         is_new= ((id ==None) or (id==''))
         
         if is_new:
-            new_booking = common_couch.createEmptyProgramBooking() # dict(type='booking',  subtype='program',  booking_day_id='', slot_id='') 
+            new_booking = common_couch.createEmptyProgramBooking()
+            log.debug('Is New')
         else:
+            log.debug('Is NOT!! New')
             new_booking = common_couch.getBooking(holly_couch,  id)
             tmp_activity = common_couch.getActivity(holly_couch,  new_booking['activity_id'])
             old_booking = DataContainer(activity=tmp_activity, activity_id=new_booking['activity_id'], visiting_group_name=new_booking['visiting_group_name'], visiting_group_id=new_booking['visiting_group_id'],  valid_from=new_booking['valid_from'],  valid_to=new_booking['valid_to'],  requested_date=new_booking['requested_date'],  content=new_booking['content'],  id=new_booking['_id'])
@@ -1155,13 +1157,16 @@ class BookingDay(BaseController):
         #raise IOError,  "%s %s %s" % (str(requested_date),  str(valid_from),  str(valid_to))
         
         if is_new:
+            log.debug('Is New 2')
             holly_couch[genUID(type='booking')] = new_booking
             remember_new_booking_request(holly_couch, new_booking)
         else:
             holly_couch[id] = new_booking
 
             remember_booking_request_change(holly_couch, old_booking=old_booking,  new_booking=new_booking)
-            
+    
+    
+        
         if return_to_day_id != None:
             if return_to_day_id != '':
                 raise redirect('/booking/day?day_id='+str(return_to_day_id)) 

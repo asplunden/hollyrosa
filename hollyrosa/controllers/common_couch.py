@@ -111,7 +111,7 @@ def getLayerText(holly_couch,  layer_text_id):
 
 
 def createEmptyProgramBooking(valid_from='',  valid_to='',  requested_date='',  subtype='program'):
-    return dict(type='booking', subtype=subtype,  valid_from=valid_from,  valid_to=valid_to,  requested_date=requested_date)
+    return dict(type='booking', subtype=subtype,  valid_from=valid_from,  valid_to=valid_to,  requested_date=requested_date, booking_day_id="", slot_id="")
     
     
 def makeHouseBooking():
