@@ -201,6 +201,9 @@ function navigation_calendar_clicked(x) {
                });
                
          
+   		common_menu.add_transfer_map_function_menu_item(view_ag_menu, view_ag_menu, "Edit day info...", '${tg.url('/calendar/edit_booking_day')}', ['booking_day_id']);
+         common_menu.add_menu_separator(view_ag_menu);      
+         
          array.forEach(agroups, function(a) {
 				common_menu.add_ag_checkbox_menu_item(view_ag_menu, a[1], a[0], ag_status, common_menu.update_activity_group_visible_rows);	         
          });
@@ -226,12 +229,12 @@ function navigation_calendar_clicked(x) {
         	</ul>
     </div>
    
-    <h2 id="view_ag_menu" class="context_menu_symbol">Program Day ${reFormatDate(booking_day.date)}</h2>
+    <h2 class="more_menu_symbol" style="width:20em;" id="view_ag_menu" hollyrosa:booking_day_id="${booking_day.id}">Program Day ${reFormatDate(booking_day.date)}</h2>
 
-    <div class="note context_menu_symbol" id="main_note"><h2>${booking_day.get('title','')}</h2>
+    <div class="note" id="main_note" style="min-height:10em;"><h2>${booking_day.get('title','')}</h2>
     <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day.events">$e</li></ul>${HTML(booking_day.note)}
     <br/>
-    <a href="${tg.url('/calendar/edit_booking_day',params={'id':booking_day.id})}">edit</a>
+    <!-- <a href="${tg.url('/calendar/edit_booking_day',params={'id':booking_day.id})}">edit</a> -->
     </div>
 
   

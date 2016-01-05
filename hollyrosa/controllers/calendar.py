@@ -98,10 +98,10 @@ class Calendar(BaseController):
         
         
     @expose('hollyrosa.templates.booking_day_properties')
-    @validate(validators={'id':validators.Int(not_empty=True)})
-    @require(Any(is_user('root'), has_level('staff'), has_level('viewer'), msg='Only staff members may change booking day properties'))
-    def edit_booking_day(self,  id=None,  **kw):
-        booking_day = common_couch.getBookingDay(holly_couch, id)
+    @validate(validators={'booking_day_id':validators.Int(not_empty=True)})
+    @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change booking day properties'))
+    def edit_booking_day(self, booking_day_id=None,  **kw):
+        booking_day = common_couch.getBookingDay(holly_couch, booking_day_id)
         if not booking_day.has_key('title'):
             booking_day['title'] = ''
         tmpl_context.form = create_edit_booking_day_form

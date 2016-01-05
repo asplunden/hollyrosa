@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, 2012, 2013, 2014, 2015, 2016 Martin Eliasson
+ * Copyright 2010-2016 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *
@@ -147,6 +147,22 @@
            }));
     }
     
+    
+    function add_transfer_map_function_menu_item(a_menu, a_sub_menu, a_name, a_url, param_list) {
+    	return add_call_function_menu_item(a_menu, a_sub_menu, a_name, function(evt) {
+    		var node = a_menu.currentTarget;
+    		var ioq = {};
+    		array.forEach(param_list, function(param_name) {
+    			ioq[param_name] = node.attributes["hollyrosa:"+param_name].value;
+    		
+    			});
+    		     
+          console.log(a_url + '?' + ioQuery.objectToQuery(ioq));
+          window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+    	
+    		});
+    }
+    
 	
 	function add_booking_op_menu_item_for_block(a_menu, a_sub_menu, a_name, a_url, a_subtype) {
    	var menu_item =new MenuItem({
@@ -160,7 +176,7 @@
                        subtype:a_subtype,
                        booking_day_id: node.attributes["hollyrosa:bdayid"].value
                    };
-               console.log(a_url + '?' + ioQuery.objectToQuery(ioq));
+               //console.log(a_url + '?' + ioQuery.objectToQuery(ioq));
                window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
                }
            });
@@ -398,7 +414,8 @@
 		vodb_state_change_list:program_state_change_list, user_level_change_list:user_level_change_list,
         add_calc_sheet_redirect_menu_item:add_calc_sheet_redirect_menu_item,
         program_state_map:program_state_map, vodb_state_map:vodb_state_map,
-        update_visiting_group_type_visible_rows:update_visiting_group_type_visible_rows
+        update_visiting_group_type_visible_rows:update_visiting_group_type_visible_rows,
+        add_transfer_map_function_menu_item:add_transfer_map_function_menu_item
 		  };
 	});
 	

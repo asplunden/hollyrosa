@@ -90,7 +90,7 @@ def makeDate(s):
            var node = menu.currentTarget;
            var bdayid = node.attributes["hollyrosa:bdayid"].value;
            var ioq = {
-               id: bdayid
+               booking_day_id: bdayid
                };
            window.location = '${tg.url('/calendar/edit_booking_day')}' + '?' + ioQuery.objectToQuery(ioq);
            }

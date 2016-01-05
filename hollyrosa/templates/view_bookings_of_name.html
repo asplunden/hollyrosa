@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -135,7 +135,7 @@ ready(function() {
 
 <body class="tundra">
     <div py:if="show_group==1">
-    <h2>${name}</h2>
+    <h2 class="more_menu_symbol" style="width:30em;">${name}</h2>
     <p>${formatDate(visiting_group.from_date)} to ${formatDate(visiting_group.to_date)}</p>
     <div class="note" >
       <div class="tag_list">
@@ -172,7 +172,7 @@ ready(function() {
     
     </div> <!-- end  show group info -->
     
-    <h2 id="visiting_group_menu" class="context_menu_symbol">Program Bookings for ${name}</h2>
+    <h2 id="visiting_group_menu" class="more_menu_symbol" style="width:30em;">Program Bookings for ${name}</h2>
     <div py:if="show_group!=1"> <!-- else show group info (tags) -->
         <div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul></div>
     </div> <!-- end else -->
@@ -210,7 +210,7 @@ ready(function() {
         
 	</div>
 	<div py:if="len(booking_info_notes)" style="border: 1px dashed red; padding:1em;margin:2em;">
-   <h2>Att t채nka p책</h2>
+   <h2>Att tänka på</h2>
        <div py:for="n in booking_info_notes" style="padding:2em;">${HTML(n.get('text','missing text for note %s' % n['_id']))}</div>
    </div>
 </body>
