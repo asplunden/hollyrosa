@@ -618,9 +618,9 @@ class BookingDay(BaseController):
         slot_map= getSchemaSlotActivityMap(holly_couch, booking_day,  subtype=subtype)
         slot = slot_map[slot_id]        
         activity = common_couch.getActivity(holly_couch,  slot['activity_id']) 
-        booking_o = DataContainer(content='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_id=slot_id)
-        
-        return dict(booking_day=booking_day, booking=booking_o, visiting_groups=visiting_groups, edit_this_visiting_group=0,  slot_position=slot)
+        booking_o = DataContainer(content='', visiting_group_id='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_id=slot_id)
+        visiting_group_options = json.dumps([dict(name=a[1], id=a[0]) for a in visiting_groups] )
+        return dict(booking_day=booking_day, booking=booking_o, visiting_groups=visiting_groups, edit_this_visiting_group=0,  slot_position=slot,visiting_group_options=visiting_group_options)
 
 
     def getEndSlotIdOptions(self,  living_schema_id,  activity_id):
@@ -778,6 +778,14 @@ class BookingDay(BaseController):
         #   for a programe booking, booking day id decides the date but on room bookings (live) it's the oposite.
         #   booking_date determines booking_day_id
         
+        #...find visiting group and if id doesent exist it indicates we should use N/A group
+        if visiting_group_id == '':
+            visiting_group_id = self.getN_A_VisitingGroupId(holly_couch)
+            
+        vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+            
+            
+        #...if new booking
         if is_new:
             old_booking = common_couch.createEmptyProgramBooking(subtype=subtype)
             
@@ -792,10 +800,10 @@ class BookingDay(BaseController):
             old_booking['booking_day_id'] = booking_day_id
                 
                 
-            if visiting_group_id !=None:
-                vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+            if visiting_group_id != '':
                 old_booking['valid_from'] = vgroup['from_date']
                 old_booking['valid_to'] = vgroup['to_date']
+            
         else: # saving to existing booking
             old_booking = common_couch.getBooking(holly_couch,  id)
             
@@ -814,7 +822,7 @@ class BookingDay(BaseController):
         old_booking['visiting_group_id'] = visiting_group_id
         old_booking['last_changed_by_id'] = getLoggedInUserId(request)
         old_booking['content'] = content
-        old_booking['cache_content'] = computeCacheContent(common_couch.getVisitingGroup(holly_couch,  visiting_group_id), content)
+        old_booking['cache_content'] = computeCacheContent(vgroup, content)
         
             
         #...make sure activity is set
