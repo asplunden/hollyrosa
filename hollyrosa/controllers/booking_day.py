@@ -1013,7 +1013,8 @@ class BookingDay(BaseController):
         booking_o.return_to_day_id = return_to_day_id
         
         activity_entries = json.dumps( [dict(name=a[1], id=a[0]) for a in activities] )
-        return dict(visiting_groups=visiting_groups,  activities=activities, booking=booking_o,  edit_this_visiting_group=edit_this_visiting_group, activity_entries=activity_entries)
+        visiting_group_options = json.dumps([dict(name=a[1], id=a[0]) for a in visiting_groups] )
+        return dict(visiting_groups=visiting_groups,  activities=activities, booking=booking_o,  edit_this_visiting_group=edit_this_visiting_group, activity_entries=activity_entries, visiting_group_options=visiting_group_options)
         
         
     @expose('hollyrosa.templates.move_booking')

@@ -31,9 +31,9 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
 
-require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/Button", "dijit/form/FilteringSelect", "dijit/Dialog", "dojo/ready"], function(edit_booking, dom, on, xhr, Memory, Button, FilteringSelect, Dialog, ready) { 
+require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/ComboBox", "dijit/form/FilteringSelect", "dijit/Dialog", "dojo/ready"], function(edit_booking, dom, on, xhr, Memory, ComboBox, FilteringSelect, Dialog, ready) { 
 
-function get_visiting_group_data_from_XHR_helper(visiting_group_id, value) {
+function get_visiting_group_data_from_XHR_helper(value) {
     xhr("${tg.url('/visiting_group/show_visiting_group_data')}", {
     handleAs:"json",
     method:"GET",
@@ -42,14 +42,21 @@ function get_visiting_group_data_from_XHR_helper(visiting_group_id, value) {
 
 
 function get_visiting_group_data_from_XHR(visiting_group_id) {
-    var value = this.options[this.selectedIndex].value;
-    get_visiting_group_data_from_XHR_helper(visiting_group_id, value);
+    //var value = this.options[this.selectedIndex].value;
+    get_visiting_group_data_from_XHR_helper(visiting_group_id);
 }
 
 
+/* deprecated
 function propagate_selected_value() {
     var value = this.options[this.selectedIndex].text;
     edit_booking.set_form_field_value('create_edit_new_booking_request_form_visiting_group_name', value);
+}
+*/
+
+function set_visiting_group_id(value) {
+    edit_booking.set_form_field_value('create_edit_new_booking_request_form_visiting_group_id', value);
+    get_visiting_group_data_from_XHR(value, value);
 }
 
 
@@ -79,8 +86,7 @@ function validate_form(evt, filtering_select) {
 
 	if (!filtering_select.validate()) {
 			alert("checking failed");
-			evt.preventDefault();			
-			//evt.stop();
+			evt.preventDefault();
 			return false;
 	}
 	return true;
@@ -89,46 +95,66 @@ function validate_form(evt, filtering_select) {
 
 ready(function(){
 	 //...this sets up dojo handling changes to visiting group select field
-    var elem = dom.byId('create_edit_new_booking_request_form_visiting_group_id');
-    on( elem, "change", propagate_selected_value);
-    on( elem, "change", get_visiting_group_data_from_XHR);
+    //var elem = dom.byId('create_edit_new_booking_request_form_visiting_group_id');
+    //on( elem, "change", propagate_selected_value);
+    //on( elem, "change", get_visiting_group_data_from_XHR);
     on( dom.byId('fromdate_href'), "click", transfer_from_date);
     on( dom.byId('todate_href'), "click", transfer_to_date);
     
     is_new_booking = '0' == '${edit_this_visiting_group}' ;
     if ( ! is_new_booking ) {
-      get_visiting_group_data_from_XHR_helper('${edit_this_visiting_group}', '${edit_this_visiting_group}');
+      get_visiting_group_data_from_XHR_helper('${edit_this_visiting_group}');
     } else {
         //...load N/A group (should be the first in the list)
-        value = elem.options[elem.selectedIndex].text;
+        /* TODO: fix in antorher way::: value = elem.options[elem.selectedIndex].text;
         edit_booking.set_form_field_value('create_edit_new_booking_request_form_visiting_group_name', value);
         id_value = elem.options[elem.selectedIndex].value;
+        
+        
         get_visiting_group_data_from_XHR_helper(value, id_value);
+        
+        */
     }
     
     
     //...set up filtering select for activity
+    var visiting_group_options = ${visiting_group_options};
+	 var visiting_group_store = new Memory({
+        data:visiting_group_options });
+
+
+    var visiting_group_filtering_select = new FilteringSelect({
+        id: "create_edit_new_booking_request_form_visiting_group_name",
+        name: "create_edit_new_booking_request_form_visiting_group_name",
+        value: "",
+        onChange: function(value) {
+        		set_visiting_group_id(value);
+    			},
+        store: visiting_group_store,
+        searchAttr: "name"
+    }, "create_edit_new_booking_request_form_visiting_group_name");
+  
+  
+    
+    //...set up filtering select for activity
     var activity_entries = ${activity_entries};
-	 var stateStore = new Memory({
+	 var activity_store = new Memory({
         data:activity_entries });
 
 
-    var filteringSelect = new FilteringSelect({
+    var activity_filtering_select = new FilteringSelect({
         id: "create_edit_new_booking_request_form_activity_name",
-        name: "state",
-        value: "CA",
+        name: "create_edit_new_booking_request_form_activity_name",
+        value: "NA",
         onChange: function(value) {
         		set_activity_id(value);
     			},
-        store: stateStore,
+        store: activity_store,
         searchAttr: "name"
     }, "create_edit_new_booking_request_form_activity_name");
-    
-//    var submit_button_elem = dom.byId("create_edit_new_booking_request_form_submit");
-//    on(submit_button_elem, "click", function(evt) { return validate_form(evt, filteringSelect); }  );
-    
+        
     var submit_button_elem = dom.byId("create_edit_new_booking_request_form");
-    on(submit_button_elem, "submit", function(evt) { return validate_form(evt, filteringSelect); }  );
+    on(submit_button_elem, "submit", function(evt) { return validate_form(evt, activity_filtering_select); }  );
     
 });
 
