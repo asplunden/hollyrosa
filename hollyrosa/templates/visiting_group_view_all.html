@@ -169,7 +169,9 @@ function loadNotesFor(id) {
        });
        
    common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All visiting groups", '', '${tg.url('/visiting_group/view_all')}'); 
-   common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All visiting groups today", '', '${tg.url('/visiting_group/view_today')}'); 
+   common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All visiting groups today", '', '${tg.url('/visiting_group/view_today')}');
+   
+   common_menu.add_menu_separator(filter_menu); 
        
    var bokn_status_menu = new Menu();
    filter_menu.addChild(new PopupMenuItem({
@@ -199,12 +201,6 @@ function loadNotesFor(id) {
       leftClickToOpen: common_menu.load_left_click_menu()
    })); 
    
-   /*
-   var view_vgt_menu = new Menu({
-   	targetNodeIds: ["view_ag_menu"],
-      leftClickToOpen: common_menu.load_left_click_menu()
-   });
-	*/
 	
 	common_menu.add_menu_separator(filter_menu);
 	
