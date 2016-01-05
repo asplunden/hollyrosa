@@ -42,21 +42,18 @@ function get_visiting_group_data_from_XHR_helper(value) {
 
 
 function get_visiting_group_data_from_XHR(visiting_group_id) {
-    //var value = this.options[this.selectedIndex].value;
     get_visiting_group_data_from_XHR_helper(visiting_group_id);
 }
 
 
-/* deprecated
-function propagate_selected_value() {
-    var value = this.options[this.selectedIndex].text;
-    edit_booking.set_form_field_value('create_edit_new_booking_request_form_visiting_group_name', value);
-}
-*/
-
 function set_visiting_group_id(value) {
     edit_booking.set_form_field_value('create_edit_new_booking_request_form_visiting_group_id', value);
-    get_visiting_group_data_from_XHR(value, value);
+    if (null != value) {
+			get_visiting_group_data_from_XHR(value);    
+    } else {
+         edit_booking.clean_properties_table();
+    }
+    
 }
 
 
@@ -82,12 +79,18 @@ function set_activity_id(value) {
 /**
 http://stackoverflow.com/questions/3844995/preventing-form-submission-with-dojo
 **/
-function validate_form(evt, filtering_select) {
+function validate_form(evt, activity_select, visiting_group_filtering_select) {
 
-	if (!filtering_select.validate()) {
+	if (!activity_select.validate()) {
 			alert("checking failed");
 			evt.preventDefault();
 			return false;
+	}
+	
+	//...what do we do if we don't have a valid visiting group id?
+	//   we set id to 0?
+	if (!visiting_group_filtering_select.validate()) {
+			set_visiting_group_id(null);
 	}
 	return true;
 }

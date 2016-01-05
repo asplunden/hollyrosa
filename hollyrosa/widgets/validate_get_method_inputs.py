@@ -31,6 +31,8 @@ class ValidateScheduleBooking(TableForm):
     class fields(WidgetsList):
         return_to_day_id = HiddenField(validator=UnicodeString)
         booking_id = HiddenField(validator=UnicodeString)
+        booking_day_id = HiddenField(validator=UnicodeString)
+        slot_row_position_id = HiddenField(validator=UnicodeString)
 
 
 class ValidateUnscheduleBooking(TableForm):
@@ -39,6 +41,22 @@ class ValidateUnscheduleBooking(TableForm):
         return_to_day_id = HiddenField(validator=UnicodeString)
         booking_id = HiddenField(validator=UnicodeString)
         slot_row_position_id = HiddenField(validator=UnicodeString)
+        
+        
+class ValidateCreateNewBookingRequest(TableForm):
+    show_errors = True
+    id = HiddenField(validator=UnicodeString)
+    return_to_day_id = HiddenField()
+    visiting_group_name = TextField(validator=UnicodeString(min=1))
+    visiting_group_id = HiddenField(validator=UnicodeString)
+    content = TextArea(validator=UnicodeString)
+    activity_id = HiddenField(validator=UnicodeString)
+    activity_name = TextField(validator=UnicodeString(min=1))
+    requested_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"), date_format='%Y-%m-%d')
+    valid_from = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"), date_format='%Y-%m-%d')  
+    valid_to = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"), date_format='%Y-%m-%d')   
+       
 
 create_validate_schedule_booking = ValidateScheduleBooking("create_validate_schedule_booking")
 create_validate_unschedule_booking = ValidateUnscheduleBooking("create_validate_unschedule_booking")
+create_validate_new_booking_request_form = ValidateCreateNewBookingRequest("create_validate_new_booking_request")

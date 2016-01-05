@@ -47,6 +47,14 @@ function create_visiting_group_properties_table_headings(table) {
     th = domConstruct.create("th", { innerHTML: "from date" }, table);
     th = domConstruct.create("th", { innerHTML: "to date" }, table);
  }
+ 
+ 
+ function clean_properties_table() {
+    var elems_to_destroy = query('#visiting_group_properties_table >');
+    array.forEach(elems_to_destroy, function(g){
+    	domConstruct.destroy(g);
+    });
+ }
 
 
 function update_visiting_group_data_common(data, content_elem_id) {
@@ -59,10 +67,12 @@ function update_visiting_group_data_common(data, content_elem_id) {
     var properties = data['properties'] 
 	 
     //...clean property table
-    var elems_to_destroy = query('#visiting_group_properties_table >');
+    clean_properties_table();
+    /*var elems_to_destroy = query('#visiting_group_properties_table >');
     array.forEach(elems_to_destroy, function(g){
     	domConstruct.destroy(g);
     });
+*/
 
     //...create heading
     create_visiting_group_properties_table_headings(table);
@@ -102,7 +112,7 @@ function update_visiting_group_data_for_new_booking_request(data) {
 
 
 
-return {set_form_field_value:set_form_field_value, update_visiting_group_data:update_visiting_group_data, update_visiting_group_data_for_new_booking_request:update_visiting_group_data_for_new_booking_request};
+return {set_form_field_value:set_form_field_value, update_visiting_group_data:update_visiting_group_data, update_visiting_group_data_for_new_booking_request:update_visiting_group_data_for_new_booking_request, clean_properties_table:clean_properties_table};
 
 
 });
