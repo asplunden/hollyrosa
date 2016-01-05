@@ -48,6 +48,7 @@ class ValidateCreateNewBookingRequest(TableForm):
     id = HiddenField(validator=UnicodeString)
     return_to_day_id = HiddenField()
     visiting_group_name = TextField(validator=UnicodeString(min=1))
+    visiting_group_display_name = HiddenField(validator=UnicodeString(min=1))
     visiting_group_id = HiddenField(validator=UnicodeString)
     content = TextArea(validator=UnicodeString)
     activity_id = HiddenField(validator=UnicodeString)

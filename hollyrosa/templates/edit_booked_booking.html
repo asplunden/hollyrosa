@@ -49,11 +49,6 @@ function get_visiting_group_data_from_XHR(value) {
 }
 
 
-//function propagate_selected_value(value) {
-//    edit_booking.set_form_field_value('create_edit_book_slot_form_visiting_group_name', value);
-//}
-
-
 function set_visiting_group_id(value) {
     edit_booking.set_form_field_value('create_edit_book_slot_form_visiting_group_id', value);
     if (null != value) {
@@ -94,14 +89,14 @@ ready(function(){
         id: "create_edit_book_slot_form_visiting_group_name",
         name: "create_edit_book_slot_form_visiting_group_name",
         value: "${booking.visiting_group_id}",
+        displayedValue: "${booking.visiting_group_name}",
         onChange: function(value) {
         		set_visiting_group_id(value);
     			},
         store: visiting_group_store,
         searchAttr: "name"
     }, "create_edit_book_slot_form_visiting_group_name");
-  
-  
+    
   	 var submit_button_elem = dom.byId("create_edit_book_slot_form");
     on(submit_button_elem, "submit", function(evt) { return validate_form(evt, visiting_group_filtering_select); }  );
   

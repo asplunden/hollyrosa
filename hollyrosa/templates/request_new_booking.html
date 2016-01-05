@@ -82,7 +82,7 @@ http://stackoverflow.com/questions/3844995/preventing-form-submission-with-dojo
 function validate_form(evt, activity_select, visiting_group_filtering_select) {
 
 	if (!activity_select.validate()) {
-			alert("checking failed");
+			alert("activity not valid");
 			evt.preventDefault();
 			return false;
 	}
@@ -92,6 +92,12 @@ function validate_form(evt, activity_select, visiting_group_filtering_select) {
 	if (!visiting_group_filtering_select.validate()) {
 			set_visiting_group_id(null);
 	}
+	
+	//...we always should set the display name, we either can compute it OR it will be N/A as group id and we dont want N/A if we typed in another name. 	
+	var visiting_group_name = visiting_group_filtering_select.displayedValue;
+	console.log(visiting_group_name);	
+	edit_booking.set_form_field_value('create_edit_new_booking_request_form_visiting_group_display_name', visiting_group_name);
+	
 	return true;
 }
 
@@ -114,6 +120,7 @@ ready(function(){
         id: "create_edit_new_booking_request_form_visiting_group_name",
         name: "create_edit_new_booking_request_form_visiting_group_name",
         value: "${booking.visiting_group_id}",
+        displayedValue: "${booking.visiting_group_name}",
         onChange: function(value) {
         		set_visiting_group_id(value);
     			},
@@ -141,7 +148,7 @@ ready(function(){
     }, "create_edit_new_booking_request_form_activity_name");
         
     var submit_button_elem = dom.byId("create_edit_new_booking_request_form");
-    on(submit_button_elem, "submit", function(evt) { return validate_form(evt, activity_filtering_select); }  );
+    on(submit_button_elem, "submit", function(evt) { return validate_form(evt, activity_filtering_select, visiting_group_filtering_select); }  );
     
 });
 

@@ -1149,7 +1149,7 @@ class BookingDay(BaseController):
     @validate(create_validate_new_booking_request_form, error_handler=edit_booking) 
     @require(Any(is_user('root'), has_level('view'), has_level('staff'), has_level('pl'),  msg='Only viewers, staff and PL can submitt a new booking request'))
     @expose()
-    def save_new_booking_request(self, content='', activity_id=None, activity_name=None, visiting_group_name='',  visiting_group_select=None,  valid_from=None,  valid_to=None,  requested_date=None,  visiting_group_id=None,  id=None,  return_to_day_id=None, **kwargs):
+    def save_new_booking_request(self, content='', activity_id=None, activity_name=None, visiting_group_name='', visiting_group_display_name='',  valid_from=None,  valid_to=None,  requested_date=None,  visiting_group_id=None,  id=None,  return_to_day_id=None, **kwargs):
         is_new= ((id ==None) or (id==''))
         
         if is_new:
@@ -1162,8 +1162,8 @@ class BookingDay(BaseController):
         if is_new:
             new_booking['booking_state'] = 0
         else:
-           # TODO: DEPENDS ON WHAT HAS CHANGED. Maybe content change isnt enough to change state?
-           new_booking['booking_state'] = 0
+            # TODO: DEPENDS ON WHAT HAS CHANGED. Maybe content change isnt enough to change state?
+            new_booking['booking_state'] = 0
             
         #...Id visiting group id is empty, it should be replaced with the N/A Group
         if '' == visiting_group_id:
@@ -1176,7 +1176,7 @@ class BookingDay(BaseController):
         
         
         new_booking['activity_id'] = activity_id
-        new_booking['visiting_group_name'] = visiting_group_name
+        new_booking['visiting_group_name'] = visiting_group_display_name
         new_booking['last_changed_by_id'] = getLoggedInUserId(request)
         
 
