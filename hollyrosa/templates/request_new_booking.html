@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011,2012, 2013 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -28,11 +28,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Edit/Create Booking Request</title>
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
-  <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
 
-require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/ready"], function(edit_booking, dom, on, xhr, ready) { 
+require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dijit/Dialog", "dojo/ready"], function(edit_booking, dom, on, xhr, Memory, FilteringSelect, Dialog, ready) { 
 
 function get_visiting_group_data_from_XHR_helper(visiting_group_id, value) {
     xhr("${tg.url('/visiting_group/show_visiting_group_data')}", {
@@ -68,7 +67,25 @@ function transfer_to_date(event) {
 }
 
 
+var myDialog = new Dialog({
+        title: "My Dialog",
+        content: "Test content.",
+        style: "width: 300px"
+    });
+    
+  
+
+
+function show_activity_alternatives(event) {
+myDialog.show();
+}
+
+function set_activity_id(value) {
+	edit_booking.set_form_field_value('create_edit_new_booking_request_form_activity_id', value);
+}
+
 ready(function(){
+	 //...this sets up dojo handling changes to visiting group select field
     var elem = dom.byId('create_edit_new_booking_request_form_visiting_group_id');
     on( elem, "change", propagate_selected_value);
     on( elem, "change", get_visiting_group_data_from_XHR);
@@ -85,6 +102,54 @@ ready(function(){
         id_value = elem.options[elem.selectedIndex].value;
         get_visiting_group_data_from_XHR_helper(value, id_value);
     }
+    
+    
+    //...set up some kind of callback when user clicks the activity_name field
+    
+    var activity_name_elem = dom.byId('create_edit_new_booking_request_form_activity_name');
+    on( activity_name_elem, "click", show_activity_alternatives );
+    
+    
+    var activity_entries = ${activity_entries}; 
+    
+//...add inner content like a entry field
+var stateStore = new Memory({
+        data:activity_entries });
+        /* [
+            {name:"Alabama", id:"AL"},
+            {name:"Alaska", id:"AK"},
+            {name:"American Samoa", id:"AS"},
+            {name:"Arizona", id:"AZ"},
+            {name:"Arkansas", id:"AR"},
+            {name:"Armed Forces Europe", id:"AE"},
+            {name:"Armed Forces Pacific", id:"AP"},
+            {name:"Armed Forces the Americas", id:"AA"},
+            {name:"California", id:"CA"},
+            {name:"Colorado", id:"CO"},
+            {name:"Connecticut", id:"CT"},
+            {name:"Delaware", id:"DE"}
+        ]
+    });
+*/
+    var filteringSelect = new FilteringSelect({
+        id: "create_edit_new_booking_request_form_activity_name",
+        name: "state",
+        value: "CA",
+        onChange: function(value) {
+        		set_activity_id(value);
+    			},
+        store: stateStore,
+        searchAttr: "name"
+    }, "create_edit_new_booking_request_form_activity_name");//.startup();//placeAt(myDialog);
+		
+		// how do we make name and id propagate the right way ???
+	//on(filteringSelect, "change", function() { set_activity_id(filteringSelect) } ); 
+    
+    
+   
+    
+    
+    
 });
 
 
@@ -92,7 +157,7 @@ ready(function(){
 </script>
 </head>
 
-<body>
+<body class="tundra">
     <h2>Edit/Create booking request</h2>
     <div id="visiting_group_data" style="font-size:80%; border:1px solid green; margin:2em; padding: 2em; float:right;">
         <h3> Showing visiting group info: <span id="visiting_group_data_name"></span></h3>

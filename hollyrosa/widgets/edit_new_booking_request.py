@@ -1,5 +1,5 @@
 """
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -33,13 +33,15 @@ class EditNewBookingRequestForm(TableForm):
         id = HiddenField(validator=UnicodeString)
         #booking_day_id = HiddenField()
         return_to_day_id = HiddenField()
-        visiting_group_name =  TextField(validator=UnicodeString(min=1),  css_class="edit_name",  size=40)
+        visiting_group_name = TextField(validator=UnicodeString(min=1), css_class="edit_name", size=40)
         visiting_group_id = SingleSelectField(validator=UnicodeString)
         content = TextArea(validator=UnicodeString)
-        activity_id = SingleSelectField(validator=UnicodeString)
-        requested_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
-        valid_from = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')  
-        valid_to = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')   
+        #activity_id = SingleSelectField(validator=UnicodeString)
+        activity_id = HiddenField(validator=UnicodeString)
+        activity_name = TextField(validator=UnicodeString(min=1))
+        requested_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"), date_format='%Y-%m-%d')
+        valid_from = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"), date_format='%Y-%m-%d')  
+        valid_to = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"), date_format='%Y-%m-%d')   
         
         
 

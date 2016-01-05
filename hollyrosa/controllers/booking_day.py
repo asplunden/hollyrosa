@@ -33,6 +33,9 @@ http://turbogears.org/2.0/docs/main/Auth/Authorization.html#module-repoze.what.p
 
 """
 
+import datetime, logging, json
+
+log = logging.getLogger()
 
 from tg import expose, flash, require, url, request, redirect,  validate,  override_template
 
@@ -41,9 +44,7 @@ from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch, genUID
 from hollyrosa.model.booking_couch import getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate, getVisitingGroupsInDatePeriod,  dateRange2,  getBookingDayOfDateList,  getSlotRowSchemaOfActivity,  getActivityGroupNameAndIdList
 from hollyrosa.model.booking_couch import getAllHistoryForBookings,  getAllActivities,  getAllActivityGroups,  getVisitingGroupsAtDate,  getUserNameMap,  getSchemaSlotActivityMap,  getAllVisitingGroups,  getActivityTitleMap
-import datetime,  logging
 
-log = logging.getLogger()
 
 from formencode import validators
 
@@ -953,8 +954,33 @@ class BookingDay(BaseController):
         
     @expose('hollyrosa.templates.request_new_booking')
     @validate(validators={'return_to_day_id':validators.UnicodeString(not_empty=False), 'booking_id':validators.UnicodeString(not_empty=True), 'visiting_group_id':validators.UnicodeString(not_empty=False)})
-    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change a booking'))
-    def edit_booking(self,  return_to_day_id=None,  booking_id=None, visiting_group_id='', **kw):
+    @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change a booking'))
+    def edit_booking(self, return_to_day_id=None, booking_id=None, visiting_group_id='', **kw):
+        """
+        edit_booking is really edit_program_booking since room and staff bookings are done slightly different,
+        making use of from/to time, so we can assume this only concerns program bookings BUT
+        given that we can have several schemas for a year, we cannot know well which activities are valid in whished
+        date range or on any given day,
+        
+        HOWEVER
+        
+        if we view any program booking as a whish rather than a decission, then we could list all
+        reasonable activities (all program activities) AND if an activity is choosen that is not available according to schema,
+        then we WARN on that/those days that THIS activity is NOT available this day.
+        
+        Given that there can be many activities, we should have one field for the last N used activities and
+        a completion list rather than drop down list.
+        
+        Can TW2 generate a selection box instead of a drop-down?
+        
+        Well, there is Choosen wich would be cool to test, but it aint Dojo.
+        Maybe we can have a text box that we do DOJO magick with?
+        
+        Client side Dojo could find the text box and when user clicks it things starts to happen,
+        like a pop up dynamic form being shown.
+        
+        
+        """
         tmpl_context.form = create_edit_new_booking_request_form
         edit_this_visiting_group = 0
         
@@ -985,7 +1011,9 @@ class BookingDay(BaseController):
         if return_to_day_id != None and return_to_day_id != '':
             booking_o.requested_date = booking_day_o['date']
         booking_o.return_to_day_id = return_to_day_id
-        return dict(visiting_groups=visiting_groups,  activities=activities, booking=booking_o,  edit_this_visiting_group=edit_this_visiting_group)
+        
+        activity_entries = json.dumps( [dict(name=a[1], id=a[0]) for a in activities] )
+        return dict(visiting_groups=visiting_groups,  activities=activities, booking=booking_o,  edit_this_visiting_group=edit_this_visiting_group, activity_entries=activity_entries)
         
         
     @expose('hollyrosa.templates.move_booking')
@@ -1088,10 +1116,10 @@ class BookingDay(BaseController):
         raise redirect('/booking/'+return_path+'?day_id='+str(return_to_day_id)) 
         
         
-    @validate(create_edit_new_booking_request_form, error_handler=edit_booking) 
+    # TODO: reenable validation @validate(create_edit_new_booking_request_form, error_handler=edit_booking) 
     @require(Any(is_user('root'), has_level('view'), has_level('staff'), has_level('pl'),  msg='Only viewers, staff and PL can submitt a new booking request'))
     @expose()
-    def save_new_booking_request(self, content='',  activity_id=None,  visiting_group_name='',  visiting_group_select=None,  valid_from=None,  valid_to=None,  requested_date=None,  visiting_group_id=None,  id=None,  return_to_day_id=None):
+    def save_new_booking_request(self, content='', activity_id=None, activity_name=None, visiting_group_name='',  visiting_group_select=None,  valid_from=None,  valid_to=None,  requested_date=None,  visiting_group_id=None,  id=None,  return_to_day_id=None, **kwargs):
         is_new= ((id ==None) or (id==''))
         
         if is_new:
