@@ -607,8 +607,6 @@ ul.any_menu {
 
 ul.any_menu li {
     display:inline;
-    /* background-image:url('http://media.disqus.com/images/embed/email.png');
-    background-repeat:no-repeat; */
     padding-left: 10px;
 }
 
@@ -897,7 +895,16 @@ table.visiting_group_info_table tr td.info {
 
     
 .context_menu_symbol:hover {
-    background-image: url('../images/dropdown_menu_symbol.png');
+    /* background-image: url('../images/dropdown_menu_symbol.png'); */
+    background-image: url('../images/more_contextmenu_available_icon.svg');
+    background-size: 1.5em 1.5em;
+    background-repeat: no-repeat;
+    background-position: right top;
+}
+
+.more_menu_symbol {
+    background-image: url('../images/more_menu_available_icon.svg');
+    background-size: 1.5em 1.5em;
     background-repeat: no-repeat;
     background-position: right top;
 }

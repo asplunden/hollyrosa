@@ -162,39 +162,58 @@ function loadNotesFor(id) {
    common_menu.add_visiting_group_menu_item(menu, menu, "Show history...", '${tg.url('/history/show')}');   
    
        
-   /* assemblingthe filter booking status menu */
+   /* assembling the filter booking status menu */
    var filter_menu = new Menu({
        targetNodeIds: ["bokn_status_menu"],
        leftClickToOpen: common_menu.load_left_click_menu()
        });
        
+   common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All visiting groups", '', '${tg.url('/visiting_group/view_all')}'); 
+   common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All visiting groups today", '', '${tg.url('/visiting_group/view_today')}'); 
+       
    var bokn_status_menu = new Menu();
    filter_menu.addChild(new PopupMenuItem({
-   	label: "Program status...",
+   	label: "Select on Program status...",
       popup: bokn_status_menu,
       leftClickToOpen: common_menu.load_left_click_menu()
    })); 
    
    var vodb_state_menu = new Menu();
    filter_menu.addChild(new PopupMenuItem({
-   	label: "VODB status...",
+   	label: "Select on VODB status...",
       popup: vodb_state_menu,
       leftClickToOpen: common_menu.load_left_click_menu()
    })); 
    
    var tag_menu = new Menu();
    filter_menu.addChild(new PopupMenuItem({
-   	label: "Tags...",
+   	label: "Select Tags...",
       popup: tag_menu,
       leftClickToOpen: common_menu.load_left_click_menu()
    })); 
 
    var date_range_menu = new Menu();
    filter_menu.addChild(new PopupMenuItem({
-   	label: "Date range...",
+   	label: "Select Date range...",
       popup: date_range_menu,
       leftClickToOpen: common_menu.load_left_click_menu()
    })); 
+   
+   /*
+   var view_vgt_menu = new Menu({
+   	targetNodeIds: ["view_ag_menu"],
+      leftClickToOpen: common_menu.load_left_click_menu()
+   });
+	*/
+	
+	common_menu.add_menu_separator(filter_menu);
+	
+	var view_vgt_menu = new Menu();
+	filter_menu.addChild(new PopupMenuItem({
+   	label: "Filter on Group Type...",
+      popup: view_vgt_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+   }));	   
 
    
    var l1 = ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in program_state_map.items()] ) +']' };
@@ -231,10 +250,7 @@ function loadNotesFor(id) {
          
     var vgt_status = common_menu.load_ag_checkbox_status();         
            
-    var view_vgt_menu = new Menu({
-               targetNodeIds: ["view_ag_menu"],
-               leftClickToOpen: common_menu.load_left_click_menu()
-               });
+    
                
          
     array.forEach(vgtgroups, function(a) {
@@ -285,14 +301,16 @@ function loadNotesFor(id) {
 
 </head>
 
-<body class="tundra">
-    Choose time period:
+<body class="tundra">    
+    <div class="more_menu_symbol" style="width:20em;" id="bokn_status_menu"><h2>Viewing visiting groups</h2></div>
+    <!--
     <ul class="any_menu">
-        <li><a href="${tg.url('view_today')}">today</a></li>
-        <li id="bokn_status_menu" class="context_menu_symbol">Filter booking status</li>    
+        <li><a href="${tg.url('view_today')}">Visiting Groups Today</a></li>
+        <li class="more_menu_symbol" id="bokn_status_menu" >Narrow Search</li>
+        <li class="more_menu_symbol" id="view_ag_menu" >Filter Group Types</li>
     </ul>
+    -->
     
-    <h2 id="view_ag_menu">Viewing visiting groups</h2>
     <table id="vgroup_listing">
         <tr py:for="visiting_group in visiting_groups" class="name_menu" hollyrosa:vgid="${visiting_group._id}" hollyrosa:taglist_node_id="taglist_for_${hash(visiting_group._id)}" hollyrosa:vgname="${visiting_group.name}" hollyrosa:vgtid="${visiting_group.subtype}" hollyrosa:has_notes="${has_notes_map.has_key(visiting_group._id)}">
             <td class="info data context_menu_symbol">${visiting_group.name}<a name="vgroupid_${visiting_group._id}"/></td>
