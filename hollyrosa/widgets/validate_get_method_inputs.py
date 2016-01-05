@@ -54,9 +54,19 @@ class ValidateCreateNewBookingRequest(TableForm):
     activity_name = TextField(validator=UnicodeString(min=1))
     requested_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"), date_format='%Y-%m-%d')
     valid_from = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"), date_format='%Y-%m-%d')  
-    valid_to = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"), date_format='%Y-%m-%d')   
+    valid_to = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"), date_format='%Y-%m-%d')
+    
+
+class ValidateBookSlotForm(TableForm):
+    id = HiddenField(validator=UnicodeString)
+    return_to_day_id = HiddenField()
+    visiting_group_name = TextField(validator=UnicodeString(min=1))
+    visiting_group_display_name = HiddenField(validator=UnicodeString(min=1))
+    visiting_group_id = HiddenField(validator=UnicodeString)
+    content = TextArea(validator=UnicodeString)
        
 
 create_validate_schedule_booking = ValidateScheduleBooking("create_validate_schedule_booking")
 create_validate_unschedule_booking = ValidateUnscheduleBooking("create_validate_unschedule_booking")
 create_validate_new_booking_request_form = ValidateCreateNewBookingRequest("create_validate_new_booking_request")
+create_validate_book_slot_form = ValidateBookSlotForm("create_validate_book_slot")

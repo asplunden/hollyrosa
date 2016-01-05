@@ -62,7 +62,7 @@ from hollyrosa.widgets.edit_activity_form import create_edit_activity_form
 from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
 from hollyrosa.widgets.edit_book_live_slot_form import  create_edit_book_live_slot_form
 from hollyrosa.widgets.move_booking_form import  create_move_booking_form
-from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking, create_validate_new_booking_request_form
+from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking, create_validate_new_booking_request_form, create_validate_book_slot_form
 
 from hollyrosa.controllers.booking_history import remember_booking_change,  remember_schedule_booking,  remember_unschedule_booking,  remember_book_slot,  remember_booking_properties_change,  remember_new_booking_request,  remember_booking_request_change,  remember_delete_booking_request,  remember_block_slot, remember_unblock_slot,  remember_booking_move,  remember_ignore_booking_warning
 
@@ -746,7 +746,9 @@ class BookingDay(BaseController):
         visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in tmp_visiting_groups]  
         
         end_slot_id_options = self.getEndSlotIdOptions(booking_day[self.getSchemaIdOfBooking(booking_o)], slot_position['activity_id'])
-        return dict(booking_day=booking_day, slot_position=slot_position, booking=booking_, visiting_groups=visiting_groups, edit_this_visiting_group=booking_o['visiting_group_id'],  activity=activity,  end_slot_id_options=end_slot_id_options, living_schema_id=booking_day[self.getSchemaSubNameOfSubtype(subtype)])
+        
+        visiting_group_options = json.dumps([dict(name=a[1], id=a[0]) for a in visiting_groups] )
+        return dict(booking_day=booking_day, slot_position=slot_position, booking=booking_, visiting_groups=visiting_groups, edit_this_visiting_group=booking_o['visiting_group_id'],  activity=activity,  end_slot_id_options=end_slot_id_options, living_schema_id=booking_day[self.getSchemaSubNameOfSubtype(subtype)], visiting_group_options=visiting_group_options)
         
     
     # TODO: fix subtype, it's not always live, can be funk/staff. Maybe need to be hidden id I think
@@ -759,11 +761,11 @@ class BookingDay(BaseController):
         raise redirect('live?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id), subtype=subtype)
     
     
-    @validate(create_edit_book_slot_form, error_handler=edit_booked_booking) 
+    @validate(create_validate_book_slot_form, error_handler=edit_booked_booking) 
     @expose()
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
-    def save_booked_booking_properties(self,  id=None,  content=None,  visiting_group_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  block_after_book=False ):
-        tmp_activity_id = self.save_booked_booking_properties_helper(id,  content,  visiting_group_name,  visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  block_after_book=block_after_book,  subtype='program')
+    def save_booked_booking_properties(self,  id=None,  content=None,  visiting_group_display_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  block_after_book=False, **kwargs ):
+        tmp_activity_id = self.save_booked_booking_properties_helper(id,  content,  visiting_group_display_name,  visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  block_after_book=block_after_book,  subtype='program')
         raise redirect('day?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id))
     
         

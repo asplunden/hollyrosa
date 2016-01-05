@@ -31,7 +31,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
 
-require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/ComboBox", "dijit/form/FilteringSelect", "dijit/Dialog", "dojo/ready"], function(edit_booking, dom, on, xhr, Memory, ComboBox, FilteringSelect, Dialog, ready) { 
+require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready"], function(edit_booking, dom, on, xhr, Memory, FilteringSelect, ready) { 
 
 function get_visiting_group_data_from_XHR_helper(value) {
     xhr("${tg.url('/visiting_group/show_visiting_group_data')}", {

@@ -35,8 +35,9 @@ class EditBookSlotForm(TableForm):
         slot_id = HiddenField(validator=UnicodeString)
         activity_id = HiddenField(validator=UnicodeString)
         return_to_day_id = HiddenField(validator=UnicodeString)
-        visiting_group_name = TextField(validator=UnicodeString(min=1),  css_class="edit_name",  size=40)
-        visiting_group_id = SingleSelectField(validator=UnicodeString)
+        visiting_group_name = TextField(validator=UnicodeString(min=1))
+        visiting_group_display_name = HiddenField(validator=UnicodeString)
+        visiting_group_id = HiddenField(validator=UnicodeString)
         content = TextArea(validator=UnicodeString)
         block_after_book = CheckBox()
         
