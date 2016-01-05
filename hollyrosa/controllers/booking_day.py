@@ -38,6 +38,7 @@ import datetime, logging, json
 log = logging.getLogger(__name__)
 
 from tg import expose, flash, require, url, request, redirect,  validate,  override_template
+from tg.validation import TGValidationError
 
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
@@ -61,7 +62,7 @@ from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_
 from hollyrosa.widgets.edit_activity_form import create_edit_activity_form
 from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
 from hollyrosa.widgets.edit_book_live_slot_form import  create_edit_book_live_slot_form
-from hollyrosa.widgets.move_booking_form import  create_move_booking_form
+from hollyrosa.widgets.move_booking_form import  create_move_booking_form, validate_move_booking_form
 from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking, create_validate_new_booking_request_form, create_validate_book_slot_form
 
 from hollyrosa.controllers.booking_history import remember_booking_change,  remember_schedule_booking,  remember_unschedule_booking,  remember_book_slot,  remember_booking_properties_change,  remember_new_booking_request,  remember_booking_request_change,  remember_delete_booking_request,  remember_block_slot, remember_unblock_slot,  remember_booking_move,  remember_ignore_booking_warning
@@ -1043,13 +1044,14 @@ class BookingDay(BaseController):
         activity_o = common_couch.getActivity(holly_couch,  booking_o['activity_id'])
         booking_day = common_couch.getBookingDay(holly_couch,  booking_o['booking_day_id'])
         booking_ = DataContainer(activity_id=activity_id,  content=booking_o['content'],  cache_content=booking_o['cache_content'],  visiting_group_name=booking_o['visiting_group_name'],  id=booking_o['_id'],  return_to_day_id=return_to_day_id)
-        return dict(activities=activities, booking=booking_,  activity=activity_o,  booking_day=booking_day,  slot=slot_o,  getRenderContent=getRenderContent)
+        activity_entries = json.dumps( [dict(name=a[1], id=a[0]) for a in activities] )
+        return dict(activities=activities, booking=booking_,  activity=activity_o,  booking_day=booking_day,  slot=slot_o,  getRenderContent=getRenderContent, activity_entries=activity_entries)
         
         
-    @validate(create_move_booking_form, error_handler=move_booking)      
+    @validate(validate_move_booking_form, error_handler=move_booking)      
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change activity properties'))
-    def save_move_booking(self,  id=None,  activity_id=None,  return_to_day_id=None,  **kw):
+    def save_move_booking(self,  id=None,  activity_id=None,  activity_name=None, return_to_day_id=None,  **kw):
         booking_o = common_couch.getBooking(holly_couch,  id)
         old_activity_id = booking_o['activity_id']
         
@@ -1081,8 +1083,15 @@ class BookingDay(BaseController):
                     old_end_slot_index = tmp_slot_index
                 tmp_slot_index += 1
         
-        #...now, find the 
-        tmp_new_slot_row = the_schema[activity_id]
+        #...now, find the
+        try:
+            tmp_new_slot_row = the_schema[activity_id]
+        except KeyError:
+            flash('Activity not valid for that day','error')
+            #raise TGValidationError('Activity not valid for that day')
+            raise redirect(url('move_booking', params=dict(return_to_day_id=return_to_day_id,  booking_id=id)))
+        
+        
         new_slot = tmp_new_slot_row[old_slot_index]
         new_slot_id = new_slot['slot_id']
         
