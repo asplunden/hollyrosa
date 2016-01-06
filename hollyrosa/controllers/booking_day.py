@@ -38,7 +38,7 @@ import datetime, logging, json
 log = logging.getLogger(__name__)
 
 from tg import expose, flash, require, url, request, redirect,  validate,  override_template
-from tg.validation import TGValidationError
+#from tg.validation import TGValidationError
 
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
