@@ -44,7 +44,7 @@ from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch, genUID
 from hollyrosa.model.booking_couch import getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate, getVisitingGroupsInDatePeriod,  dateRange2,  getBookingDayOfDateList,  getSlotRowSchemaOfActivity,  getActivityGroupNameAndIdList
-from hollyrosa.model.booking_couch import getAllHistoryForBookings,  getAllActivities,  getAllActivityGroups,  getVisitingGroupsAtDate,  getUserNameMap,  getSchemaSlotActivityMap,  getAllVisitingGroups,  getActivityTitleMap, getVisitingGroupOfVisitingGroupName
+from hollyrosa.model.booking_couch import getAllHistoryForBookings,  getAllActivities, getAllRooms, getAllActivityGroups,  getVisitingGroupsAtDate,  getUserNameMap,  getSchemaSlotActivityMap,  getAllVisitingGroups,  getActivityTitleMap, getVisitingGroupOfVisitingGroupName
 
 
 from formencode import validators
@@ -352,13 +352,13 @@ class BookingDay(BaseController):
     def live(self, day=None, day_id=None, subtype='room'):
         """Show a complete booking day"""
         
-        if schema_type=='funk':
-            schema_type='staff'
+        #if schema_type=='funk':
+        #    schema_type='staff'
         
         # TODO: we really need to get only the slot rows related to our booking day schema or things will go wrong at some point when we have more than one schema to work with.
         
         today_sql_date = datetime.datetime.today().date().strftime("%Y-%m-%d")
-        activities_map = self.getActivitiesMap(getAllActivities(holly_couch))
+        activities_map = self.getActivitiesMap(getAllRooms(holly_couch))
         
         if day_id != None:
             booking_day_o = common_couch.getBookingDay(holly_couch, day_id)
@@ -391,7 +391,7 @@ class BookingDay(BaseController):
         #...we have to assume all days belong to the same day schema, otherwise, we really shouldnt display that day
         schema_type = self.getSchemaSubNameOfSubtype(subtype)
         schema_id = booking_day_o[schema_type]
-        schema = common_couch.getDaySchema(holly_couch,  schema_id)
+        schema = common_couch.getDaySchema(holly_couch, schema_id)
         title_hint = schema['title_hint']
         
         slot_rows = self.make_slot_rows__of_day_schema(schema,  activities_map,  dates=dates)

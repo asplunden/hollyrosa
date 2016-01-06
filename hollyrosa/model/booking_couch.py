@@ -245,6 +245,9 @@ def getActivityGroupNameAndIdList(holly_couch,  day_schema=None):
 
 def getAllActivities(holly_couch):
     return holly_couch.view('all_activities/all_activities', include_docs=True)
+
+def getAllRooms(holly_couch):
+    return holly_couch.view('all_activities/all_rooms', include_docs=True)
     
 #---
 
