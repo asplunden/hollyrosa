@@ -757,7 +757,7 @@ class BookingDay(BaseController):
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change booked live booking properties'))
     def save_booked_live_booking_properties(self, booking_id=None, content=None, visiting_group_name=None, visiting_group_display_name=None, visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  booking_date=None,  booking_end_date=None,  booking_end_slot_id=None,  block_after_book=False, subtype='room', **args):
         tmp_activity_id = self.save_booked_booking_properties_helper(booking_id, content, visiting_group_display_name, visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  booking_date=booking_date,  block_after_book=block_after_book,  subtype=subtype,  booking_end_date=booking_end_date,  booking_end_slot_id=booking_end_slot_id)
-        raise redirect('live?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id), subtype=subtype)
+        raise redirect('live?day_id='+str(return_to_day_id)+'&subtype='+subtype+make_booking_day_activity_anchor(tmp_activity_id))
     
     
     @validate(create_validate_book_slot_form, error_handler=edit_booked_booking) 
@@ -1357,7 +1357,7 @@ class BookingDay(BaseController):
 
         if subtype == 'program':
             raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(activity_id))
-        raise redirect('live?day_id='+booking_day_id+'&schema_type='+subtype + make_booking_day_activity_anchor(activity_id))
+        raise redirect('live?day_id='+booking_day_id+'&subtype='+subtype + make_booking_day_activity_anchor(activity_id))
     
 
     @expose('hollyrosa.templates.edit_multi_book')

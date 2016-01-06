@@ -236,7 +236,7 @@ ready(function() {
    
     <h2 class="more_menu_symbol" style="width:20em;" id="view_ag_menu" hollyrosa:booking_day_id="${booking_day.id}">$title_hint Overview ${reFormatDate(booking_day.date)}</h2>
 
-    <div class="note"><h2>${booking_day.get('title','')}</h2>
+    <div class="note" style="min-height:10em;"><h2>${booking_day.get('title','')}</h2>
     <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day.events">$e</li></ul>${HTML(booking_day.note)}
     </div>
     &nbsp;<br/><br/>
