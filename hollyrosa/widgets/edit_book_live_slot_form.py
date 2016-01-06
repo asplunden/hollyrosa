@@ -1,5 +1,5 @@
 """
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -33,16 +33,38 @@ class EditBookLiveSlotForm(TableForm):
         booking_id = HiddenField(validator=UnicodeString)
         booking_day_id = HiddenField(validator=UnicodeString)
         subtype = HiddenField(validator=UnicodeString)
-        #slot_id = HiddenField(validator=UnicodeString)
         activity_id = HiddenField(validator=UnicodeString)
         return_to_day_id = HiddenField(validator=UnicodeString)
-        visiting_group_name = TextField(validator=UnicodeString(min=1),  css_class="edit_name",  size=40)
-        visiting_group_id = SingleSelectField(validator=UnicodeString)
+        visiting_group_name = TextField(validator=UnicodeString(min=1))
+        visiting_group_displayname = HiddenField(validator=UnicodeString(min=1))        
+        visiting_group_id = HiddenField(validator=UnicodeString)
         booking_date = CalendarDatePicker('start_date', validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
         slot_id = SingleSelectField(validator=UnicodeString)
         booking_end_date = CalendarDatePicker('end_date', validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
         booking_end_slot_id = SingleSelectField(validator=UnicodeString)
         content = TextArea(validator=UnicodeString)
         block_after_book = CheckBox()
+
+
+class ValidateBookLiveSlotForm(TableForm):
+    """
+    This class is almost a copy of EditBookLiveSlotForm but somehow it processes validation a lot better after mixing validation with Dojo FilteringSelect
+    """
+    show_errors = True
+    booking_id = HiddenField(validator=UnicodeString)
+    booking_day_id = HiddenField(validator=UnicodeString)
+    subtype = HiddenField(validator=UnicodeString)
+    activity_id = HiddenField(validator=UnicodeString)
+    return_to_day_id = HiddenField(validator=UnicodeString)
+    visiting_group_name = TextField(validator=UnicodeString(min=1))
+    visiting_group_displayname = HiddenField(validator=UnicodeString(min=1))        
+    visiting_group_id = TextField(validator=UnicodeString)
+    booking_date = CalendarDatePicker('start_date', validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
+    slot_id = SingleSelectField(validator=UnicodeString)
+    booking_end_date = CalendarDatePicker('end_date', validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
+    booking_end_slot_id = SingleSelectField(validator=UnicodeString)
+    content = TextArea(validator=UnicodeString)
+    block_after_book = CheckBox()
         
 create_edit_book_live_slot_form = EditBookLiveSlotForm("create_edit_book_live_slot_form")
+validate_edit_book_live_slot_form = ValidateBookLiveSlotForm("validate_edit_book_live_slot_form")

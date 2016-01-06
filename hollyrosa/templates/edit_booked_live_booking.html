@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -31,12 +31,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
   <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
- 
- 
-require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/ready"], function(edit_booking, dom, on, xhr, ready) { 
+require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready"], function(edit_booking, dom, on, xhr, Memory, FilteringSelect, ready) { 
 
 
-function get_visiting_group_data_from_XHR_helper(visiting_group_id, value) {
+function get_visiting_group_data_from_XHR_helper(value) {
     xhr("${tg.url('/visiting_group/show_visiting_group_data')}", {
     handleAs:"json",
     method:"GET",
@@ -44,45 +42,70 @@ function get_visiting_group_data_from_XHR_helper(visiting_group_id, value) {
 }
 
 
-function get_visiting_group_data_from_XHR(visiting_group_id) {
-    var value = this.options[this.selectedIndex].value;
-    get_visiting_group_data_from_XHR_helper(visiting_group_id, value);
+function get_visiting_group_data_from_XHR(value) {
+    get_visiting_group_data_from_XHR_helper(value);
 }
 
 
-function propagate_selected_value() {
-    var value = this.options[this.selectedIndex].text;
-    edit_booking.set_form_field_value('create_edit_book_live_slot_form_visiting_group_name', value);
+function set_visiting_group_id(value) {
+    edit_booking.set_form_field_value('create_edit_book_live_slot_form_visiting_group_id', value);
+    if (null != value) {
+			get_visiting_group_data_from_XHR(value);    
+    } else {
+         edit_booking.clean_properties_table();
+    }
+    
+}
+
+
+/**
+http://stackoverflow.com/questions/3844995/preventing-form-submission-with-dojo
+**/
+function validate_form(evt, visiting_group_filtering_select) {	
+	if (!visiting_group_filtering_select.validate()) {
+			set_visiting_group_id(null);
+	}
+	var visiting_group_name = visiting_group_filtering_select.displayedValue;
+	edit_booking.set_form_field_value('create_edit_book_live_slot_form_visiting_group_display_name', visiting_group_name);
+	return true;
 }
 
 
 ready(function(){
     var elem = dom.byId('create_edit_book_live_slot_form_visiting_group_id');
-    on( elem, "change", propagate_selected_value);
-    on( elem, "change", get_visiting_group_data_from_XHR);
-
+ 
     is_new_booking = '0' == '${edit_this_visiting_group}' ;
-    if ( ! is_new_booking ) {
-      get_visiting_group_data_from_XHR_helper('${edit_this_visiting_group}', '${edit_this_visiting_group}');
-    } else {
-        //...load N/A group (should be the first in the list)
-        value = elem.options[elem.selectedIndex].text;
-        edit_booking.set_form_field_value('create_edit_book_live_slot_form_visiting_group_name', value);
-        id_value = elem.options[elem.selectedIndex].value;
-        get_visiting_group_data_from_XHR_helper(value, id_value);
-    }
+    get_visiting_group_data_from_XHR_helper('${booking.visiting_group_id}');
+    
+    //...set up filtering select for activity
+    var visiting_group_options = ${visiting_group_options};
+	 var visiting_group_store = new Memory({
+        data:visiting_group_options });
+
+
+    var visiting_group_filtering_select = new FilteringSelect({
+        id: "create_edit_book_live_slot_form_visiting_group_name",
+        name: "create_edit_book_live_slot_form_visiting_group_name",
+        value: "${booking.visiting_group_id}",
+        displayedValue: "${booking.visiting_group_name}",
+        onChange: function(value) {
+        		set_visiting_group_id(value);
+    			},
+        store: visiting_group_store,
+        searchAttr: "name"
+    }, "create_edit_book_live_slot_form_visiting_group_name");
+    
+  	 var submit_button_elem = dom.byId("create_edit_book_live_slot_form");
+    on(submit_button_elem, "submit", function(evt) { return validate_form(evt, visiting_group_filtering_select); }  );
+  
 });
-
-
   
 });
   
   </script>
-
 </head>
-
-<body>
-    <h2>${booking.activity.title} LIVE booking</h2>
+<body class="tundra">
+    <h2>${booking.activity.title} Room booking</h2>
     <div id="visiting_group_data" style="font-size:80%; border:1px solid green; margin:2em; padding: 2em; float:right;">
         <h3> Showing visiting group info: <span id="visiting_group_data_name"></span></h3>
         <div class="note" id="visiting_group_data_info"></div>
