@@ -2,7 +2,7 @@
 """
 hollyrosa_tool.py
 
-Copyright 2010-2015 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -39,12 +39,14 @@ def dateRange(from_date, to_date, format='%a %b %d %Y'):
     
 parser = argparse.ArgumentParser()
 parser.add_argument("--couch", help="url to couch db", default='http://localhost:5989')
-parser.add_argument("--database", help="name of database in couch", default='hollyrosa_2015_prod')
+parser.add_argument("--database", help="name of database in couch", default='hollyrosa_2016_prod')
 parser.add_argument("--username", help="login username", default=None)
 parser.add_argument("--password", help="login password", default=None)
 parser.add_argument("--save-views", help="save all views code to file from database", action="store_true")
 parser.add_argument("--load-views", help="load all views code from file to database", action="store_true")
+parser.add_argument("--clear-erasable", help="dangerous option for creating a new DB", action="store_true")
 parser.add_argument("-v", "--verbose", help="turn on verbose logging", action="store_true")
+
 args = parser.parse_args()
 
 #...init logging'
@@ -74,11 +76,10 @@ except couchdb.ResourceNotFound, e:
     
     
 
-if False:
+if args.clear_erasable:
     for b in holly_couch.view('all_activities/erasure', include_docs=True):
         doc = b.doc
-        dtype = doc['type']
-        print 'delete', doc
+        logging.debug('delete %s' % str( doc ))
         holly_couch.delete(b.doc)
     
 if False:
@@ -97,18 +98,18 @@ if False:
     holly_couch['school_schema.2014'] = ds
     
     
-if False:
-    pos = 1500
-    school_dates_spring = dateRange('2014-05-01', '2014-06-07', format='%Y-%m-%d')
-    summer_dates = dateRange('2014-06-08', '2014-08-17', format='%Y-%m-%d')
+if True:
+    pos = 2500
+    school_dates_spring = dateRange('2016-05-01', '2016-06-04', format='%Y-%m-%d')
+    summer_dates = dateRange('2016-06-05', '2016-08-14', format='%Y-%m-%d')
     sixtydn_dates = [] #dateRange('2013-0', '2013-08-18', format='%Y-%m-%d')
-    school_dates_autumn = dateRange('2014-08-18', '2014-10-20', format='%Y-%m-%d')
+    school_dates_autumn = dateRange('2016-08-15', '2016-10-31', format='%Y-%m-%d')
     
     worklist = [(school_dates_spring,  'school_schema.2014'), (summer_dates, 'summer_schema.2014'), (sixtydn_dates, '60dn_schema.2014'), (school_dates_autumn, 'school_schema.2014')]
     
     for days, day_schema_id in worklist:
         for d in days:
-            bd_c = dict(type='booking_day', date=d, note='', title='', num_program_crew_members=0, num_fladan_crew_members=0, day_schema_id=day_schema_id, zorder=pos,  room_schema_id='room_schema.2013' )
+            bd_c = dict(type='booking_day', date=d, note='', title='', num_program_crew_members=0, num_fladan_crew_members=0, day_schema_id=day_schema_id, zorder=pos,  staff_schema_id='funk_schema.2015', room_schema_id='room_schema.2013' )
             holly_couch['booking_day.'+str(pos)] = bd_c
             pos += 1
             
