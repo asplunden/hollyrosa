@@ -1,1 +1,1 @@
-{"utelunch": {"map": "function(doc) {  if(doc.type=='booking') { if (0 <= doc.content.indexOf('$utelunch')) emit(doc.booking_day_id, null)}; }"}, "all_users": {"map": "function(doc) { if(doc.type=='user') {\n   { emit(doc._id, null)}};\n}"}}
+{"utelunch": {"map": "function(doc) {  if(doc.type=='booking') { if (0 <= doc.content.indexOf('$utelunch')) emit(doc.booking_day_id, null)}; }"}, "all_users": {"map": "function(doc) { if(doc.type=='user') {\n   { emit([doc.active, doc._id], null)}};\n}"}}
