@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -232,7 +232,7 @@ class History(BaseController):
         
     @expose('hollyrosa.templates.history_show')
     @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=False), 'user_id':validators.UnicodeString(not_empty=False)})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view history'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view history'))
     def show(self, visiting_group_id='', user_id=''):
         for_group_name = ''
         if visiting_group_id != '':
@@ -251,7 +251,7 @@ class History(BaseController):
         
 
     @expose('hollyrosa.templates.rss_20_history')
-    @require(Any(is_user('root'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view history'))
+    @require(Any(has_level('pl'), has_permission('staff'), has_permission('view'), msg='Only staff members and viewers may view history'))
     def rss(self):
         return dict(history = DBSession.query(booking.BookingHistory).all().limit(100),  change_op_map=change_op_map,  publishing_date=time.localtime(time.time()))
 

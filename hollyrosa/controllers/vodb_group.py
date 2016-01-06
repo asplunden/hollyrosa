@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -19,7 +19,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-import pylons
+
 from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
@@ -64,7 +64,7 @@ class VODBGroup(BaseController):
     
 
     @expose('hollyrosa.templates.vodb_group_view_all')
-    @require(Any(is_user('erspl'), has_level('staff'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members and viewers may view visiting group properties'))
     def view_all(self):
         visiting_groups = [v.doc for v in getAllVisitingGroups(holly_couch)] 
         remaining_visiting_groups_map = dict()
@@ -73,7 +73,7 @@ class VODBGroup(BaseController):
 
 
     @expose('hollyrosa.templates.vodb_group_view_all')
-    @require(Any(is_user('erspl'), has_level('staff'),   msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members and viewers may view visiting group properties'))
     def view_tags(self, tag):
         # TODO>: rename and maybe only return visiting groups docs ?
         visiting_groups = [v.doc for v in getDocumentsByTag(holly_couch, tag)] 
@@ -84,7 +84,7 @@ class VODBGroup(BaseController):
 
     @expose('hollyrosa.templates.vodb_group_view_all')
     @validate(validators={'program_state':validators.Int(not_empty=True)})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_program_state(self,  program_state=None):
         #boknstatus=boknstatus[:4] # amateurish quick sanitation
         #visiting_groups = get_visiting_groups_with_boknstatus(boknstatus) 
@@ -96,7 +96,7 @@ class VODBGroup(BaseController):
 
     @expose('hollyrosa.templates.vodb_group_view_all')
     @validate(validators={'vodb_state':validators.Int(not_empty=True)})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_vodb_state(self,  vodb_state=None):
         visiting_groups =[v.doc for v in getVisitingGroupsByVodbState(holly_couch, vodb_state)]
         v_group_map = dict()
@@ -106,7 +106,7 @@ class VODBGroup(BaseController):
 
     @expose('hollyrosa.templates.vodb_group_view_all')
     @validate(validators={'group_type':validators.UnicodeString(not_empty=True)})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_group_type(self,  group_type=None):
         #boknstatus=boknstatus[:4] # amateurish quick sanitation
         #visiting_groups = get_visiting_groups_with_boknstatus(boknstatus) 
@@ -117,7 +117,7 @@ class VODBGroup(BaseController):
 
 
     @expose('hollyrosa.templates.vodb_group_edit')
-    @require(Any(is_user('user.erspl'), has_level('pl'), has_level('staff'), msg='Only staff and pl may edit vodb group data'))
+    @require(Any(has_level('pl'), has_level('pl'), has_level('staff'), msg='Only staff and pl may edit vodb group data'))
     def edit_group_data(self, visiting_group_id='', subtype=''):
 #        visiting_group_x = holly_couch[visiting_group_id]
         tmpl_context.form = create_edit_vodb_group_form
@@ -168,7 +168,7 @@ class VODBGroup(BaseController):
 
     @expose()
     @validate(create_edit_vodb_group_form, error_handler=edit_group_data)
-    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may change visiting group properties'))
     def save_vodb_group_properties(self, _id='', boknr='', name='', info='', camping_location='', vodb_contact_name='', vodb_contact_phone='', vodb_contact_email='', vodb_contact_address='', from_date='', to_date='', subtype='', visiting_group_properties=None):
         #...how do we handle new groups? Like new visiting_group, right?
         #   better have type=visiting_group for all groups and then have subtypes=group, course, daytrip, funk, etc for filtering/deciding on additional capabillities
@@ -313,7 +313,7 @@ class VODBGroup(BaseController):
         
         
     @expose('hollyrosa.templates.vodb_group_edit_sheet')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
     def edit_group_sheet(self, visiting_group_id=''):
         visiting_group_o = holly_couch[visiting_group_id]
         tmpl_context.form = create_edit_vodb_group_form
@@ -352,7 +352,7 @@ class VODBGroup(BaseController):
         
 
     @expose()
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members may update vodb group sheets'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members may update vodb group sheets'))
     def update_group_sheets(self, vgroup_id='', tag_sheet=None, eat_sheet=None, live_sheet=None, saveButton=''):
         # todo: accessor function making sure the type really is visiting_group
         visiting_group_o = holly_couch[vgroup_id] 
@@ -382,7 +382,7 @@ class VODBGroup(BaseController):
         
         
     @expose('hollyrosa.templates.vodb_group_view')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
     def view_vodb_group(self, visiting_group_id=''):
         visiting_group_o = holly_couch[visiting_group_id]
         
@@ -424,7 +424,7 @@ class VODBGroup(BaseController):
         
         
     @expose('hollyrosa.templates.visiting_group_program_request_edit2')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få ändra i dina programönskemål'))    
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få ändra i dina programönskemål'))    
     def edit_request(self, visiting_group_id=''):     	
         visiting_group_o = holly_couch[str(visiting_group_id)] 
         visiting_group_o.program_request_info = visiting_group_o.get('program_request_info','message to program!')
@@ -473,7 +473,7 @@ class VODBGroup(BaseController):
     
     
     @expose('hollyrosa.templates.vodb_group_booking_overview')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'fff'))    
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'fff'))    
     def vodb_eat_overview(self, compute_local_sum=False, compute_live=False):
         if compute_live:
             overview_live_o = getBookingOverview(holly_couch, None, None, reduce=False)
@@ -664,7 +664,7 @@ class VODBGroup(BaseController):
         
         
     @expose('hollyrosa.templates.vodb_group_booking_overview2')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'fff'))    
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'fff'))    
     def vodb_booking_overview(self, compute_local_sum=False, compute_live=False):
         # the aim at first is to start draw grid / sheet using div tags instead of a table.
         overview_live_o = getBookingOverview(holly_couch, None, None, reduce=False)
@@ -720,7 +720,7 @@ class VODBGroup(BaseController):
 
     @expose()
     @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True), 'live':validators.UnicodeString(not_empty=True), 'change_schema':validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may set up vodb calculation schemas'))
+    @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may set up vodb calculation schemas'))
     def create_calculation_schema(self,  visiting_group_id=None,  live='outdoor',  change_schema='live'):
         # todo: accessor function making sure the type really is visiting_group
         visiting_group_o = holly_couch[visiting_group_id] 

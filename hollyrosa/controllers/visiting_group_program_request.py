@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -161,7 +161,7 @@ class VisitingGroupProgramRequest(BaseController):
         
         
     @expose('hollyrosa.templates.visiting_group_program_request_edit2')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få ändra i dina programönskemål'))    
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få ändra i dina programönskemål'))    
     def edit_request(self, visiting_group_id=''):     	
         visiting_group_o = holly_couch[str(visiting_group_id)] 
         visiting_group_o.program_request_info = visiting_group_o.get('program_request_info','message to program!')
@@ -175,9 +175,9 @@ class VisitingGroupProgramRequest(BaseController):
         #...supply booking request if it exists
         age_group_data_tmp = json.loads(age_group_data_raw)
         for tmp_item in age_group_data_tmp['items']:
-        	log.debug('TMP ITEM' + str( tmp_item ))
-        	tmp_item['from_date'] = visiting_group_o['from_date']
-        	tmp_item['to_date'] = visiting_group_o['to_date']
+            log.debug('TMP ITEM' + str( tmp_item ))
+            tmp_item['from_date'] = visiting_group_o['from_date']
+            tmp_item['to_date'] = visiting_group_o['to_date']
         
         age_group_data = json.dumps(age_group_data_tmp)
         visiting_group_o.program_request_age_group = visiting_group_o.get('program_request_age_group', age_group_data)

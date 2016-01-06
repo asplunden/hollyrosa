@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013, 2014, 2015 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -40,7 +40,7 @@ class ProgramLayer(BaseController):
     
     @expose('hollyrosa.templates.visiting_group_edit_layers')
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only PL and staff members may change layers configuration'))
+    @require(Any(has_level('staff'), has_level('pl'), msg='Only PL and staff members may change layers configuration'))
     def edit_layers(self, visiting_group_id):
         vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         vgroup_layers = vgroup.get('layers',  list())
@@ -70,7 +70,7 @@ class ProgramLayer(BaseController):
 
     @expose()
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('pl'), msg='Only PL and staff members may change layers configuration'))
+    @require(Any(has_level('pl'), msg='Only PL may change layers configuration'))
     def update_visiting_group_program_layers(self, visiting_group_id,  save_button=None,  layer_data=''):
         vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         vgroup_layers = vgroup.get('layers',  list())
@@ -89,7 +89,7 @@ class ProgramLayer(BaseController):
 
     @expose('hollyrosa.templates.program_booking_layers')
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
-    @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def layers(self, visiting_group_id):
         vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)]

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -80,7 +80,7 @@ class Tools(BaseController):
         
 
     @expose('hollyrosa.templates.view_sanity_check_property_usage')
-    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
+    @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def sanity_check_property_usage(self):
         
         #...iterate through all bookings, we are only interested in scheduled bookings
@@ -153,7 +153,7 @@ class Tools(BaseController):
         
         
     @expose('hollyrosa.templates.activity_statistics')
-    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can take a look at people statistics'))
+    @require(Any(has_level('staff'), has_level('pl'), msg='Only PL or staff members can take a look at people statistics'))
     def activity_statistics(self):
         activity_statistics = getActivityStatistics(holly_couch)
         
@@ -175,7 +175,7 @@ class Tools(BaseController):
     
         
     @expose('hollyrosa.templates.visitor_statistics')
-    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can take a look at people statistics'))
+    @require(Any(has_level('staff'), has_level('pl'), msg='Only PL or staff members can take a look at people statistics'))
     def visitor_statistics(self):
         
         # TODO: this complete calculation has to be redone 
@@ -212,7 +212,7 @@ class Tools(BaseController):
             tot[tmp_property] = int(tmp_value)
             property_names[tmp_property] = 1 # kepiong track of property names used
             totals[tmp_date] = tot
-				
+
         #...same thing but now for aggrgate statistics
         all_totals = list()
         for tmp in statistics_totals:
@@ -221,14 +221,14 @@ class Tools(BaseController):
             
             tmp_date_x = tmp_key[0]
             tmp_date = datetime.date(tmp_date_x[0], tmp_date_x[1], tmp_date_x[2]) #'-'.join([str(t) for t in tmp_date])
-				
+
             tot = totals.get(tmp_date, dict())
             #...for now we need to protect against tot=0 giving zero division errors
             if tmp_value == 0:
                 tmp_value = 1
             tot['tot'] = tmp_value
             totals[tmp_date] = int(tmp_value)
-				
+
             mark = '#444;'
             if tot['tot'] < 250:
                 mark = '#484;'
@@ -239,21 +239,6 @@ class Tools(BaseController):
             else:
                 mark = '#844;'
             all_totals.append((tmp_date, tot, mark))
-
-            
-    #    for booking_day_kv in booking_days:
-    #        booking_day = booking_day_kv.doc        
-    #        tot = dict()
-    #        tot['tot'] = 0 
-    #        for tmp_property_row in vgroup_properties:
-     #           if (tmp.fromdate <= d) and (tmp.todate >= d):
-      #              try:       
-            #            tot['tot'] += int(tmp.value)
-             #           x = tot.get(tmp.property, 0)
-              #          tot[tmp.property] = x + int(tmp.value)
-             #           property_names[tmp.property] = 1
-         #           except ValueError, e:
-       #                 pass
 
 
         property_ns = ['spar','uppt','aven','utm']
@@ -271,7 +256,7 @@ class Tools(BaseController):
 
 
     @expose('hollyrosa.templates.vodb_statistics')
-    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can take a look at people statistics'))
+    @require(Any(has_level('staff'), has_level('pl'), msg='Only PL or staff members can take a look at people statistics'))
     def vodb_statistics(self):
         """
         This method is intended to show the number of participants in different workflow state (preliminary, etc)
@@ -324,18 +309,11 @@ class Tools(BaseController):
 
 
 
-
-
-
-
-
-
-
     @expose('hollyrosa.templates.booking_day_summary')
-    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
+    @require(Any(has_level('staff'), has_level('pl'), msg='Only PL or staff members can take a look at booking statistics'))
     def booking_statistics(self):
         """Show a complete booking day"""
-        
+        abort(501)
         slot_rows = DBSession.query(booking.SlotRow).options(eagerload('activity'))
         slot_rows_n = []
         for s in slot_rows:
@@ -374,91 +352,10 @@ class Tools(BaseController):
 
 
         return dict(slot_rows=slot_rows_n,  bookings=activity_totals, totals=totals)
-    
-    
-        
-    #@expose()
-    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def update_schema(self):
-        s = holly_couch['day_schema.1']
-        pos = 1
-        activity = DBSession.query(booking.Activity).all() # use slot_rows instead , the pos counter screws things up...
-        slot_rows = DBSession(booking.SlotRow).all()
-        
-        zorder = 1
-        sch = dict()
-        for sl in slot_rows:
-            #for ac in activity:
-            ac = sl.activity
-            
-            tmp = [dict(id='activity.'+str(ac.id),  zorder=zorder)]
-            zorder += 1
-            
-            slrp = dict(time_from='09:00:00',  time_to='12:00:00',  duration='03:00:00' ,  slot_id='slot.'+str(pos),  title='FM')
-            pos += 1
-            tmp.append(slrp)
-            
-            slrp = dict(time_from='13:30:00',  time_to='17:00:00',  duration='03:30:00' ,  slot_id='slot.'+str(pos),  title='EM')
-            pos += 1
-            tmp.append(slrp)
-            
-            slrp = dict(time_from='19:00:00',  time_to='21:00:00',  duration='02:00:00' ,  slot_id='slot.'+str(pos),  title=u'Kväll')
-            pos += 1
-            tmp.append(slrp)
-
-            slrp = dict(time_from='21:00:00',  time_to='23:59:00',  duration='03:00:00' ,  slot_id='slot.'+str(pos),  title='After hours')
-            pos += 1
-            tmp.append(slrp)
-
-            sch['activity.'+str(ac.id)] = tmp
-        s['schema'] = sch
-        s = holly_couch['day_schema.1'] = s
-        raise redirect('/')
-        
-        
-#    @expose()
-    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def make_booking_days(self,  from_date,  to_date,  day_schema_id='day_schema.2013'):
-        pos = 1300
-        dates = dateRange(min_date, max_date, format='%Y-%m-%d')
-        
-        # some dates will be lagerskola.2013 other will be schema.2013 and there will be 60DN.2013
-#        #...must iterate a date range, check out websetup.py....        
-#        for i in range(30):
-#            d = datetime.date(2012, 6, i+1)
-#            dates.append(str(d))
-#       
-#        for i in range(31):
-#            d = datetime.date(2012, 7, i+1)
-#            dates.append(str(d))
-#
-#        for i in range(31):
-#            d = datetime.date(2012, 8, i+1)
-#            dates.append(str(d))
-            
-            
-        for d in dates:
-            #...make sure the date doesent exist already
-            raise IOError
-            
-            bd_c = dict(type='booking_day', date=d, note='', title='', num_program_crew_members=0, num_fladan_crew_members=0, day_schema_id=day_schema_id, zorder=pos,  room_schema_id='room_schema.2013' )
-            holly_couch['booking_day.'+str(pos)] = bd_c
-            pos += 1
-            
-        raise redirect('/')
-        
-#    @expose()
-    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
-    def transfer_bookings(self):
-        for b in holly_couch.view('all_activities/erasure', include_docs=True):
-            holly_couch.delete(b.doc)
-        raise redirect('/')
-    
-        
         
         
     @expose('hollyrosa.templates.sannah_overview')
-    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can take a look at people statistics'))
+    @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL can take a look at people statistics'))
     def sannah(self):
         #...get all booking days in the future
         today = datetime.date.today().strftime('%Y-%m-%d')
@@ -480,7 +377,7 @@ class Tools(BaseController):
 
 
     @expose()
-    @require(Any(has_level('pl'),  msg='Only PL or staff members can take a look at booking statistics'))
+    @require(Any(has_level('pl'),  msg='Only PL can take a look at booking statistics'))
     def set_booking_day_schema_ids(self):
         booking_days = [b.doc for b in getAllBookingDays(holly_couch)]
         for bdy in booking_days:
@@ -492,7 +389,7 @@ class Tools(BaseController):
         
         
     @expose()
-    @require(Any(has_level('pl'),  msg='Only PL or staff members can poke around the schemas'))
+    @require(Any(has_level('pl'),  msg='Only PL can poke around the schemas'))
     def create_living_schema(self):
         ew_id = genUID(type='living_schema')
         schema = dict(type='day_schema',  subtype='room',  title='room schema 2013',  activity_group_ids=["activity_groups_ids", "roomgroup.fyrbyn", "roomgroup.vaderstracken", "roomgroup.vindarnashus","roomgroup.tunet",

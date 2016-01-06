@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2015 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -63,7 +63,7 @@ class VisitingGroupPropertyRow(object):
 class VisitingGroup(BaseController):
 
     @expose('hollyrosa.templates.visiting_group_view_all')
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view(self, url):
         visiting_groups = [x.doc for x in getAllVisitingGroups(holly_couch)]
         visiting_group_names = [x['name'] for x in visiting_groups] 
@@ -86,7 +86,7 @@ class VisitingGroup(BaseController):
 
     @expose('hollyrosa.templates.visiting_group_view_all')
     @validate(validators={'from_date':validators.DateValidator(not_empty=False), 'to_date':validators.DateValidator(not_empty=False)})
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_date_range(self,  from_date=None,  to_date=None):
         visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(holly_couch, from_date,  to_date)]
         v_group_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=fromdate,  to_date=todate)
@@ -95,7 +95,7 @@ class VisitingGroup(BaseController):
 
     
     @expose('hollyrosa.templates.visiting_group_view_all')
-    @require(Any(is_user('erspl'), has_level('staff'),   msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members and viewers may view visiting group properties'))
     def view_tags(self, tag):
         # TODO: rename and maybe only return visiting groups docs ?
         visiting_groups = [v.doc for v in getDocumentsByTag(holly_couch, tag)] 
@@ -105,7 +105,7 @@ class VisitingGroup(BaseController):
 
     
     @expose('hollyrosa.templates.visiting_group_view_all')
-    @require(Any(is_user('erspl'), has_level('staff'),   msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members and viewers may view visiting group properties'))
     def view_all(self):
         visiting_groups = [v.doc for v in getAllVisitingGroups(holly_couch)] 
         remaining_visiting_groups_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups)        
@@ -117,7 +117,7 @@ class VisitingGroup(BaseController):
         
     #...in the future, return the maps, but change contents depending on wether the user is logged in or not
     @expose("json")
-    @require(Any(is_user('erspl'), has_level('view'),   msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def get_all_tags_and_vodb_state_maps(self):
         if None == getLoggedInUser(request):
             return dict(all_tags={})
@@ -137,7 +137,7 @@ class VisitingGroup(BaseController):
         
     @expose('hollyrosa.templates.visiting_group_view_all')
     @validate(validators={'program_state':validators.Int(not_empty=True)})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_program_state(self,  program_state=None):
         visiting_groups =[v.doc for v in getVisitingGroupsByBoknstatus(holly_couch, program_state)]
         v_group_map = dict()
@@ -147,7 +147,7 @@ class VisitingGroup(BaseController):
 
     @expose('hollyrosa.templates.visiting_group_view_all')
     @validate(validators={'vodb_state':validators.Int(not_empty=True)})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_vodb_state(self,  vodb_state=None):
         visiting_groups =[v.doc for v in getVisitingGroupsByVodbState(holly_couch, vodb_state)]
         v_group_map = dict()
@@ -157,7 +157,7 @@ class VisitingGroup(BaseController):
         
     @expose('hollyrosa.templates.visiting_group_view_all')
     @validate(validators={'period':validators.String(not_empty=False)})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view_period(self,  period=None):
 
         # TODO: refactor so we only show visiting groups in time span given by daterange document.
@@ -188,7 +188,7 @@ class VisitingGroup(BaseController):
 
 
     @expose('hollyrosa.templates.visiting_group_view_all')
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group and their properties properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group and their properties properties'))
     def view_today(self):
         at_date = datetime.datetime.today().strftime('%Y-%m-%d')
         visiting_groups = [v.doc for v in getVisitingGroupsAtDate(holly_couch, at_date)] 
@@ -199,7 +199,7 @@ class VisitingGroup(BaseController):
 
     @expose('hollyrosa.templates.visiting_group_view_all')
     @validate(validators={'at_date':validators.DateValidator(not_empty=False)})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group and their properties properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group and their properties properties'))
     def view_at_date(self,  at_date=None):
         visiting_groups = [v.doc for v in getVisitingGroupsAtDate(holly_couch, at_date)] 
         v_group_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups,  from_date=at_date,  to_date=at_date)
@@ -228,7 +228,7 @@ class VisitingGroup(BaseController):
         
     @expose('hollyrosa.templates.visiting_group_view')
     @validate(validators={'visiting_group_id':validators.UnicodeString})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def show_visiting_group(self,  visiting_group_id=None,  **kw):
         
         if None == visiting_group_id:
@@ -250,7 +250,7 @@ class VisitingGroup(BaseController):
 
     @expose('hollyrosa.templates.edit_visiting_group')
     @validate(validators={'visiting_group_id':validators.UnicodeString,  'subtype':validators.UnicodeString})
-    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may change visiting group properties'))
     def edit_visiting_group(self,  visiting_group_id=None, subtype='',  **kw):
         tmpl_context.form = create_edit_visiting_group_form
         
@@ -280,7 +280,7 @@ class VisitingGroup(BaseController):
 
     @expose()
     @validate(create_edit_visiting_group_form, error_handler=edit_visiting_group)
-    @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may change visiting group properties'))
     def save_visiting_group_properties(self,  _id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr='', password='',  subtype=''):
         id = _id
         is_new = ((None == id) or (id == ''))
@@ -358,7 +358,7 @@ class VisitingGroup(BaseController):
 
 
     @validate(validators={'id':validators.Int})
-    @require(Any(is_user('root'), has_level('pl'), msg='Only pl members may change visiting group properties'))
+    @require(Any(has_level('pl'), msg='Only pl members may delete visiting groups'))
     def delete_visiting_group(self,  id=None):
         if None == id:
             pass
@@ -417,7 +417,7 @@ class VisitingGroup(BaseController):
     
     @expose('hollyrosa.templates.view_bookings_of_name')
     @validate(validators={"visiting_group_id":validators.UnicodeString(), "render_time":validators.UnicodeString(), "hide_comment":validators.Int(), "show_group":validators.Int()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), has_level('pl'), has_level('vgroup'),  msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
+    @require(Any(has_level('staff'), has_level('view'), has_level('pl'), has_level('vgroup'),  msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def view_bookings_of_visiting_group_id(self, visiting_group_id=None, render_time='', hide_comment=0, show_group=0):
         
         bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, '<- MATCHES NO GROUP ->', visiting_group_id)]
@@ -428,7 +428,7 @@ class VisitingGroup(BaseController):
             
     @expose('hollyrosa.templates.view_bookings_of_name')
     @validate(validators={"name":validators.UnicodeString(), "render_time":validators.UnicodeString(), "hide_comment":validators.Int(), "show_group":validators.Int()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), has_level('pl'), has_level('vgroup'),  msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
+    @require(Any(has_level('staff'), has_level('view'), has_level('pl'), has_level('vgroup'),  msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def view_bookings_of_name(self,  name=None, render_time='', hide_comment=0, show_group=0):
         # TODO: its now possible to get bookings on both name and id
         bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, name, '<- MATCHES NO GROUP ->')]
@@ -516,7 +516,7 @@ class VisitingGroup(BaseController):
 
     @expose(content_type=CUSTOM_CONTENT_TYPE)
     @validate(validators={"visiting_group_id":validators.UnicodeString(), "doc_id":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('pl'), has_level('staff'), msg='Only staff members may view visiting group attachments'))   
+    @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may view visiting group attachments'))   
     def download_attachment(self, visiting_group_id, doc_id):
         response.content_type='x-application/download'
         response.headerlist.append(('Content-Disposition','attachment;filename=%s' % doc_id))        
@@ -537,7 +537,7 @@ class VisitingGroup(BaseController):
     
     @expose('hollyrosa.templates.edit_visiting_group_vodb_data')
     @validate(validators={"id":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def edit_vodb_data(self, id):
         vgroup = common_couch.getVisitingGroup(holly_couch,  id)
         return dict(visiting_group=vgroup)
@@ -579,7 +579,7 @@ class VisitingGroup(BaseController):
 
     @expose()
     @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True), 'state':validators.Int(not_empty=True)})    
-    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
+    @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def set_program_state(self, visiting_group_id=None,  state=0):
         visiting_group_o = common_couch.getVisitingGroup(holly_couch,  visiting_group_id) 
         self.do_set_program_state(holly_couch, visiting_group_id,  visiting_group_o, int(state))            
@@ -588,7 +588,7 @@ class VisitingGroup(BaseController):
 
     @expose()
     @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True), 'state':validators.Int(not_empty=True)})    
-    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
+    @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def set_vodb_state(self, visiting_group_id=None,  state=0):
         visiting_group_o = common_couch.getVisitingGroup(holly_couch,  visiting_group_id) 
         self.do_set_vodb_state(holly_couch, visiting_group_id,  visiting_group_o, int(state))            
@@ -596,7 +596,7 @@ class VisitingGroup(BaseController):
 
     @expose()
     @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True)})    
-    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
+    @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def copy_vodb_contact_info(self, visiting_group_id=None):
         visiting_group_o = common_couch.getVisitingGroup(holly_couch,  visiting_group_id) 
         

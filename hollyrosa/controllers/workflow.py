@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -104,10 +104,6 @@ class Workflow(BaseController):
         #...only PL can set state=20 (approved) or -10 (disapproved)
         
         if state=='20' or state=='-10' or booking_o['booking_state'] == 20 or booking_o['booking_state']==-10:
-            #ok = False
-            #for group in getLoggedInUserId(request):
-            #    if group.group_name == 'pl':
-            #        ok = True
             ok = has_level('pl').check_authorization(request.environ)
             
             # TODO: fix
@@ -126,17 +122,17 @@ class Workflow(BaseController):
 
     @expose()
     @validate(validators={'booking_id':validators.UnicodeString(not_empty=True), 'state':validators.Int(not_empty=True), 'all':validators.Int(not_empty=False)})    
-    @require(Any(is_user('root'), has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
+    @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def set_state(self, booking_id=None,  state=0, all=0):
         if all == 0 or all==None:
             booking_o = holly_couch[booking_id] 
             self.do_set_state(holly_couch, booking_id,  booking_o, state)
         elif all == 1: # look for all bookings with same group
-           booking_o = holly_couch[booking_id] 
-           bookings = [b.doc for b in getAllSimilarBookings(holly_couch, [booking_o['visiting_group_id'], booking_o['activity_id']]) ] # TODO: Fix later DBSession.query(booking.Booking).filter(and_('visiting_group_id='+str(booking_o.visiting_group_id), 'activity_id='+str(booking_o.activity_id), 'booking_state > -100')).all()
-           for new_b in bookings:
-               if (new_b['content'].strip() == booking_o['content'].strip()) and (new_b['booking_day_id'] != None):
-                   self.do_set_state(holly_couch, new_b['_id'],  new_b, state)
+            booking_o = holly_couch[booking_id] 
+            bookings = [b.doc for b in getAllSimilarBookings(holly_couch, [booking_o['visiting_group_id'], booking_o['activity_id']]) ] # TODO: Fix later DBSession.query(booking.Booking).filter(and_('visiting_group_id='+str(booking_o.visiting_group_id), 'activity_id='+str(booking_o.activity_id), 'booking_state > -100')).all()
+            for new_b in bookings:
+                if (new_b['content'].strip() == booking_o['content'].strip()) and (new_b['booking_day_id'] != None):
+                    self.do_set_state(holly_couch, new_b['_id'],  new_b, state)
         else:
             pass
             

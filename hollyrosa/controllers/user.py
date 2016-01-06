@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013, 2014, 2015, 2016 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -157,7 +157,7 @@ class User(BaseController):
         
     @expose('hollyrosa.templates.change_password')
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
-    @require(Any(is_user('root'), has_level('pl'),  msg='Only PL can change passwords'))    
+    @require(Any(has_level('pl'),  msg='Only PL can change passwords'))    
     def change_password(self, user_id):
         tmpl_context.form = create_change_password_form
         user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
@@ -167,7 +167,7 @@ class User(BaseController):
         
     @expose()
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
-    @require(Any(is_user('root'), has_level('pl'), msg='Only PL can change passwords'))
+    @require(Any(has_level('pl'), msg='Only PL can change passwords'))
     def update_password(self, user_id, password, password2):
         if not password==password2:
             raise IOError, 'passwords must agree'

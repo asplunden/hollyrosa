@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -54,7 +54,7 @@ class Note(BaseController):
         abort(404)
    
     @expose('hollyrosa.templates.edit_note')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))  
+    @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))  
     def add_note(self, target_id):
         tmpl_context.form = create_edit_note_form
         note_o = DataContainer(text='', target_id=target_id, _id='')
@@ -62,7 +62,7 @@ class Note(BaseController):
         
         
     @expose('hollyrosa.templates.edit_attachment')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))  
+    @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))  
     def add_attachment(self, target_id):
         tmpl_context.form = create_edit_attachment_form
         attachment_o = DataContainer(text='', target_id=target_id, _id='')
@@ -70,7 +70,7 @@ class Note(BaseController):
         
    
     @expose('hollyrosa.templates.edit_note')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def edit_note(self, note_id=None, visiting_group_id=None):
         tmpl_context.form = create_edit_note_form
         if note_id == '':
@@ -81,7 +81,7 @@ class Note(BaseController):
         
         
     @expose('hollyrosa.templates.edit_attachment')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def edit_attachment(self, note_id=None, visiting_group_id=None):
         attachment_id=note_id
         tmpl_context.form = create_edit_attachment_form
@@ -99,7 +99,7 @@ class Note(BaseController):
 
 
     @expose()
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(is_user('root'), has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def save_note(self, target_id, _id, text):
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         if _id == '':
@@ -131,7 +131,7 @@ class Note(BaseController):
         
         
     @expose()
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(is_user('root'), has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def save_attachment(self, target_id, _id, text, attachment):
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         if _id == '':
@@ -169,7 +169,7 @@ class Note(BaseController):
         
     @expose(content_type=CUSTOM_CONTENT_TYPE)
     @validate(validators={"attachment_id":validators.UnicodeString(), "doc_id":validators.UnicodeString()})
-    @require(Any(is_user('root'), has_level('pl'), has_level('staff'), msg='Only staff members may view visiting group attachments'))   
+    @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may view visiting group attachments'))   
     def download_attachment(self, attachment_id, doc_id):
         response.content_type='x-application/download'
         log.debug(u'Trying to download attachment="%s" filename="%s"' % (attachment_id, doc_id))  

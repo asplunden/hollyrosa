@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -44,6 +44,6 @@ class Me(BaseController):
         
     
     @expose('hollyrosa.templates.me')
-    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only logged in users may view me properties'))
+    @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only logged in users may view me properties'))
     def settings(self):
         return dict()
