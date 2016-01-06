@@ -295,7 +295,7 @@ class BookingDay(BaseController):
         
         
     @expose('hollyrosa.templates.booking_day')
-    @validate(validators={'day_id':validators.Int(not_empty=False), 'day':validators.DateValidator(not_empty=False), 'subtype':validators.UnicodeString(not_empty=False)})
+    @validate(validators={'day_id':validators.UnicodeString(not_empty=False), 'day':validators.DateValidator(not_empty=False), 'subtype':validators.UnicodeString(not_empty=False)})
     def day(self,  day=None,  day_id=None, subtype=None):
         """Show a complete booking day"""
         
@@ -348,8 +348,8 @@ class BookingDay(BaseController):
     
     
     @expose('hollyrosa.templates.live_day')
-    @validate(validators={'day_id':validators.Int(not_empty=False), 'day':validators.DateValidator(not_empty=False), 'subtype':validators.UnicodeString(not_empty=True)})
-    def live(self, day=None, day_id=None, subtype='room'):
+    @validate(validators={'day_id':validators.UnicodeString(not_empty=False), 'day':validators.DateValidator(not_empty=False), 'subtype':validators.UnicodeString(not_empty=True)})
+    def live(self, day=None, day_id=None, subtype=u'room'):
         """Show a complete booking day"""
         
         #if schema_type=='funk':
@@ -657,11 +657,11 @@ class BookingDay(BaseController):
         activity = common_couch.getActivity(holly_couch,  slot['activity_id'])
        
         #...TODO: also extract the whole slot_row from the schema and remove the first entry. This will be needed for the date range to work correctly
-        booking_o = DataContainer(content='', visiting_group_id='', visiting_group_name='', visiting_group_displayname='', valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_id=slot_id, booking_id=None, subtype=subtype)
+        booking_o = DataContainer(content='', visiting_group_id='', visiting_group_name='', visiting_group_displayname='', valid_from=None, valid_to=None, requested_date=None, return_to_day_id=booking_day_id, activity_id=slot['activity_id'], id=None, activity=activity, booking_day_id=booking_day_id, slot_id=slot_id, booking_id=None, subtype=subtype, booking_date=booking_day['date'], booking_end_date=booking_day['date'])
         schema_id = self.getSchemaSubNameOfSubtype(subtype)    
         schema_o = booking_day[schema_id] 
         
-        end_slot_id_options = self.getEndSlotIdOptions(schema_o,  slot['activity_id'])
+        end_slot_id_options = self.getEndSlotIdOptions(schema_o, slot['activity_id'])
         visiting_group_options = json.dumps([dict(name=a[1], id=a[0]) for a in visiting_groups] )
         return dict(booking_day=booking_day, booking=booking_o, visiting_groups=visiting_groups, edit_this_visiting_group=0,  slot_position=slot,  end_slot_id_options=end_slot_id_options, visiting_group_options=visiting_group_options)
         
@@ -758,8 +758,8 @@ class BookingDay(BaseController):
     @validate(validate_edit_book_live_slot_form, error_handler=edit_booked_booking)      
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change booked live booking properties'))
-    def save_booked_live_booking_properties(self,  booking_id=None,  content=None, visiting_group_name=None, visiting_group_displayname=None, visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  booking_date=None,  booking_end_date=None,  booking_end_slot_id=None,  block_after_book=False, subtype='room', **args):
-        tmp_activity_id = self.save_booked_booking_properties_helper(booking_id, content, visiting_group_displayname, visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  booking_date=booking_date,  block_after_book=block_after_book,  subtype=subtype,  booking_end_date=booking_end_date,  booking_end_slot_id=booking_end_slot_id)
+    def save_booked_live_booking_properties(self, booking_id=None, content=None, visiting_group_name=None, visiting_group_display_name=None, visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  booking_date=None,  booking_end_date=None,  booking_end_slot_id=None,  block_after_book=False, subtype='room', **args):
+        tmp_activity_id = self.save_booked_booking_properties_helper(booking_id, content, visiting_group_display_name, visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  booking_date=booking_date,  block_after_book=block_after_book,  subtype=subtype,  booking_end_date=booking_end_date,  booking_end_slot_id=booking_end_slot_id)
         raise redirect('live?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id), subtype=subtype)
     
     
@@ -873,7 +873,7 @@ class BookingDay(BaseController):
             if subtype in ['room', 'staff']:
                 old_booking['slot_id'] = slot_id
                 old_booking['booking_date'] = booking_day['date']
-                old_booking['booking_end_date'] = booking_end_date.strftime('%Y-%m-%d')
+                old_booking['booking_end_date'] = booking_end_date # strftime    .strftime('%Y-%m-%d')
                 old_booking['booking_end_slot_id'] = booking_end_slot_id
                 
                 tmp_schema_id = booking_day[self.getSchemaSubNameOfSubtype(subtype)]
