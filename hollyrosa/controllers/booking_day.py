@@ -43,8 +43,8 @@ from tg import expose, flash, require, url, request, redirect,  validate,  overr
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch, genUID
-from hollyrosa.model.booking_couch import getBookingDays,  getAllBookingDays,  getSlotAndActivityIdOfBooking,  getBookingDayOfDate, getVisitingGroupsInDatePeriod,  dateRange2,  getBookingDayOfDateList,  getSlotRowSchemaOfActivity,  getActivityGroupNameAndIdList
-from hollyrosa.model.booking_couch import getAllHistoryForBookings,  getAllActivities, getAllRooms, getAllActivityGroups,  getVisitingGroupsAtDate,  getUserNameMap,  getSchemaSlotActivityMap,  getAllVisitingGroups,  getActivityTitleMap, getVisitingGroupOfVisitingGroupName
+from hollyrosa.model.booking_couch import getBookingDays, getAllBookingDays, getSlotAndActivityIdOfBooking, getBookingDayOfDate, getVisitingGroupsInDatePeriod, dateRange2,  getBookingDayOfDateList,  getSlotRowSchemaOfActivity,  getActivityGroupNameAndIdList
+from hollyrosa.model.booking_couch import getAllHistoryForBookings, getAllActivities, getAllRooms, getAllActivityGroups, getVisitingGroupsAtDate, getUserNameMap, getSchemaSlotActivityMap,  getAllVisitingGroups,  getActivityTitleMap, getVisitingGroupOfVisitingGroupName
 
 
 from formencode import validators
@@ -990,7 +990,6 @@ class BookingDay(BaseController):
         Client side Dojo could find the text box and when user clicks it things starts to happen,
         like a pop up dynamic form being shown.
         
-        
         """
         tmpl_context.form = create_edit_new_booking_request_form
         edit_this_visiting_group = 0
@@ -1009,10 +1008,10 @@ class BookingDay(BaseController):
         
         #...patch since this is the way we will be called if validator for new will fail
         if (visiting_group_id != '') and (visiting_group_id != None):
-            booking_o = DataContainer(id='', content='', visiting_group_id = visiting_group_id, visiting_group_name=tmp_visiting_group['name'], activity_id='')
+            booking_o = DataContainer(id='', content='', visiting_group_id=visiting_group_id, visiting_group_name=tmp_visiting_group['name'], activity_id='')
             edit_this_visiting_group = 0 #visiting_group_id
         elif booking_id=='' or booking_id==None:
-            booking_o = DataContainer(id='', content='')
+            booking_o = DataContainer(id='', content='', visiting_group_id=visiting_group_id, visiting_group_name='', activity_id='')
         else:
             b = common_couch.getBooking(holly_couch,  booking_id)
             booking_o = DataContainer(id=b['_id'], content=b['content'], visiting_group_id=b['visiting_group_id'], valid_from=b['valid_from'], valid_to=b['valid_to'], requested_date=b['requested_date'], activity_id=b['activity_id'], visiting_group_name=b['visiting_group_name'])  
