@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -33,37 +33,26 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 </head>
 
 <body class="tundra">
-    <h2>Tools for $show_day</h2>
+    <h2>Tools planning bookings</h2>
     <ul>
-        <li py:if="request.identity"><a href="${tg.url('/history/show')}">History</a></li>
-        <li py:if="request.identity"><a href="${tg.url('/workflow/overview')}">Workflow</a></li>
-        <li py:if="request.identity"><a href="${tg.url('/vodb_group/vodb_booking_overview')}">VODB Booking Overview (beta)</a></li>
-        
-
+        <li><a href="${tg.url('sanity_check_property_usage')}">Check for bookig errors and warnings</a></li>
+        <li py:if="request.identity"><a href="${tg.url('/history/show')}">Booking history</a></li>
     </ul>
-
-    <h3>Statistics</h3>
+    <h3>Tools for managing users</h3>
+    <ul>
+      <li><a href="${tg.url('/user/show')}">Manage all Active Users</a></li>
+		<li><a href="${tg.url('/user/show', params={'show_deactive':True})}">Manage all Users</a></li>
+	</ul>
+    <h3>Statistics tools</h3>
     <ul>
         <!-- <li><a href="${tg.url('booking_statistics')}">Booking Statistics</a></li> -->
+        <li><a href="${tg.url('visitor_statistics')}">Age Group Statistics</a></li>        
         <li><a href="${tg.url('vodb_statistics')}">VODB Statistics</a></li>
-        <li><a href="${tg.url('visitor_statistics')}">Age Group Statistics</a></li>
-        
     </ul>
-    <h3>Export Treeware for $show_day</h3>
-    <h3>Push-to-Google Calendar</h3>
-    <h3>Visiting Group Attributes out-of-range</h3>
+    <h3>Tools in development (alpha &amp; beta)</h3>
     <ul>
-      <li><a href="${tg.url('sanity_check_property_usage')}">Check</a></li>
-      <li><a href="${tg.url('/user/show')}">List all Active Users</a></li>
-		<li><a href="${tg.url('/user/show', params={'show_deactive':True})}">List all Users</a></li>
-	</ul>
-<!--    <h3>Transfer to booking treeware template</h3>
-    <form name="create_program_day" action="${tg.url('make_program_day_doc')}" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" id="file"/>
-        <input type="text" name="day" value="$show_day"/>
-        <input type="submit" value="generate program day doc"/>
-        
-    </form>
-    -->
+    <!-- <li py:if="request.identity"><a href="${tg.url('/workflow/overview')}">Workflow</a></li> -->
+        <li py:if="request.identity"><a href="${tg.url('/vodb_group/vodb_booking_overview')}">VODB Booking Overview (beta)</a></li>
+	</ul>    
 </body>
 </html>
