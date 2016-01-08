@@ -92,7 +92,7 @@ class MyAppConfig(AppConfig):
  
     login_url = '/login'
     login_handler = '/login_handler'
-    post_login_url = None
+    post_login_url = '/post_login' #None
     logout_handler = '/logout_handler'
     post_logout_url = None
     login_counter_name = None

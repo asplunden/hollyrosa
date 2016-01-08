@@ -107,14 +107,14 @@ class RootController(BaseController):
         return dict(page='editor stuff')
 
     @expose('hollyrosa.templates.login')
-    def login(self, came_from=url('/')):
+    def login(self, came_from=url('/'), logins=0):
         """Start the user login."""
         if request.environ.has_key('repoze.who.logins'):
             login_counter = request.environ['repoze.who.logins']
         else:
             login_counter = 0
             
-        if login_counter > 0:
+        if login_counter > 0 or logins>0:
             flash(_('Wrong credentials'), 'warning')
             
         return dict(page='login', login_counter=str(login_counter), came_from=came_from)
@@ -129,7 +129,7 @@ class RootController(BaseController):
         """
         if not request.identity:
             login_counter = request.environ['repoze.who.logins'] + 1
-            redirect(url('/login', came_from=came_from, __logins=login_counter))
+            redirect(url('/login', params=dict(came_from=came_from, logins=login_counter)))
         userid = request.identity['repoze.who.userid']
         flash(_('Welcome back, %s!') % userid)
         redirect(came_from)
