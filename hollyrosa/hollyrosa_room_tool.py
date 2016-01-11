@@ -2,7 +2,7 @@
 """
 hollyrosa_tool.py 
 
-Copyright 2010-2015 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -79,18 +79,30 @@ if False:
 
 
 
-if False:
-    #...try to generate all booking days. Ah, first generate day schema!
-    ds = holly_couch['60dn_schema.2013']
-    new_ds = copy.deepcopy(ds)
-    holly_couch['arcanum_schema.2015'] = ds
+
     
 
 def copyDocument(db, from_id, to_id):
     doc = db[from_id]
     new_doc = copy.deepcopy(doc)
     db[to_id] = new_doc
+    
+    
+copyDocument(holly_couch, 'program_schema.2014', 'program_schema.2016')
+copyDocument(holly_couch, 'school_schema.2014', 'school_schema.2016')
+#copyDocument(holly_couch, 'arcanum_schema.2015', 'boomerang.2016')
 
+if True:
+    for b in holly_couch.view('booking_day/all_booking_days', include_docs=True):
+        doc = holly_couch[b.doc['_id']]
+        if doc['day_schema_id'] == 'summer_schema.2014':
+            doc['day_schema_id'] = 'summer_schema.2016
+        if doc['day_schema_id'] == 'school_schema.2014':
+            doc['day_schema_id'] = 'school_schema.2016
+        if doc['day_schema_id'] == 'arcanum_schema.2015':
+            doc['day_schema_id'] = 'summer_schema.2016
+            '
+        holly_couch[b.doc['_id']] = doc
 
 if False:
     for i in range(8):
@@ -131,7 +143,7 @@ def makeSlotRow(slot_id_start, zorder, activity_id):
     return result, slot_id_start
 
 
-if True:
+if False:
     doc = holly_couch['arcanum_schema.2015']
     schema = doc['schema']
     print schema
