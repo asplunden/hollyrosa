@@ -88,7 +88,7 @@ def copyDocument(db, from_id, to_id):
     db[to_id] = new_doc
     
     
-copyDocument(holly_couch, 'program_schema.2014', 'program_schema.2016')
+copyDocument(holly_couch, 'summer_schema.2014', 'summer_schema.2016')
 copyDocument(holly_couch, 'school_schema.2014', 'school_schema.2016')
 #copyDocument(holly_couch, 'arcanum_schema.2015', 'boomerang.2016')
 
@@ -96,12 +96,12 @@ if True:
     for b in holly_couch.view('booking_day/all_booking_days', include_docs=True):
         doc = holly_couch[b.doc['_id']]
         if doc['day_schema_id'] == 'summer_schema.2014':
-            doc['day_schema_id'] = 'summer_schema.2016
+            doc['day_schema_id'] = 'summer_schema.2016'
         if doc['day_schema_id'] == 'school_schema.2014':
-            doc['day_schema_id'] = 'school_schema.2016
+            doc['day_schema_id'] = 'school_schema.2016'
         if doc['day_schema_id'] == 'arcanum_schema.2015':
-            doc['day_schema_id'] = 'summer_schema.2016
-            '
+            doc['day_schema_id'] = 'summer_schema.2016'
+            
         holly_couch[b.doc['_id']] = doc
 
 if False:
