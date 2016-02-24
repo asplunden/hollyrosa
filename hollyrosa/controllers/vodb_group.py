@@ -118,7 +118,7 @@ class VODBGroup(BaseController):
 
     @expose('hollyrosa.templates.vodb_group_edit')
     @require(Any(has_level('pl'), has_level('pl'), has_level('staff'), msg='Only staff and pl may edit vodb group data'))
-    def edit_group_data(self, visiting_group_id='', subtype=''):
+    def edit_group_data(self, visiting_group_id='', subtype='', **kwargs):
 #        visiting_group_x = holly_couch[visiting_group_id]
         tmpl_context.form = create_edit_vodb_group_form
         
