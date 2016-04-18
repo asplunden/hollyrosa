@@ -1,11 +1,10 @@
-TurboGears2 <= 2.2.3
+TurboGears2 >= 2.0b7
+Catwalk >= 2.0.2
 Babel >=0.9.4
 toscawidgets >= 0.9.7.1
 zope.sqlalchemy >= 0.4
 repoze.tm2 >= 1.0a4
+tw.dynforms >= 0.9.8
+tw.tinymce >= 0.8
+couchdb >= 0.8
 repoze.what-quickstart >= 1.0
-repoze.who <= 1.99
-tw.dynforms
-tw.tinymce
-couchdb
-genshi

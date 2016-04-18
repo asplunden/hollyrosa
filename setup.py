@@ -14,8 +14,7 @@ setup(
     author_email='asplunden@gmail.com',
     url='http://github.com/asplunden/hollyrosa',
     install_requires=[
-        "TurboGears2 >= 2.0b7",
-        "Catwalk >= 2.0.2",
+        "TurboGears2 >= 2.3.8",
         "Babel >=0.9.4",
         #can be removed iif use_toscawidgets = False
         "toscawidgets >= 0.9.7.1",
@@ -23,7 +22,8 @@ setup(
         "repoze.tm2 >= 1.0a4",
         "tw.dynforms >= 0.9.8",
         "tw.tinymce >= 0.8",
-        "couchdb-python >= 0.8",
+        "couchdb >= 1.0.0",
+        "webhelpers >= 1.3",
         "repoze.what-quickstart >= 1.0",
                 ],
     setup_requires=["PasteScript >= 1.7"],
