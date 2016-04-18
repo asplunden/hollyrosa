@@ -21,7 +21,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from tg import expose, flash, require, url, request, redirect
-from pylons.i18n import ugettext as _, lazy_ugettext as l_
+from tg.i18n import ugettext as _, lazy_ugettext as l_
+
 from repoze.what import predicates
 
 from hollyrosa.lib.base import BaseController
@@ -29,7 +30,7 @@ from hollyrosa.controllers.error import ErrorController
 from hollyrosa.controllers import booking_day,  calendar, booking_history, workflow, visiting_group, tools, note, tag, user, me, visiting_group_program_request, vodb_group,  program_layer
 
 from hollyrosa import model
-from hollyrosa.controllers.secure import SecureController
+##from hollyrosa.controllers.secure import SecureController
 
 __all__ = ['RootController']
 
@@ -48,7 +49,7 @@ class RootController(BaseController):
     must be wrapped around with :class:`tg.controllers.WSGIAppController`.
     
     """
-    secc = SecureController()
+    ##secc = SecureController()
     
     error = ErrorController()
     

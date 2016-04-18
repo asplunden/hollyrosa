@@ -43,7 +43,7 @@ from hollyrosa.controllers.booking_history import remember_tag_change
 from hollyrosa.controllers import common_couch
 
 from tg import request, response
-from tg.controllers import CUSTOM_CONTENT_TYPE
+##from tg.controllers import CUSTOM_CONTENT_TYPE
 
 __all__ = ['VisitingGroup']
 
@@ -514,7 +514,7 @@ class VisitingGroup(BaseController):
         return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time, visiting_group=visiting_group, bokn_status_map=bokn_status_map, notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)], show_group=show_group)
 
 
-    @expose(content_type=CUSTOM_CONTENT_TYPE)
+    @expose() ##content_type=CUSTOM_CONTENT_TYPE)
     @validate(validators={"visiting_group_id":validators.UnicodeString(), "doc_id":validators.UnicodeString()})
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may view visiting group attachments'))   
     def download_attachment(self, visiting_group_id, doc_id):

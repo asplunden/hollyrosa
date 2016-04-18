@@ -19,7 +19,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-import pylons
+##import pylons
 from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
@@ -43,7 +43,7 @@ from hollyrosa.model.booking_couch import genUID, getNotesForTarget
 from hollyrosa.controllers.booking_history import remember_note_change
 
 from tg import request, response
-from tg.controllers import CUSTOM_CONTENT_TYPE
+##from tg.controllers import CUSTOM_CONTENT_TYPE
 
 __all__ = ['note']
 
@@ -167,7 +167,7 @@ class Note(BaseController):
         raise redirect(redirect_to)
         
         
-    @expose(content_type=CUSTOM_CONTENT_TYPE)
+    @expose() ##content_type=CUSTOM_CONTENT_TYPE)
     @validate(validators={"attachment_id":validators.UnicodeString(), "doc_id":validators.UnicodeString()})
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may view visiting group attachments'))   
     def download_attachment(self, attachment_id, doc_id):
