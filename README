@@ -1,11 +1,37 @@
-paster serve --reload production_master.ini
+Installation for TG2.3.8
+========================
 
- * You may skip --reload
+Step 1: Create virtualenv and activate:
 
- * Plus tw.dynforms and a few more. Thats about it.
+> virtualenv hollyrosa_env
+> cd hollyrosa_env
+> source bin/activate
 
- * Oh, validators.py needs to be copied to the correct place
+Step 2: install TG
 
-TODO:
- * remove deug=true
+> cd hollyrosa_env
+> pip install tg.devtools
+
+Step 3: get source from Github
+
+> git clone https://github..../hollyrosa 
+
+Step 4: install hollyrosa
+
+> pip install -e .
+
+Preparations
+============
+
+You will need to setup the couchdb and configuring before proceeding.
+
+TBD.
+
+
+
+Run (in debug mode)
+===================
+
+> gearbox serve -c <path to ini file>
+
 
