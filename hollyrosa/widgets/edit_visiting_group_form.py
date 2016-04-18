@@ -1,5 +1,5 @@
 """
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -35,8 +35,8 @@ class ParamsGrowingTableFieldSet(GrowingTableFieldSet):
         TextField('value',  size=4),
         TextField('unit',  size=8), 
         TextField('description'), 
-        CalendarDatePicker('from_date', validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d'), 
-        CalendarDatePicker('to_date', validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')]
+        CalendarDatePicker('from_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d'), 
+        CalendarDatePicker('to_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')]
         
 
 #class EditVisitingGroupForm(CustomisedForm):
@@ -53,10 +53,9 @@ class EditVisitingGroupForm(TableForm):
                                                                    theme_advanced_buttons2 = "",
                                                                    theme_advanced_buttons3 = ""
 ))
-        #broken: fromdate = CalendarDatePicker(date_format="%Y-%m-%d", validator=DateConverter(month_style='dd/mm/yyyy'))
-        #broken: todate = CalendarDatePicker(date_format="%Y-%m-%d", validator=DateConverter(month_style='yyyy/mm/dd'))
-        from_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
-        to_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
+        
+        from_date = CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+        to_date = CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
         contact_person = TextField(validator=UnicodeString(),  label_text="contact person:")
         contact_person_email = TextField(validator=Email(resolve_domain=False))
         contact_person_phone = TextField(validator=UnicodeString())

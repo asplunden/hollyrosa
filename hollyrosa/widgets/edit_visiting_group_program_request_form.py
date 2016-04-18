@@ -1,5 +1,5 @@
 """
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -46,9 +46,9 @@ class EditVisitingGroupProgramRequestForm(TableForm):
         contact_person = TextField(validator=UnicodeString())
         contact_person_email = TextField(validator=UnicodeString())
         contact_person_phone = TextField(validator=UnicodeString())
-        #from_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
+        #from_date = CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
         
-        #to_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"),  date_format='%Y-%m-%d')
+        #to_date = CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
         
         
         age_groups = DivWidget(value='xyz')

@@ -38,9 +38,9 @@ class EditNewBookingRequestForm(TableForm):
         content = TextArea(validator=UnicodeString)
         activity_id = HiddenField(validator=UnicodeString)
         activity_name = TextField(validator=UnicodeString(min=1))
-        requested_date = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"), date_format='%Y-%m-%d')
-        valid_from = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"), date_format='%Y-%m-%d')  
-        valid_to = CalendarDatePicker(validator=DateConverter(month_style="yyyy-mm-dd"), date_format='%Y-%m-%d')   
+        requested_date = CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')
+        valid_from = CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')  
+        valid_to = CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')   
         
 
 create_edit_new_booking_request_form = EditNewBookingRequestForm("create_edit_new_booking_request_form")
