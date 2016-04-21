@@ -32,12 +32,10 @@ hollyrosa/controllers/me.py
 hollyrosa/controllers/note.py
 hollyrosa/controllers/program_layer.py
 hollyrosa/controllers/root.py
-hollyrosa/controllers/secure.py
 hollyrosa/controllers/tag.py
 hollyrosa/controllers/template.py
 hollyrosa/controllers/tools.py
 hollyrosa/controllers/user.py
-hollyrosa/controllers/validators.py
 hollyrosa/controllers/visiting_group.py
 hollyrosa/controllers/visiting_group_common.py
 hollyrosa/controllers/visiting_group_program_request.py
@@ -105,6 +103,7 @@ hollyrosa/public/scripts/std.js
 hollyrosa/public/scripts/tags.js
 hollyrosa/public/scripts/visiting_group_program_request_widget.js
 hollyrosa/templates/__init__.py
+hollyrosa/templates/__init__.pyc
 hollyrosa/templates/about.html
 hollyrosa/templates/activity_statistics.html
 hollyrosa/templates/authentication.html
@@ -136,6 +135,7 @@ hollyrosa/templates/list_users.html
 hollyrosa/templates/live_day.html
 hollyrosa/templates/login.html
 hollyrosa/templates/master.html
+hollyrosa/templates/master.html~
 hollyrosa/templates/master_external.html
 hollyrosa/templates/me.html
 hollyrosa/templates/move_booking.html

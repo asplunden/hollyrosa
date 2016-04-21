@@ -2,8 +2,8 @@
 """WSGI middleware initialization for the hollyrosa application."""
 
 #...hack beacause my mysql egg is not in the tg2env
-import sys
-sys.path.append('/usr/lib/python2.5/site-packages/MySQL_python-1.2.3-py2.5-linux-i686.egg')
+#import sys
+#sys.path.append('/usr/lib/python2.5/site-packages/MySQL_python-1.2.3-py2.5-linux-i686.egg')
 
 
 from hollyrosa.config.app_cfg import base_config

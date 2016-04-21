@@ -19,7 +19,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-##import pylons
+
 from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController

@@ -1,10 +1,8 @@
-TurboGears2 >= 2.0b7
-Catwalk >= 2.0.2
-Babel >=0.9.4
+TurboGears2 >= 2.3.7
 toscawidgets >= 0.9.7.1
 zope.sqlalchemy >= 0.4
-repoze.tm2 >= 1.0a4
+repoze.who
 tw.dynforms >= 0.9.8
 tw.tinymce >= 0.8
-couchdb >= 0.8
-repoze.what-quickstart >= 1.0
+couchdb >= 1.0.0
+webhelpers >= 1.3
