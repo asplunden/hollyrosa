@@ -20,10 +20,12 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from tg import expose, flash, require, url, request, redirect
+from tg import expose, flash, require, url, lurl, request, redirect, tmpl_context
 from tg.i18n import ugettext as _, lazy_ugettext as l_
+from tg.exceptions import HTTPFound
 
-from repoze.what import predicates
+#from repoze.what import predicates
+from tg import predicates
 
 from hollyrosa.lib.base import BaseController
 from hollyrosa.controllers.error import ErrorController
@@ -108,39 +110,53 @@ class RootController(BaseController):
         return dict(page='editor stuff')
 
     @expose('hollyrosa.templates.login')
-    def login(self, came_from=url('/'), logins=0):
+    def login(self, came_from=lurl('/'), failure=None, logins=0, login=''):
         """Start the user login."""
-        if request.environ.has_key('repoze.who.logins'):
-            login_counter = request.environ['repoze.who.logins']
-        else:
-            login_counter = 0
-            
-        if login_counter > 0 or logins>0:
+        if failure is not None:
+            if failure == 'user-not-found':
+                flash(_('User not found'), 'error')
+            elif failure == 'invalid-password':
+                flash(_('Invalid Password'), 'error')
+
+        login_counter = request.environ.get('repoze.who.logins', 0)
+        if failure is None and login_counter > 0:
             flash(_('Wrong credentials'), 'warning')
-            
-        return dict(page='login', login_counter=str(login_counter), came_from=came_from)
-    
-    
+        
+        ##if request.environ.has_key('repoze.who.logins'):
+        ##     login_counter = request.environ['repoze.who.logins']
+        ##else:
+        ##    login_counter = 0
+        ##    
+        ##if login_counter > 0 or logins>0:
+        ##    flash(_('Wrong credentials'), 'warning')
+
+        return dict(page='login', login_counter=str(login_counter),
+                    came_from=came_from, login=login)
+
     @expose()
-    def post_login(self, came_from=url('/')):
+    def post_login(self, came_from=lurl('/')):
         """
         Redirect the user to the initially requested page on successful
         authentication or redirect her back to the login page if login failed.
         
         """
         if not request.identity:
-            login_counter = request.environ['repoze.who.logins'] + 1
-            redirect(url('/login', params=dict(came_from=came_from, logins=login_counter)))
+            login_counter = request.environ.get('repoze.who.logins', 0) + 1
+            redirect('/login',
+                     params=dict(came_from=came_from, __logins=login_counter))
         userid = request.identity['repoze.who.userid']
         flash(_('Welcome back, %s!') % userid)
-        redirect(came_from)
+
+        # Do not use tg.redirect with tg.url as it will add the mountpoint
+        # of the application twice.
+        return HTTPFound(location=came_from)
 
     @expose()
-    def post_logout(self, came_from=url('/')):
+    def post_logout(self, came_from=lurl('/')):
         """
         Redirect the user to the initially requested page on logout and say
         goodbye as well.
         
         """
         flash(_('We hope to see you soon!'))
-        redirect(came_from)
+        return HTTPFound(location=came_from)
