@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """The application's model objects"""
 
-from zope.sqlalchemy import ZopeTransactionExtension
-from sqlalchemy.orm import scoped_session, sessionmaker
+#from zope.sqlalchemy import ZopeTransactionExtension
+#from sqlalchemy.orm import scoped_session, sessionmaker
 import couchdb
 import tg
 
@@ -11,8 +11,8 @@ import tg
 
 # Global session manager: DBSession() returns the Thread-local
 # session object appropriate for the current web request.
-maker = sessionmaker(autoflush=True, autocommit=False, extension=ZopeTransactionExtension())
-DBSession = scoped_session(maker)
+##maker = sessionmaker(autoflush=True, autocommit=False, extension=ZopeTransactionExtension())
+##DBSession = scoped_session(maker)
 
 # Base class for all of our model classes: By default, the data model is
 # defined with SQLAlchemy's declarative extension, but if you need more
@@ -48,8 +48,8 @@ holly_couch = None
         
 def init_model(engine):
     """Call me before using any of the tables or classes in the model."""
-    DBSession.configure(bind=engine)
-
+    #DBSession.configure(bind=engine)
+    pass
     
 def getDB():
     return holly_couch
@@ -59,7 +59,6 @@ def initDB():
     db_url = tg.config.get('couch.db_url', 'http://localhost:5989')
     db_name = tg.config.get('couch.database', 'hollyrosa1')
 
-    print 'initDB...', db_url,  db_name
     global couch_server
     global holly_couch
     

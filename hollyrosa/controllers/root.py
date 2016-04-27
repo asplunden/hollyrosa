@@ -2,7 +2,7 @@
 """
 Main Controller
 
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010 - 2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -19,6 +19,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
+import datetime
 
 from tg import expose, flash, require, url, lurl, request, redirect, tmpl_context
 from tg.i18n import ugettext as _, lazy_ugettext as l_
@@ -130,8 +131,8 @@ class RootController(BaseController):
         ##if login_counter > 0 or logins>0:
         ##    flash(_('Wrong credentials'), 'warning')
 
-        return dict(page='login', login_counter=str(login_counter),
-                    came_from=came_from, login=login)
+        return dict(page='login', login_counter=str(login_counter), came_from=came_from, login=login)
+
 
     @expose()
     def post_login(self, came_from=lurl('/')):
@@ -142,9 +143,22 @@ class RootController(BaseController):
         """
         if not request.identity:
             login_counter = request.environ.get('repoze.who.logins', 0) + 1
-            redirect('/login',
-                     params=dict(came_from=came_from, __logins=login_counter))
+            print 'ERROR'
+            redirect('/login', params=dict(came_from=came_from, __logins=login_counter))
         userid = request.identity['repoze.who.userid']
+        
+        #...make a note here of last login
+        # TODO: getter in holly couch
+        user_o = model.holly_couch.get('user.'+userid)
+        user_o['last_login'] = str(datetime.datetime.now())
+        user_o['active'] = True
+        
+        print user_o
+        
+        model.holly_couch['user.'+userid] = user_o        
+
+                        
+        
         flash(_('Welcome back, %s!') % userid)
 
         # Do not use tg.redirect with tg.url as it will add the mountpoint
