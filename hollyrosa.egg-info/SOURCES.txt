@@ -103,7 +103,6 @@ hollyrosa/public/scripts/std.js
 hollyrosa/public/scripts/tags.js
 hollyrosa/public/scripts/visiting_group_program_request_widget.js
 hollyrosa/templates/__init__.py
-hollyrosa/templates/__init__.pyc
 hollyrosa/templates/about.html
 hollyrosa/templates/activity_statistics.html
 hollyrosa/templates/authentication.html
@@ -135,7 +134,6 @@ hollyrosa/templates/list_users.html
 hollyrosa/templates/live_day.html
 hollyrosa/templates/login.html
 hollyrosa/templates/master.html
-hollyrosa/templates/master.html~
 hollyrosa/templates/master_external.html
 hollyrosa/templates/me.html
 hollyrosa/templates/move_booking.html

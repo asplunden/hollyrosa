@@ -14,11 +14,12 @@ setup(
     author_email='asplunden@gmail.com',
     url='http://github.com/asplunden/hollyrosa',
     install_requires=[
-        "TurboGears2 >= 2.3.7",
+        "TurboGears2 >= 2.3.8",
         #can be removed iif use_toscawidgets = False
         "toscawidgets >= 0.9.7.1",
         "zope.sqlalchemy >= 0.4 ",
         "repoze.who",
+        "repoze.waht",
         "tw.dynforms >= 0.9.8",
         "tw.tinymce >= 0.8",
         "couchdb >= 1.0.0",
