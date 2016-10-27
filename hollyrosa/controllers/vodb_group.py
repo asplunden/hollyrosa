@@ -407,9 +407,6 @@ class VODBGroup(BaseController):
             #...lookup slot map
             live_schema_id = 'room_schema.2013' # TODO: Read dynamically from booking day 
             tmp_slot_row_data = list(holly_couch.view('day_schema/slot_map',  keys=[[b['slot_id'],  live_schema_id], [b['booking_end_slot_id'],  live_schema_id]]))
-            
-            print 
-            print 'start time',  tmp_slot_row_data[0],tmp_slot_row_data[1]
 
             start_time = tmp_slot_row_data[0].value[1]['time_from']
             end_time = tmp_slot_row_data[1].value[1]['time_to']
@@ -773,10 +770,10 @@ class VODBGroup(BaseController):
         
         
         #if eat_sheet != None:
-         #   visiting_group_o['vodb_eat_sheet'] = json.loads(eat_sheet)
+        #   visiting_group_o['vodb_eat_sheet'] = json.loads(eat_sheet)
 
         #if live_sheet != None:
-         #   visiting_group_o['vodb_live_sheet'] = json.loads(live_sheet)
+        #   visiting_group_o['vodb_live_sheet'] = json.loads(live_sheet)
         
         vodb_tag_times_tags = computeAllUsedVisitingGroupsTagsForTagSheet(visiting_group_o['tags'], visiting_group_o['vodb_tag_sheet']['items'])
 

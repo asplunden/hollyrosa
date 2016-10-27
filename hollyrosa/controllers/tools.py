@@ -401,7 +401,6 @@ class Tools(BaseController):
         z=0
         tmp_schema = dict()
         for tmp_act in list(all_activities):
-            print tmp_act
             if tmp_act.has_key('activity_group_id') or True:
                 if tmp_act.doc['activity_group_id'][:9] == 'roomgroup':            
                     z += 1

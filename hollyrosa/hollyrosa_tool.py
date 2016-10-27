@@ -136,15 +136,12 @@ if False:
             activities.append(k)
             tmp_activity = holly_couch[k]
             agid = tmp_activity['activity_group_id']
-            #print 'agid',  agid
+            
             tmp_agroup = holly_couch[agid]
             if not agroups.has_key(tmp_agroup.id):
                 agroups[tmp_agroup.id] = tmp_agroup
-                print 'added agroup', tmp_agroup
-        print 'ALL AGS',  agroups
-        print 
+        
         all_keys = [k for k in agroups.keys()]
-        print 
         day_schema2 = holly_couch[day_schema.id]
         day_schema2['activity_groups_ids'] = all_keys
         holly_couch[day_schema.id] = day_schema2
@@ -168,11 +165,8 @@ if False:
             tmp_agroup = holly_couch[agid]
             if not agroups.has_key(tmp_agroup.id):
                 agroups[tmp_agroup.id] = tmp_agroup
-                print 'added agroup', tmp_agroup
-        print 'ALL AGS',  agroups
-        print 
+            
         all_keys = [k for k in agroups.keys()]
-        print 
         day_schema2 = holly_couch[day_schema.id]
         day_schema2['activity_groups_ids'] = all_keys
         holly_couch[day_schema.id] = day_schema2
@@ -296,18 +290,15 @@ if False:
     #...find funk schema
     doc = holly_couch['funk_schema.2015']
     schema = doc['schema']
-    print schema
     
     #...find max slot id
     max_slot_id = 0
     for k, v in schema.items():
         #...v is a list of slots
         for tmp_slot in v[1:]:
-            print tmp_slot
             tmp_slot_id_num = int(tmp_slot['slot_id'].replace('slot.',''))
             max_slot_id = max(max_slot_id, tmp_slot_id_num)
             
-    print 'max_slot_id', max_slot_id
     #copy last slot row inserting more slot rows
     max_slot_id += 1
     

@@ -83,7 +83,6 @@ if True:
     for b in holly_couch.view('booking_day/all_booking_days', include_docs=True):
 
         doc = holly_couch[b.doc['_id']]
-        print doc
         doc['staff_schema_id'] = 'funk_schema.2015'
         holly_couch[b.doc['_id']] = doc
     

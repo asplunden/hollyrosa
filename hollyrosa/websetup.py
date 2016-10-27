@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010 - 2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -18,11 +18,6 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-
-#...hack beacause my mysql egg is not in the tg2env
-import sys
-sys.path.append('/usr/lib/python2.5/site-packages/MySQL_python-1.2.3-py2.5-linux-i686.egg')
-
 
 import logging,  datetime
 

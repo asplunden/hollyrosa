@@ -69,17 +69,9 @@ if False:
     
     schema = ds['schema']
     for k in schema.keys():
-        print k
-        
         rm = holly_couch[k]
         new_rm = copy.deepcopy(rm)
-        print new_rm
         holly_couch_destination[k] = new_rm
-
-
-
-
-
     
 
 def copyDocument(db, from_id, to_id):
@@ -146,25 +138,21 @@ def makeSlotRow(slot_id_start, zorder, activity_id):
 if False:
     doc = holly_couch['arcanum_schema.2015']
     schema = doc['schema']
-    print schema
     
     #...find max slot id
     max_slot_id = 0
     for k, v in schema.items():
         #...v is a list of slots
         for tmp_slot in v[1:]:
-            print tmp_slot
             tmp_slot_id_num = int(tmp_slot['slot_id'].replace('slot.',''))
             max_slot_id = max(max_slot_id, tmp_slot_id_num)
             
-    print 'max_slot_id', max_slot_id
     #copy last slot row inserting more slot rows
     max_slot_id += 1
     
     #...add the first 8 activities
     for i in range(8):
         tmp_activity_id = "activity.arcanum_%d" % (i+20+1)
-        print max_slot_id
         tmp_slot_row, max_slot_id = makeSlotRow(max_slot_id, 100+i, tmp_activity_id)
         schema[tmp_activity_id] = tmp_slot_row
         
@@ -175,6 +163,3 @@ if False:
         
         
     holly_couch['arcanum_schema.2015'] = doc
-    
-    
-    

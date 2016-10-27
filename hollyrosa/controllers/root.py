@@ -122,14 +122,6 @@ class RootController(BaseController):
         login_counter = request.environ.get('repoze.who.logins', 0)
         if failure is None and login_counter > 0:
             flash(_('Wrong credentials'), 'warning')
-        
-        ##if request.environ.has_key('repoze.who.logins'):
-        ##     login_counter = request.environ['repoze.who.logins']
-        ##else:
-        ##    login_counter = 0
-        ##    
-        ##if login_counter > 0 or logins>0:
-        ##    flash(_('Wrong credentials'), 'warning')
 
         return dict(page='login', login_counter=str(login_counter), came_from=came_from, login=login)
 
@@ -143,7 +135,6 @@ class RootController(BaseController):
         """
         if not request.identity:
             login_counter = request.environ.get('repoze.who.logins', 0) + 1
-            print 'ERROR'
             redirect('/login', params=dict(came_from=came_from, __logins=login_counter))
         userid = request.identity['repoze.who.userid']
         
@@ -152,13 +143,8 @@ class RootController(BaseController):
         user_o = model.holly_couch.get('user.'+userid)
         user_o['last_login'] = str(datetime.datetime.now())
         user_o['active'] = True
-        
-        print user_o
-        
         model.holly_couch['user.'+userid] = user_o        
 
-                        
-        
         flash(_('Welcome back, %s!') % userid)
 
         # Do not use tg.redirect with tg.url as it will add the mountpoint
