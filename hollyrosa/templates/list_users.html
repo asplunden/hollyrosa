@@ -28,11 +28,9 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Show users</title>
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
-  <script src="${tg.url('/scripts/dojo-release-1.11.2/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
-   require(["common_menu","dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dijit/CheckedMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/ready"], function(common_menu, array, Menu, MenuItem, PopupMenuItem, CheckedMenuItem, xq, ioQuery, ready) {
- 
-   
+   require(["common_menu","dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dijit/CheckedMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/ready", "dojo/domReady!"], function(common_menu, array, Menu, MenuItem, PopupMenuItem, CheckedMenuItem, xq, ioQuery, ready) {
+
    ready(function() {
    
 		var menu = new Menu({

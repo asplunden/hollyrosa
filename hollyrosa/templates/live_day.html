@@ -29,17 +29,15 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa $title_hint Overview - ${booking_day.date}</title>
   
-  <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.11.2/dijit/themes/tundra/tundra.css')}" />
-<style type="text/css">
-            .tundra table.dijitCalendarContainer { margin: 25px auto; } #formatted
-            { text-align: center; }
-        </style>
+	<style type="text/css">
+    	.tundra table.dijitCalendarContainer { margin: 25px auto; } #formatted
+        { text-align: center; }
+    </style>
         
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" />
-  <script src="${tg.url('/scripts/dojo-release-1.11.2/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
 
-require(["dojo/dom", "dojo/query!css2", "dojo/dom-form", "dojo/dom-attr", "dojo/_base/array", "dojo/query", "dojo/cookie", "dojo/date", "dijit/Calendar", "dojo/on", "dojo/parser", "dojo/io-query", "dojo/ready", "dojo/json"], function(dom, query, domForm, domAttr, array, query, cookie, date, calendar, on, parser, ioQuery, ready, json) {
+require(["dojo/dom", "dojo/query!css2", "dojo/dom-form", "dojo/dom-attr", "dojo/_base/array", "dojo/query", "dojo/cookie", "dojo/date", "dijit/Calendar", "dojo/on", "dojo/parser", "dojo/io-query", "dojo/ready", "dojo/json", "dojo/domReady!"], function(dom, query, domForm, domAttr, array, query, cookie, date, calendar, on, parser, ioQuery, ready, json) {
 /* todo: move into its own dojo module so it doesent have to be loaded every time  */
 var jdata = {};
 

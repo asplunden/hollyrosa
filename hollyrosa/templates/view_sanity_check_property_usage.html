@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -27,12 +27,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Sanity Check</title>
-  
-  <script src="${tg.url('/scripts/dojo-release-1.11.2/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true, debugAtAllCosts: true"></script>
   <script>
   
   
-require(["common_menu", "dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem",  "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready"], function(common_menu, array, Menu, MenuItem, PopupMenuItem, dom, domConstruct, xhr, ready) {
+require(["common_menu", "dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem",  "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/ready", "dojo/domReady!"], function(common_menu, array, Menu, MenuItem, PopupMenuItem, dom, domConstruct, xhr, ready) {
   
     function on_booking_deleted(response_data) {
         var booking = response_data['delete_req_booking_id'];
