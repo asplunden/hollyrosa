@@ -27,14 +27,9 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Viewing VODB Groups</title>
-
-  
-  <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
-  
-  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
-require(["common_menu", "tags", "dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/on", "dojo/_base/window", "dojo/ready"], function(common_menu, tags, array, registry, Menu, MenuItem, PopupMenuItem, xq, ioQuery, dom, domConstruct, xhr, on, win, ready) {
+require(["common_menu", "tags", "dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/on", "dojo/_base/window", "dojo/ready", "dojo/domReady!"], function(common_menu, tags, array, registry, Menu, MenuItem, PopupMenuItem, xq, ioQuery, dom, domConstruct, xhr, on, win, ready) {
 
 
 function deleteTagHelper(evt) {
@@ -270,7 +265,7 @@ function loadNotesFor(id) {
   </script>
   <script type="text/javascript">
 
-require(["dojo/_base/array", "dojo/dom-construct", "dojo/query!css2", "dojo/dom", "dojo/request/xhr", "dojo/on", "dojo/ready"], function(array, domConstruct, query, dom, xhr, on, ready) {
+require(["dojo/_base/array", "dojo/dom-construct", "dojo/query!css2", "dojo/dom", "dojo/request/xhr", "dojo/on", "dojo/ready", "dojo/domReady!"], function(array, domConstruct, query, dom, xhr, on, ready) {
 
 
 function updateUnboundNames(data) {

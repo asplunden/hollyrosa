@@ -17,7 +17,7 @@
  * along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
  **/
  
- define(["dojo/dom-attr", "dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/CheckedMenuItem", "dijit/MenuSeparator", "dojo/query", "dojo/io-query", "dojo/json", "dojo/cookie"], function(domAttr, array, Menu, MenuItem, CheckedMenuItem, MenuSeparator, query, ioQuery, json, cookie) {
+ define(["dojo/dom-attr", "dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/CheckedMenuItem", "dijit/MenuSeparator", "dojo/query", "dojo/io-query", "dojo/json", "dojo/cookie", "dojo/dom-style", "dojo/domReady!"], function(domAttr, array, Menu, MenuItem, CheckedMenuItem, MenuSeparator, query, ioQuery, json, cookie, domStyle) {
 		
     function add_menu_separator(menu) {
     	menu.addChild(new MenuSeparator());
@@ -279,11 +279,11 @@
        array.forEach(elems, function(elem) {
            var agc_val = domAttr.get(elem, 'hollyrosa:acgid');
            if (a_ag_status[agc_val]) {
-               dojo.style(elem, {display: 'block'});
+               domStyle.set(elem, 'display', 'block');
            } else if (null == a_ag_status[agc_val]) {
-               dojo.style(elem, {display: 'block'});
+               domStyle.set(elem, 'display', 'block');
             } else {
-                dojo.style(elem, {display: 'none'});
+                domStyle.set(elem, 'display', 'none');
             }
         });
     }
@@ -294,11 +294,11 @@
         array.forEach(elems, function(elem) {
             var vgt_val = domAttr.get(elem, 'hollyrosa:vgtid');
             if (a_vgt_status[vgt_val]) {
-                dojo.style(elem, {display: 'table-row'});
+                domStyle.set(elem, 'display', 'table-row');
             } else if (null == a_vgt_status[vgt_val]) {
-                dojo.style(elem, {display: 'table-row'});
+                domStyle.set(elem, 'display', 'table-row');
             } else {
-                dojo.style(elem, {display: 'none'});
+                domStyle.set(elem, 'display', 'none');
             }
         });
      }

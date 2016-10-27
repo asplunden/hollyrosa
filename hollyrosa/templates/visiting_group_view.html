@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010-2015 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -27,12 +27,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Show Visiting Group ${visiting_group.name}</title>
-  <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
-  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true, debugAtAllCosts: true"></script>
   <script>
 
-require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem", "dojo/dom", "dojo/dom-style", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window"], function(ready, tags, common_menu, Menu, PopupMenuItem, dom, domStyle, array, query, on, win) {
+require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem", "dojo/dom", "dojo/dom-style", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window", "dojo/domReady!"], function(ready, tags, common_menu, Menu, PopupMenuItem, dom, domStyle, array, query, on, win) {
 
 
 function deleteTagHelper(evt) {
@@ -140,7 +138,7 @@ function startup() {
    
    var set_program_state_url = '${tg.url('/visiting_group/set_program_state')}';       
     
-   array.forEach(common_menu.program_state_change_list, function(x) {console.log(x); common_menu.add_change_program_state_menu_item(menu, change_program_status_menu, x['name'], x['state'], 0, set_program_state_url);});
+   array.forEach(common_menu.program_state_change_list, function(x) {common_menu.add_change_program_state_menu_item(menu, change_program_status_menu, x['name'], x['state'], 0, set_program_state_url);});
 	/* Disabled so we dont do misstakes *
 	var change_vodb_status_menu = new Menu();
     menu.addChild(new PopupMenuItem({

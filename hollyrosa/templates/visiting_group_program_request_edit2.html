@@ -29,15 +29,15 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <title>Hollyrosa - Program ${visiting_group_program_request.name}</title>
 
   <link rel="stylesheet" type="text/css" href="${tg.url('/css/div_widget.css')}" />
-  <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dojox/grid/resources/tundraGrid.css')}" />
+  <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.11.2/dojox/grid/resources/tundraGrid.css')}" />
 
   <script>dojoConfig = {parseOnLoad: true}</script>
-  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true"></script>
+  <!--<script src="${tg.url('/scripts/dojo-release-1.11.2/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true"></script>-->
    
   <script>
 
 require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on','dojo/ready', 'dojo/domReady!'],
-  function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready, domReady ){
+  function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready ){
     
     function formatDate(datum) {
         /*var d = stamp.fromISOString(datum);

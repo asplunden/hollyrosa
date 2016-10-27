@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -28,11 +28,11 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Program ${visiting_group_program_request.name}</title>
   
-  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true"></script>
+  <!--<script src="${tg.url('/scripts/dojo-release-1.11.2/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true"></script>-->
   <script>
 // I need to attach a hook to the submit on-click and readout the dojo data grids before doing the form.submit. This is going to be interesting...
 
-require(["dojo/ready", "dojo/dom", "dojo/dom-attr", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window"], function(ready, dom, domAttr, array, query, on, win) {
+require(["dojo/ready", "dojo/dom", "dojo/dom-attr", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window","dojo/domReady!"], function(ready, dom, domAttr, array, query, on, win) {
 
   function on_submit() {
       //alert('submit');

@@ -33,12 +33,8 @@ def makeDate(s):
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Calendar Overview</title>
-  
-  <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dijit/themes/tundra/tundra.css')}" />
-
-  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
-   require(["dijit/registry","common_menu","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query"], function(registry, common_menu, Menu, MenuItem, xq, ioQuery) {
+   require(["dijit/registry","common_menu","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query", "dojo/domReady!"], function(registry, common_menu, Menu, MenuItem, xq, ioQuery) {
    var menu = new Menu({
        targetNodeIds: ["calendar_listing"],
        selector: "tr.calendar_overview",

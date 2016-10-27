@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -27,16 +27,13 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Edit Program Layers for $visiting_group.name</title>
-  
-  <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.8.0/dojox/grid/resources/tundraGrid.css')}" />
-  
+  <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.11.2/dojox/grid/resources/tundraGrid.css')}" />
+
   <script>dojoConfig = {parseOnLoad: true}</script>
-  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true"></script>
-   
   <script>
 
-require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on','dojo/ready', 'dojo/domReady!'],
-  function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready, domReady ){
+require(["dojo/parser", 'dojo/on', 'dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom', 'dijit/registry', 'dojo/ready', 'dojo/domReady!'],
+  function(parser, on, lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, registry, ready){
     
    function saveCompleteCallback(){
     	alert('save done');
@@ -82,7 +79,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     	};
     
     function on_validate() {
-      var myForm = dijit.byId('myForm');
+      var myForm = registry.byId('myForm');
     	if(myForm.validate()){
             /* do some more advanced form data validation
              * all requested dates should be within the range of the visiting group
@@ -97,8 +94,9 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
     
     
     function on_ready(){
-      var save_button = dijit.byId('save_button');
-
+      //var save_button = registry.byId('save_button');
+      parser.parse();
+	  var save_button = registry.byId('save_button');
       on( save_button , 'click', on_save_grid_to_input );
       on( save_button , 'click', on_validate); 
 		
@@ -110,9 +108,7 @@ require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore
   });
   
     </script>
-    <script>
-        require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/ValidationTextBox", "dijit/form/DateTextBox"]);
-    </script>
+    
 
 
 </head>

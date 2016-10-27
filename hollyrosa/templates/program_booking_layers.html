@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -26,11 +26,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
-  <title>Hollyrosa - Program Booking Layers ${visiting_group.name}</title>
- 
-  <script>dojoConfig = {parseOnLoad: true}</script>
-  <script src="${tg.url('/scripts/dojo-release-1.8.0/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true"></script>
-   
+  <title>Hollyrosa - Program Booking Layers ${visiting_group.name}</title> 
   <script>
 
 require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/PopupMenuItem", 'dijit/Dialog', 'dijit/form/Form', 'dijit/form/TextBox', "dijit/form/Textarea", "dijit/form/Button", "dijit/layout/ContentPane", 'dojox/layout/TableContainer', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/request/xhr', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-geometry', 'dojo/dom-style', 'dojo/query', 'dojo/on','dojo/ready', 'dojo/domReady!'],
