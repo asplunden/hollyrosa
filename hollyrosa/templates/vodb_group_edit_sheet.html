@@ -31,13 +31,12 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <link rel="stylesheet" type="text/css" href="${tg.url('/css/div_widget.css')}" />
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.11.2/dojox/grid/resources/tundraGrid.css')}" />
 
-  <script>dojoConfig = {parseOnLoad: true}</script>
-  <script src="${tg.url('/scripts/dojo-release-1.11.2/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true"></script>
+  <!--<script>dojoConfig = {parseOnLoad: true}</script>-->
    
   <script>
 
-require(['dojo/_base/array', 'dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on','dojo/ready', 'dojo/domReady!'],
-  function(array, lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready, domReady ){
+require(['dojo/_base/array', 'dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on','dojo/ready', 'dijit/registry', 'dojo/domReady!'],
+  function(array, lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready, registry ){
     
     function formatDate(datum) {
         var d = stamp.fromISOString(datum);
@@ -176,7 +175,7 @@ var tag_layout = [tag_layout_inner];
     
     
     function on_validate() {
-      var myForm = dijit.byId('myForm');
+      var myForm = registry.byId('myForm');
     	if(myForm.validate()){
             //var result = confirm('Form is valid, press OK to submit');
             
@@ -190,7 +189,7 @@ var tag_layout = [tag_layout_inner];
     
     
     function on_validate_finalize() {
-      var myForm = dijit.byId('myForm');
+      var myForm = registry.byId('myForm');
     	if(myForm.validate()){
             var result = confirm('Form is valid and ready to be sent for processing, pressing OK will submit your requests and thereafter you cannot change your request data except for contact info and request text');
             
@@ -204,7 +203,7 @@ var tag_layout = [tag_layout_inner];
     
     
     function on_ready(){
-      var save_button = dijit.byId('save_button');
+      var save_button = registry.byId('save_button');
       on( save_button , 'click', on_save_grid_to_input );
 		on( save_button , 'click', on_validate); 
 		
@@ -226,7 +225,7 @@ var tag_layout = [tag_layout_inner];
 
   <script>
 
-require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window"], function(ready, tags, common_menu, Menu, PopupMenuItem, dom, array, query, on, win) {
+require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window", "dojo/parser", "dijit/registry", "dojo/domReady!"], function(ready, tags, common_menu, Menu, PopupMenuItem, dom, array, query, on, win, parser, registry) {
 
 
 function deleteTagHelper(evt) {
@@ -317,6 +316,7 @@ function startup() {
 	};
     
 	ready(function() {
+	    parser.parse();
 		startup();
 		});  
  });
@@ -325,7 +325,7 @@ function startup() {
 
   
 <script>
-require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/ValidationTextBox", "dijit/form/DateTextBox"]);
+require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/ValidationTextBox", "dijit/form/DateTextBox", "dojo/domReady!"]);
 </script>
 </head>
 

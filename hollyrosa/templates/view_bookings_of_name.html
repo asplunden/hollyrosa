@@ -27,13 +27,11 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Program Bookings for ${name}</title>
-  <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.11.2/dijit/themes/tundra/tundra.css')}" />
   
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
-  <script src="${tg.url('/scripts/dojo-release-1.11.2/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
   
-require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/on", "dojo/ready", "dojo/_base/window"], function(common_menu, tags, array, Menu, MenuItem, PopupMenuItem, query, ioQuery, dom, on, ready, win) {
+require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/on", "dojo/ready", "dojo/_base/window", "dojo/domReady!"], function(common_menu, tags, array, Menu, MenuItem, PopupMenuItem, query, ioQuery, dom, on, ready, win) {
 
 
 function deleteTagHelper(evt) {
