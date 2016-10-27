@@ -171,11 +171,8 @@ def getAllVisitingGroupsNameAmongBookings(holly_couch, from_date='',  to_date='9
     #...conversion 
     visiting_group_names_result = dict()
     for vgn in visiting_groups_names:
-        print vgn
         visiting_group_names_result[vgn.key[1]] = 1
         
-        
-    #print  visiting_group_names_result.values()
     return visiting_group_names_result.keys()
     
     
@@ -314,7 +311,6 @@ def getSchemaSlotActivityMap(holly_couch, booking_day,  subtype):
     
     try:
         tmp = _schema_slot_activity_map
-        print 'found'
     except NameError:
         res = holly_couch.view('day_schema/slot_map')
         m = dict()
