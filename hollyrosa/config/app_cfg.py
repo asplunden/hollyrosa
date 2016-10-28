@@ -27,7 +27,7 @@ base_config.disable_request_extensions = False
 # Set to a function to provide custom escaping.
 base_config.dispatch_path_translator = True
 
-base_config.prefer_toscawidgets2 = False
+base_config.prefer_toscawidgets2 = True
 
 base_config.package = hollyrosa
 

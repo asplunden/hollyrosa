@@ -32,7 +32,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <body>
     <h2>Booking Day Properties ${booking_day.date}</h2>
     
-    <div py:replace="tmpl_context.form(booking_day, action='save_booking_day_properties')">Input Form</div>
-    
+    <!-- <div py:replace="tmpl_context.form(booking_day, action='save_booking_day_properties')">Input Form</div> -->
+    <div>${tmpl_context.form.display(value=booking_day)}</div>
 </body>
 </html>

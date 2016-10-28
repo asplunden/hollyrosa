@@ -103,21 +103,22 @@ class Calendar(BaseController):
         booking_day = common_couch.getBookingDay(holly_couch, booking_day_id)
         if not booking_day.has_key('title'):
             booking_day['title'] = ''
+        booking_day['recid'] = booking_day['_id']
         tmpl_context.form = create_edit_booking_day_form
         return dict(booking_day=booking_day,  usage='edit')
         
         
-    @validate(create_edit_booking_day_form, error_handler=edit_booking_day)      
+    #### @validate(create_edit_booking_day_form, error_handler=edit_booking_day)      
     @expose()
-    @require(Any(has_level('staff'), has_level('viewer'), msg='Only staff members may change booking day properties'))
-    def save_booking_day_properties(self,  _id=None,  note='', title='', num_program_crew_members=0,  num_fladan_crew_members=0):
+    #### @require(Any(has_level('staff'), has_level('viewer'), msg='Only staff members may change booking day properties'))
+    def save_booking_day_properties(self,  recid=None,  note='', title='', num_program_crew_members=0,  num_fladan_crew_members=0):
         
-        booking_day_c = common_couch.getBookingDay(holly_couch, _id)
+        booking_day_c = common_couch.getBookingDay(holly_couch, recid)
         booking_day_c['note'] = note
         booking_day_c['title'] = title
         booking_day_c['num_program_crew_members'] = num_program_crew_members
         booking_day_c['num_fladan_crew_members'] = num_fladan_crew_members
-        holly_couch[_id]=booking_day_c
+        holly_couch[recid]=booking_day_c
         
-        raise redirect('/booking/day?day_id='+str(_id))
+        raise redirect('/booking/day?day_id='+str(recid))
         

@@ -1,5 +1,5 @@
 """
-Copyright 2010, 2011 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -18,26 +18,34 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from tw.api import WidgetsList
-from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea,  HiddenField
+#### from tw.api import WidgetsList
+#### from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea,  HiddenField
+from tg import lurl
+
+import tw2.core as twc
+import tw2.forms as twf
 
 #...for form validation
-from tw.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString
-from tw.tinymce import TinyMCE, MarkupConverter
+#### from tw.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString
+from tw2.tinymce import TinyMCEWidget, MarkupConverter
 
-class EditVisitingGroupForm(TableForm):
+####TableForm)
 
-    class fields(WidgetsList):
-        _id = HiddenField(validator=UnicodeString)
-        title = TextField(validator=UnicodeString)
-        note = TinyMCE(validator=MarkupConverter,  mce_options = dict(theme='advanced',  
+class EditVisitingGroupForm(twf.Form): 
+
+    ####class fields(WidgetsList):
+    class child(twf.TableLayout):
+        recid = twf.HiddenField(validator=twc.Required) #### TODO: former id was _id but no longer allowed name
+        title = twf.TextField(validator=twc.Required)
+        note = TinyMCEWidget(validator=MarkupConverter,  mce_options = dict(theme='advanced',  
                                                                       theme_advanced_toolbar_align ="left",  
                                                                       theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat", 
                                                                       theme_advanced_buttons2 = "",
                                                                       theme_advanced_buttons3 = ""
 ))
-        num_program_crew_members = TextField(validator=Int)
-        num_fladan_crew_members = TextField(validator=Int)
+        num_program_crew_members = twf.TextField(validator=twc.Required) #### TODO: should be int validoator
+        num_fladan_crew_members = twf.TextField(validator=twc.Required) #### TODO: should be int validator
         
+    action = lurl('save_booking_day_properties')
 
-create_edit_booking_day_form = EditVisitingGroupForm("create_edit_booking_day_form")
+create_edit_booking_day_form = EditVisitingGroupForm() ####"create_edit_booking_day_form")
