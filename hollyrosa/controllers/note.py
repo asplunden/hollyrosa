@@ -36,7 +36,7 @@ log = logging.getLogger()
 from tg import tmpl_context
 
 from hollyrosa.widgets.edit_note_form import create_edit_note_form
-#### from hollyrosa.widgets.edit_attachment_form import create_edit_attachment_form
+from hollyrosa.widgets.edit_attachment_form import create_edit_attachment_form
 
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId
 
