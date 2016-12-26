@@ -30,9 +30,9 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 </head>
 
 <body>
-    <h2>Edit ${visiting_group.subtype} Visting Group ${visiting_group.name}</h2>
+    <h2>Edit ${visiting_group.subtype} Visting Group ${visiting_group.name}</h2>  
+    <div>${tmpl_context.form.display(value=visiting_group)}</div> <!-- child_args=dict(boknstatus=dict(options=bokn_status_map))-->
     
-    <div py:replace="tmpl_context.form(visiting_group, action='save_visiting_group_properties', child_args=dict(boknstatus=dict(options=bokn_status_map)))">Input Form</div>
 <!-- info=visiting_group.info, fromdate=visiting_group.fromdate, todate=visiting_group.todate -->
 
 </body>

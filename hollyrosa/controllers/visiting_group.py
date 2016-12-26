@@ -19,6 +19,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
+import datetime,  logging
+
+log = logging.getLogger(__name__)
+
 from tg import expose, flash, require, url, request, redirect,  validate
 from formencode import validators
 from repoze.what.predicates import Any, is_user, has_permission
@@ -32,7 +36,7 @@ import datetime,  json
 from tg import tmpl_context
 
 
-#### from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
+from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
 #### from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
 #### from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
 #### from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
@@ -257,6 +261,7 @@ class VisitingGroup(BaseController):
         
         is_new = ((None == visiting_group_id) or ('' == visiting_group_id))
         if is_new:
+            log.info('edit new visiting group')
             properties_template = dict()
             
             if subtype == 'program':
@@ -271,27 +276,29 @@ class VisitingGroup(BaseController):
             visiting_group = DataContainer(name='',  id=None, _id=None,   info='',  visiting_group_properties=properties_template,  subtype=subtype,  contact_person='',  contact_person_email='',  contact_person_phone='',  boknr='')
         
         else:
-            visiting_group_c = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+            log.info('looking up existing visiting group %s' % str(visiting_group_id))
+            visiting_group_c = common_couch.getVisitingGroup(holly_couch, visiting_group_id)
             if not visiting_group_c.has_key('subtype'):
                 visiting_group_c['subtype'] = 'program'
             visiting_group = makeVisitingGroupObjectOfVGDictionary(visiting_group_c)
             
-        return dict(visiting_group=visiting_group,  bokn_status_map=bokn_status_options,  is_new=is_new)
+        return dict(visiting_group=visiting_group, is_new=is_new) # bokn_status_map=bokn_status_options,  is_new=is_new
 
 
     @expose()
-    #### @validate(create_edit_visiting_group_form, error_handler=edit_visiting_group)
+    @validate(create_edit_visiting_group_form, error_handler=edit_visiting_group)
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may change visiting group properties'))
-    def save_visiting_group_properties(self,  _id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr='', password='',  subtype=''):
-        id = _id
-        is_new = ((None == id) or (id == ''))
+    def save_visiting_group_properties(self,  visiting_group_id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr='', password='',  subtype=''):
+        log.info('save_visiting_group_properties')
+        #id = visiting_group_id_id
+        is_new = ((None == visiting_group_id) or (visiting_group_id == ''))
         
         #...this is a hack so we can direct the id of the visiting group for special groups
         
         if not is_new:
-            if 'visiting_group' not in id:
+            if 'visiting_group' not in visiting_group_id:
                 is_new = True
-                id_c = 'visiting_group.'+id
+                id_c = 'visiting_group.'+visiting_group_id
         else:
             id_c = genUID(type='visiting_group')
             
@@ -305,7 +312,7 @@ class VisitingGroup(BaseController):
             #...populate sheets and computed sheets?
             
         else:
-            id_c = id
+            id_c = visiting_group_id
             visiting_group_c = holly_couch[id_c]
             
         #visiting_group_c['type'] = 'visiting_group'
@@ -353,8 +360,8 @@ class VisitingGroup(BaseController):
         
         holly_couch[id_c] = visiting_group_c
         
-        if visiting_group_c.has_key('_id'):
-            raise redirect('/visiting_group/show_visiting_group?visiting_group_id='+visiting_group_c['_id'])
+        if visiting_group_c.has_key('visiting_group_id'):
+            raise redirect('/visiting_group/show_visiting_group?visiting_group_id='+visiting_group_c['visiting_group_id'])
         raise redirect('/visiting_group/view_all')
 
 

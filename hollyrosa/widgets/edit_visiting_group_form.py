@@ -19,51 +19,49 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 # http://wiki.moxiecode.com/index.php/TinyMCE:Control_reference
 
-#from tw2.core import WidgetsList
 import tw2.core as twc
-from tw2.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea,  HiddenField,  Label
-from tw2.dynforms import GrowingTableFieldSet,  CustomisedForm
-#...for form validation
-from tw2.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString,  Email
-from tw2.tinymce import TinyMCE, MarkupConverter
+import tw2.forms as twf
+import tw2.dynforms as twd
 
-# http://toscawidgets.org/documentation/tw.dynforms/widgets/index.html
+from tg import lurl
 
-class ParamsGrowingTableFieldSet(GrowingTableFieldSet):
-    children = [
-        HiddenField('id'), 
-        TextField('property',  size=10),
-        TextField('value',  size=4),
-        TextField('unit',  size=8), 
-        TextField('description'), 
-        CalendarDatePicker('from_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d'), 
-        CalendarDatePicker('to_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')]
+#from tw2.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString,  Email
+from tw2.tinymce import TinyMCEWidget, MarkupConverter
+from formencode.validators import DateConverter
+
+
         
 
-#class EditVisitingGroupForm(CustomisedForm):
-class EditVisitingGroupForm(TableForm):
-    show_errors = True
-    
-    class fields(WidgetsList):
-        _id = HiddenField(validator=UnicodeString())
-        subtype = HiddenField(validator=UnicodeString()) 
-        name = TextField(validator=UnicodeString(min=1),  css_class="edit_name",  size=40)
-        info = TinyMCE(validator=MarkupConverter, mce_options = dict(theme='advanced',  
+class EditVisitingGroupForm(twd.CustomisedTableForm):
+    class child(twf.TableLayout):
+        visiting_group_id = twf.HiddenField(validator=twc.Required)
+        subtype = twf.HiddenField(validator=twc.Required) 
+        name = twf.TextField(validator=twc.StringLengthValidator(min=1),  css_class="edit_name",  size=40)
+        info = TinyMCEWidget(validator=MarkupConverter, mce_options = dict(theme='advanced',  
                                                                    theme_advanced_toolbar_align ="left",  
                                                                    theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat", 
                                                                    theme_advanced_buttons2 = "",
-                                                                   theme_advanced_buttons3 = ""
-))
-        
-        from_date = CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
-        to_date = CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
-        contact_person = TextField(validator=UnicodeString(),  label_text="contact person:")
-        contact_person_email = TextField(validator=Email(resolve_domain=False))
-        contact_person_phone = TextField(validator=UnicodeString())
-        boknr = TextField(validator=UnicodeString())
-        password = TextField(validator=UnicodeString())
-        camping_location = TextField(validator=UnicodeString())
-        
-        visiting_group_properties = ParamsGrowingTableFieldSet()
+                                                                   theme_advanced_buttons3 = ""))
 
-create_edit_visiting_group_form = EditVisitingGroupForm("create_edit_visiting_group_form")
+        from_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+        to_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+        contact_person = twf.TextField(validator=twc.Required, label_text="contact person:")
+        contact_person_email = twf.TextField(validator=twc.EmailValidator)
+        contact_person_phone = twf.TextField(validator=twc.Required)
+        boknr = twf.TextField(validator=twc.Required)
+        password = twf.TextField(validator=twc.Required)
+        camping_location = twf.TextField(validator=twc.Required)
+
+        class visiting_group_properties(twd.GrowingGridLayout):
+            extra_reps = 1
+            property_id = twf.HiddenField()
+            property = twf.TextField(size=10)
+            value = twf.TextField(size=4)
+            unit = twf.TextField(size=8)
+            description = twf.TextField()
+            from_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+            to_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+
+    action = lurl('save_visiting_group_properties')
+
+create_edit_visiting_group_form = EditVisitingGroupForm()

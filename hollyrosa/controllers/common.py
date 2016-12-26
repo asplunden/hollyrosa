@@ -136,7 +136,7 @@ class DataContainer(object):
             return self.__getattribute__(key)
         except AttributeError:
             raise KeyError, 'key "%s" not found' % key
-            
+        
 class DummyIdentity(object):
     def __init__(self):
         self.display_name = 'not logged in'
@@ -230,13 +230,13 @@ class has_level(Predicate):
 def makeVisitingGroupObjectOfVGDictionary(a_visiting_group):
     obj_params = makeParamsForObjectOfVGDictionary(a_visiting_group)
     
-    # TODO: DataContainerFromDictLikeObject(fields=)
-    visiting_group = DataContainer(name=a_visiting_group['name'],  _id=a_visiting_group['_id'],  info=a_visiting_group['info'],  visiting_group_properties=obj_params, 
+    visiting_group = dict(name=a_visiting_group['name'],  visiting_group_id=a_visiting_group['_id'], info=a_visiting_group['info'], visiting_group_properties=obj_params, 
                                    contact_person=a_visiting_group.get('contact_person', ''),  contact_person_email=a_visiting_group.get('contact_person_email', ''),  contact_person_phone=a_visiting_group.get('contact_person_phone', ''), 
                                    boknr=a_visiting_group['boknr'], password=a_visiting_group.get('password',''), boknstatus=a_visiting_group['boknstatus'],  camping_location=a_visiting_group['camping_location'],  
                                    from_date=datetime.datetime.strptime(a_visiting_group['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(a_visiting_group['to_date'], '%Y-%m-%d'), 
                                    subtype=a_visiting_group['subtype'])
-            
+    
+    
     return visiting_group
     
     
@@ -249,7 +249,10 @@ def makeVODBGroupObjectOfVGDictionary(a_visiting_group):
                                    boknr=a_visiting_group['boknr'], password=a_visiting_group.get('password',''), boknstatus=a_visiting_group['boknstatus'],  camping_location=a_visiting_group['camping_location'],  
                                    from_date=datetime.datetime.strptime(a_visiting_group['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(a_visiting_group['to_date'], '%Y-%m-%d'), 
                                    subtype=a_visiting_group['subtype'])
-            
+    
+    
+    
+    
     return visiting_group
     
     
@@ -270,7 +273,7 @@ def makeParamsForObjectOfVGDictionary(visiting_group_c):
             tmp_from_date = None
                 
                 
-        vgpx = DataContainer(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=tmp_from_date,  to_date=tmp_to_date,  id=str(id))
+        vgpx = dict(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=tmp_from_date,  to_date=tmp_to_date,  id=str(id))
         vgps.append(vgpx)
     return vgps
     
