@@ -32,7 +32,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <body>
     <h2>Edit note</h2>
     
-    <div py:replace="tmpl_context.form(note, action='save_note')">Input Form</div>
-
+    <!--<div py:replace="tmpl_context.form(note, action='save_note')">Input Form</div>-->
+	<div>${tmpl_context.form.display(value=note)}</div>
 </body>
 </html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010-2015 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -32,7 +32,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <body>
     <h2>Edit Activity ${activity.title}</h2>
     
-    <div py:replace="tmpl_context.form(activity, action='save_activity_properties', child_args=dict(activity_group_id=dict(options=activity_groups)))">Input Form</div>
-
+    <!--<div py:replace="tmpl_context.form(activity, action='save_activity_properties', child_args=dict(activity_group_id=dict(options=activity_groups)))">Input Form</div>-->
+    <div>${tmpl_context.form.display(value=activity)}</div>
 </body>
 </html>

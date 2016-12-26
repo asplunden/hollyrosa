@@ -19,12 +19,13 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 # http://wiki.moxiecode.com/index.php/TinyMCE:Control_reference
 
-from tw.api import WidgetsList
-from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea,  HiddenField,  Label
-from tw.dynforms import GrowingTableFieldSet,  CustomisedForm
+#from tw2.core import WidgetsList
+import tw2.core as twc
+from tw2.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea,  HiddenField,  Label
+from tw2.dynforms import GrowingTableFieldSet,  CustomisedForm
 #...for form validation
-from tw.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString,  Email
-from tw.tinymce import TinyMCE, MarkupConverter
+from tw2.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString,  Email
+from tw2.tinymce import TinyMCE, MarkupConverter
 
 # http://toscawidgets.org/documentation/tw.dynforms/widgets/index.html
 

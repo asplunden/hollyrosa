@@ -35,8 +35,9 @@ log = logging.getLogger()
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
 
-from hollyrosa.widgets.edit_note_form import create_edit_note_form
-from hollyrosa.widgets.edit_attachment_form import create_edit_attachment_form
+#### from hollyrosa.widgets.edit_note_form import create_edit_note_form
+#### from hollyrosa.widgets.edit_attachment_form import create_edit_attachment_form
+
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId
 
 from hollyrosa.model.booking_couch import genUID, getNotesForTarget

@@ -32,11 +32,12 @@ import datetime,  json
 from tg import tmpl_context
 
 
-from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
-from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
-from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
-from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
-from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
+#### from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
+#### from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
+#### from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
+#### from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
+#### from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
+
 from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, makeVisitingGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options,  hide_cache_content_in_booking,  getLoggedInUser,  vodb_status_map
 from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange,  updateVisitingGroupComputedSheets,  computeAllUsedVisitingGroupsTagsForTagSheet,  program_visiting_group_properties_template,  staff_visiting_group_properties_template,  course_visiting_group_properties_template
 from hollyrosa.controllers.booking_history import remember_tag_change
@@ -279,7 +280,7 @@ class VisitingGroup(BaseController):
 
 
     @expose()
-    @validate(create_edit_visiting_group_form, error_handler=edit_visiting_group)
+    #### @validate(create_edit_visiting_group_form, error_handler=edit_visiting_group)
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may change visiting group properties'))
     def save_visiting_group_properties(self,  _id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr='', password='',  subtype=''):
         id = _id

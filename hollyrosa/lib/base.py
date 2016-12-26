@@ -6,7 +6,7 @@ from tg import TGController, tmpl_context
 from tg.render import render
 from tg import request
 ##from tg.i18n import _, ungettext, N_
-from tw.api import WidgetBunch
+#from tw.api import WidgetBunch
 import hollyrosa.model as model
 
 __all__ = ['Controller', 'BaseController']

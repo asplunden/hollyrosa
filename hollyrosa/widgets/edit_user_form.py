@@ -1,5 +1,5 @@
 """
-Copyright 2010, 2011, 2012, 2013, 2014, 2015, 2016 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -17,21 +17,25 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from tw.api import WidgetsList
-from tw.forms import TableForm, TextField, TextArea, HiddenField, CheckBox
+#from tw.api import WidgetsList
+#from tw.forms import TableForm, TextField, TextArea, HiddenField, CheckBox
 
 #...for form validation
-from tw.forms.validators import Int, NotEmpty, DateConverter, UnicodeString
+#from tw.forms.validators import Int, NotEmpty, DateConverter, UnicodeString
+
+from tg import lurl
+import tw2.core as twc
+import tw2.forms as twf
 
 
-class EditUserForm(TableForm):
+class EditUserForm(twf.Form):
     
-    show_errors = True
+    #show_errors = True
 
-    class fields(WidgetsList):
-        _id = HiddenField(validator=UnicodeString)
-        user_name = TextField(validator=UnicodeString)
-        display_name = TextField(validator=UnicodeString)
+    class child(twf.TableLayout):
+        user_id = twf.HiddenField(validator=twc.Required)
+        user_name = twf.TextField(validator=twc.StringLengthValidator(min=4))
+        display_name = twf.TextField(validator=twc.StringLengthValidator(min=4))
         
-        
-create_edit_user_form = EditUserForm("create_edit_user_form")
+    action = lurl('save_user')
+create_edit_user_form = EditUserForm() #"create_edit_user_form")

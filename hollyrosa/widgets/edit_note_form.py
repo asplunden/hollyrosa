@@ -19,23 +19,27 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 # http://wiki.moxiecode.com/index.php/TinyMCE:Control_reference
 
-from tw.api import WidgetsList
-from tw.forms import TableForm, TextField, TextArea, HiddenField, CheckBox
+#from tw.api import WidgetsList
+#from tw.forms import TableForm, TextField, TextArea, HiddenField, CheckBox
 
 #...for form validation
-from tw.forms.validators import Int, NotEmpty, DateConverter, UnicodeString
-from tw.tinymce import TinyMCE, MarkupConverter
+#from tw.forms.validators import Int, NotEmpty, DateConverter, UnicodeString
+from tg import lurl
+import tw2.core as twc
+import tw2.forms as twf
+from tw2.tinymce import TinyMCEWidget, MarkupConverter
 
 
-class EditNoteForm(TableForm):
+class EditNoteForm(twf.Form):
     
-    show_errors = True
+    #show_errors = True
 
-    class fields(WidgetsList):
-        _id = HiddenField(validator=UnicodeString)
-        target_id = HiddenField(validator=UnicodeString)
+    #class fields(WidgetsList):
+    class children(twf.TableLayout):
+        id = twf.HiddenField(validator=twc.Required())
+        target_id = twf.HiddenField(validator=twc.Required())
 
-        text = TinyMCE(validator=MarkupConverter, mce_options = dict(theme='advanced',  
+        text = TinyMCEWidget(validator=MarkupConverter, mce_options = dict(theme='advanced',  
                                                                    theme_advanced_toolbar_align ="left",  
                                                                    theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat", 
                                                                    theme_advanced_buttons2 = "",
@@ -45,5 +49,6 @@ class EditNoteForm(TableForm):
         
         
         
-
-create_edit_note_form = EditNoteForm("create_edit_note_form")
+    action = lurl('save_note')
+    
+create_edit_note_form = EditNoteForm() #"create_edit_note_form")

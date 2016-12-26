@@ -110,7 +110,7 @@ class Calendar(BaseController):
         
     #### @validate(create_edit_booking_day_form, error_handler=edit_booking_day)      
     @expose()
-    #### @require(Any(has_level('staff'), has_level('viewer'), msg='Only staff members may change booking day properties'))
+    @require(Any(has_level('staff'), has_level('viewer'), msg='Only staff members may change booking day properties'))
     def save_booking_day_properties(self,  recid=None,  note='', title='', num_program_crew_members=0,  num_fladan_crew_members=0):
         
         booking_day_c = common_couch.getBookingDay(holly_couch, recid)

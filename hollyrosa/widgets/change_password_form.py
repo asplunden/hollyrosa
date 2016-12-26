@@ -1,5 +1,5 @@
 """
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -18,20 +18,27 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from tw.api import WidgetsList
-from tw.forms import TableForm, TextField, HiddenField, Label
+#from tw.api import WidgetsList
+#from tw.forms import TableForm, TextField, HiddenField, Label, PasswordField
 
 #...for form validation
-from tw.forms.validators import Int, NotEmpty, UnicodeString
+#from tw.forms.validators import Int, NotEmpty, UnicodeString
+
+from tg import lurl
+import tw2.core as twc
+import tw2.forms as twf
 
 
-class ChangePasswordForm(TableForm):
+class ChangePasswordForm(twf.Form):
     
-    show_errors = True
+    #show_errors = True
+    # TODO: add validator for equal passwords
 
-    class fields(WidgetsList):
-        user_id = HiddenField(validator=UnicodeString)
-        password = TextField(validator=UnicodeString(min=1))
-        password2 = TextField(validator=UnicodeString(min=1))
+    class child(twf.TableLayout):
+        user_id = twf.HiddenField(validator=twc.Required)
+        password = twf.PasswordField(validator=twc.Required)
+        password2 = twf.PasswordField(validator=twc.Required)
         
-create_change_password_form = ChangePasswordForm("change_password_form")
+    action = lurl('update_password')
+    
+create_change_password_form = ChangePasswordForm() #"change_password_form")

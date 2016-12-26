@@ -54,16 +54,16 @@ from formencode import validators
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
 
-import tw.tinymce
+#### import tw2.tinymce
 
-from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
-from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
-from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
+#### from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
+#### from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
+#### from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
 from hollyrosa.widgets.edit_activity_form import create_edit_activity_form
-from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
-from hollyrosa.widgets.edit_book_live_slot_form import  create_edit_book_live_slot_form, validate_edit_book_live_slot_form
-from hollyrosa.widgets.move_booking_form import  create_move_booking_form, validate_move_booking_form
-from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking, create_validate_new_booking_request_form, create_validate_book_slot_form
+####from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
+####from hollyrosa.widgets.edit_book_live_slot_form import  create_edit_book_live_slot_form, validate_edit_book_live_slot_form
+####from hollyrosa.widgets.move_booking_form import  create_move_booking_form, validate_move_booking_form
+####from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking, create_validate_new_booking_request_form, create_validate_book_slot_form
 
 from hollyrosa.controllers.booking_history import remember_booking_change,  remember_schedule_booking,  remember_unschedule_booking,  remember_book_slot,  remember_booking_properties_change,  remember_new_booking_request,  remember_booking_request_change,  remember_delete_booking_request,  remember_block_slot, remember_unblock_slot,  remember_booking_move,  remember_ignore_booking_warning
 
@@ -505,7 +505,7 @@ class BookingDay(BaseController):
     def getBookingDayDate(self, booking_day_id):
         return common_couch.getBookingDay(holly_couch, booking_day_id)['date']#holly_couch[old_booking_day_id]['date']
         
-    @validate(create_validate_unschedule_booking)
+    ####@validate(create_validate_unschedule_booking)
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may unschedule booking request'))
     def unschedule_booking(self,  return_to_day_id=None,  booking_id=None):
@@ -571,7 +571,7 @@ class BookingDay(BaseController):
         raise redirect('day?day_id='+return_to_day_id + make_booking_day_activity_anchor(b['activity_id']))
         
         
-    @validate(create_validate_schedule_booking)
+    ####@validate(create_validate_schedule_booking)
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may schedule booking request'))
     def schedule_booking(self,  return_to_day_id=None,  booking_id=None,  booking_day_id=None,  slot_row_position_id=None):
@@ -752,7 +752,7 @@ class BookingDay(BaseController):
     
     # TODO: fix subtype, it's not always live, can be funk/staff. Maybe need to be hidden id I think
     # TODO is the error handler right?
-    @validate(validate_edit_book_live_slot_form, error_handler=edit_booked_booking)      
+    ####@validate(validate_edit_book_live_slot_form, error_handler=edit_booked_booking)      
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change booked live booking properties'))
     def save_booked_live_booking_properties(self, booking_id=None, content=None, visiting_group_name=None, visiting_group_display_name=None, visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  booking_date=None,  booking_end_date=None,  booking_end_slot_id=None,  block_after_book=False, subtype='room', **args):
@@ -760,7 +760,7 @@ class BookingDay(BaseController):
         raise redirect('live?day_id='+str(return_to_day_id)+'&subtype='+subtype+make_booking_day_activity_anchor(tmp_activity_id))
     
     
-    @validate(create_validate_book_slot_form, error_handler=edit_booked_booking) 
+    ####@validate(create_validate_book_slot_form, error_handler=edit_booked_booking) 
     @expose()
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
     def save_booked_booking_properties(self,  id=None,  content=None,  visiting_group_display_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  block_after_book=False, **kwargs ):
@@ -926,7 +926,8 @@ class BookingDay(BaseController):
             except:
                 activity = DataContainer(id=activity_id,  title='', info='', default_booking_state=0)
                 
-        return dict(activity=activity,  activity_group=activity_groups,  activity_groups=activity_groups)
+        activity['activity_group_id'] = dict(options=activity_groups, value=activity_id)
+        return dict(activity=activity) ####,  activity_group=activity_groups,  activity_groups=activity_groups)
         
         
     @validate(create_edit_activity_form, error_handler=edit_activity)      
@@ -1045,7 +1046,7 @@ class BookingDay(BaseController):
         return dict(activities=activities, booking=booking_,  activity=activity_o,  booking_day=booking_day,  slot=slot_o,  getRenderContent=getRenderContent, activity_entries=activity_entries)
         
         
-    @validate(validate_move_booking_form, error_handler=move_booking)      
+    ####@validate(validate_move_booking_form, error_handler=move_booking)      
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change activity properties'))
     def save_move_booking(self,  id=None,  activity_id=None,  activity_name=None, return_to_day_id=None,  **kw):
@@ -1152,7 +1153,7 @@ class BookingDay(BaseController):
             raise ValueError, "failed to obtain the N/A visiting group from DB"
         return visiting_group_id
     
-    @validate(create_validate_new_booking_request_form, error_handler=edit_booking) 
+    ####@validate(create_validate_new_booking_request_form, error_handler=edit_booking) 
     @require(Any(is_user('root'), has_level('view'), has_level('staff'), has_level('pl'),  msg='Only viewers, staff and PL can submitt a new booking request'))
     @expose()
     def save_new_booking_request(self, content='', activity_id=None, activity_name=None, visiting_group_name='', visiting_group_display_name='',  valid_from=None,  valid_to=None,  requested_date=None,  visiting_group_id=None,  id=None,  return_to_day_id=None, **kwargs):

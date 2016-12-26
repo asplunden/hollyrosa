@@ -1,5 +1,5 @@
 """
-Copyright 2010, 2011, 2012 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -19,26 +19,30 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 
 
-from tw.api import WidgetsList
-from tw.forms import TableForm, TextField, TextArea, HiddenField, CheckBox, FileField
+#from tw.api import WidgetsList
+#from tw.forms import TableForm, TextField, TextArea, HiddenField, CheckBox, FileField
+
 
 #...for form validation
-from tw.forms.validators import Int, NotEmpty, DateConverter, UnicodeString
+#from tw.forms.validators import Int, NotEmpty, DateConverter, UnicodeString
 
+import tw2.core as twc
+import tw2.forms as twf
 
-class EditAttachmentForm(TableForm):
+from tg import lurl
+
+class EditAttachmentForm(twf.Form):
     
-    show_errors = True
+    #show_errors = True
 
-    class fields(WidgetsList):
-        _id = HiddenField(validator=UnicodeString)
-        target_id = HiddenField(validator=UnicodeString)
+    #class fields(WidgetsList):
+    class Children(twf.TableLayout):
+        recid = twf.HiddenField(validator=twc.Required())
+        target_id = twf.HiddenField(validator=twc.Required())
 
-        text = TextField(validator=UnicodeString)
-        attachment = FileField()
+        text = twf.TextField(validator=twc.Required())
+        attachment = twf.FileField()
         
-        
-        
-        
+    action = lurl('save_attachment')
 
-create_edit_attachment_form = EditAttachmentForm("create_edit_attachment_form")
+create_edit_attachment_form = EditAttachmentForm() #"create_edit_attachment_form")

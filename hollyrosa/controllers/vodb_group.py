@@ -24,8 +24,10 @@ from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch
-from hollyrosa.widgets.edit_visiting_group_program_request_form import create_edit_visiting_group_program_request_form
-from hollyrosa.widgets.edit_vodb_group_form import create_edit_vodb_group_form
+
+#### from hollyrosa.widgets.edit_visiting_group_program_request_form import create_edit_visiting_group_program_request_form
+#### from hollyrosa.widgets.edit_vodb_group_form import create_edit_vodb_group_form
+
 from tg import tmpl_context
 
 import datetime,logging, json, time, types,  copy
@@ -167,7 +169,7 @@ class VODBGroup(BaseController):
     
 
     @expose()
-    @validate(create_edit_vodb_group_form, error_handler=edit_group_data)
+    #### @validate(create_edit_vodb_group_form, error_handler=edit_group_data)
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may change visiting group properties'))
     def save_vodb_group_properties(self, _id='', boknr='', name='', info='', camping_location='', vodb_contact_name='', vodb_contact_phone='', vodb_contact_email='', vodb_contact_address='', from_date='', to_date='', subtype='', visiting_group_properties=None):
         #...how do we handle new groups? Like new visiting_group, right?
