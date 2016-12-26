@@ -33,13 +33,13 @@ class MoveBookingForm(TableForm):
         return_to_day_id = HiddenField(validator=UnicodeString)
         activity_id = HiddenField(validator=UnicodeString)
         activity_name = SingleSelectField()
-        
+
 class ValidateMoveBookingForm(TableForm):
     show_errors = True
     id = HiddenField(validator=UnicodeString)
     return_to_day_id = HiddenField(validator=UnicodeString)
     activity_id = HiddenField(validator=UnicodeString)
     activity_name = SingleSelectField()
-        
+
 create_move_booking_form = MoveBookingForm("create_move_booking_form")
 validate_move_booking_form = ValidateMoveBookingForm("validate_move_booking_form")

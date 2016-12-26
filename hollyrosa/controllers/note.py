@@ -35,7 +35,7 @@ log = logging.getLogger()
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
 
-#### from hollyrosa.widgets.edit_note_form import create_edit_note_form
+from hollyrosa.widgets.edit_note_form import create_edit_note_form
 #### from hollyrosa.widgets.edit_attachment_form import create_edit_attachment_form
 
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId
@@ -58,7 +58,7 @@ class Note(BaseController):
     @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))  
     def add_note(self, target_id):
         tmpl_context.form = create_edit_note_form
-        note_o = DataContainer(text='', target_id=target_id, _id='')
+        note_o = dict(text='', target_id=target_id, note_id='')
         return dict(note=note_o)
         
         
@@ -66,7 +66,7 @@ class Note(BaseController):
     @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))  
     def add_attachment(self, target_id):
         tmpl_context.form = create_edit_attachment_form
-        attachment_o = DataContainer(text='', target_id=target_id, _id='')
+        attachment_o = dict(text='', target_id=target_id, attachment_id='')
         return dict(attachment=attachment_o)
         
    
@@ -75,7 +75,7 @@ class Note(BaseController):
     def edit_note(self, note_id=None, visiting_group_id=None):
         tmpl_context.form = create_edit_note_form
         if note_id == '':
-            note_o = DataContainer(text='', target_id=target_id, _id='')
+            note_o = DataContainer(text='', target_id=visiting_group_id, note_id='')
         else:
             note_o = common_couch.getNote(holly_couch,  note_id) 
         return dict(note=note_o)
@@ -87,7 +87,7 @@ class Note(BaseController):
         attachment_id=note_id
         tmpl_context.form = create_edit_attachment_form
         if attachment_id == '':
-            attachment_o = DataContainer(text='', target_id=target_id, _id='')
+            attachment_o = dict(text='', target_id=visiting_group_id, note_id='')
         else:
             attachment_o = common_couch.getAttachment(holly_couch,  attachment_id)
         return dict(attachment=attachment_o)
@@ -101,14 +101,14 @@ class Note(BaseController):
 
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def save_note(self, target_id, _id, text):
+    def save_note(self, target_id, note_id, text):
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-        if _id == '':
+        if note_id == '':
             note_o = dict(type='note', _id=genUID(type='note'), target_id=target_id, note_state=0, tags=list(), history=list(), text='')
             note_change='new'
             note_o['timestamp'] = timestamp
         else:
-            note_o = common_couch.getNote(holly_couch,  _id)
+            note_o = common_couch.getNote(holly_couch, note_id)
             history = note_o['history']
             if history == None:
                 history = list()
@@ -120,9 +120,9 @@ class Note(BaseController):
         
         note_o['last_changed_by'] = getLoggedInUserId(request)
         note_o['text'] = text
-        holly_couch[note_o['_id']] = note_o
+        holly_couch[note_o['note_id']] = note_o
         
-        remember_note_change(holly_couch, target_id=target_id, note_id=note_o['_id'], changed_by=getLoggedInUserId(request), note_change=note_change)
+        remember_note_change(holly_couch, target_id=target_id, note_id=note_o['note_id'], changed_by=getLoggedInUserId(request), note_change=note_change)
 
         # TODO: where do we go from here?
         redirect_to = '/'

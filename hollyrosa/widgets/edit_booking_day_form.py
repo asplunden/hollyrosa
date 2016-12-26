@@ -17,19 +17,13 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-
-#### from tw.api import WidgetsList
-#### from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea,  HiddenField
 from tg import lurl
 
 import tw2.core as twc
 import tw2.forms as twf
 
-#...for form validation
-#### from tw.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString
 from tw2.tinymce import TinyMCEWidget, MarkupConverter
 
-####TableForm)
 
 class EditVisitingGroupForm(twf.Form): 
 

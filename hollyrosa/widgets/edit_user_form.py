@@ -17,25 +17,16 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-#from tw.api import WidgetsList
-#from tw.forms import TableForm, TextField, TextArea, HiddenField, CheckBox
-
-#...for form validation
-#from tw.forms.validators import Int, NotEmpty, DateConverter, UnicodeString
-
 from tg import lurl
 import tw2.core as twc
 import tw2.forms as twf
 
 
 class EditUserForm(twf.Form):
-    
-    #show_errors = True
-
     class child(twf.TableLayout):
         user_id = twf.HiddenField(validator=twc.Required)
         user_name = twf.TextField(validator=twc.StringLengthValidator(min=4))
         display_name = twf.TextField(validator=twc.StringLengthValidator(min=4))
         
     action = lurl('save_user')
-create_edit_user_form = EditUserForm() #"create_edit_user_form")
+create_edit_user_form = EditUserForm()
