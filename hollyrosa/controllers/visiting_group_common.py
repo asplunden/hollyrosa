@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -25,24 +25,24 @@ from hollyrosa.controllers.booking_history import remember_tag_change,  remember
 
 
 
-program_visiting_group_properties_template = [DataContainer(property='sma',  value='0',  unit=u'småbarn',  description=u'antal deltagare 0 till 8 år'),
-                                              DataContainer(property='spar',  value='0',  unit=u'spår',  description=u'antal deltagare 8 till 9 år'), 
-                                              DataContainer(property='uppt',  value='0',  unit=u'uppt',  description=u'antal deltagare 10 till 11 år'), 
-                                              DataContainer(property='aven',  value='0',  unit=u'aven',  description=u'antal deltagare 12 till 15 år'), 
-                                              DataContainer(property='utm',  value='0',  unit=u'utm',  description=u'antal deltagare 16 till 18 år'),
-                                              DataContainer(property='rov',  value='0',  unit=u'rover',  description=u'antal roverscouter'),
-                                              DataContainer(property='led',  value='0',  unit=u'ledare',  description=u'antal ledare'), 
-                                              DataContainer(property='antal',  value='0',  unit=u'antal',  description=u'preliminärt uppskattat antal')]
+program_visiting_group_properties_template = [dict(property='sma',  value='0',  unit=u'småbarn',  description=u'antal deltagare 0 till 8 år'),
+                                              dict(property='spar',  value='0',  unit=u'spår',  description=u'antal deltagare 8 till 9 år'), 
+                                              dict(property='uppt',  value='0',  unit=u'uppt',  description=u'antal deltagare 10 till 11 år'), 
+                                              dict(property='aven',  value='0',  unit=u'aven',  description=u'antal deltagare 12 till 15 år'), 
+                                              dict(property='utm',  value='0',  unit=u'utm',  description=u'antal deltagare 16 till 18 år'),
+                                              dict(property='rov',  value='0',  unit=u'rover',  description=u'antal roverscouter'),
+                                              dict(property='led',  value='0',  unit=u'ledare',  description=u'antal ledare'), 
+                                              dict(property='antal',  value='0',  unit=u'antal',  description=u'preliminärt uppskattat antal')]
                                               
-staff_visiting_group_properties_template = [DataContainer(property='funk',  value='1',  unit=u'funk',  description=u'antal funk'), DataContainer(property='barn',  value='0',  unit=u'fkbarn',  description=u'antal funk barn')]
+staff_visiting_group_properties_template = [dict(property='funk',  value='1',  unit=u'funk',  description=u'antal funk'), dict(property='barn',  value='0',  unit=u'fkbarn',  description=u'antal funk barn')]
  
  
  
-course_visiting_group_properties_template = [DataContainer(property='SSD',  value='0',  unit=u'SSD',  description=u'antal kursdeltagare från SSD'), 
-                                              DataContainer(property='scout',  value='0',  unit=u'scout',  description=u'antal kursdeltagare från scouterna (utom SSD)'), 
-                                              DataContainer(property='ovr',  value='0',  unit=u'övriga',  description=u'antal övriga kursdeltagare'), 
-                                              DataContainer(property='led',  value='0',  unit=u'kursled',  description=u'antal kursledare'), 
-                                              DataContainer(property='barn',  value='0',  unit=u'klbarn',  description=u'antal kursledarbarn')]
+course_visiting_group_properties_template = [dict(property='SSD',  value='0',  unit=u'SSD',  description=u'antal kursdeltagare från SSD'), 
+                                              dict(property='scout',  value='0',  unit=u'scout',  description=u'antal kursdeltagare från scouterna (utom SSD)'), 
+                                              dict(property='ovr',  value='0',  unit=u'övriga',  description=u'antal övriga kursdeltagare'), 
+                                              dict(property='led',  value='0',  unit=u'kursled',  description=u'antal kursledare'), 
+                                              dict(property='barn',  value='0',  unit=u'klbarn',  description=u'antal kursledarbarn')]
  
  
  

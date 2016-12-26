@@ -25,7 +25,6 @@ import tw2.dynforms as twd
 
 from tg import lurl
 
-#from tw2.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString,  Email
 from tw2.tinymce import TinyMCEWidget, MarkupConverter
 from formencode.validators import DateConverter
 

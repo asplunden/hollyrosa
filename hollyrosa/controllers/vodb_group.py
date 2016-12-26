@@ -26,11 +26,11 @@ from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch
 
 #### from hollyrosa.widgets.edit_visiting_group_program_request_form import create_edit_visiting_group_program_request_form
-#### from hollyrosa.widgets.edit_vodb_group_form import create_edit_vodb_group_form
+from hollyrosa.widgets.edit_vodb_group_form import create_edit_vodb_group_form
 
 from tg import tmpl_context
 
-import datetime,logging, json, time, types,  copy
+import datetime,logging, json, time, types, copy
 
 log = logging.getLogger()
 
@@ -137,7 +137,7 @@ class VODBGroup(BaseController):
             if subtype =='course':
                 properties_template = course_visiting_group_properties_template
                 
-            visiting_group = DataContainer(name='',  id=None, _id=None,   info='',  visiting_group_properties=properties_template,  subtype=subtype,  contact_person='',  contact_person_email='',  contact_person_phone='',  boknr='')
+            visiting_group = dict(name='',  id=None, _id=None,   info='',  visiting_group_properties=properties_template,  subtype=subtype,  contact_person='',  contact_person_email='',  contact_person_phone='',  boknr='')
         
         else:
             visiting_group_c = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
@@ -169,12 +169,12 @@ class VODBGroup(BaseController):
     
 
     @expose()
-    #### @validate(create_edit_vodb_group_form, error_handler=edit_group_data)
+    @validate(create_edit_vodb_group_form, error_handler=edit_group_data)
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may change visiting group properties'))
-    def save_vodb_group_properties(self, _id='', boknr='', name='', info='', camping_location='', vodb_contact_name='', vodb_contact_phone='', vodb_contact_email='', vodb_contact_address='', from_date='', to_date='', subtype='', visiting_group_properties=None):
+    def save_vodb_group_properties(self, vodb_group_id='', boknr='', name='', info='', camping_location='', vodb_contact_name='', vodb_contact_phone='', vodb_contact_email='', vodb_contact_address='', from_date='', to_date='', subtype='', visiting_group_properties=None):
         #...how do we handle new groups? Like new visiting_group, right?
         #   better have type=visiting_group for all groups and then have subtypes=group, course, daytrip, funk, etc for filtering/deciding on additional capabillities
-        id = _id
+        id = vodb_group_id
         is_new, vgroup_id = self.newOrExistingVgroupId(id) 
         
         #...load or create new vgroup
@@ -199,13 +199,8 @@ class VODBGroup(BaseController):
         visiting_group_o['vodb_contact_name'] = vodb_contact_name
         visiting_group_o['vodb_contact_email'] = vodb_contact_email
         visiting_group_o['vodb_contact_phone'] = vodb_contact_phone
-        visiting_group_o['vodb_contact_address'] = vodb_contact_address
-        
+        visiting_group_o['vodb_contact_address'] = vodb_contact_address        
         visiting_group_o['boknr'] = boknr
-        
-#        if is_new:
-#            visiting_group_o['boknstatus'] = program_state
-#            visiting_group_o['vodbstatus'] = vodb_state
         visiting_group_o['camping_location'] = camping_location
 
         # TODO: figure out the order of updating things if something goes wrong.

@@ -243,7 +243,7 @@ def makeVisitingGroupObjectOfVGDictionary(a_visiting_group):
 def makeVODBGroupObjectOfVGDictionary(a_visiting_group):
     obj_params = makeParamsForObjectOfVGDictionary(a_visiting_group)
     
-    visiting_group = DataContainer(name=a_visiting_group['name'],  _id=a_visiting_group['_id'],  info=a_visiting_group['info'],  visiting_group_properties=obj_params, 
+    visiting_group = dict(name=a_visiting_group['name'],  vodb_group_id=a_visiting_group['_id'],  info=a_visiting_group['info'],  visiting_group_properties=obj_params, 
                                    vodb_contact_person=a_visiting_group.get('vodb_contact_person', ''),  vodb_contact_email=a_visiting_group.get('vodb_contact_email', ''),  
                                    vodb_contact_phone=a_visiting_group.get('vodb_contact_phone', ''), vodb_contact_address=a_visiting_group.get('vodb_contact_address', ''), 
                                    boknr=a_visiting_group['boknr'], password=a_visiting_group.get('password',''), boknstatus=a_visiting_group['boknstatus'],  camping_location=a_visiting_group['camping_location'],  

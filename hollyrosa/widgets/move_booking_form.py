@@ -20,7 +20,6 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 from tw.api import WidgetsList
 from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, HiddenField
-#from tw.dojo import Dojo
 
 #...for form validation
 from tw.forms.validators import Int, NotEmpty, UnicodeString

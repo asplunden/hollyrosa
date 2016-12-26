@@ -273,7 +273,7 @@ class VisitingGroup(BaseController):
             if subtype =='course':
                 properties_template = course_visiting_group_properties_template
                 
-            visiting_group = DataContainer(name='',  id=None, _id=None,   info='',  visiting_group_properties=properties_template,  subtype=subtype,  contact_person='',  contact_person_email='',  contact_person_phone='',  boknr='')
+            visiting_group = dict(name='',  id=None, _id=None,   info='',  visiting_group_properties=properties_template,  subtype=subtype,  contact_person='',  contact_person_email='',  contact_person_phone='',  boknr='')
         
         else:
             log.info('looking up existing visiting group %s' % str(visiting_group_id))

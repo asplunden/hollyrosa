@@ -17,53 +17,46 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-# http://wiki.moxiecode.com/index.php/TinyMCE:Control_reference
+import tw2.core as twc
+import tw2.forms as twf
+import tw2.dynforms as twd
 
-from tw.api import WidgetsList
-from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea,  HiddenField,  Label
-from tw.dynforms import GrowingTableFieldSet,  CustomisedForm
-#...for form validation
-from tw.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString,  Email
-from tw.tinymce import TinyMCE, MarkupConverter
+from tg import lurl
 
-# http://toscawidgets.org/documentation/tw.dynforms/widgets/index.html
+from tw2.tinymce import TinyMCEWidget, MarkupConverter
+from formencode.validators import DateConverter
 
-class ParamsGrowingTableFieldSet(GrowingTableFieldSet):
-    children = [
-        HiddenField('id'), 
-        TextField('property',  size=10),
-        TextField('value',  size=4),
-        TextField('unit',  size=8), 
-        TextField('description'), 
-        CalendarDatePicker('from_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d'), 
-        CalendarDatePicker('to_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')]
-        
+class EditVodbGroupForm(twd.CustomisedTableForm):
+    class child(twf.TableLayout):
+        vodb_group_id = twf.HiddenField(validator=twc.Required)
+        subtype = twf.HiddenField(validator=twc.Required) 
+        name = twf.TextField(validator=twc.StringLengthValidator(min=4),  css_class="edit_name",  size=40)
+        boknr = twf.TextField(validator=twc.Required)
 
-
-class EditVodbGroupForm(TableForm):
-    show_errors = True
-    
-    class fields(WidgetsList):
-        _id = HiddenField(validator=UnicodeString())
-        subtype = HiddenField(validator=UnicodeString()) 
-        name = TextField(validator=UnicodeString(min=1),  css_class="edit_name",  size=40)
-        boknr = TextField(validator=UnicodeString())
-        
-        info = TinyMCE(validator=MarkupConverter, mce_options = dict(theme='advanced',  
+        info = TinyMCEWidget(validator=MarkupConverter, mce_options = dict(theme='advanced',  
                                                                    theme_advanced_toolbar_align ="left",  
                                                                    theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat", 
                                                                    theme_advanced_buttons2 = "",
                                                                    theme_advanced_buttons3 = ""
 ))
-        from_date = CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
-        to_date = CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
-        vodb_contact_name = TextField(validator=UnicodeString())
-        vodb_contact_email = TextField(validator=Email(resolve_domain=False))
-        vodb_contact_phone = TextField(validator=UnicodeString())
-        vodb_contact_address = TextArea(validator=UnicodeString(), rows=4)
-        
-        camping_location = TextField(validator=UnicodeString())
-        
-        visiting_group_properties = ParamsGrowingTableFieldSet()
+        from_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+        to_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+        vodb_contact_name = twf.TextField(validator=twc.Required)
+        vodb_contact_email = twf.TextField(validator=twc.EmailValidator)
+        vodb_contact_phone = twf.TextField(validator=twc.Required)
+        vodb_contact_address = twf.TextArea(validator=twc.StringLengthValidator(min=4))
+        camping_location = twf.TextField(validator=twc.Required)
 
-create_edit_vodb_group_form = EditVodbGroupForm("create_edit_vodb_group_form")
+        #######visiting_group_properties = ParamsGrowingTableFieldSet()
+
+        class visiting_group_properties(twd.GrowingGridLayout):
+            propery_id = twf.HiddenField('property_id')
+            property = twf.TextField('property',  size=10)
+            value = twf.TextField('value',  size=4)
+            unit = twf.TextField('unit',  size=8)
+            description = twf.TextField('description')
+            from_date = twf.CalendarDatePicker('from_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+            to_date = twf.CalendarDatePicker('to_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+
+    action = lurl('save_vodb_group_properties')
+create_edit_vodb_group_form = EditVodbGroupForm()
