@@ -127,6 +127,7 @@ ready(function(){
     <span py:if="None != booking_day">${booking_day.date} </span><span py:if="None != slot_position"><b> ${slot_position.time_from} to ${slot_position.time_to} </b> </span><span py:if="None != booking_day"><a py:if="booking.id != None " href="${tg.url('unschedule_booking', params={'booking_id':booking.id, 'booking_day_id':booking_day.id})}">unschedule</a></span>
     </p>
     
-    <div py:replace="tmpl_context.form(booking, action='save_booked_booking_properties', child_args=dict(visiting_group_id=dict(options=visiting_groups)))">Input Form</div>
+    <!-- <div py:replace="tmpl_context.form(booking, action='save_booked_booking_properties', child_args=dict(visiting_group_id=dict(options=visiting_groups)))">Input Form</div> -->
+    <div>${tmpl_context.form.display(value=booking, child_args=dict(visiting_group_id=dict(options=visiting_groups)))}</div>
 </body>
 </html>

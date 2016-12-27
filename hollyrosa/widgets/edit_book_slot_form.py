@@ -1,5 +1,5 @@
 """
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -18,27 +18,24 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from tw.api import WidgetsList
-from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea,  HiddenField,  Label,  CheckBox
+from tg import lurl
+import tw2.core as twc
+import tw2.forms as twf
 
-#...for form validation
-from tw.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString
-
-
-class EditBookSlotForm(TableForm):
-    
-    show_errors = True
-
-    class fields(WidgetsList):
-        id = HiddenField(validator=UnicodeString)
-        booking_day_id = HiddenField(validator=UnicodeString)
-        slot_id = HiddenField(validator=UnicodeString)
-        activity_id = HiddenField(validator=UnicodeString)
-        return_to_day_id = HiddenField(validator=UnicodeString)
-        visiting_group_name = TextField(validator=UnicodeString(min=1))
-        visiting_group_display_name = HiddenField(validator=UnicodeString)
-        visiting_group_id = HiddenField(validator=UnicodeString)
-        content = TextArea(validator=UnicodeString)
-        block_after_book = CheckBox()
+class EditBookSlotForm(twf.Form):
+    class child(twf.TableLayout):
+        id = twf.HiddenField(validator=twc.Required)
+        booking_day_id = twf.HiddenField(validator=twc.Required)
+        slot_id = twf.HiddenField(validator=twc.Required)
+        activity_id = twf.HiddenField(validator=twc.Required)
+        return_to_day_id = twf.HiddenField(validator=twc.Required)
+        visiting_group_name = twf.TextField(validator=twc.StringLengthValidator(min=1))
+        visiting_group_display_name = twf.HiddenField(validator=twc.Required)
+        visiting_group_id = twf.HiddenField(validator=twc.Required)
+        # TODO: set height and width
+        content = twf.TextArea(validator=twc.Required)
+        block_after_book = twf.CheckBox()
         
-create_edit_book_slot_form = EditBookSlotForm("create_edit_book_slot_form")
+    action = lurl('save_booked_booking_properties')
+        
+create_edit_book_slot_form = EditBookSlotForm()

@@ -25,9 +25,7 @@ import tw2.forms as twf
 from tw2.tinymce import TinyMCEWidget, MarkupConverter
 
 
-class EditVisitingGroupForm(twf.Form): 
-
-    ####class fields(WidgetsList):
+class EditVisitingGroupForm(twf.Form):
     class child(twf.TableLayout):
         recid = twf.HiddenField(validator=twc.Required) #### TODO: former id was _id but no longer allowed name
         title = twf.TextField(validator=twc.Required)

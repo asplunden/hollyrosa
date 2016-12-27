@@ -60,7 +60,7 @@ from tg import tmpl_context
 #### from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
 #### from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
 from hollyrosa.widgets.edit_activity_form import create_edit_activity_form
-####from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
+from hollyrosa.widgets.edit_book_slot_form import create_edit_book_slot_form
 ####from hollyrosa.widgets.edit_book_live_slot_form import  create_edit_book_live_slot_form, validate_edit_book_live_slot_form
 ####from hollyrosa.widgets.move_booking_form import  create_move_booking_form, validate_move_booking_form
 ####from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking, create_validate_new_booking_request_form, create_validate_book_slot_form
@@ -616,7 +616,7 @@ class BookingDay(BaseController):
         slot_map= getSchemaSlotActivityMap(holly_couch, booking_day,  subtype=subtype)
         slot = slot_map[slot_id]        
         activity = common_couch.getActivity(holly_couch,  slot['activity_id']) 
-        booking_o = DataContainer(content='', visiting_group_id='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_id=slot_id)
+        booking_o = dict(content='', visiting_group_id='', visiting_group_name='',  valid_from=None,  valid_to=None,  requested_date=None,  return_to_day_id=booking_day_id,  activity_id=slot['activity_id'], id=None,  activity=activity,  booking_day_id=booking_day_id,  slot_id=slot_id)
         visiting_group_options = json.dumps([dict(name=a[1], id=a[0]) for a in visiting_groups] )
         return dict(booking_day=booking_day, booking=booking_o, visiting_groups=visiting_groups, edit_this_visiting_group=0,  slot_position=slot,visiting_group_options=visiting_group_options)
 
