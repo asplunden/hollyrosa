@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -69,7 +69,6 @@ from hollyrosa.controllers.booking_history import remember_booking_change,  reme
 
 from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate
 from hollyrosa.controllers import common_couch
-from hollyrosa.model import holly_couch
 
 __all__ = ['BookingDay']
     
@@ -739,7 +738,7 @@ class BookingDay(BaseController):
         slot_position = slot_map[slot_id]
         activity_id = booking_o['activity_id']
         activity = common_couch.getActivity(holly_couch, activity_id)
-        booking_ = DataContainer(activity_id=activity_id, slot_id=slot_id, activity=activity, id=booking_o['_id'], booking_id=booking_o['_id'], visiting_group_name=booking_o['visiting_group_name'], visiting_group_id=booking_o['visiting_group_id'], content=booking_o['content'], booking_date=booking_o.get('booking_date', '2013-07-01'), booking_end_date=booking_o.get('booking_end_date', '2013-07-24'), booking_end_slot_id=booking_o.get('booking_end_slot_id', ''), return_to_day_id=return_to_day_id, booking_day_id=return_to_day_id, subtype=subtype )
+        booking_ = dict(activity_id=activity_id, slot_id=slot_id, activity=activity, id=booking_o['_id'], booking_id=booking_o['_id'], visiting_group_name=booking_o['visiting_group_name'], visiting_group_id=booking_o['visiting_group_id'], content=booking_o['content'], booking_date=booking_o.get('booking_date', '2013-07-01'), booking_end_date=booking_o.get('booking_end_date', '2013-07-24'), booking_end_slot_id=booking_o.get('booking_end_slot_id', ''), return_to_day_id=return_to_day_id, booking_day_id=return_to_day_id, subtype=subtype )
         
         tmp_visiting_groups = getVisitingGroupsAtDate(holly_couch, booking_day['date']) 
         visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in tmp_visiting_groups]  
@@ -911,26 +910,22 @@ class BookingDay(BaseController):
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change activity information'))
     def edit_activity(self, activity_id=None,  **kw):
         tmpl_context.form = create_edit_activity_form
-        activity_groups = list()
-        for x in getAllActivityGroups(holly_couch):
-            activity_groups.append((x.value['_id'], x.value['title']))
             
         if None == activity_id:
-            activity = DataContainer(id=None,  title='',  info='')
+            activity = dict(id=None,  title='',  info='')
         elif id=='':
-            activity = DataContainer(id=None,  title='', info='')
+            activity = dict(id=None,  title='', info='')
         else:
             try:
                 activity = common_couch.getActivity(holly_couch,  activity_id) 
                 activity['id'] = activity_id 
             except:
-                activity = DataContainer(id=activity_id,  title='', info='', default_booking_state=0)
-                
-        activity['activity_group_id'] = dict(options=activity_groups, value=activity_id)
+                activity = dict(id=activity_id,  title='', info='', default_booking_state=0)
+        
         return dict(activity=activity) ####,  activity_group=activity_groups,  activity_groups=activity_groups)
         
         
-    @validate(create_edit_activity_form, error_handler=edit_activity)      
+    @validate(form=create_edit_activity_form, error_handler=edit_activity)      
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change activity properties'))
     def save_activity_properties(self,  id=None,  title=None,  external_link='', internal_link='',  print_on_demand_link='',  description='', tags='', capacity=0,  default_booking_state=0,  activity_group_id=1,  gps_lat=0,  gps_long=0,  equipment_needed=False, education_needed=False,  certificate_needed=False,  bg_color='', guides_per_slot=0,  guides_per_day=0 ):

@@ -24,19 +24,25 @@ from tg import lurl
 #from tw.api import WidgetsList
 import tw2.core as twc
 import tw2.forms as twf
-####from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea,  HiddenField,  CheckBox
 
 #...for form validation
-#from tw2.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString,  Email
 from tw2.tinymce import MarkupConverter # TinyMCE
 from tw2.tinymce import TinyMCEWidget
 
+from hollyrosa.model import holly_couch
+from hollyrosa.model.booking_couch import getAllActivityGroups
+
+def getActivityGroupOptions():
+    activity_groups = list()
+    for x in getAllActivityGroups(holly_couch):
+        activity_groups.append((x.value['_id'], x.value['title']))   
+    return activity_groups
+
 class EditActivityForm(twf.Form):
     
-    ####show_errors = True
-    ####class fields(WidgetsList):
-    
     class child(twf.TableLayout):
+        
+        
         id = twf.HiddenField()
         title = twf.TextField(validator=twc.Required,  css_class="edit_name")
         description = TinyMCEWidget(validator=MarkupConverter, mce_options = dict(theme='advanced',  
@@ -45,21 +51,21 @@ class EditActivityForm(twf.Form):
                                                                    theme_advanced_buttons2 = "",
                                                                    theme_advanced_buttons3 = ""
                                                                    ))
-        tags = twf.TextField(validator=twc.Required)
-        external_link = twf.TextField(validator=twc.Required)
-        internal_link = twf.TextField(validator=twc.Required)
-        print_on_demand_link = twf.TextField(validator=twc.Required)
-        capacity = twf.TextField(validator=twc.StringLengthValidator(min=4)) # TODO: should be inteteger here
+        tags = twf.TextField()#validator=twc.String)
+        external_link = twf.TextField()#validator=twc.Required)
+        internal_link = twf.TextField()#validator=twc.Required)
+        print_on_demand_link = twf.TextField()#validator=twc.Required)
+        capacity = twf.TextField(validator=twc.IntValidator) # TODO: should be inteteger here
         default_booking_state = twf.HiddenField()
-        activity_group_id = twf.SingleSelectField(validator=twc.Required, options=[]) # TODO: what to do with options
-        gps_lat  = twf.TextField(validator=twc.Required)
-        gps_long = twf.TextField(validator=twc.Required)
+        activity_group_id = twf.SingleSelectField(validator=twc.Required, options=twc.Deferred(getActivityGroupOptions)) # TODO: what to do with options, see perhaps http://code.runnable.com/U-tO4xSN7Ch6wWS7/turbogears-forms-fill-singleselect-value-for-python
+        gps_lat  = twf.TextField()#validator=twc.Required)
+        gps_long = twf.TextField()#validator=twc.Required)
         equipment_needed = twf.CheckBox()
         education_needed  = twf.CheckBox()
         certificate_needed = twf.CheckBox()
         bg_color = twf.TextField(validator=twc.Required)
-        guides_per_slot = twf.TextField() ##### validator=UnicodeString(size=4, validator=Int)
-        guides_per_day = twf.TextField() #### validator=UnicodeString(size=4, validator=Int)
+        guides_per_slot = twf.TextField(validator=twc.IntValidator)
+        guides_per_day = twf.TextField(validator=twc.IntValidator)
         
         
     action = lurl('save_activity_properties')
