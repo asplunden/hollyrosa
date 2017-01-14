@@ -29,7 +29,7 @@ class ChangePasswordForm(twf.Form):
     # TODO: add validator for equal passwords
 
     class child(twf.TableLayout):
-        user_id = twf.HiddenField(validator=twc.Required)
+        user_id = twf.HiddenField(validator=twc.StringLengthValidator(min=4))
         password = twf.PasswordField(validator=twc.Required)
         password2 = twf.PasswordField(validator=twc.Required)
         

@@ -1,5 +1,5 @@
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -18,29 +18,32 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from tw.api import WidgetsList
-from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea,  HiddenField
-#from tw.dojo import Dojo
-
-#...for form validation
-from tw.forms.validators import Int, NotEmpty, DateConverter, UnicodeString
 
 
-class EditNewBookingRequestForm(TableForm):
+from tg import lurl
 
-    class fields(WidgetsList):
+#from tw.api import WidgetsList
+import tw2.core as twc
+import tw2.forms as twf
+
+from formencode.validators import DateConverter
+
+
+class EditNewBookingRequestForm(twf.Form):
+
+    class child(twf.TableLayout):
         
-        id = HiddenField(validator=UnicodeString)
-        return_to_day_id = HiddenField()
-        visiting_group_name = TextField(validator=UnicodeString(min=1))
-        visiting_group_display_name = HiddenField(validator=UnicodeString)        
-        visiting_group_id = HiddenField(validator=UnicodeString)        
-        content = TextArea(validator=UnicodeString)
-        activity_id = HiddenField(validator=UnicodeString)
-        activity_name = TextField(validator=UnicodeString(min=1))
-        requested_date = CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')
-        valid_from = CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')  
-        valid_to = CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')   
+        id = twf.HiddenField() #validator=UnicodeString)
+        return_to_day_id = twf.HiddenField()
+        visiting_group_name = twf.TextField(validator=twc.StringLengthValidator(min=1))
+        visiting_group_display_name = twf.HiddenField() #validator=UnicodeString)        
+        visiting_group_id = twf.HiddenField() #validator=UnicodeString)        
+        content = twf.TextArea() #validator=UnicodeString)
+        activity_id = twf.HiddenField() #validator=twc.Required)
+        activity_name = twf.TextField(twc.Required)#validator=UnicodeString(min=1))
+        requested_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')
+        valid_from = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')  
+        valid_to = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')   
         
-
-create_edit_new_booking_request_form = EditNewBookingRequestForm("create_edit_new_booking_request_form")
+    action = lurl('save_new_booking_request')
+create_edit_new_booking_request_form = EditNewBookingRequestForm() #id="create_edit_new_booking_request_form")

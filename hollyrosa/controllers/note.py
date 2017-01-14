@@ -103,8 +103,8 @@ class Note(BaseController):
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def save_note(self, target_id, note_id, text):
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-        if note_id == '':
-            note_o = dict(type='note', _id=genUID(type='note'), target_id=target_id, note_state=0, tags=list(), history=list(), text='')
+        if note_id == '' or note_id == None:
+            note_o = dict(type='note', note_id=genUID(type='note'), target_id=target_id, note_state=0, tags=list(), history=list(), text='')
             note_change='new'
             note_o['timestamp'] = timestamp
         else:

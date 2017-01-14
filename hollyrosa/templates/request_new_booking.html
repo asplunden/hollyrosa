@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -30,7 +30,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
   <script>
 
-require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready", "dojo/domReady!"], function(edit_booking, dom, on, xhr, Memory, FilteringSelect, ready) { 
+require(["edit_booking", "dojo/query", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready", "dojo/domReady!"], function(edit_booking, query, dom, on, xhr, Memory, FilteringSelect, ready) { 
 
 function get_visiting_group_data_from_XHR_helper(value) {
     xhr("${tg.url('/visiting_group/show_visiting_group_data')}", {
@@ -46,7 +46,7 @@ function get_visiting_group_data_from_XHR(visiting_group_id) {
 
 
 function set_visiting_group_id(value) {
-    edit_booking.set_form_field_value('create_edit_new_booking_request_form_visiting_group_id', value);
+    edit_booking.set_form_field_value('visiting_group_id', value);
     if (null != value) {
 			get_visiting_group_data_from_XHR(value);    
     } else {
@@ -59,19 +59,19 @@ function set_visiting_group_id(value) {
 function transfer_from_date(event) {
     date_elem = dom.byId("visiting_group_data_fromdate");
     date = date_elem.innerHTML;
-    dom.byId("create_edit_new_booking_request_form_valid_from").value = date;
+    dom.byId("valid_from").value = date;
 }
 
 
 function transfer_to_date(event) {
     date_elem = dom.byId("visiting_group_data_todate");
     date = date_elem.innerHTML;
-    dom.byId("create_edit_new_booking_request_form_valid_to").value = date;
+    dom.byId("valid_to").value = date;
 }  
 
 
 function set_activity_id(value) {
-	edit_booking.set_form_field_value('create_edit_new_booking_request_form_activity_id', value);
+	edit_booking.set_form_field_value('activity_id', value);
 }
 
 
@@ -94,7 +94,7 @@ function validate_form(evt, activity_select, visiting_group_filtering_select) {
 	
 	//...we always should set the display name, we either can compute it OR it will be N/A as group id and we dont want N/A if we typed in another name. 	
 	var visiting_group_name = visiting_group_filtering_select.displayedValue;
-	edit_booking.set_form_field_value('create_edit_new_booking_request_form_visiting_group_display_name', visiting_group_name);
+	edit_booking.set_form_field_value('display_name', visiting_group_name);
 	
 	return true;
 }
@@ -110,13 +110,13 @@ ready(function(){
     
     //...set up filtering select for activity
     var visiting_group_options = ${visiting_group_options};
-	 var visiting_group_store = new Memory({
+	var visiting_group_store = new Memory({
         data:visiting_group_options });
 
 
     var visiting_group_filtering_select = new FilteringSelect({
-        id: "create_edit_new_booking_request_form_visiting_group_name",
-        name: "create_edit_new_booking_request_form_visiting_group_name",
+        id: "visiting_group_name",
+        name: "visiting_group_name",
         value: "${booking.visiting_group_id}",
         displayedValue: "${booking.visiting_group_name}",
         onChange: function(value) {
@@ -124,29 +124,29 @@ ready(function(){
     			},
         store: visiting_group_store,
         searchAttr: "name"
-    }, "create_edit_new_booking_request_form_visiting_group_name");
+    }, "visiting_group_name");
   
   
     
     //...set up filtering select for activity
     var activity_entries = ${activity_entries};
-	 var activity_store = new Memory({
+	var activity_store = new Memory({
         data:activity_entries });
 
 
     var activity_filtering_select = new FilteringSelect({
-        id: "create_edit_new_booking_request_form_activity_name",
-        name: "create_edit_new_booking_request_form_activity_name",
+        id: "activity_name",
+        name: "activity_name",
         value: "${booking.activity_id}",
         onChange: function(value) {
         		set_activity_id(value);
     			},
         store: activity_store,
         searchAttr: "name"
-    }, "create_edit_new_booking_request_form_activity_name");
+    }, "activity_name");
         
-    var submit_button_elem = dom.byId("create_edit_new_booking_request_form");
-    on(submit_button_elem, "submit", function(evt) { return validate_form(evt, activity_filtering_select, visiting_group_filtering_select); }  );
+    var submit_button_elems = query('input[type="Submit"]');
+    on(submit_button_elems[0], "submit", function(evt) { return validate_form(evt, activity_filtering_select, visiting_group_filtering_select); }  );
 });
 
 
@@ -175,7 +175,7 @@ ready(function(){
     </div>
     
     
-    <div py:replace="tmpl_context.form(booking, action='save_new_booking_request', child_args=dict(activity_id=dict(options=activities), visiting_group_id=dict(options=visiting_groups)))">Input Form</div>
-    
+    <div py:replace="tmpl_context.form.display(value=booking, child_args=dict(activity_id=dict(options=activities), visiting_group_id=dict(options=visiting_groups)))">Input Form</div>
+        
 </body>
 </html>

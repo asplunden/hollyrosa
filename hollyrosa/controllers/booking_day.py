@@ -18,16 +18,9 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-
 Documentation pointers:
 http://turbogears.org/2.0/docs/toc.html
-http://toscawidgets.org/documentation/tw.forms/tutorials/index.html#constructing-a-form
 http://turbogears.org/2.0/docs/main/ToscaWidgets/forms.html
-
-http://toscawidgets.org/documentation/tw.dynforms/tutorial.html
-http://pylonsbook.com/en/1.1/working-with-forms-and-validators.html
-http://turbogears.org/2.1/docs/modules/thirdparty/formencode_api.html
 http://blog.vrplumber.com/index.php?/archives/2381-ToscaWidgets-JQuery-and-TinyMCE-Tutorialish-ly.html
 http://turbogears.org/2.0/docs/main/Auth/Authorization.html#module-repoze.what.predicates
 
@@ -58,16 +51,16 @@ from tg import tmpl_context
 
 #### from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
 #### from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
-#### from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
+from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
 from hollyrosa.widgets.edit_activity_form import create_edit_activity_form
 from hollyrosa.widgets.edit_book_slot_form import create_edit_book_slot_form
 ####from hollyrosa.widgets.edit_book_live_slot_form import  create_edit_book_live_slot_form, validate_edit_book_live_slot_form
 ####from hollyrosa.widgets.move_booking_form import  create_move_booking_form, validate_move_booking_form
 ####from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking, create_validate_new_booking_request_form, create_validate_book_slot_form
 
-from hollyrosa.controllers.booking_history import remember_booking_change,  remember_schedule_booking,  remember_unschedule_booking,  remember_book_slot,  remember_booking_properties_change,  remember_new_booking_request,  remember_booking_request_change,  remember_delete_booking_request,  remember_block_slot, remember_unblock_slot,  remember_booking_move,  remember_ignore_booking_warning
+from hollyrosa.controllers.booking_history import remember_booking_change,  remember_schedule_booking,  remember_unschedule_booking,  remember_book_slot, remember_booking_properties_change,  remember_new_booking_request,  remember_booking_request_change,  remember_delete_booking_request,  remember_block_slot, remember_unblock_slot,  remember_booking_move,  remember_ignore_booking_warning
 
-from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate
+from hollyrosa.controllers.common import workflow_map, getLoggedInUserId, change_op_map, getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate
 from hollyrosa.controllers import common_couch
 
 __all__ = ['BookingDay']
@@ -1004,19 +997,19 @@ class BookingDay(BaseController):
         
         #...patch since this is the way we will be called if validator for new will fail
         if (visiting_group_id != '') and (visiting_group_id != None):
-            booking_o = DataContainer(id='', content='', visiting_group_id=visiting_group_id, visiting_group_name=tmp_visiting_group['name'], activity_id='')
+            booking_o = dict(id='', content='', visiting_group_id=visiting_group_id, visiting_group_name=tmp_visiting_group['name'], activity_id='')
             edit_this_visiting_group = 0 #visiting_group_id
         elif booking_id=='' or booking_id==None:
-            booking_o = DataContainer(id='', content='', visiting_group_id=visiting_group_id, visiting_group_name='', activity_id='')
+            booking_o = dict(id='', content='', visiting_group_id=visiting_group_id, visiting_group_name='', activity_id='')
         else:
             b = common_couch.getBooking(holly_couch,  booking_id)
-            booking_o = DataContainer(id=b['_id'], content=b['content'], visiting_group_id=b['visiting_group_id'], valid_from=b['valid_from'], valid_to=b['valid_to'], requested_date=b['requested_date'], activity_id=b['activity_id'], visiting_group_name=b['visiting_group_name'])  
+            booking_o = dict(id=b['_id'], content=b['content'], visiting_group_id=b['visiting_group_id'], valid_from=b['valid_from'], valid_to=b['valid_to'], requested_date=b['requested_date'], activity_id=b['activity_id'], visiting_group_name=b['visiting_group_name'])  
     
         # TODO: We still need to add some reasonable sorting on the activities abd the visiting groups
         
         if return_to_day_id != None and return_to_day_id != '':
-            booking_o.requested_date = booking_day_o['date']
-        booking_o.return_to_day_id = return_to_day_id
+            booking_o['requested_date'] = booking_day_o['date']
+        booking_o['return_to_day_id'] = return_to_day_id
         
         activity_entries = json.dumps( [dict(name=a[1], id=a[0]) for a in activities] )
         visiting_group_options = json.dumps([dict(name=a[1], id=a[0]) for a in visiting_groups] )
@@ -1148,15 +1141,17 @@ class BookingDay(BaseController):
             raise ValueError, "failed to obtain the N/A visiting group from DB"
         return visiting_group_id
     
-    ####@validate(create_validate_new_booking_request_form, error_handler=edit_booking) 
+    ##@validate(create_validate_new_booking_request_form, error_handler=edit_booking) 
     @require(Any(is_user('root'), has_level('view'), has_level('staff'), has_level('pl'),  msg='Only viewers, staff and PL can submitt a new booking request'))
     @expose()
     def save_new_booking_request(self, content='', activity_id=None, activity_name=None, visiting_group_name='', visiting_group_display_name='',  valid_from=None,  valid_to=None,  requested_date=None,  visiting_group_id=None,  id=None,  return_to_day_id=None, **kwargs):
         is_new= ((id ==None) or (id==''))
         
         if is_new:
+            log.debug('new program booking request')
             new_booking = common_couch.createEmptyProgramBooking()
         else:
+            log.debug('editing existing program booking')
             new_booking = common_couch.getBooking(holly_couch,  id)
             tmp_activity = common_couch.getActivity(holly_couch,  new_booking['activity_id'])
             old_booking = DataContainer(activity=tmp_activity, activity_id=new_booking['activity_id'], visiting_group_name=new_booking['visiting_group_name'], visiting_group_id=new_booking['visiting_group_id'],  valid_from=new_booking['valid_from'],  valid_to=new_booking['valid_to'],  requested_date=new_booking['requested_date'],  content=new_booking['content'],  id=new_booking['_id'])
@@ -1168,13 +1163,14 @@ class BookingDay(BaseController):
             new_booking['booking_state'] = 0
             
         #...Id visiting group id is empty, it should be replaced with the N/A Group
+        log.debug('visiting_group_name=%s, visiting_group_display_name=%s, visiting_group_id=%s' % (str(visiting_group_name), str(visiting_group_display_name), str(visiting_group_id)))
         if '' == visiting_group_id:
             visiting_group_id = self.getN_A_VisitingGroupId(holly_couch)
-            
+        
         new_booking['content'] = content
         
         new_booking['visiting_group_id'] = visiting_group_id
-        new_booking['cache_content'] = computeCacheContent(common_couch.getVisitingGroup(holly_couch,  visiting_group_id),  content)
+        new_booking['cache_content'] = computeCacheContent(common_couch.getVisitingGroup(holly_couch, visiting_group_id), content)
         
         
         new_booking['activity_id'] = activity_id
