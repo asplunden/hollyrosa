@@ -55,12 +55,12 @@ from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_
 from hollyrosa.widgets.edit_activity_form import create_edit_activity_form
 from hollyrosa.widgets.edit_book_slot_form import create_edit_book_slot_form
 ####from hollyrosa.widgets.edit_book_live_slot_form import  create_edit_book_live_slot_form, validate_edit_book_live_slot_form
-####from hollyrosa.widgets.move_booking_form import  create_move_booking_form, validate_move_booking_form
+from hollyrosa.widgets.move_booking_form import create_move_booking_form ##, validate_move_booking_form
 ####from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking, create_validate_new_booking_request_form, create_validate_book_slot_form
 
 from hollyrosa.controllers.booking_history import remember_booking_change,  remember_schedule_booking,  remember_unschedule_booking,  remember_book_slot, remember_booking_properties_change,  remember_new_booking_request,  remember_booking_request_change,  remember_delete_booking_request,  remember_block_slot, remember_unblock_slot,  remember_booking_move,  remember_ignore_booking_warning
 
-from hollyrosa.controllers.common import workflow_map, getLoggedInUserId, change_op_map, getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate
+from hollyrosa.controllers.common import DataContainer, workflow_map, getLoggedInUserId, change_op_map, getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate
 from hollyrosa.controllers import common_couch
 
 __all__ = ['BookingDay']
@@ -1029,9 +1029,9 @@ class BookingDay(BaseController):
         activity_id,  slot_o = getSlotAndActivityIdOfBooking(holly_couch, booking_o,  booking_o['subtype'])
         activity_o = common_couch.getActivity(holly_couch,  booking_o['activity_id'])
         booking_day = common_couch.getBookingDay(holly_couch,  booking_o['booking_day_id'])
-        booking_ = DataContainer(activity_id=activity_id,  content=booking_o['content'],  cache_content=booking_o['cache_content'],  visiting_group_name=booking_o['visiting_group_name'],  id=booking_o['_id'],  return_to_day_id=return_to_day_id)
+        booking_ = dict(activity_id=activity_id,  content=booking_o['content'],  cache_content=booking_o['cache_content'],  visiting_group_name=booking_o['visiting_group_name'],  id=booking_o['_id'],  return_to_day_id=return_to_day_id)
         activity_entries = json.dumps( [dict(name=a[1], id=a[0]) for a in activities] )
-        return dict(activities=activities, booking=booking_,  activity=activity_o,  booking_day=booking_day,  slot=slot_o,  getRenderContent=getRenderContent, activity_entries=activity_entries)
+        return dict(activities=activities, booking=booking_,  activity=activity_o,  booking_day=booking_day,  slot=slot_o,  getRenderContentDict=getRenderContentDict, activity_entries=activity_entries)
         
         
     ####@validate(validate_move_booking_form, error_handler=move_booking)      

@@ -1,5 +1,5 @@
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -18,28 +18,23 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from tw.api import WidgetsList
-from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, HiddenField
 
-#...for form validation
-from tw.forms.validators import Int, NotEmpty, UnicodeString
 
-class MoveBookingForm(TableForm):
+from tg import lurl
+
+#from tw.api import WidgetsList
+import tw2.core as twc
+import tw2.forms as twf
+
+class MoveBookingForm(twf.Form):
     
-    show_errors = True
+    class child(twf.TableLayout):
+        id = twf.HiddenField()
+        return_to_day_id = twf.HiddenField()
+        activity_id = twf.HiddenField()
+        activity_name = twf.SingleSelectField(options=[])
     
-    class fields(WidgetsList):
-        id = HiddenField(validator=UnicodeString)
-        return_to_day_id = HiddenField(validator=UnicodeString)
-        activity_id = HiddenField(validator=UnicodeString)
-        activity_name = SingleSelectField()
+    action = lurl('save_move_booking')
 
-class ValidateMoveBookingForm(TableForm):
-    show_errors = True
-    id = HiddenField(validator=UnicodeString)
-    return_to_day_id = HiddenField(validator=UnicodeString)
-    activity_id = HiddenField(validator=UnicodeString)
-    activity_name = SingleSelectField()
+create_move_booking_form = MoveBookingForm()
 
-create_move_booking_form = MoveBookingForm("create_move_booking_form")
-validate_move_booking_form = ValidateMoveBookingForm("validate_move_booking_form")

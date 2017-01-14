@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -31,11 +31,11 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
   <script src="${tg.url('/scripts/dojo-release-1.11.2/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
-require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready"], function(edit_booking, dom, on, xhr, Memory, FilteringSelect, ready) { 
+require(["edit_booking", "dojo/query", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready"], function(edit_booking, query, dom, on, xhr, Memory, FilteringSelect, ready) { 
 
 
 function set_activity_id(value) {
-	edit_booking.set_form_field_value('create_move_booking_form_activity_id', value);
+	edit_booking.set_form_field_value('activity_id', value);
 }
 
 
@@ -61,18 +61,18 @@ ready(function(){
 
 
     var activity_filtering_select = new FilteringSelect({
-        id: "create_move_booking_form_activity_name",
-        name: "create_move_booking_form_activity_name",
+        id: "activity_name",
+        name: "activity_name",
         value: "${booking.activity_id}",
         onChange: function(value) {
         		set_activity_id(value);
     			},
         store: activity_store,
         searchAttr: "name"
-    }, "create_move_booking_form_activity_name");
+    }, "activity_name");
         
-    var submit_button_elem = dom.byId("create_move_booking_form");
-    on(submit_button_elem, "submit", function(evt) { return validate_form(evt, activity_filtering_select); }  );
+    var submit_button_elems = query('input[type="Submit"]');
+    on(submit_button_elems[0], "submit", function(evt) { return validate_form(evt, activity_filtering_select); }  );
     
 });
 
@@ -87,10 +87,10 @@ ready(function(){
         <tr><td>visiting group:</td><td>${booking.visiting_group_name}</td></tr>
         <tr><td>activity:</td><td>${activity.title}</td></tr>
         <tr><td>date:</td><td>${booking_day.date} at ${slot.time_from} to ${slot.time_to}</td></tr>
-        <tr><td>content:</td><td>${getRenderContent(booking)}</td></tr>
+        <tr><td>content:</td><td>${getRenderContentDict(booking)}</td></tr>
         
     </table>
     <h4>Change activity below</h4>
-    <div py:replace="tmpl_context.form(booking, action='save_move_booking', child_args=dict(activity_id=dict(options=activities)))">Input Form</div> 
+    <div py:replace="tmpl_context.form.display(booking, child_args=dict(activity_id=dict(options=activities)))">Input Form</div> 
 </body>
 </html>
