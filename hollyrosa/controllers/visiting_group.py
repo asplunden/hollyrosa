@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -214,17 +214,19 @@ class VisitingGroup(BaseController):
 
     @expose("json")
     @validate(validators={'id':validators.UnicodeString})
-    def show_visiting_group_data(self,  id=None,  **kw):
-        
+    def show_visiting_group_data(self, id=None, **kw):
+        log.debug('show_visiting_group_data with id "%s"' % str(id))
         properties=[]
         if None == id:
-            visiting_group = DataContainer(name='',  id=None,  info='')
+            log.info('show_visiting_group_data: id is None')
+            visiting_group = dict(name='', id=None, info='')
             
-        elif id=='':
-            visiting_group = DataContainer(name='',  id=None,  info='')
+        elif '' == id:
+            log.info('show_visiting_group_data: id is empty string')
+            visiting_group = dict(name='', id=None, info='')
             
         else:
-            visiting_group = common_couch.getVisitingGroup(holly_couch,  id) 
+            visiting_group = common_couch.getVisitingGroup(holly_couch, id) 
             
             properties=[p for p in visiting_group['visiting_group_properties'].values()]
             
@@ -234,7 +236,7 @@ class VisitingGroup(BaseController):
     @expose('hollyrosa.templates.visiting_group_view')
     @validate(validators={'visiting_group_id':validators.UnicodeString})
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def show_visiting_group(self,  visiting_group_id=None,  **kw):
+    def show_visiting_group(self, visiting_group_id=None,  **kw):
         
         if None == visiting_group_id:
             visiting_group = DataContainer(name='', id=None,  info='')

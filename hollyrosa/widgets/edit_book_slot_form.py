@@ -38,4 +38,4 @@ class EditBookSlotForm(twf.Form):
         
     action = lurl('save_booked_booking_properties')
         
-create_edit_book_slot_form = EditBookSlotForm()
+create_edit_book_slot_form = EditBookSlotForm(id='edit_book_slot_form')
