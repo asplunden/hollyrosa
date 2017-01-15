@@ -1,5 +1,5 @@
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -26,7 +26,7 @@ import tw2.core as twc
 import tw2.forms as twf
 
 #...for form validation
-from tw2.tinymce import MarkupConverter # TinyMCE
+from tw2.tinymce import MarkupConverter
 from tw2.tinymce import TinyMCEWidget
 
 from hollyrosa.model import holly_couch

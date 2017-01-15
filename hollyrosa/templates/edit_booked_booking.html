@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -97,7 +97,7 @@ ready(function(){
   	//var submit_button_elem = dom.byId("create_edit_book_slot_form");
   	var form_elem = dom.byId("edit_book_slot_form");
   	
-  	// this is to find the subnit button whos id disapeared when migrating from tw to tw2
+  	// this is to find the submit button who's id dissapeared when migrating from tw to tw2
   	var submit_button_elems = query('input[type="Submit"]');
     on(submit_button_elems[0], "submit", function(evt) { return validate_form(evt, visiting_group_filtering_select); }  );
   

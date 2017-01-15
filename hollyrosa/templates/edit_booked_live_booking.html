@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -29,9 +29,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Book Slot</title>
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
-  <script src="${tg.url('/scripts/dojo-release-1.11.2/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
-require(["edit_booking", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready"], function(edit_booking, dom, on, xhr, Memory, FilteringSelect, ready) { 
+require(["edit_booking", "dojo/query", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready"], function(edit_booking, query, dom, on, xhr, Memory, FilteringSelect, ready) { 
 
 
 function get_visiting_group_data_from_XHR_helper(value) {
@@ -48,7 +47,7 @@ function get_visiting_group_data_from_XHR(value) {
 
 
 function set_visiting_group_id(value) {
-    edit_booking.set_form_field_value('create_edit_book_live_slot_form_visiting_group_id', value);
+    edit_booking.set_form_field_value('visiting_group_id', value);
     if (null != value) {
 			get_visiting_group_data_from_XHR(value);    
     } else {
@@ -66,13 +65,13 @@ function validate_form(evt, visiting_group_filtering_select) {
 			set_visiting_group_id(null);
 	}
 	var visiting_group_name = visiting_group_filtering_select.displayedValue;
-	edit_booking.set_form_field_value('create_edit_book_live_slot_form_visiting_group_display_name', visiting_group_name);
+	edit_booking.set_form_field_value('visiting_group_display_name', visiting_group_name);
 	return true;
 }
 
 
 ready(function(){
-    var elem = dom.byId('create_edit_book_live_slot_form_visiting_group_id');
+    var elem = dom.byId('visiting_group_id');
  
     is_new_booking = '0' == '${edit_this_visiting_group}' ;
     get_visiting_group_data_from_XHR_helper('${booking.visiting_group_id}');
@@ -84,8 +83,8 @@ ready(function(){
 
 
     var visiting_group_filtering_select = new FilteringSelect({
-        id: "create_edit_book_live_slot_form_visiting_group_name",
-        name: "create_edit_book_live_slot_form_visiting_group_name",
+        id: "visiting_group_name",
+        name: "visiting_group_name",
         value: "${booking.visiting_group_id}",
         displayedValue: "${booking.visiting_group_name}",
         onChange: function(value) {
@@ -93,10 +92,11 @@ ready(function(){
     			},
         store: visiting_group_store,
         searchAttr: "name"
-    }, "create_edit_book_live_slot_form_visiting_group_name");
+    }, "visiting_group_name");
     
-  	 var submit_button_elem = dom.byId("create_edit_book_live_slot_form");
-    on(submit_button_elem, "submit", function(evt) { return validate_form(evt, visiting_group_filtering_select); }  );
+    // this is to find the submit button who's id disapeared when migrating from tw to tw2
+  	var submit_button_elems = query('input[type="Submit"]');
+    on(submit_button_elems[0], "submit", function(evt) { return validate_form(evt, visiting_group_filtering_select); }  );
   
 });
   
@@ -126,6 +126,6 @@ ready(function(){
     <span py:if="None != booking_day">Start date: ${booking_day.date} </span><span py:if="None != slot_position"><b> ${slot_position.time_from} to ${slot_position.time_to} </b> </span><span py:if="None != booking_day"><a py:if="booking.booking_id != None " href="${tg.url('unschedule_booking', params={'booking_id':booking.booking_id, 'booking_day_id':booking_day.id})}">unschedule</a></span>
     </p>
     
-    <div py:replace="tmpl_context.form(booking, action='save_booked_live_booking_properties', child_args=dict(visiting_group_id=dict(options=visiting_groups), slot_id=dict(options=end_slot_id_options), booking_end_slot_id=dict(options=end_slot_id_options)))">Input Form</div>
+    <div py:replace="tmpl_context.form.display(booking, child_args=dict(visiting_group_id=dict(options=visiting_groups), slot_id=dict(options=end_slot_id_options), booking_end_slot_id=dict(options=end_slot_id_options)))">Input Form</div>
 </body>
 </html>

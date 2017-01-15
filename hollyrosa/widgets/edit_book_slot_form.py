@@ -1,5 +1,5 @@
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -33,7 +33,7 @@ class EditBookSlotForm(twf.Form):
         visiting_group_display_name = twf.HiddenField(validator=twc.Required)
         visiting_group_id = twf.HiddenField(validator=twc.Required)
         # TODO: set height and width
-        content = twf.TextArea(validator=twc.Required)
+        content = twf.TextArea(validator=twc.Required, css_class="edit_booking_content")
         block_after_book = twf.CheckBox()
         
     action = lurl('save_booked_booking_properties')

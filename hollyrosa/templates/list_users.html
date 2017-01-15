@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012, 2013, 2014, 2015, 2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -104,7 +104,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
             <td class="data info context_menu_symbol">${u.display_name}</td>
             <td class="data info context_menu_symbol"><ul py:for="l in u.get('level',[])" style="display:inline"><li style="display:inline">${l}</li></ul></td>
             <td class="data info context_menu_symbol">${u.get('active',False)}</td>
-            <td class="data info context_menu_symbol">-</td>
+            <td class="data info context_menu_symbol">${u.get('last_login', '-')}</td>
         </tr>    
     </table>
 </body>

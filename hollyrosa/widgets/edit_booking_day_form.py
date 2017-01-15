@@ -35,9 +35,9 @@ class EditVisitingGroupForm(twf.Form):
                                                                       theme_advanced_buttons2 = "",
                                                                       theme_advanced_buttons3 = ""
 ))
-        num_program_crew_members = twf.TextField(validator=twc.Required) #### TODO: should be int validoator
-        num_fladan_crew_members = twf.TextField(validator=twc.Required) #### TODO: should be int validator
+        num_program_crew_members = twf.TextField(validator=twc.IntValidator) 
+        num_fladan_crew_members = twf.TextField(validator=twc.IntValidator) 
         
     action = lurl('save_booking_day_properties')
 
-create_edit_booking_day_form = EditVisitingGroupForm() ####"create_edit_booking_day_form")
+create_edit_booking_day_form = EditVisitingGroupForm()

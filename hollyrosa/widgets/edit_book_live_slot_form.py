@@ -1,5 +1,5 @@
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -18,53 +18,37 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from tw.api import WidgetsList
-from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea,  HiddenField,  Label,  CheckBox
+from tg import lurl
+import tw2.core as twc
+import tw2.forms as twf
+from formencode.validators import DateConverter
 
-#...for form validation
-from tw.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString
+def getSlotIdOptions():
+    return list()
 
-
-class EditBookLiveSlotForm(TableForm):
-    
-    show_errors = True
-
-    class fields(WidgetsList):
-        booking_id = HiddenField(validator=UnicodeString)
-        booking_day_id = HiddenField(validator=UnicodeString)
-        subtype = HiddenField(validator=UnicodeString)
-        activity_id = HiddenField(validator=UnicodeString)
-        return_to_day_id = HiddenField(validator=UnicodeString)
-        visiting_group_name = TextField(validator=UnicodeString(min=1))
-        visiting_group_display_name = HiddenField(validator=UnicodeString(min=1))        
-        visiting_group_id = HiddenField(validator=UnicodeString)
-        booking_date = CalendarDatePicker('start_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
-        slot_id = SingleSelectField(validator=UnicodeString)
-        booking_end_date = CalendarDatePicker('end_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
-        booking_end_slot_id = SingleSelectField(validator=UnicodeString)
-        content = TextArea(validator=UnicodeString)
-        block_after_book = CheckBox()
-
-
-class ValidateBookLiveSlotForm(TableForm):
-    """
-    This class is almost a copy of EditBookLiveSlotForm but somehow it processes validation a lot better after mixing validation with Dojo FilteringSelect
-    """
-    show_errors = True
-    booking_id = HiddenField(validator=UnicodeString)
-    booking_day_id = HiddenField(validator=UnicodeString)
-    subtype = HiddenField(validator=UnicodeString)
-    activity_id = HiddenField(validator=UnicodeString)
-    return_to_day_id = HiddenField(validator=UnicodeString)
-    visiting_group_name = TextField(validator=UnicodeString(min=1))
-    visiting_group_display_name = HiddenField(validator=UnicodeString(min=1))        
-    visiting_group_id = TextField(validator=UnicodeString)
-    booking_date = CalendarDatePicker('start_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
-    slot_id = SingleSelectField(validator=UnicodeString)
-    booking_end_date = CalendarDatePicker('end_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
-    booking_end_slot_id = SingleSelectField(validator=UnicodeString)
-    content = TextArea(validator=UnicodeString)
-    block_after_book = CheckBox()
+class EditBookLiveSlotForm(twf.Form):
+    class child(twf.TableLayout):
+        booking_id = twf.HiddenField(validator=twc.Required)
+        booking_day_id = twf.HiddenField(validator=twc.Required)
+        subtype = twf.HiddenField(validator=twc.Required)
+        activity_id = twf.HiddenField(validator=twc.Required)
+        return_to_day_id = twf.HiddenField(validator=twc.Required)
+        visiting_group_name = twf.TextField(validator=twc.StringLengthValidator(min=1), css_class="edit_name", size=40)
+        visiting_group_display_name = twf.HiddenField(validator=twc.StringLengthValidator(min=1))        
+        visiting_group_id = twf.HiddenField(validator=twc.Required)
+        booking_date = twf.CalendarDatePicker('start_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
         
-create_edit_book_live_slot_form = EditBookLiveSlotForm("create_edit_book_live_slot_form")
-validate_edit_book_live_slot_form = ValidateBookLiveSlotForm("validate_edit_book_live_slot_form")
+        slot_id = twf.SingleSelectField(validator=twc.Required, options=twc.Deferred(getSlotIdOptions))
+        
+        booking_end_date = twf.CalendarDatePicker('end_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+        
+        booking_end_slot_id = twf.SingleSelectField(validator=twc.Required, options=[])
+        
+        content = twf.TextArea(twc.Required, css_class="edit_booking_content")
+        block_after_book = twf.CheckBox()
+
+	action = lurl('save_booked_live_booking_properties')
+
+        
+create_edit_book_live_slot_form = EditBookLiveSlotForm()
+

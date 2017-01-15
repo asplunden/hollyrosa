@@ -1,5 +1,5 @@
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -30,7 +30,7 @@ class EditVodbGroupForm(twd.CustomisedTableForm):
     class child(twf.TableLayout):
         vodb_group_id = twf.HiddenField(validator=twc.Required)
         subtype = twf.HiddenField(validator=twc.Required) 
-        name = twf.TextField(validator=twc.StringLengthValidator(min=4),  css_class="edit_name",  size=40)
+        name = twf.TextField(validator=twc.StringLengthValidator(min=4), css_class="edit_name", size=40)
         boknr = twf.TextField(validator=twc.Required)
 
         info = TinyMCEWidget(validator=MarkupConverter, mce_options = dict(theme='advanced',  
@@ -46,8 +46,6 @@ class EditVodbGroupForm(twd.CustomisedTableForm):
         vodb_contact_phone = twf.TextField(validator=twc.Required)
         vodb_contact_address = twf.TextArea(validator=twc.StringLengthValidator(min=4))
         camping_location = twf.TextField(validator=twc.Required)
-
-        #######visiting_group_properties = ParamsGrowingTableFieldSet()
 
         class visiting_group_properties(twd.GrowingGridLayout):
             propery_id = twf.HiddenField('property_id')

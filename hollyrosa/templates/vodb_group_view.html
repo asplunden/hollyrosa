@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010-2015 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -173,7 +173,7 @@ function startup() {
 </head>
 
 <body class="tundra">
-    <h2 id="visiting_group_menu" hollyrosa:vgid="${visiting_group.id}" class="more_menu_symbol" style="width:30em;" >${visiting_group.name} - ${visiting_group.get('subtype','')}</h2> 
+    <div id="visiting_group_menu" hollyrosa:vgid="${visiting_group.id}" class="more_menu_symbol"><h2>${visiting_group.name} - ${visiting_group.get('subtype','')}</h2></div> 
     <p class="context_menu_symbol">${reFormatDate(visiting_group.from_date)} to ${reFormatDate(visiting_group.to_date)}</p>
     
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
+ * Copyright 2010-2017 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *
@@ -745,6 +745,13 @@ ul.context_dropdown_menu li:hover {
 }
 
 
+.edit_booking_content {
+    font-size: 100%;
+    width = 40;
+    height = 20;
+}
+
+
 #booking_day_hide_slot_rows_control {
     float:right;
     display: inline;
@@ -906,7 +913,8 @@ table.visiting_group_info_table tr td.info {
     background-image: url('../images/more_menu_available_icon.svg');
     background-size: 1.5em 1.5em;
     background-repeat: no-repeat;
-    background-position: right top;
+    background-position: left top;
+    padding-left:2em;
 }
 
 /* program layers. Break out to separate CSS */
