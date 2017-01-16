@@ -23,11 +23,19 @@ import tw2.core as twc
 import tw2.forms as twf
 from formencode.validators import DateConverter
 
-def getSlotIdOptions():
-    return list()
+from hollyrosa.widgets.SingleSelectFieldMod import SingleSelectFieldMod
 
 class EditBookLiveSlotForm(twf.Form):
+	    
     class child(twf.TableLayout):
+    
+        slot_position = twc.Param('test options for now for single select field', default=['x','y'])
+
+        
+        def getSlotIdOptions():
+            return slot_position
+    
+    
         booking_id = twf.HiddenField(validator=twc.Required)
         booking_day_id = twf.HiddenField(validator=twc.Required)
         subtype = twf.HiddenField(validator=twc.Required)
@@ -36,19 +44,24 @@ class EditBookLiveSlotForm(twf.Form):
         visiting_group_name = twf.TextField(validator=twc.StringLengthValidator(min=1), css_class="edit_name", size=40)
         visiting_group_display_name = twf.HiddenField(validator=twc.StringLengthValidator(min=1))        
         visiting_group_id = twf.HiddenField(validator=twc.Required)
-        booking_date = twf.CalendarDatePicker('start_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+        booking_date = twf.CalendarDatePicker('start_date', validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')
         
-        slot_id = twf.SingleSelectField(validator=twc.Required, options=twc.Deferred(getSlotIdOptions))
+        slot_id = twf.SingleSelectField(validator=twc.Required, options=[])
         
-        booking_end_date = twf.CalendarDatePicker('end_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+        booking_end_date = twf.CalendarDatePicker('end_date', validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')
         
-        booking_end_slot_id = twf.SingleSelectField(validator=twc.Required, options=[])
+        booking_end_slot_id = SingleSelectFieldMod(validator=twc.Required, options=None, prompt_text=None, label="end time")
         
-        content = twf.TextArea(twc.Required, css_class="edit_booking_content")
+        content = twf.TextArea(twc.Required, css_class="edit_booking_content", rows=5, cols=30)
         block_after_book = twf.CheckBox()
 
 	action = lurl('save_booked_live_booking_properties')
 
+
+    #def prepare(self):
+    # 	
+    #    super(EditBookLiveSlotForm, self).prepare()
         
+
 create_edit_book_live_slot_form = EditBookLiveSlotForm()
 

@@ -645,7 +645,13 @@ class BookingDay(BaseController):
         
         end_slot_id_options = self.getEndSlotIdOptions(schema_o, slot['activity_id'])
         visiting_group_options = json.dumps([dict(name=a[1], id=a[0]) for a in visiting_groups] )
-        return dict(booking_day=booking_day, booking=booking_o, visiting_groups=visiting_groups, edit_this_visiting_group=0, slot_position=slot, end_slot_id_options=end_slot_id_options, visiting_group_options=visiting_group_options)
+        
+        #...modify singel select field
+        #booking_o['slot_id'] = dict(value=booking_o['slot_id'], options=slot)
+        log.debug(str(end_slot_id_options))
+        slot_id_options = json.dumps(end_slot_id_options)
+        booking_o['booking_end_slot_id'] = (end_slot_id_options[0][0], end_slot_id_options)
+        return dict(booking_day=booking_day, booking=booking_o, visiting_groups=visiting_groups, edit_this_visiting_group=0, slot_position=slot, end_slot_id_options=end_slot_id_options, visiting_group_options=visiting_group_options, slot_id_data=slot_id_options)
         
 
     @expose('hollyrosa.templates.booking_view')

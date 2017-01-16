@@ -30,7 +30,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <title>Hollyrosa - Book Slot</title>
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
   <script>
-require(["edit_booking", "dojo/query", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready"], function(edit_booking, query, dom, on, xhr, Memory, FilteringSelect, ready) { 
+require(["edit_booking", "dojo/_base/array", "dojo/query", "dojo/dom", "dojo/on", "dojo/dom-construct", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready"], function(edit_booking, array, query, dom, on, domConstruct, xhr, Memory, FilteringSelect, ready) { 
 
 
 function get_visiting_group_data_from_XHR_helper(value) {
@@ -78,7 +78,7 @@ ready(function(){
     
     //...set up filtering select for activity
     var visiting_group_options = ${visiting_group_options};
-	 var visiting_group_store = new Memory({
+	var visiting_group_store = new Memory({
         data:visiting_group_options });
 
 
@@ -94,12 +94,20 @@ ready(function(){
         searchAttr: "name"
     }, "visiting_group_name");
     
+    //...try set option to slot_id field, this is an ugly tw2 hack
+    //...somehow need to pass parameters as json into html form
+    //...also need to clear all pre-existing options
+    var slot_id_select_elem = dom.byId('slot_id');
+    domConstruct.empty(slot_id_select_elem);
+    array.forEach($slot_id_data, function(a) {
+    	var tmp_option = domConstruct.create("option", {value:a[0]}, slot_id, "first"); // TODO: first should maybe be last
+    	tmp_option.innerHTML = a[1];
+        });
+    
     // this is to find the submit button who's id disapeared when migrating from tw to tw2
   	var submit_button_elems = query('input[type="Submit"]');
     on(submit_button_elems[0], "submit", function(evt) { return validate_form(evt, visiting_group_filtering_select); }  );
-  
-});
-  
+  });
 });
   
   </script>
@@ -126,6 +134,8 @@ ready(function(){
     <span py:if="None != booking_day">Start date: ${booking_day.date} </span><span py:if="None != slot_position"><b> ${slot_position.time_from} to ${slot_position.time_to} </b> </span><span py:if="None != booking_day"><a py:if="booking.booking_id != None " href="${tg.url('unschedule_booking', params={'booking_id':booking.booking_id, 'booking_day_id':booking_day.id})}">unschedule</a></span>
     </p>
     
-    <div py:replace="tmpl_context.form.display(booking, child_args=dict(visiting_group_id=dict(options=visiting_groups), slot_id=dict(options=end_slot_id_options), booking_end_slot_id=dict(options=end_slot_id_options)))">Input Form</div>
+    <!-- <div py:replace="tmpl_context.form.display(booking, child_args=dict(visiting_group_id=dict(options=visiting_groups), slot_id=dict(options=end_slot_id_options), booking_end_slot_id=dict(options=end_slot_id_options)))">Input Form</div> -->
+    <div py:replace="tmpl_context.form.display(booking, list())">Input Form</div>
+    
 </body>
 </html>
