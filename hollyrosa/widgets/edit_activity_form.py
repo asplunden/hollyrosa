@@ -52,10 +52,10 @@ class EditActivityForm(twf.Form):
                                                                    theme_advanced_buttons3 = ""
                                                                    ))
         tags = twf.TextField()#validator=twc.String)
-        external_link = twf.TextField()#validator=twc.Required)
-        internal_link = twf.TextField()#validator=twc.Required)
-        print_on_demand_link = twf.TextField()#validator=twc.Required)
-        capacity = twf.TextField(validator=twc.IntValidator) # TODO: should be inteteger here
+        external_link = twf.UrlField()#validator=twc.Required)
+        internal_link = twf.UrlField()#validator=twc.Required)
+        print_on_demand_link = twf.UrlField()#validator=twc.Required)
+        capacity = twf.NumberField(validator=twc.IntValidator) # TODO: should be inteteger here
         default_booking_state = twf.HiddenField()
         activity_group_id = twf.SingleSelectField(validator=twc.Required, options=twc.Deferred(getActivityGroupOptions)) # TODO: what to do with options, see perhaps http://code.runnable.com/U-tO4xSN7Ch6wWS7/turbogears-forms-fill-singleselect-value-for-python
         gps_lat  = twf.TextField()#validator=twc.Required)
@@ -63,9 +63,9 @@ class EditActivityForm(twf.Form):
         equipment_needed = twf.CheckBox()
         education_needed  = twf.CheckBox()
         certificate_needed = twf.CheckBox()
-        bg_color = twf.TextField(validator=twc.Required)
-        guides_per_slot = twf.TextField(validator=twc.IntValidator)
-        guides_per_day = twf.TextField(validator=twc.IntValidator)
+        bg_color = twf.ColorField(validator=twc.Required)
+        guides_per_slot = twf.NumberField(validator=twc.IntValidator)
+        guides_per_day = twf.NumberField(validator=twc.IntValidator)
         
         
     action = lurl('save_activity_properties')
