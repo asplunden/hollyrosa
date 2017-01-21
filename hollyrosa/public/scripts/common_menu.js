@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2016 Martin Eliasson
+ * Copyright 2010-2017 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *
@@ -177,7 +177,7 @@
                        booking_day_id: node.attributes["hollyrosa:bdayid"].value
                    };
                //console.log(a_url + '?' + ioQuery.objectToQuery(ioq));
-               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+               window.location = a_url + '?' + ioQuery.objectToQuery(ioq); // this is bad and we would like to do a complete POST request instead
                }
            });
            

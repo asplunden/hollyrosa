@@ -84,6 +84,12 @@ def getNextBookingDayId(holly_couch, booking_day):
     
     
 
+def ensurePostRequest(request, name=''):
+    """
+    The purpose of this little method is to ensure that the controller was called with appropriate HTTP verb. 
+    """
+    if not request.method == 'POST':
+        raise webob.exc.HTTPMethodNotAllowed(comment='The method %s you tried to reached through TG2 object dispatch is only accepting POST requests. Most probable there is some old code still calling GET.' % str(name))
 
         
 class BookingDay(BaseController):
@@ -712,7 +718,7 @@ class BookingDay(BaseController):
         # TODO: subtype should be what kind of booking,
         # TODO: then there should be a schema_type explaining what schema the booking belongs to.
         #...find booking day and booking row
-        booking_o = common_couch.getBooking(holly_couch,  booking_id)
+        booking_o = common_couch.getBooking(holly_couch, booking_id)
         subtype = booking_o['subtype']
         if subtype == 'program':
             tmpl_context.form = create_edit_book_slot_form
@@ -732,7 +738,7 @@ class BookingDay(BaseController):
         slot_position = slot_map[slot_id]
         activity_id = booking_o['activity_id']
         activity = common_couch.getActivity(holly_couch, activity_id)
-        booking_ = dict(activity_id=activity_id, slot_id=slot_id, activity=activity, id=booking_o['_id'], booking_id=booking_o['_id'], visiting_group_name=booking_o['visiting_group_name'], visiting_group_id=booking_o['visiting_group_id'], content=booking_o['content'], booking_date=booking_o.get('booking_date', '2013-07-01'), booking_end_date=booking_o.get('booking_end_date', '2013-07-24'), booking_end_slot_id=booking_o.get('booking_end_slot_id', ''), return_to_day_id=return_to_day_id, booking_day_id=return_to_day_id, subtype=subtype )
+        booking_ = dict(activity_id=activity_id, slot_id=slot_id, activity=activity, id=booking_o['_id'], booking_id=booking_o['_id'], visiting_group_name=booking_o['visiting_group_name'], visiting_group_id=booking_o['visiting_group_id'], booking_content=booking_o['content'], booking_date=booking_o.get('booking_date', '2013-07-01'), booking_end_date=booking_o.get('booking_end_date', '2013-07-24'), booking_end_slot_id=booking_o.get('booking_end_slot_id', ''), return_to_day_id=return_to_day_id, booking_day_id=return_to_day_id, subtype=subtype )
         
         tmp_visiting_groups = getVisitingGroupsAtDate(holly_couch, booking_day['date']) 
         visiting_groups = [(e.doc['_id'],  e.doc['name']) for e in tmp_visiting_groups]  
@@ -764,8 +770,7 @@ class BookingDay(BaseController):
         """
         
         #...This is a new way tot try to block GET requests to pages which have a side effect.
-        if not request.method == 'POST':
-            raise webob.exc.HTTPMethodNotAllowed(comment='The method you tried to reached through TG2 object dispatch is only accepting POST requests. Most probable there is some old code still calling GET.')
+        ensurePostRequest(request, name=__name__)
         
         tmp_activity_id = self._saveBookedBookingPropertiesHelper(id, booking_content, visiting_group_display_name, visiting_group_id, activity_id, return_to_day_id, slot_id, booking_day_id, block_after_book=block_after_book, subtype='program')
         raise redirect('day?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id))
@@ -939,6 +944,8 @@ class BookingDay(BaseController):
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change activity properties'))
     def save_activity_properties(self,  id=None,  title=None,  external_link='', internal_link='',  print_on_demand_link='',  description='', tags='', capacity=0,  default_booking_state=0,  activity_group_id=1,  gps_lat=0,  gps_long=0,  equipment_needed=False, education_needed=False,  certificate_needed=False,  bg_color='', guides_per_slot=0,  guides_per_day=0 ):
+        ensurePostRequest(request, name=__name__)
+        
         is_new = None == id or '' == id 
         if is_new:
             activity = dict(type='activity')
@@ -1055,6 +1062,7 @@ class BookingDay(BaseController):
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change activity properties'))
     def save_move_booking(self,  id=None,  activity_id=None,  activity_name=None, return_to_day_id=None,  **kw):
+        ensurePostRequest(request, name=__name__)
         booking_o = common_couch.getBooking(holly_couch,  id)
         old_activity_id = booking_o['activity_id']
         
@@ -1162,6 +1170,7 @@ class BookingDay(BaseController):
     @require(Any(is_user('root'), has_level('view'), has_level('staff'), has_level('pl'),  msg='Only viewers, staff and PL can submitt a new booking request'))
     @expose()
     def save_new_booking_request(self, content='', activity_id=None, activity_name=None, visiting_group_name='', visiting_group_display_name='',  valid_from=None,  valid_to=None,  requested_date=None,  visiting_group_id=None,  id=None,  return_to_day_id=None, **kwargs):
+        ensurePostRequest(request, name=__name__)
         is_new= ((id ==None) or (id==''))
         
         if is_new:
@@ -1224,6 +1233,7 @@ class BookingDay(BaseController):
     @validate(validators={'return_to_day_id':validators.UnicodeString(not_empty=False), 'booking_id':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
     def prolong(self,  return_to_day_id=None, booking_id=None):
+        ensurePostRequest(request, name=__name__)
         # TODO: one of the problems with prolong that just must be sloved is what do we do if the day shema is different for the day after?
         
         #...first, find the slot to prolong to
@@ -1338,6 +1348,7 @@ class BookingDay(BaseController):
     @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True), 'level':validators.UnicodeString(not_empty=True), 'subtype':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
     def block_slot(self, booking_day_id=None,  slot_id=None,  level = 1, subtype='program'):
+        # TODO: reenable ensurePostRequest(request, name=__name__)
         self.block_slot_helper(holly_couch, booking_day_id, slot_id, level=level)
         activity_id = self.getActivityIdOfBooking(holly_couch, booking_day_id,  slot_id, subtype=subtype)
         if subtype == 'program':
@@ -1349,7 +1360,7 @@ class BookingDay(BaseController):
     @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True), 'subtype':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
     def unblock_slot(self, booking_day_id=None,  slot_id=None, subtype='program'):
-        
+        # TODO: reenable ensurePostRequest(request, name=__name__)
         # todo: set state variable when it has been introduced
         tmp_slot_state_ids = self.getSlotStateOfBookingDayIdAndSlotId(holly_couch,  booking_day_id,  slot_id)
         for tmp_slot_state_id in tmp_slot_state_ids:
@@ -1422,7 +1433,7 @@ class BookingDay(BaseController):
     #@validate(validators={'booking_day_id':validators.Int(not_empty=True), 'slot_row_position_id':validators.Int(not_empty=True), 'activity_id':validators.Int(not_empty=True), 'content':validators.UnicodeString(not_empty=False), 'visiting_group_id_id':validators.Int(not_empty=True), 'block_after_book':validators.Bool(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may create a booking the async way'))
     def create_booking_async(self,  booking_day_id=0,  slot_row_position_id=0,  activity_id=0,  content='', block_after_book=False,  visiting_group_id=None):
-                
+        # TODO: reenable ensurePostRequest(request, name=__name__)
         #...TODO refactor to isBlocked
         slot_row_position_states = [b.doc for  b in holly_couch.view('booking_day/slot_state_of_slot_id_and_booking_day_id', keys=[booking_day_id, slot_row_position_id])]
         
@@ -1464,6 +1475,7 @@ class BookingDay(BaseController):
     @validate(validators={'delete_req_booking_id':validators.UnicodeString(not_empty=True), 'activity_id':validators.Int(not_empty=True), 'visiting_group_id_id':validators.Int(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may delete a booking using async interface'))
     def delete_booking_async(self,  delete_req_booking_id=0,  activity_id=0,  visiting_group_id=None):
+        # TODO: reenable ensurePostRequest(request, name=__name__)
         vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         booking_o = common_couch.getBooking(holly_couch, delete_req_booking_id)
         remember_delete_booking_request(holly_couch, booking_o)
@@ -1477,6 +1489,7 @@ class BookingDay(BaseController):
     @validate(validators={'booking_id':validators.UnicodeString(not_empty=True)})
     @require(Any(is_user('root'), has_level('pl'), msg='Only pl may indicate to igonre a booking warning'))
     def ignore_booking_warning_async(self, booking_id=''):
+        #TODO:  reenable ensurePostRequest(request, name=__name__)
         booking_o = common_couch.getBooking(holly_couch,  booking_id)
         ##remember_delete_booking_request(holly_couch, booking_o)
         ##deleteBooking(holly_couch, booking_o)
@@ -1497,6 +1510,7 @@ class BookingDay(BaseController):
     @validate(validators={'delete_req_booking_id':validators.Int(not_empty=True), 'activity_id':validators.Int(not_empty=True), 'visiting_group_id_id':validators.Int(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may unschedule bookings using async method'))
     def unschedule_booking_async(self,  delete_req_booking_id=0,  activity_id=0,  visiting_group_id=None):
+        # TODO: renable ensurePostRequest(request, name=__name__)
         vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         booking_o = common_couch.getBooking(holly_couch,  delete_req_booking_id)
         booking_o.last_changed_by_id = getLoggedInUserId(request)

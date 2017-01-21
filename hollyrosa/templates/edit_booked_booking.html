@@ -57,7 +57,9 @@ function set_visiting_group_id(value) {
     
 function set_visiting_group_display_name(store, value) {
     var obj = store.get(value);
-    edit_booking.set_form_field_value('visiting_group_display_name', obj.name);    
+    if (null != obj) {
+    	edit_booking.set_form_field_value('visiting_group_display_name', obj.name);
+    } 
 }
 
 
@@ -98,6 +100,8 @@ ready(function(){
         store: visiting_group_store,
         searchAttr: "name"
     }, "visiting_group_name");
+  	
+  	set_visiting_group_display_name(visiting_group_store, "${booking.visiting_group_id}");
   	
   	// this is to find the submit button who's id disappeared when migrating from tw to tw2
   	var submit_button_elems = query('input[type="Submit"]');
