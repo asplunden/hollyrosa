@@ -33,4 +33,4 @@ class EditAttachmentForm(twf.Form):
 
     action = lurl('save_attachment')
 
-create_edit_attachment_form = EditAttachmentForm() #"create_edit_attachment_form")
+create_edit_attachment_form = EditAttachmentForm()

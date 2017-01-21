@@ -33,4 +33,4 @@ class EditNoteForm(twf.Form):
                                                                    ))
     action = lurl('save_note')
 
-create_edit_note_form = EditNoteForm() #"create_edit_note_form")
+create_edit_note_form = EditNoteForm()
