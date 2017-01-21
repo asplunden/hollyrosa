@@ -71,7 +71,7 @@ def getActivity(holly_couch,  activity_id):
 
 
 def getActivityGroup(holly_couch,  activity_group_id):
-    return getCouchDBDocument(holly_couch,  activity_group_id,  doc_type='booking',  doc_subtype='bed')
+    return getCouchDBDocument(holly_couch,  activity_group_id,  doc_type='activity_group',  doc_subtype=None) # TODO: need to clean up DB before we can check subtype
 
 
 def getDaySchema(holly_couch,  day_schema_id):

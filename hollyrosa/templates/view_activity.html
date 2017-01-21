@@ -65,7 +65,7 @@ addPrintLink.addEvent(window, 'load', function(){addPrintLink.init('print-on-dem
 
 <body class="tundra">
     <h2>Kort beskrivning av ${activity.title}</h2>
-    <h3>${activity.activity_group_id}</h3>
+    <h3>${activity_group['title']}</h3>
     <ul class="any_menu context_inline_menu ">
        <li><a href="${tg.url('edit_activity', params={'activity_id':activity.id})}">edit</a></li>
        <li><a href="${activity.external_link}">external link</a></li>
@@ -78,6 +78,7 @@ addPrintLink.addEvent(window, 'load', function(){addPrintLink.init('print-on-dem
     <p>Capacity: ${activity.capacity}</p>
     <p>Guides per slot: ${activity.guides_per_slot}</p>
     <p>Guides per day: ${activity.guides_per_day}</p>
+    <p>Background color: <span style="background-color: ${activity.bg_color}; width:4em;padding:0.2em; border: 1px solid gray;">&nbsp;${activity.bg_color}&nbsp;</span></p>
     
     <!-- <p>GPS: ${activity.gps_lat} - ${activity.gps_long} Add google map</p> -->
    <em><span py:if="True==activity.equipment_needed">Equipment needed</span> <span py:if="True==activity.education_needed">Education needed</span> <span py:if="True==activity.certificate_needed">Certificate needed</span> </em>

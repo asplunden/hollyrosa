@@ -2,7 +2,7 @@
 """
 Main Controller
 
-Copyright 2010 - 2016 Martin Eliasson
+Copyright 2010 - 2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -29,7 +29,7 @@ from tg import predicates
 
 from hollyrosa.lib.base import BaseController
 from hollyrosa.controllers.error import ErrorController
-from hollyrosa.controllers import booking_day, calendar, booking_history, workflow, visiting_group, tools, note, tag, user, me, visiting_group_program_request, vodb_group,  program_layer
+from hollyrosa.controllers import booking_day, calendar, booking_history, workflow, visiting_group, tools, note, tag, user, me, visiting_group_program_request, vodb_group, program_layer, activity
 
 from hollyrosa import model
 
@@ -53,6 +53,8 @@ class RootController(BaseController):
     ##secc = SecureController()
     
     error = ErrorController()
+    
+    activity = activity.Activity()
     
     booking = booking_day.BookingDay()
 

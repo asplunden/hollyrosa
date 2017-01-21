@@ -31,7 +31,7 @@ from tg.validation import validation_errors
 
 log = logging.getLogger(__name__)
 
-from tg import expose, flash, require, url, request, redirect, validate, override_template
+from tg import expose, flash, require, url, request, redirect, validate, override_template, abort, tmpl_context
 import webob
 
 from repoze.what.predicates import Any, is_user, has_permission
@@ -44,10 +44,10 @@ from hollyrosa.model.booking_couch import getAllHistoryForBookings, getAllActivi
 from formencode import validators
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
-from tg import tmpl_context
+
 
 from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
-from hollyrosa.widgets.edit_activity_form import create_edit_activity_form
+
 from hollyrosa.widgets.edit_book_slot_form import create_edit_book_slot_form
 from hollyrosa.widgets.edit_book_live_slot_form import  create_edit_book_live_slot_form
 from hollyrosa.widgets.move_booking_form import create_move_booking_form ##, validate_move_booking_form
@@ -905,78 +905,7 @@ class BookingDay(BaseController):
         return tmp_activity_id
     
         
-    @expose('hollyrosa.templates.view_activity')
-    @validate(validators={'activity_id':validators.UnicodeString(not_empty=True)})
-    def view_activity(self, activity_id=None):
-        activity = common_couch.getActivity(holly_couch, activity_id)
-        
-        #...replace missing fields with empty string
-        for tmp_field in ['print_on_demand_link','external_link','internal_link','guides_per_slot','guides_per_day','equipment_needed','education_needed']:
-            if not activity.has_key(tmp_field):
-                activity[tmp_field] = ''
-        return dict(activity=activity)
-        
     
-    
-    
-
-    @expose('hollyrosa.templates.edit_activity')
-    @validate(validators={'activity_id':validators.UnicodeString(not_empty=True)})
-    @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change activity information'))
-    def edit_activity(self, activity_id=None,  **kw):
-        tmpl_context.form = create_edit_activity_form
-            
-        if None == activity_id:
-            activity = dict(id=None,  title='',  info='', activity_group_id='')
-        elif id=='':
-            activity = dict(id=None,  title='', info='', activity_group_id='')
-        else:
-            try:
-                activity = common_couch.getActivity(holly_couch,  activity_id) 
-                activity['id'] = activity_id 
-            except:
-                activity = dict(id=activity_id,  title='', info='', default_booking_state=0, activity_group_id='')
-        
-        return dict(activity=activity)
-        
-        
-    @validate(form=create_edit_activity_form, error_handler=edit_activity)      
-    @expose()
-    @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change activity properties'))
-    def save_activity_properties(self, id=None, title=None, external_link='', internal_link='', print_on_demand_link='', description='', tags='', capacity=0, default_booking_state=0, activity_group_id=1,  gps_lat=0,  gps_long=0,  equipment_needed=False, education_needed=False,  certificate_needed=False,  bg_color='', guides_per_slot=0,  guides_per_day=0 ):
-        ensurePostRequest(request, name=__name__)
-        
-        is_new = None == id or '' == id 
-        if is_new:
-            activity = dict(type='activity')
-            id = genUID(type='activity')
-            
-        else:
-            activity = common_couch.getActivity(holly_couch,  id)
-                
-        activity['title'] = title
-        activity['description'] = description
-        activity['external_link'] = external_link
-        activity['internal_link'] = internal_link
-        activity['print_on_demand_link'] = print_on_demand_link
-        activity['tags'] = tags
-        activity['capacity'] = capacity
-#        #activity.default_booking_state=default_booking_state
-        activity['activity_group_id'] = activity_group_id
-#        activity.gps_lat = gps_lat
- #       activity.gps_long = gps_long
-        activity['equipment_needed'] = equipment_needed
-        activity['education_needed'] = education_needed
-        activity['certificate_needed'] = certificate_needed
-        activity['bg_color'] = bg_color
-        activity['guides_per_slot'] = guides_per_slot
-        activity['guides_per_day'] = guides_per_day
-        
-        holly_couch[id] = activity    
-        raise redirect('/booking/view_activity',  activity_id=id)
-     
-    
-        
     @expose('hollyrosa.templates.request_new_booking')
     @validate(validators={'return_to_day_id':validators.UnicodeString(not_empty=False), 'booking_id':validators.UnicodeString(not_empty=True), 'visiting_group_id':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change a booking'))
