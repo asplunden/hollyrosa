@@ -50,7 +50,7 @@ class EditBookLiveSlotForm(twf.Form):
         
         booking_end_date = twf.CalendarDatePicker('end_date', validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')
         
-        booking_end_slot_id = SingleSelectFieldMod(validator=twc.Required, options=None, prompt_text=None, label="end time")
+        booking_end_slot_id = twf.SingleSelectField(validator=twc.Required, options=None, prompt_text=None, label="end time")
         
         content = twf.TextArea(twc.Required, css_class="edit_booking_content", rows=5, cols=30)
         block_after_book = twf.CheckBox()
@@ -58,10 +58,7 @@ class EditBookLiveSlotForm(twf.Form):
 	action = lurl('save_booked_live_booking_properties')
 
 
-    #def prepare(self):
-    # 	
-    #    super(EditBookLiveSlotForm, self).prepare()
-        
+            
 
 create_edit_book_live_slot_form = EditBookLiveSlotForm()
 

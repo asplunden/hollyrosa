@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 Martin Eliasson
+ * Copyright 2012-2017 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *
@@ -68,11 +68,6 @@ function update_visiting_group_data_common(data, content_elem_id) {
 	 
     //...clean property table
     clean_properties_table();
-    /*var elems_to_destroy = query('#visiting_group_properties_table >');
-    array.forEach(elems_to_destroy, function(g){
-    	domConstruct.destroy(g);
-    });
-*/
 
     //...create heading
     create_visiting_group_properties_table_headings(table);
@@ -100,13 +95,15 @@ function update_visiting_group_data_common(data, content_elem_id) {
 
 
 function update_visiting_group_data(data) {
-    update_visiting_group_data_common(data, "create_edit_book_slot_form_content");
+	// TODO: its uggly to depend on id in form from loaded code module
+    update_visiting_group_data_common(data, 'booking_content');
 }
 
 
 
 function update_visiting_group_data_for_new_booking_request(data) {
-    update_visiting_group_data_common(data, "create_edit_new_booking_request_form_content");
+	// TODO: its uggly to depend on id in form from loaded code module
+    update_visiting_group_data_common(data, 'booking_content');
 }
 
 

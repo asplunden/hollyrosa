@@ -33,9 +33,9 @@ class EditBookSlotForm(twf.Form):
         visiting_group_display_name = twf.HiddenField(validator=twc.Required)
         visiting_group_id = twf.HiddenField(validator=twc.Required)
         # TODO: set height and width
-        content = twf.TextArea(validator=twc.Required, css_class="edit_booking_content")
+        content = twf.TextArea(validator=twc.Required, css_class="edit_booking_content", rows=5, cols=35, id="booking_content")
         block_after_book = twf.CheckBox()
         
     action = lurl('save_booked_booking_properties')
         
-create_edit_book_slot_form = EditBookSlotForm(id='edit_book_slot_form')
+create_edit_book_slot_form = EditBookSlotForm()

@@ -27,10 +27,12 @@ http://turbogears.org/2.0/docs/main/Auth/Authorization.html#module-repoze.what.p
 """
 
 import datetime, logging, json
+from tg.validation import validation_errors
 
 log = logging.getLogger(__name__)
 
 from tg import expose, flash, require, url, request, redirect,  validate,  override_template
+import webob
 
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
@@ -747,32 +749,45 @@ class BookingDay(BaseController):
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change booked live booking properties'))
     def save_booked_live_booking_properties(self, booking_id=None, content=None, visiting_group_name=None, visiting_group_display_name=None, visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  booking_date=None,  booking_end_date=None,  booking_end_slot_id=None,  block_after_book=False, subtype='room', **args):
-        tmp_activity_id = self.save_booked_booking_properties_helper(booking_id, content, visiting_group_display_name, visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  booking_date=booking_date,  block_after_book=block_after_book,  subtype=subtype,  booking_end_date=booking_end_date,  booking_end_slot_id=booking_end_slot_id)
+        tmp_activity_id = self._saveBookedBookingPropertiesHelper(booking_id, content, visiting_group_display_name, visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  booking_date=booking_date,  block_after_book=block_after_book,  subtype=subtype,  booking_end_date=booking_end_date,  booking_end_slot_id=booking_end_slot_id)
         raise redirect('live?day_id='+str(return_to_day_id)+'&subtype='+subtype+make_booking_day_activity_anchor(tmp_activity_id))
+
     
-    
-    ####@validate(create_validate_book_slot_form, error_handler=edit_booked_booking) 
     @expose()
+    @validate({"id":validators.UnicodeString, "booking_content":validators.UnicodeString(not_empty=True), "visiting_group_display_name":validators.UnicodeString, "visiting_group_id":validators.UnicodeString(not_empty=True), "activity_id":validators.UnicodeString(not_empty=True), "return_to_day_id":validators.UnicodeString, "slot_id":validators.UnicodeString, "booking_day_id":validators.UnicodeString, "block_after_book":validators.Bool})
     @require(Any(is_user('root'), has_level('staff'), msg='Only staff members may change booked booking properties'))
-    def save_booked_booking_properties(self,  id=None,  content=None,  visiting_group_display_name=None,  visiting_group_id=None,  activity_id=None,  return_to_day_id=None, slot_id=None,  booking_day_id=None,  block_after_book=False, **kwargs ):
-        tmp_activity_id = self.save_booked_booking_properties_helper(id,  content,  visiting_group_display_name,  visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  block_after_book=block_after_book,  subtype='program')
+    def save_booked_booking_properties(self, id=None, booking_content=None, visiting_group_display_name=None, visiting_group_id=None, activity_id=None, return_to_day_id=None, slot_id=None, booking_day_id=None, block_after_book=False, **kwargs ):
+        """
+        Accepts a form POST (or GET) request to store a booking.
+        
+        TODO: What do we do with visiting_group_display_name which is a little bit deprecated at the moment ?
+        """
+        
+        #...This is a new way tot try to block GET requests to pages which have a side effect.
+        if not request.method == 'POST':
+            raise webob.exc.HTTPMethodNotAllowed(comment='The method you tried to reached through TG2 object dispatch is only accepting POST requests. Most probable there is some old code still calling GET.')
+        
+        tmp_activity_id = self._saveBookedBookingPropertiesHelper(id, booking_content, visiting_group_display_name, visiting_group_id, activity_id, return_to_day_id, slot_id, booking_day_id, block_after_book=block_after_book, subtype='program')
         raise redirect('day?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id))
     
         
-    def save_booked_booking_properties_helper(self, id=None, content=None, visiting_group_name=None, visiting_group_id=None, activity_id=None, return_to_day_id=None, slot_id=None, booking_day_id=None, booking_date=None,  block_after_book=False,  subtype='program',  booking_end_date='',  booking_end_slot_id=''):
+    def _saveBookedBookingPropertiesHelper(self, id=None, content=None, visiting_group_name=None, visiting_group_id=None, activity_id=None, return_to_day_id=None, slot_id=None, booking_day_id=None, booking_date=None,  block_after_book=False,  subtype='program',  booking_end_date='',  booking_end_slot_id=''):
+        """
+        Common method for saving booking properties
+        """
         is_new = (None == id or '' == id) 
         #...id can be None if a new slot is booked
         booking_day = None
         
         #...there is a big difference on how booking_day_id is handled.
-        #   for a programe booking, booking day id decides the date but on room bookings (live) it's the oposite.
+        #   for a program booking, booking day id decides the date but on room bookings (live) it's the opposite.
         #   booking_date determines booking_day_id
         
         #...find visiting group and if id doesent exist it indicates we should use N/A group
         if visiting_group_id == '':
             visiting_group_id = self.getN_A_VisitingGroupId(holly_couch)
             
-        vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        vgroup = common_couch.getVisitingGroup(holly_couch, visiting_group_id)
             
             
         #...if new booking
@@ -781,7 +796,7 @@ class BookingDay(BaseController):
             
             if subtype in ['room','staff']:
                 #...look up booking day by date
-                booking_day = getBookingDayOfDate(holly_couch, booking_date) # strftime not needed if date is given as a string    .strftime('%Y-%m-%d'))
+                booking_day = getBookingDayOfDate(holly_couch, booking_date)
                 booking_day_id = booking_day['_id']
             else:
                 booking_day = holly_couch[ booking_day_id ]
@@ -799,7 +814,7 @@ class BookingDay(BaseController):
             
             if subtype in ['room','staff']:
                 #...change booking_day_id according to booking date
-                booking_day = getBookingDayOfDate(holly_couch, booking_date) # strftime not needed if validation doesent work .strftime('%Y-%m-%d'))
+                booking_day = getBookingDayOfDate(holly_couch, booking_date)
                 booking_day_id = booking_day['_id']
                 old_booking['slot_id'] = slot_id
                 old_booking['booking_day_id'] = booking_day_id
@@ -880,14 +895,14 @@ class BookingDay(BaseController):
         if block_after_book:
             # TODO: will fail so I disabled it temporarilly
             if False:
-                self.block_slot_helper(holly_couch, booking_day_id,  slot_row_position_id)
+                self.block_slot_helper(holly_couch, booking_day_id, slot_row_position_id)
         
         return tmp_activity_id
     
         
     @expose('hollyrosa.templates.view_activity')
-    @validate(validators={'activity_id':validators.Int(not_empty=True)})
-    def view_activity(self,  activity_id=None):
+    @validate(validators={'activity_id':validators.UnicodeString(not_empty=True)})
+    def view_activity(self, activity_id=None):
         activity = common_couch.getActivity(holly_couch, activity_id)
         
         #...replace missing fields with empty string
