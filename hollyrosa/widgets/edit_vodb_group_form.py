@@ -33,7 +33,7 @@ class EditVodbGroupForm(twd.CustomisedTableForm):
         name = twf.TextField(validator=twc.StringLengthValidator(min=4), css_class="edit_name", size=40)
         boknr = twf.TextField(validator=twc.Required)
 
-        info = TinyMCEWidget(validator=MarkupConverter, mce_options = dict(theme='advanced',  
+        info = TinyMCEWidget(mce_options = dict(theme='advanced',  
                                                                    theme_advanced_toolbar_align ="left",  
                                                                    theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat", 
                                                                    theme_advanced_buttons2 = "",

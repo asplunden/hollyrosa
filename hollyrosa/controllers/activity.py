@@ -20,6 +20,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
+import logging
+log = logging.getLogger(__name__)
 
 from tg import expose, flash, require, url, request, redirect, validate, abort, tmpl_context
 from repoze.what.predicates import Any, is_user, has_permission
@@ -73,24 +75,29 @@ class Activity(BaseController):
     def edit_activity(self, activity_id=None,  **kw):
         tmpl_context.form = create_edit_activity_form
             
+        log.debug('edit_activity()')
+        
         if None == activity_id:
-            activity = dict(id=None,  title='',  info='', activity_group_id='')
+            activity = dict(id=None,  title=u'', description=u'', activity_group_id='')
         elif id=='':
-            activity = dict(id=None,  title='', info='', activity_group_id='')
+            activity = dict(id=None,  title=u'', description=u'', activity_group_id='')
         else:
             try:
-                activity = common_couch.getActivity(holly_couch,  activity_id) 
+                activity = common_couch.getActivity(holly_couch, activity_id) 
                 activity['id'] = activity_id 
             except:
-                activity = dict(id=activity_id, title='', info='', default_booking_state=0, activity_group_id='')
+                activity = dict(id=activity_id, title=u'', description=u'', default_booking_state=0, activity_group_id='')
         
         #...what about sanitizing colors like #fff to #ffffff
         if activity['bg_color'][0] == '#' and len(activity['bg_color']) == 4:
             a = activity['bg_color'][1]
             b = activity['bg_color'][2]
             c = activity['bg_color'][3]
-            activity['bg_color'] = "%c%c%c%c%c%c%c" % ('#', a, a, b, b, c, c)
+            activity['bg_color'] = u"%c%c%c%c%c%c%c" % ('#', a, a, b, b, c, c)
+            
+        #activity['description'] = u''
         
+        log.debug(activity)
         return dict(activity=activity)
         
         
@@ -102,7 +109,7 @@ class Activity(BaseController):
         
         is_new = None == id or '' == id 
         if is_new:
-            activity = dict(type='activity')
+            activity = dict(type='activity') # TODO: need to set subtype on activity or is it handled by group belonging?
             id = genUID(type='activity')
             
         else:

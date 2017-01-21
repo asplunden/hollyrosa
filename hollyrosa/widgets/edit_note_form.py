@@ -19,13 +19,13 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 from tg import lurl
 import tw2.core as twc
 import tw2.forms as twf
-from tw2.tinymce import TinyMCEWidget, MarkupConverter
+from tw2.tinymce import TinyMCEWidget
 
 class EditNoteForm(twf.Form):
     class child(twf.TableLayout):
         note_id = twf.HiddenField(validator=twc.Required)
         target_id = twf.HiddenField(validator=twc.Required)
-        text = TinyMCEWidget(validator=MarkupConverter, mce_options = dict(theme='advanced',  
+        text = TinyMCEWidget(mce_options = dict(theme='advanced',  
                                                                    theme_advanced_toolbar_align ="left",  
                                                                    theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat", 
                                                                    theme_advanced_buttons2 = "",

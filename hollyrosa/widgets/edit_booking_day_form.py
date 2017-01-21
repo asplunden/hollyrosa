@@ -22,14 +22,14 @@ from tg import lurl
 import tw2.core as twc
 import tw2.forms as twf
 
-from tw2.tinymce import TinyMCEWidget, MarkupConverter
+from tw2.tinymce import TinyMCEWidget
 
 
 class EditVisitingGroupForm(twf.Form):
     class child(twf.TableLayout):
         recid = twf.HiddenField(validator=twc.Required) #### TODO: former id was _id but no longer allowed name
         title = twf.TextField(validator=twc.Required)
-        note = TinyMCEWidget(validator=MarkupConverter,  mce_options = dict(theme='advanced',  
+        note = TinyMCEWidget(mce_options = dict(theme='advanced',  
                                                                       theme_advanced_toolbar_align ="left",  
                                                                       theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat", 
                                                                       theme_advanced_buttons2 = "",

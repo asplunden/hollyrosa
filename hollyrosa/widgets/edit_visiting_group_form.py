@@ -25,7 +25,7 @@ import tw2.dynforms as twd
 
 from tg import lurl
 
-from tw2.tinymce import TinyMCEWidget, MarkupConverter
+from tw2.tinymce import TinyMCEWidget
 from formencode.validators import DateConverter
 
 
@@ -36,7 +36,7 @@ class EditVisitingGroupForm(twd.CustomisedTableForm):
         visiting_group_id = twf.HiddenField(validator=twc.Required)
         subtype = twf.HiddenField(validator=twc.Required) 
         name = twf.TextField(validator=twc.StringLengthValidator(min=1),  css_class="edit_name",  size=40)
-        info = TinyMCEWidget(validator=MarkupConverter, mce_options = dict(theme='advanced',  
+        info = TinyMCEWidget(mce_options = dict(theme='advanced',  
                                                                    theme_advanced_toolbar_align ="left",  
                                                                    theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat", 
                                                                    theme_advanced_buttons2 = "",
