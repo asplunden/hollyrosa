@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -30,13 +30,14 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
   <link rel="stylesheet" type="text/css" href="${tg.url('/css/div_widget.css')}" />
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.11.2/dojox/grid/resources/tundraGrid.css')}" />
-
-  <!--<script>dojoConfig = {parseOnLoad: true}</script>-->
    
   <script>
 
 require(['dojo/_base/array', 'dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on','dojo/ready', 'dijit/registry', 'dojo/domReady!'],
   function(array, lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready, registry ){
+    
+    
+    
     
     function formatDate(datum) {
         var d = stamp.fromISOString(datum);

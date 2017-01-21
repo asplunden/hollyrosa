@@ -39,8 +39,8 @@ class EditVodbGroupForm(twd.CustomisedTableForm):
                                                                    theme_advanced_buttons2 = "",
                                                                    theme_advanced_buttons3 = ""
 ))
-        from_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
-        to_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+        from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')
+        to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')
         vodb_contact_name = twf.TextField(validator=twc.Required)
         vodb_contact_email = twf.TextField(validator=twc.EmailValidator)
         vodb_contact_phone = twf.TextField(validator=twc.Required)
@@ -49,12 +49,12 @@ class EditVodbGroupForm(twd.CustomisedTableForm):
 
         class visiting_group_properties(twd.GrowingGridLayout):
             propery_id = twf.HiddenField('property_id')
-            property = twf.TextField('property',  size=10)
-            value = twf.TextField('value',  size=4)
-            unit = twf.TextField('unit',  size=8)
+            property = twf.TextField('property', size=10)
+            value = twf.TextField('value', size=4)
+            unit = twf.TextField('unit', size=8)
             description = twf.TextField('description')
-            from_date = twf.CalendarDatePicker('from_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
-            to_date = twf.CalendarDatePicker('to_date', validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+            from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')
+            to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')
 
     action = lurl('save_vodb_group_properties')
 create_edit_vodb_group_form = EditVodbGroupForm()

@@ -55,7 +55,7 @@ from hollyrosa.widgets.move_booking_form import create_move_booking_form ##, val
 
 from hollyrosa.controllers.booking_history import remember_booking_change,  remember_schedule_booking,  remember_unschedule_booking,  remember_book_slot, remember_booking_properties_change,  remember_new_booking_request,  remember_booking_request_change,  remember_delete_booking_request,  remember_block_slot, remember_unblock_slot,  remember_booking_move,  remember_ignore_booking_warning
 
-from hollyrosa.controllers.common import DataContainer, workflow_map, getLoggedInUserId, change_op_map, getRenderContent, getRenderContentDict,  computeCacheContent, has_level, reFormatDate, getSanitizeDate, fixCalendarDatePickerWrongKindOfDateFormat
+from hollyrosa.controllers.common import DataContainer, workflow_map, getLoggedInUserId, change_op_map, getRenderContent, getRenderContentDict,  computeCacheContent, has_level, reFormatDate, getSanitizeDate
 from hollyrosa.controllers import common_couch
 
 __all__ = ['BookingDay']
@@ -628,7 +628,7 @@ class BookingDay(BaseController):
     @expose('hollyrosa.templates.edit_booked_live_booking')
     @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=True), 'slot_id':validators.UnicodeString(not_empty=True), 'subtype':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may book a slot'))
-    def book_live_slot(self,  booking_day_id=None,  slot_id=None, subtype='room'):
+    def book_live_slot(self, booking_day_id=None, slot_id=None, subtype='room'):
         tmpl_context.form = create_edit_book_live_slot_form
         
         if subtype not in ['program','room','staff']:
@@ -1167,9 +1167,9 @@ class BookingDay(BaseController):
 
         #...todo add dates, but only after form validation
         log.debug("save_new_booking_request requeste_date=%s" % str(requested_date))
-        new_booking['requested_date'] = fixCalendarDatePickerWrongKindOfDateFormat(requested_date)
-        new_booking['valid_from'] = fixCalendarDatePickerWrongKindOfDateFormat(valid_from)
-        new_booking['valid_to'] = fixCalendarDatePickerWrongKindOfDateFormat(valid_to)
+        new_booking['requested_date'] = requested_date 
+        new_booking['valid_from'] = valid_from
+        new_booking['valid_to'] = valid_to 
         
         if is_new:
             holly_couch[genUID(type='booking')] = new_booking

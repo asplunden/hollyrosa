@@ -70,6 +70,24 @@ function validate_form(evt, visiting_group_filtering_select) {
 }
 
 
+/**
+ try set option to slot_id field, this is an ugly tw2 hack
+ somehow need to pass parameters as json into html form
+ also need to clear all pre-existing options
+**/
+
+function populateSingleSelectFieldHack(single_select_field_elem, data, clear_preexisting_options) {	
+    if (clear_preexisting_options) {
+    	domConstruct.empty(single_select_field_elem);
+    }
+    
+    array.forEach(data, function(a) {
+    	var tmp_option = domConstruct.create("option", {value:a[0]}, single_select_field_elem, "last"); // TODO: first should maybe be last
+    	tmp_option.innerHTML = a[1];
+        });
+}
+
+
 ready(function(){
     var elem = dom.byId('visiting_group_id');
  
@@ -88,23 +106,19 @@ ready(function(){
         value: "${booking.visiting_group_id}",
         displayedValue: "${booking.visiting_group_name}",
         onChange: function(value) {
-        		set_visiting_group_id(value);
+        		set_visiting_group_id(value); // TODO ALSO SET THE VISITING GROUP NAME IF NEEDED
     			},
         store: visiting_group_store,
         searchAttr: "name"
     }, "visiting_group_name");
     
-    //...try set option to slot_id field, this is an ugly tw2 hack
-    //...somehow need to pass parameters as json into html form
-    //...also need to clear all pre-existing options
-    var slot_id_select_elem = dom.byId('slot_id');
-    domConstruct.empty(slot_id_select_elem);
-    array.forEach($slot_id_data, function(a) {
-    	var tmp_option = domConstruct.create("option", {value:a[0]}, slot_id, "first"); // TODO: first should maybe be last
-    	tmp_option.innerHTML = a[1];
-        });
+    var slot_id_elem = dom.byId('slot_id');
+    populateSingleSelectFieldHack(slot_id_elem, ${slot_id_data}, true)
     
-    // this is to find the submit button who's id disapeared when migrating from tw to tw2
+    var slot_end_time_elem = dom.byId('booking_end_slot_id');
+    populateSingleSelectFieldHack(slot_end_time_elem, ${slot_id_data}, true)
+    
+    // this is to find the submit button who's id disappeared when migrating from tw to tw2
   	var submit_button_elems = query('input[type="Submit"]');
     on(submit_button_elems[0], "submit", function(evt) { return validate_form(evt, visiting_group_filtering_select); }  );
   });
