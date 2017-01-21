@@ -52,7 +52,14 @@ function set_visiting_group_id(value) {
     } else {
          edit_booking.clean_properties_table();
     }
-    
+}
+
+
+function set_visiting_group_display_name(store, value) {
+    var obj = store.get(value);
+    if (null != obj) {
+    	edit_booking.set_form_field_value('visiting_group_display_name', obj.name);
+    } 
 }
 
 
@@ -121,12 +128,14 @@ ready(function(){
         displayedValue: "${booking.visiting_group_name}",
         onChange: function(value) {
         		set_visiting_group_id(value);
+        		set_visiting_group_display_name(visiting_group_store, value);
     			},
         store: visiting_group_store,
         searchAttr: "name"
     }, "visiting_group_name");
   
-  
+   //...need to set the initial value
+   set_visiting_group_display_name(visiting_group_store, "${booking.visiting_group_id}")
     
     //...set up filtering select for activity
     var activity_entries = ${activity_entries};
@@ -174,8 +183,7 @@ ready(function(){
         </table>
     </div>
     
-    
-    <div py:replace="tmpl_context.form.display(value=booking, child_args=dict(activity_id=dict(options=activities), visiting_group_id=dict(options=visiting_groups)))">Input Form</div>
+    <div py:replace="tmpl_context.form.display(value=booking)">Input Form</div>
         
 </body>
 </html>

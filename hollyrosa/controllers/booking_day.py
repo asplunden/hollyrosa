@@ -31,7 +31,7 @@ from tg.validation import validation_errors
 
 log = logging.getLogger(__name__)
 
-from tg import expose, flash, require, url, request, redirect,  validate,  override_template
+from tg import expose, flash, require, url, request, redirect, validate, override_template
 import webob
 
 from repoze.what.predicates import Any, is_user, has_permission
@@ -55,7 +55,7 @@ from hollyrosa.widgets.move_booking_form import create_move_booking_form ##, val
 
 from hollyrosa.controllers.booking_history import remember_booking_change,  remember_schedule_booking,  remember_unschedule_booking,  remember_book_slot, remember_booking_properties_change,  remember_new_booking_request,  remember_booking_request_change,  remember_delete_booking_request,  remember_block_slot, remember_unblock_slot,  remember_booking_move,  remember_ignore_booking_warning
 
-from hollyrosa.controllers.common import DataContainer, workflow_map, getLoggedInUserId, change_op_map, getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate
+from hollyrosa.controllers.common import DataContainer, workflow_map, getLoggedInUserId, change_op_map, getRenderContent, getRenderContentDict,  computeCacheContent, has_level, reFormatDate, getSanitizeDate, fixCalendarDatePickerWrongKindOfDateFormat
 from hollyrosa.controllers import common_couch
 
 __all__ = ['BookingDay']
@@ -921,7 +921,7 @@ class BookingDay(BaseController):
     
 
     @expose('hollyrosa.templates.edit_activity')
-    @validate(validators={'activity_id':validators.Int(not_empty=True)})
+    @validate(validators={'activity_id':validators.UnicodeString(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change activity information'))
     def edit_activity(self, activity_id=None,  **kw):
         tmpl_context.form = create_edit_activity_form
@@ -943,7 +943,7 @@ class BookingDay(BaseController):
     @validate(form=create_edit_activity_form, error_handler=edit_activity)      
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change activity properties'))
-    def save_activity_properties(self,  id=None,  title=None,  external_link='', internal_link='',  print_on_demand_link='',  description='', tags='', capacity=0,  default_booking_state=0,  activity_group_id=1,  gps_lat=0,  gps_long=0,  equipment_needed=False, education_needed=False,  certificate_needed=False,  bg_color='', guides_per_slot=0,  guides_per_day=0 ):
+    def save_activity_properties(self, id=None, title=None, external_link='', internal_link='', print_on_demand_link='', description='', tags='', capacity=0, default_booking_state=0, activity_group_id=1,  gps_lat=0,  gps_long=0,  equipment_needed=False, education_needed=False,  certificate_needed=False,  bg_color='', guides_per_slot=0,  guides_per_day=0 ):
         ensurePostRequest(request, name=__name__)
         
         is_new = None == id or '' == id 
@@ -975,6 +975,7 @@ class BookingDay(BaseController):
         holly_couch[id] = activity    
         raise redirect('/booking/view_activity',  activity_id=id)
      
+    
         
     @expose('hollyrosa.templates.request_new_booking')
     @validate(validators={'return_to_day_id':validators.UnicodeString(not_empty=False), 'booking_id':validators.UnicodeString(not_empty=True), 'visiting_group_id':validators.UnicodeString(not_empty=False)})
@@ -1004,8 +1005,11 @@ class BookingDay(BaseController):
         like a pop up dynamic form being shown.
         
         """
+        
         tmpl_context.form = create_edit_new_booking_request_form
         edit_this_visiting_group = 0
+        
+        log.debug('edit_booking')
         
         activities = [(a.doc['_id'],  a.doc['title'] ) for a in getAllActivities(holly_couch)]
         if return_to_day_id == None: 
@@ -1016,28 +1020,52 @@ class BookingDay(BaseController):
         
         if '' != visiting_group_id:
             tmp_visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
-        else:
-            tmp_visiting_group_id = None
+        #else:
+        #    tmp_visiting_group = None
         
         #...patch since this is the way we will be called if validator for new will fail
         if (visiting_group_id != '') and (visiting_group_id != None):
-            booking_o = dict(id='', content='', visiting_group_id=visiting_group_id, visiting_group_name=tmp_visiting_group['name'], activity_id='')
+            booking_o = dict(id='', booking_content='', visiting_group_id=visiting_group_id, visiting_group_name=tmp_visiting_group['name'], activity_id='')
             edit_this_visiting_group = 0 #visiting_group_id
         elif booking_id=='' or booking_id==None:
-            booking_o = dict(id='', content='', visiting_group_id=visiting_group_id, visiting_group_name='', activity_id='')
+            booking_o = dict(id='', booking_content='', visiting_group_id=visiting_group_id, visiting_group_name='', activity_id='')
         else:
-            b = common_couch.getBooking(holly_couch,  booking_id)
-            booking_o = dict(id=b['_id'], content=b['content'], visiting_group_id=b['visiting_group_id'], valid_from=b['valid_from'], valid_to=b['valid_to'], requested_date=b['requested_date'], activity_id=b['activity_id'], visiting_group_name=b['visiting_group_name'])  
+            log.debug('edit_booking: booking exists')
+            b = common_couch.getBooking(holly_couch, booking_id)
+            
+            #...process and sanitize dates
+            booking_o = dict(id=b['_id'], booking_content=b['content'], visiting_group_id=b['visiting_group_id'], activity_id=b['activity_id'], visiting_group_name=b['visiting_group_name'])  
+            
+            from_date_ok, tmp_valid_from = getSanitizeDate(b['valid_from'], None)
+            if from_date_ok:
+                booking_o['valid_from'] = tmp_valid_from
+            
+            to_date_ok, tmp_valid_to = getSanitizeDate(b['valid_to'], None)
+            if to_date_ok:
+                booking_o['valid_to'] = tmp_valid_to
+                
+            requested_date_ok, tmp_requested_date = getSanitizeDate(b['requested_date'], None)
+            if requested_date_ok:
+                booking_o['requested_date'] = tmp_requested_date
+            
     
         # TODO: We still need to add some reasonable sorting on the activities abd the visiting groups
+        log.debug(str(booking_o))
         
         if return_to_day_id != None and return_to_day_id != '':
-            booking_o['requested_date'] = booking_day_o['date']
+            if not booking_o.has_key('requested_date'):
+                
+                requested_date_ok, tmp_requested_date = getSanitizeDate(booking_day_o['date'], None)
+                if requested_date_ok:
+                    booking_o['requested_date'] = tmp_requested_date
+            
         booking_o['return_to_day_id'] = return_to_day_id
         
+        #...these are the two types of options that we somehow need to transfer to the form tw2 style
         activity_entries = json.dumps( [dict(name=a[1], id=a[0]) for a in activities] )
         visiting_group_options = json.dumps([dict(name=a[1], id=a[0]) for a in visiting_groups] )
-        return dict(visiting_groups=visiting_groups, activities=activities, booking=booking_o,  edit_this_visiting_group=edit_this_visiting_group, activity_entries=activity_entries, visiting_group_options=visiting_group_options)
+        
+        return dict(visiting_groups=visiting_groups, activities=activities, booking=booking_o, edit_this_visiting_group=edit_this_visiting_group, activity_entries=activity_entries, visiting_group_options=visiting_group_options)
         
         
     @expose('hollyrosa.templates.move_booking')
@@ -1148,9 +1176,6 @@ class BookingDay(BaseController):
         
         raise redirect('/booking/'+return_path+'?day_id='+str(return_to_day_id)) 
         
-        
-    
-
 
     def getN_A_VisitingGroupId(self, holly_couch):
         """
@@ -1166,37 +1191,44 @@ class BookingDay(BaseController):
             raise ValueError, "failed to obtain the N/A visiting group from DB"
         return visiting_group_id
     
-    ##@validate(create_validate_new_booking_request_form, error_handler=edit_booking) 
+    
+    
+    
+    
+    @validate(validators={'booking_content':validators.UnicodeString, "activity_id":validators.UnicodeString, "activity_name":validators.UnicodeString, "visiting_group_name":validators.UnicodeString, "visiting_group_display_name":validators.UnicodeString, "valid_from":validators.DateValidator(date_format='%Y-%m-%d'), "valid_to":validators.DateValidator(date_format='%Y-%m-%d'), "requested_date":validators.DateValidator(date_format='%Y-%m-%d'), "visiting_group_id":validators.UnicodeString, "id":validators.UnicodeString, "return_to_day_id":validators.UnicodeString}) 
     @require(Any(is_user('root'), has_level('view'), has_level('staff'), has_level('pl'),  msg='Only viewers, staff and PL can submitt a new booking request'))
     @expose()
-    def save_new_booking_request(self, content='', activity_id=None, activity_name=None, visiting_group_name='', visiting_group_display_name='',  valid_from=None,  valid_to=None,  requested_date=None,  visiting_group_id=None,  id=None,  return_to_day_id=None, **kwargs):
+    def save_new_booking_request(self, booking_content='', activity_id=None, activity_name=None, visiting_group_name='', visiting_group_display_name='', valid_from=None, valid_to=None, requested_date=None, visiting_group_id=None, id=None, return_to_day_id=None, **kwargs):
+        """
+        Saves a booking requests that has no slot or booking day. These are better known as unscheduled bookings.
+        """
+        
         ensurePostRequest(request, name=__name__)
-        is_new= ((id ==None) or (id==''))
+        is_new = ((id ==None) or (id==''))
+        
+        log.debug('save_new_booking_request()')
         
         if is_new:
-            log.debug('new program booking request')
+            log.debug('save_new_booking_request:new program booking request')
             new_booking = common_couch.createEmptyProgramBooking()
         else:
-            log.debug('editing existing program booking')
+            log.debug('save_new_booking_request:editing existing unscheduled booking')
             new_booking = common_couch.getBooking(holly_couch,  id)
             tmp_activity = common_couch.getActivity(holly_couch,  new_booking['activity_id'])
             old_booking = DataContainer(activity=tmp_activity, activity_id=new_booking['activity_id'], visiting_group_name=new_booking['visiting_group_name'], visiting_group_id=new_booking['visiting_group_id'],  valid_from=new_booking['valid_from'],  valid_to=new_booking['valid_to'],  requested_date=new_booking['requested_date'],  content=new_booking['content'],  id=new_booking['_id'])
             
-        if is_new:
-            new_booking['booking_state'] = 0
-        else:
-            # TODO: DEPENDS ON WHAT HAS CHANGED. Maybe content change isnt enough to change state?
-            new_booking['booking_state'] = 0
+        new_booking['booking_state'] = 0
             
         #...Id visiting group id is empty, it should be replaced with the N/A Group
-        log.debug('visiting_group_name=%s, visiting_group_display_name=%s, visiting_group_id=%s' % (str(visiting_group_name), str(visiting_group_display_name), str(visiting_group_id)))
+        log.debug('save_new_booking_request:visiting_group_name=%s, visiting_group_display_name=%s, visiting_group_id=%s' % (str(visiting_group_name), str(visiting_group_display_name), str(visiting_group_id)))
         if '' == visiting_group_id:
+            log.warn('save_new_booking_request: Attention, no visiting group id supplied, using N/A group.')
             visiting_group_id = self.getN_A_VisitingGroupId(holly_couch)
         
-        new_booking['content'] = content
+        new_booking['content'] = booking_content
         
         new_booking['visiting_group_id'] = visiting_group_id
-        new_booking['cache_content'] = computeCacheContent(common_couch.getVisitingGroup(holly_couch, visiting_group_id), content)
+        new_booking['cache_content'] = computeCacheContent(common_couch.getVisitingGroup(holly_couch, visiting_group_id), booking_content)
         
         
         new_booking['activity_id'] = activity_id
@@ -1205,21 +1237,18 @@ class BookingDay(BaseController):
         
 
         #...todo add dates, but only after form validation
-        new_booking['requested_date'] = str(requested_date)
-        new_booking['valid_from'] = str(valid_from)
-        new_booking['valid_to'] = str(valid_to)
-        #new_booking['timestamp'] = 
-        #raise IOError,  "%s %s %s" % (str(requested_date),  str(valid_from),  str(valid_to))
+        log.debug("save_new_booking_request requeste_date=%s" % str(requested_date))
+        new_booking['requested_date'] = fixCalendarDatePickerWrongKindOfDateFormat(requested_date)
+        new_booking['valid_from'] = fixCalendarDatePickerWrongKindOfDateFormat(valid_from)
+        new_booking['valid_to'] = fixCalendarDatePickerWrongKindOfDateFormat(valid_to)
         
         if is_new:
             holly_couch[genUID(type='booking')] = new_booking
             remember_new_booking_request(holly_couch, new_booking)
         else:
             holly_couch[id] = new_booking
-
             remember_booking_request_change(holly_couch, old_booking=old_booking,  new_booking=new_booking)
-    
-    
+
         
         if return_to_day_id != None:
             if return_to_day_id != '':
@@ -1232,7 +1261,7 @@ class BookingDay(BaseController):
     @expose()
     @validate(validators={'return_to_day_id':validators.UnicodeString(not_empty=False), 'booking_id':validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('pl'), msg='Only PL can block or unblock slots'))
-    def prolong(self,  return_to_day_id=None, booking_id=None):
+    def prolong(self, return_to_day_id=None, booking_id=None):
         ensurePostRequest(request, name=__name__)
         # TODO: one of the problems with prolong that just must be sloved is what do we do if the day shema is different for the day after?
         

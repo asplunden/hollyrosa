@@ -1,5 +1,5 @@
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -42,8 +42,8 @@ class EditVisitingGroupForm(twd.CustomisedTableForm):
                                                                    theme_advanced_buttons2 = "",
                                                                    theme_advanced_buttons3 = ""))
 
-        from_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
-        to_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+        from_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')
+        to_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')
         contact_person = twf.TextField(validator=twc.Required, label_text="contact person:")
         contact_person_email = twf.TextField(validator=twc.EmailValidator)
         contact_person_phone = twf.TextField(validator=twc.Required)
@@ -58,8 +58,8 @@ class EditVisitingGroupForm(twd.CustomisedTableForm):
             value = twf.TextField(size=4)
             unit = twf.TextField(size=8)
             description = twf.TextField()
-            from_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
-            to_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"),  date_format='%Y-%m-%d')
+            from_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')
+            to_date = twf.CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')
 
     action = lurl('save_visiting_group_properties')
 

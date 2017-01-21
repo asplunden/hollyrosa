@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010, 2011, 2012, 2013, 2014 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -71,7 +71,7 @@ vodb_live_times_options = [u'indoor',u'outdoor',u'daytrip']
 
 
 def sanitizeDate(d,  default_date=''):
-    """Make sure d is on the form YYYY-mm-dd"""
+    """Make sure d is on the form YYYY-mm-dd and return a unicode string"""
     # TODO we really should use formenc validate here
     
     try:
@@ -79,6 +79,18 @@ def sanitizeDate(d,  default_date=''):
         d_trunc = d[:10]
         d_pars = datetime.datetime.strptime(d_trunc, '%Y-%m-%d')
         return True,  d_pars.strftime('%Y-%m-%d')
+    except ValueError:
+        return False, default_date
+    
+def getSanitizeDate(d,  default_date=''):
+    """Make sure d is on the form YYYY-mm-dd and return a Date"""
+    # TODO we really should use formenc validate here
+    
+    try:
+        #...only use first ten chars
+        d_trunc = d[:10]
+        d_pars = datetime.datetime.strptime(d_trunc, '%Y-%m-%d')
+        return True,  d_pars
     except ValueError:
         return False, default_date
         
@@ -96,6 +108,15 @@ def getFormatedDate(date_obj):
         return ''
     else:
         return date_obj.strftime('%A %d %B')
+    
+    
+def fixCalendarDatePickerWrongKindOfDateFormat(str_or_date_obj):
+        """
+        This is an uggly fix because somehow the new tw2 widgets like to show dates as YYYY/MM/DD in widgets wich go wrong when we save.
+        
+        I also think the validators are somehow not catching this
+        """
+        return str(str_or_date_obj).replace('/','-')
 
 
 def getRenderContent(booking):
@@ -276,4 +297,8 @@ def makeParamsForObjectOfVGDictionary(visiting_group_c):
         vgpx = dict(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=tmp_from_date,  to_date=tmp_to_date,  id=str(id))
         vgps.append(vgpx)
     return vgps
+
+
+
+
     
