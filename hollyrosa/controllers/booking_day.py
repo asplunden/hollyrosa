@@ -897,6 +897,9 @@ class BookingDay(BaseController):
         return dict(activity=activity)
         
     
+    
+    
+
     @expose('hollyrosa.templates.edit_activity')
     @validate(validators={'activity_id':validators.Int(not_empty=True)})
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change activity information'))
@@ -904,17 +907,17 @@ class BookingDay(BaseController):
         tmpl_context.form = create_edit_activity_form
             
         if None == activity_id:
-            activity = dict(id=None,  title='',  info='')
+            activity = dict(id=None,  title='',  info='', activity_group_id='')
         elif id=='':
-            activity = dict(id=None,  title='', info='')
+            activity = dict(id=None,  title='', info='', activity_group_id='')
         else:
             try:
                 activity = common_couch.getActivity(holly_couch,  activity_id) 
                 activity['id'] = activity_id 
             except:
-                activity = dict(id=activity_id,  title='', info='', default_booking_state=0)
+                activity = dict(id=activity_id,  title='', info='', default_booking_state=0, activity_group_id='')
         
-        return dict(activity=activity) ####,  activity_group=activity_groups,  activity_groups=activity_groups)
+        return dict(activity=activity)
         
         
     @validate(form=create_edit_activity_form, error_handler=edit_activity)      

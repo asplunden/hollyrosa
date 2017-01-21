@@ -32,11 +32,16 @@ from tw2.tinymce import TinyMCEWidget
 from hollyrosa.model import holly_couch
 from hollyrosa.model.booking_couch import getAllActivityGroups
 
-def getActivityGroupOptions():
-    activity_groups = list()
-    for x in getAllActivityGroups(holly_couch):
-        activity_groups.append((x.value['_id'], x.value['title']))   
-    return activity_groups
+
+def _getActivityGroupOptions():
+        """
+        return a list of all available activity groups
+        """
+        activity_groups = list()
+        for x in getAllActivityGroups(holly_couch):
+            activity_groups.append((x.value['_id'], x.value['title']))   
+        return activity_groups
+    
 
 class EditActivityForm(twf.Form):
     
@@ -51,15 +56,15 @@ class EditActivityForm(twf.Form):
                                                                    theme_advanced_buttons2 = "",
                                                                    theme_advanced_buttons3 = ""
                                                                    ))
-        tags = twf.TextField()#validator=twc.String)
-        external_link = twf.UrlField()#validator=twc.Required)
-        internal_link = twf.UrlField()#validator=twc.Required)
-        print_on_demand_link = twf.UrlField()#validator=twc.Required)
-        capacity = twf.NumberField(validator=twc.IntValidator) # TODO: should be inteteger here
+        tags = twf.TextField()
+        external_link = twf.UrlField()
+        internal_link = twf.UrlField()
+        print_on_demand_link = twf.UrlField()
+        capacity = twf.NumberField(validator=twc.IntValidator) 
         default_booking_state = twf.HiddenField()
-        activity_group_id = twf.SingleSelectField(validator=twc.Required, options=twc.Deferred(getActivityGroupOptions)) # TODO: what to do with options, see perhaps http://code.runnable.com/U-tO4xSN7Ch6wWS7/turbogears-forms-fill-singleselect-value-for-python
-        gps_lat  = twf.TextField()#validator=twc.Required)
-        gps_long = twf.TextField()#validator=twc.Required)
+        activity_group_id = twf.SingleSelectField(validator=twc.Required, options=twc.Deferred(_getActivityGroupOptions))
+        gps_lat  = twf.TextField()
+        gps_long = twf.TextField()
         equipment_needed = twf.CheckBox()
         education_needed  = twf.CheckBox()
         certificate_needed = twf.CheckBox()
@@ -71,4 +76,4 @@ class EditActivityForm(twf.Form):
     action = lurl('save_activity_properties')
         
 
-create_edit_activity_form = EditActivityForm() #####"create_edit_activity_form")
+create_edit_activity_form = EditActivityForm()

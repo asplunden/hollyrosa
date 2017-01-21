@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010, 2011, 2012, 2013 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -63,8 +63,9 @@ addPrintLink.addEvent(window, 'load', function(){addPrintLink.init('print-on-dem
 </script> 
 </head>
 
-<body>
+<body class="tundra">
     <h2>Kort beskrivning av ${activity.title}</h2>
+    <h3>${activity.activity_group_id}</h3>
     <ul class="any_menu context_inline_menu ">
        <li><a href="${tg.url('edit_activity', params={'activity_id':activity.id})}">edit</a></li>
        <li><a href="${activity.external_link}">external link</a></li>

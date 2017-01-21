@@ -32,11 +32,7 @@ import datetime,  StringIO,  time
 from tg import tmpl_context
 import hashlib
 
-#### from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
-#### from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
-#### from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
-#### from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
-#### from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
+
 from hollyrosa.widgets.change_password_form import create_change_password_form
 from hollyrosa.widgets.edit_user_form import create_edit_user_form
 
