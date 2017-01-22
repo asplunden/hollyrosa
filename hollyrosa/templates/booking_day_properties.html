@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -21,18 +21,13 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
-
-  <xi:include href="master.html" />
-
+<xi:include href="master.html" />
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Booking Day Properties</title>
 </head>
-
-<body>
-    <h2>Booking Day Properties ${booking_day.date}</h2>
-    
-    <!-- <div py:replace="tmpl_context.form(booking_day, action='save_booking_day_properties')">Input Form</div> -->
-    <div>${tmpl_context.form.display(value=booking_day)}</div>
+<body class="tundra">
+  <h2>Booking Day Properties ${booking_day.date}</h2>
+  <div>${tmpl_context.form.display(value=booking_day)}</div>
 </body>
 </html>
