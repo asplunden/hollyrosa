@@ -182,7 +182,7 @@ def getSlotAndActivityIdOfBooking(holly_couch, booking,  subtype):
     
     if subtype=='program':
         schema_o = holly_couch[booking_day_o['day_schema_id']]
-    elif subtype == 'live':
+    elif subtype == 'room':
         schema_o = holly_couch[ booking_day_o['room_schema_id']]
     #schema_o = holly_couch[booking_day_o['day_schema_id']]
     slot_id = booking['slot_id']

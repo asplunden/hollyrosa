@@ -56,7 +56,7 @@ function validate_form(evt, activity_select) {
 ready(function(){
     //...set up filtering select for activity
     var activity_entries = ${activity_entries};
-	 var activity_store = new Memory({
+	var activity_store = new Memory({
         data:activity_entries });
 
 
@@ -91,6 +91,6 @@ ready(function(){
         
     </table>
     <h4>Change activity below</h4>
-    <div py:replace="tmpl_context.form.display(booking, child_args=dict(activity_id=dict(options=activities)))">Input Form</div> 
+    <div py:replace="tmpl_context.form.display(booking)">Input Form</div> 
 </body>
 </html>

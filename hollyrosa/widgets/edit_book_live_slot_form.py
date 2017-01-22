@@ -24,18 +24,8 @@ import tw2.forms as twf
 from formencode.validators import DateConverter
 
 
-
-class EditBookLiveSlotForm(twf.Form):
-	    
-    class child(twf.TableLayout):
-    
-        slot_position = twc.Param('test options for now for single select field', default=['x','y'])
-
-        
-        def getSlotIdOptions():
-            return slot_position
-    
-    
+class EditBookLiveSlotForm(twf.Form):    
+    class child(twf.TableLayout):    
         booking_id = twf.HiddenField(validator=twc.Required)
         booking_day_id = twf.HiddenField(validator=twc.Required)
         subtype = twf.HiddenField(validator=twc.Required)
@@ -55,7 +45,7 @@ class EditBookLiveSlotForm(twf.Form):
         booking_content = twf.TextArea(twc.Required, css_class="edit_booking_content", rows=5, cols=30)
         block_after_book = twf.CheckBox()
 
-	action = lurl('save_booked_live_booking_properties')
+	action = lurl('why_this_link_dont_work_i_dont_know') #save_booked_live_booking_properties')
 
 
             

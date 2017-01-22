@@ -82,8 +82,8 @@ def sanitizeDate(d,  default_date=''):
     except ValueError:
         return False, default_date
     
-def getSanitizeDate(d,  default_date=''):
-    """Make sure d is on the form YYYY-mm-dd and return a Date"""
+def getSanitizeDate(d, default_date=''):
+    """Make sure d is on the form YYYY-mm-dd and return a Date object from datetime library"""
     # TODO we really should use formenc validate here
     
     try:

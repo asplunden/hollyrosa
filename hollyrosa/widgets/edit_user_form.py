@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Copyright 2010-2017 Martin Eliasson
 
