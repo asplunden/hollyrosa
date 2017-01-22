@@ -37,30 +37,15 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
       	targetNodeIds: ["user_listing"],
          selector: "tr.active_user",
          leftClickToOpen: common_menu.load_left_click_menu()
-/*         
-         onOpen: function(evt) {
-                   var node = menu.currentTarget;
-                   var locked = node.attributes["hollyrosa:lock"].value;
-               		console.log( locked );
-               		
-               	 if (locked == 'block') {
-                   	 menu_new_booking_choice.disabled=true;
-                      menu_block_slot_choice.disabled = true;
-                      menu_unblock_slot_choice.disabled = false;               	 
-               	 } else {
-                    	 menu_new_booking_choice.disabled=false;
-                      menu_block_slot_choice.disabled = false;
-                      menu_unblock_slot_choice.disabled = true;   
-               	 }
-           }*/
+
 		});
            
-      common_menu.add_user_management_op_menu_item(menu, menu, "New User...", '${tg.url('new')}');
-      common_menu.add_user_management_op_menu_item(menu, menu, "Edit...", '${tg.url('edit')}');
-      common_menu.add_user_management_op_menu_item(menu, menu, "Change Password...", '${tg.url('change_password')}');
-      common_menu.add_user_management_op_menu_item(menu, menu, "Activate", '${tg.url('activate')}');
-      common_menu.add_user_management_op_menu_item(menu, menu, "Dectivate", '${tg.url('deactivate')}');      
-      common_menu.add_user_management_op_menu_item(menu, menu, "History", '${tg.url('/history/show')}');		      
+      common_menu.add_user_management_op_menu_item(menu, menu, "New User...", '${tg.url('new')}', 'GET');
+      common_menu.add_user_management_op_menu_item(menu, menu, "Edit...", '${tg.url('edit')}', 'GET');
+      common_menu.add_user_management_op_menu_item(menu, menu, "Change Password...", '${tg.url('change_password')}', 'GET');
+      common_menu.add_user_management_op_menu_item(menu, menu, "Activate", '${tg.url('activate')}', 'POST');
+      common_menu.add_user_management_op_menu_item(menu, menu, "Dectivate", '${tg.url('deactivate')}', 'POST');      
+      common_menu.add_user_management_op_menu_item(menu, menu, "History", '${tg.url('/history/show')}', 'GET');		      
       common_menu.add_menu_separator(menu);	
       
       
@@ -72,13 +57,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
          leftClickToOpen: common_menu.load_left_click_menu(),
         	popup: more
       }));
-           
-		/*common_menu.add_booking_op_menu_item(menu, more, "Move...", '${tg.url('/booking/move_booking')}');
-		common_menu.add_booking_op_menu_item(menu, more, "Prolong", '${tg.url('/booking/prolong')}');
-		           
-      common_menu.add_menu_separator(more);     
-		
-        */              
+                         
       var set_level_url = '${tg.url('/user/set_level')}';
       
       

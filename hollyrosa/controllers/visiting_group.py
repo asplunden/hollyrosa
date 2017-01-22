@@ -23,7 +23,7 @@ import datetime,  logging
 
 log = logging.getLogger(__name__)
 
-from tg import expose, flash, require, url, request, redirect,  validate
+from tg import expose, flash, require, url, request, redirect, validate, response
 from formencode import validators
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
@@ -37,17 +37,13 @@ from tg import tmpl_context
 
 
 from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
-#### from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
-#### from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
-#### from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
-#### from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
 
-from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, makeVisitingGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options,  hide_cache_content_in_booking,  getLoggedInUser,  vodb_status_map
+from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, makeVisitingGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options, hide_cache_content_in_booking, getLoggedInUser, vodb_status_map, ensurePostRequest
 from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange,  updateVisitingGroupComputedSheets,  computeAllUsedVisitingGroupsTagsForTagSheet,  program_visiting_group_properties_template,  staff_visiting_group_properties_template,  course_visiting_group_properties_template
 from hollyrosa.controllers.booking_history import remember_tag_change
 from hollyrosa.controllers import common_couch
 
-from tg import request, response
+
 ##from tg.controllers import CUSTOM_CONTENT_TYPE
 
 __all__ = ['VisitingGroup']
@@ -292,7 +288,8 @@ class VisitingGroup(BaseController):
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may change visiting group properties'))
     def save_visiting_group_properties(self,  visiting_group_id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr='', password='',  subtype=''):
         log.info('save_visiting_group_properties')
-        #id = visiting_group_id_id
+        
+        ensurePostRequest(request, __name__)
         is_new = ((None == visiting_group_id) or (visiting_group_id == ''))
         
         #...this is a hack so we can direct the id of the visiting group for special groups
@@ -367,9 +364,11 @@ class VisitingGroup(BaseController):
         raise redirect('/visiting_group/view_all')
 
 
-    @validate(validators={'id':validators.Int})
+    @validate(validators={'id':validators.UnicodeString})
     @require(Any(has_level('pl'), msg='Only pl members may delete visiting groups'))
-    def delete_visiting_group(self,  id=None):
+    def delete_visiting_group(self, id=None):
+        ensurePostRequest(request, __name__)
+        log.info("delete_visiting_group()")
         if None == id:
             pass
             
@@ -591,6 +590,8 @@ class VisitingGroup(BaseController):
     @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True), 'state':validators.Int(not_empty=True)})    
     @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def set_program_state(self, visiting_group_id=None,  state=0):
+        log.info("set_program_state()")
+        ensurePostRequest(request, __name__)
         visiting_group_o = common_couch.getVisitingGroup(holly_couch,  visiting_group_id) 
         self.do_set_program_state(holly_couch, visiting_group_id,  visiting_group_o, int(state))            
         raise redirect(request.referrer)
@@ -600,14 +601,19 @@ class VisitingGroup(BaseController):
     @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True), 'state':validators.Int(not_empty=True)})    
     @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def set_vodb_state(self, visiting_group_id=None,  state=0):
+        log.info("set_vodb_state()")
+        ensurePostRequest(request, __name__)
         visiting_group_o = common_couch.getVisitingGroup(holly_couch,  visiting_group_id) 
         self.do_set_vodb_state(holly_couch, visiting_group_id,  visiting_group_o, int(state))            
         raise redirect(request.referrer)
+
 
     @expose()
     @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True)})    
     @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def copy_vodb_contact_info(self, visiting_group_id=None):
+        log.info("copy_vodb_contact_info()")
+        ensurePostRequest(request, __name__)
         visiting_group_o = common_couch.getVisitingGroup(holly_couch,  visiting_group_id) 
         
         if visiting_group_o.get('contact_person', '')  == '': 

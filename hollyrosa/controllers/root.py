@@ -2,7 +2,7 @@
 """
 Main Controller
 
-Copyright 2010 - 2017 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -19,9 +19,9 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
-import datetime
+import datetime, logging
 
-from tg import expose, flash, require, url, lurl, request, redirect, tmpl_context
+from tg import expose, flash, require, url, lurl, request, redirect, tmpl_context, abort
 from tg.i18n import ugettext as _, lazy_ugettext as l_
 from tg.exceptions import HTTPFound
 
@@ -34,6 +34,8 @@ from hollyrosa.controllers import booking_day, calendar, booking_history, workfl
 from hollyrosa import model
 
 __all__ = ['RootController']
+
+log = logging.getLogger()
 
 
 class RootController(BaseController):

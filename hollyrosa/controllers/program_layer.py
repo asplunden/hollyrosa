@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -19,6 +19,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
+import datetime, json, logging
+
 from tg import expose, flash, require, url, request, response,  redirect,  validate
 
 from formencode import validators
@@ -27,14 +29,16 @@ from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
 from hollyrosa.controllers import common_couch
 
-import datetime,  json
 
-from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, makeVisitingGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options,  hide_cache_content_in_booking
+
+from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId, makeVisitingGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options,  hide_cache_content_in_booking, ensurePostRequest
 from hollyrosa.model.booking_couch import getVisitingGroupsInDatePeriod,  getAllProgramLayerBucketTexts,  getBookingsOfVisitingGroup,  getAllActivities,  getBookingDays,  getActivityTitleMap,  getBookingInfoNotesOfUsedActivities,  getNotesForTarget
 from hollyrosa.model.booking_couch import dateRange
 
 __all__ = ['ProgramLayer']
 
+
+log = logging.getLogger()
 
 class ProgramLayer(BaseController):
     
@@ -72,6 +76,8 @@ class ProgramLayer(BaseController):
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
     @require(Any(has_level('pl'), msg='Only PL may change layers configuration'))
     def update_visiting_group_program_layers(self, visiting_group_id,  save_button=None,  layer_data=''):
+        log.info("update_visiting_group_program_layers")
+        ensurePostRequest(request, __name__)
         vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
         vgroup_layers = vgroup.get('layers',  list())
         
@@ -305,6 +311,8 @@ class ProgramLayer(BaseController):
     @validate(validators={"visiting_group_id":validators.UnicodeString(),  "booking_day_id":validators.UnicodeString(),  "bucket_time":validators.UnicodeString(),  "layer_text_id":validators.UnicodeString(),  "text":validators.UnicodeString(),  "title":validators.UnicodeString()})
     @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def program_layer_save_layer_text(self,  visiting_group_id='', booking_day_id='',  bucket_time='', layer_text_id='',  text='',  title=''):
+        log.info("program_layer_save_layer_text")
+        ensurePostRequest(request, __name__)
         is_new = (layer_text_id=='')
         
         if is_new:
@@ -362,6 +370,8 @@ class ProgramLayer(BaseController):
     @validate(validators={"layer_text_id":validators.UnicodeString()})
     @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def program_layer_delete_layer_text(self, layer_text_id):
+        log.info("program_layer_delete_layer_text()")
+        ensurePostRequest(request, __name__)
         layer_text = common_couch.getLayerText(holly_couch, layer_text_id)
         layer_text['state'] = -100
         holly_couch[layer_text_id] = layer_text

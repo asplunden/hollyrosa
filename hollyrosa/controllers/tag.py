@@ -19,16 +19,17 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
+import datetime, logging
 
-from tg import expose, flash, require, url, request, redirect,  validate
+
+from tg import expose, flash, require, url, request, redirect, validate, abort
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch
 
-import datetime
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
-from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId
+from hollyrosa.controllers.common import has_level, getLoggedInUserId, ensurePostRequest
 
 from hollyrosa.model.booking_couch import genUID 
 from hollyrosa.controllers.booking_history import remember_tag_change
@@ -36,6 +37,9 @@ from hollyrosa.controllers import common_couch
 from formencode import validators
 
 __all__ = ['tag']
+
+
+log = logging.getLogger()
 
 
 class Tag(BaseController):
@@ -52,8 +56,11 @@ class Tag(BaseController):
     
         
     @expose("json")
+    @require(Any(has_level('staff'), has_level('pl'), msg='Only PL and staff members may change tags'))
     @validate(validators={'id':validators.UnicodeString, 'tags':validators.UnicodeString})        
     def add_tags(self, id, tags):
+        log.info("add_tags()")
+        ensurePostRequest(request, __name__)
         vgroup = common_couch.getVisitingGroup(holly_couch,  id)
         old_tags = vgroup.get('tags',[])
         remember_old_tags = [t for t in old_tags]
@@ -69,8 +76,11 @@ class Tag(BaseController):
     
     
     @expose("json")
+    @require(Any(has_level('staff'), has_level('pl'), msg='Only PL and staff members may change tags'))
     @validate(validators={'id':validators.UnicodeString, 'tag':validators.UnicodeString})        
     def delete_tag(self, id, tag):
+        log.info("delete_tag()")
+        ensurePostRequest(request, __name__)
         vgroup = common_couch.getVisitingGroup(holly_couch,  id)
         old_tags = vgroup.get('tags',[])
         new_tags = [t for t in old_tags if t.strip() != tag.strip()]

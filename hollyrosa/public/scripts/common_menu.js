@@ -17,8 +17,23 @@
  * along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
  **/
  
- define(["dojo/dom-attr", "dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/CheckedMenuItem", "dijit/MenuSeparator", "dojo/query", "dojo/io-query", "dojo/json", "dojo/cookie", "dojo/dom-style", "dojo/domReady!"], function(domAttr, array, Menu, MenuItem, CheckedMenuItem, MenuSeparator, query, ioQuery, json, cookie, domStyle) {
+ define(["dojo/dom-attr", "dojo/_base/array", "dojo/dom-construct", "dojo/_base/window", "dijit/Menu","dijit/MenuItem", "dijit/CheckedMenuItem", "dijit/MenuSeparator", "dojo/query", "dojo/io-query", "dojo/json", "dojo/cookie", "dojo/dom-style", "dojo/domReady!"], function(domAttr, array, domConstruct, win, Menu, MenuItem, CheckedMenuItem, MenuSeparator, query, ioQuery, json, cookie, domStyle) {
 		
+	 
+	/**
+	 * Make a form element and the end of the body, set invisible, add form elements (all can be hidden) and then post it / submit it.
+	 * 
+	 * body_elem is a reference to the body element itself.
+	 */
+	function make_form_and_post(action, values) {
+		var body_elem = win.body();
+		var form_elem = domConstruct.create('form', { method:'post', enctype:"multipart/form-data", action:action }, body_elem);
+		for (var key in values) {
+			domConstruct.create('input', { type:'hidden', name:key, value:values[key] }, form_elem);
+		}
+		form_elem.submit();
+	}
+	
     function add_menu_separator(menu) {
     	menu.addChild(new MenuSeparator());
     }
@@ -83,13 +98,17 @@
                        booking_id: bid,
                        state: state_value,
                        all: a_all
-                   };        
-               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+                   };
+            /*
+            window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+            */
+            make_form_and_post(a_url, ioq);
+            
            }}));
    }    
    
    
-	function add_booking_op_menu_item(a_menu, a_sub_menu, a_name, a_url) {
+	function add_booking_op_menu_item(a_menu, a_sub_menu, a_name, a_url, method) {
         a_sub_menu.addChild(new MenuItem({
                label: a_name,
                onClick: function(evt) {
@@ -99,13 +118,17 @@
                        booking_id: bid,
                        return_to_day_id: node.attributes["hollyrosa:bdayid"].value
                    };
-               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+	               if (method == 'GET') {
+	            	   window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+	               } else {   
+	            	   make_form_and_post(a_url, ioq);
+	               }
                }
            })); 
 	}
 	
 	
-	function add_user_management_op_menu_item(a_menu, a_sub_menu, a_name, a_url) {
+	function add_user_management_op_menu_item(a_menu, a_sub_menu, a_name, a_url, method) {
         a_sub_menu.addChild(new MenuItem({
                label: a_name,
                onClick: function(evt) {
@@ -114,7 +137,11 @@
                    var ioq = {
                        user_id: user_id
                    };
-               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+	               if (method == 'GET') {
+	               		window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+	               } else {
+	            	    make_form_and_post(a_url, ioq);
+	               }
                }
            })); 
 	}
@@ -131,7 +158,8 @@
                        user_id: user_id,
                        level: level_value
                    };        
-               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+               //window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+            make_form_and_post(a_url, ioq)
            }}));
    }    	
     
@@ -157,9 +185,9 @@
     		
     			});
     		     
-          console.log(a_url + '?' + ioQuery.objectToQuery(ioq));
-          window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
-    	
+            //console.log(a_url + '?' + ioQuery.objectToQuery(ioq));
+            //window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+            make_form_and_post(a_url, ioq)
     		});
     }
     
@@ -177,7 +205,8 @@
                        booking_day_id: node.attributes["hollyrosa:bdayid"].value
                    };
                //console.log(a_url + '?' + ioQuery.objectToQuery(ioq));
-               window.location = a_url + '?' + ioQuery.objectToQuery(ioq); // this is bad and we would like to do a complete POST request instead
+               //window.location = a_url + '?' + ioQuery.objectToQuery(ioq); // this is bad and we would like to do a complete POST request instead
+                   make_form_and_post(a_url, ioq)
                }
            });
            
@@ -269,6 +298,7 @@
    		
    		
 	function save_ag_checkbox_status(a_checkbox_status) {
+		// TOOD: save to session data, not cookie (better for cache performance since cookie doesent needto be in flight among other things)
 		cookie('visible_ag', json.stringify(a_checkbox_status), {expires:5});		
 	}
 		
@@ -382,24 +412,25 @@
                        visiting_group_id: vgid,
                        state: state_value
                    };        
-               window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+               //window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+               make_form_and_post(a_url, ioq)
            }}));
    }
 	
-    //...better load via ajax
+    //...TODO: better load via ajax
     program_state_map = [["0","new"],["5","created"],["10","preliminary"],["50","island"],["20","confirmed"],["-10","canceled"],["-100","deleted"]];
     vodb_state_map = [["0","new"],["5","created"],["10","preliminary"],["50","island"],["20","confirmed"],["-10","canceled"],["-100","deleted"]];
     
 	
 	return {
 		add_redirect_menu_item:add_redirect_menu_item, 
-      add_call_function_menu_item:add_call_function_menu_item,
-	   add_vgid_redirect_menu_item:add_vgid_redirect_menu_item, 
-	   add_note_redirect_menu_item:add_note_redirect_menu_item, 
-	   add_list_bookings_redirect_menu_item:add_list_bookings_redirect_menu_item, 
+        add_call_function_menu_item:add_call_function_menu_item,
+	    add_vgid_redirect_menu_item:add_vgid_redirect_menu_item, 
+	    add_note_redirect_menu_item:add_note_redirect_menu_item, 
+	    add_list_bookings_redirect_menu_item:add_list_bookings_redirect_menu_item, 
 		add_change_booking_state_menu_item:add_change_booking_state_menu_item, state_change_list:state_change_list, 
 		add_booking_op_menu_item:add_booking_op_menu_item, add_visiting_group_menu_item:add_visiting_group_menu_item,
-      add_user_management_op_menu_item:add_user_management_op_menu_item, add_change_user_level_menu_item:add_change_user_level_menu_item,
+        add_user_management_op_menu_item:add_user_management_op_menu_item, add_change_user_level_menu_item:add_change_user_level_menu_item,
 		add_visiting_group_add_note_menu_item:add_visiting_group_add_note_menu_item, 
 		add_visiting_group_list_bookings_menu_item:add_visiting_group_list_bookings_menu_item,
 		add_booking_op_menu_item_for_block:add_booking_op_menu_item_for_block,

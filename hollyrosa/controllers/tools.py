@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -20,37 +20,25 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 
-from tg import expose, flash, require, url, request, redirect,  validate
+from tg import expose, flash, require, url, request, redirect, validate, abort
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
 
-import datetime,  StringIO,  time
+import datetime, StringIO, time, logging
 
-#...this can later be moved to the VisitingGroup module whenever it is broken out
-from tg import tmpl_context
-import hashlib
 
-#### from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
-#### from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
-#### from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
-#### from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
-#### from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
 
 from booking_history import  remember_workflow_state_change
-from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level
+from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level, ensurePostRequest
 
 from hollyrosa.model.booking_couch import getAllActivityGroups,  getAllScheduledBookings,  getAllBookingDays,  getAllVisitingGroups,  getAllActivities
 from hollyrosa.model.booking_couch import getAgeGroupStatistics, getTagStatistics, getSchemaSlotActivityMap, getActivityTitleMap, getBookingDays, getAllUtelunchBookings, getActivityStatistics
+
 __all__ = ['tools']
 
-workflow_submenu = """<ul class="any_menu">
-        <li><a href="overview">overview</a></li>
-        <li><a href="view_nonapproved">non-approved</a></li>
-        <li><a href="view_unscheduled">unscheduled</a></li>
-        <li><a href="view_scheduled">scheduled</a></li>
-        <li><a href="view_disapproved">dissapproved</a></li>
-    </ul>"""
+log = logging.getLogger()
+
 
 class Tools(BaseController):
     def view(self, url):
@@ -82,7 +70,8 @@ class Tools(BaseController):
     @expose('hollyrosa.templates.view_sanity_check_property_usage')
     @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def sanity_check_property_usage(self):
-        
+        log.info("sanity_check_property_usage()")
+        ensurePostRequest(request, __name__)
         #...iterate through all bookings, we are only interested in scheduled bookings
         bookings = getAllScheduledBookings(holly_couch, limit=1000000) 
         booking_days_map = dict()
@@ -307,52 +296,6 @@ class Tools(BaseController):
         
         return dict(tags=['vodb:definitiv',u'vodb:preliminär',u'vodb:förfrågan', 'vodb:na'], people_by_day=all_totals)
 
-
-
-    @expose('hollyrosa.templates.booking_day_summary')
-    @require(Any(has_level('staff'), has_level('pl'), msg='Only PL or staff members can take a look at booking statistics'))
-    def booking_statistics(self):
-        """Show a complete booking day"""
-        abort(501)
-        slot_rows = DBSession.query(booking.SlotRow).options(eagerload('activity'))
-        slot_rows_n = []
-        for s in slot_rows:
-            slot_rows_n.append(s)
-
-        #...first, get booking_day for today
-        bookings = DBSession.query(booking.Booking).all()
-        
-        #...additions - counting properties
-        visiting_groups = DBSession.query(booking.VisitingGroup).all() #join(booking.VistingGroupProperty).all()
-        vgroup_properties = DBSession.query(booking.VistingGroupProperty).all()
-        
-        activity_totals = dict()
-        totals = 0
-        for s in bookings:
-            if s.booking_day_id != None:
-                activity_count_list, activity_property_count = activity_totals.get(s.activity.id, (list(), {}))
-                
-                #...check in content for properties
-                tmp_content = s.content
-                tmp_visiting_group = s.visiting_group
-               
-                if None != tmp_visiting_group:
-                    tmp_vgroup_properties = tmp_visiting_group.visiting_group_property
-                    for tmp_vgroup_property in tmp_vgroup_properties:
-                        if '$'+tmp_vgroup_property.property in tmp_content:
-                            tmp_count_x = activity_property_count.get(tmp_vgroup_property.property, 0) + int(tmp_vgroup_property.value)
-                            activity_property_count[tmp_vgroup_property.property] = tmp_count_x
-                            tmp_count_all = activity_property_count.get('ALL', 0) + int(tmp_vgroup_property.value)
-                            activity_property_count['ALL'] = tmp_count_all
-
-
-                activity_count_list.append(s)
-                activity_totals[s.activity.id] = (activity_count_list, activity_property_count)
-                totals += 1
-
-
-        return dict(slot_rows=slot_rows_n,  bookings=activity_totals, totals=totals)
-        
         
     @expose('hollyrosa.templates.sannah_overview')
     @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL can take a look at people statistics'))
@@ -374,23 +317,13 @@ class Tools(BaseController):
         
         log.info( utelunch_dict )
         return dict(booking_days=all_booking_days, utelunches=utelunch_dict)
-
-
-    @expose()
-    @require(Any(has_level('pl'),  msg='Only PL can take a look at booking statistics'))
-    def set_booking_day_schema_ids(self):
-        booking_days = [b.doc for b in getAllBookingDays(holly_couch)]
-        for bdy in booking_days:
-            if bdy['date'] <= '2012-07-22' or bdy['date'] > '2012<07-29':
-                bdy['day_schema_id'] = 'day_schema.2012'
-                holly_couch[bdy['_id']] = bdy
-            
-        raise redirect('/')
         
         
     @expose()
     @require(Any(has_level('pl'),  msg='Only PL can poke around the schemas'))
     def create_living_schema(self):
+        log.info("create_living_schema()")
+        ensurePostRequest(request, __name__)
         ew_id = genUID(type='living_schema')
         schema = dict(type='day_schema',  subtype='room',  title='room schema 2013',  activity_group_ids=["activity_groups_ids", "roomgroup.fyrbyn", "roomgroup.vaderstracken", "roomgroup.vindarnashus","roomgroup.tunet",
         "roomgroup.skrakvik","roomgroup.tc","roomgroup.alphyddorna","roomgroup.gokboet","roomgroup.kojan"])

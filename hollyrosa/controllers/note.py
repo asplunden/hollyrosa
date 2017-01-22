@@ -20,7 +20,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 
-from tg import expose, flash, require, url, request, redirect,  validate
+from tg import expose, flash, require, url, request, redirect,  validate, abort
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch,  genUID
@@ -38,7 +38,7 @@ from tg import tmpl_context
 from hollyrosa.widgets.edit_note_form import create_edit_note_form
 from hollyrosa.widgets.edit_attachment_form import create_edit_attachment_form
 
-from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId
+from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, ensurePostRequest
 
 from hollyrosa.model.booking_couch import genUID, getNotesForTarget
 from hollyrosa.controllers.booking_history import remember_note_change
@@ -102,6 +102,8 @@ class Note(BaseController):
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def save_note(self, target_id, note_id, text):
+        log.info('save_note()')
+        ensurePostRequest(request, __name__)
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         if note_id == '' or note_id == None:
             note_o = dict(type='note', note_id=genUID(type='note'), target_id=target_id, note_state=0, tags=list(), history=list(), text='')
@@ -133,7 +135,9 @@ class Note(BaseController):
         
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
-    def save_attachment(self, target_id, _id, text, attachment):
+    def save_attachment(self, target_id, text, attachment, _id='', **kwargs):
+        log.info("save_attachment()")
+        ensurePostRequest(request, __name__)
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         if _id == '':
             attachment_o = dict(type='attachment', _id=genUID(type='attachment'), target_id=target_id, attachment_state=0, tags=list(), history=list(), text='')
@@ -168,7 +172,7 @@ class Note(BaseController):
         raise redirect(redirect_to)
         
         
-    @expose() ##content_type=CUSTOM_CONTENT_TYPE)
+    @expose()
     @validate(validators={"attachment_id":validators.UnicodeString(), "doc_id":validators.UnicodeString()})
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may view visiting group attachments'))   
     def download_attachment(self, attachment_id, doc_id):

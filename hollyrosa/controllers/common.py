@@ -20,12 +20,11 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 Note: functions in this module should rarely if ever access holly_couch (couch db), instead, put such methods in the common_couch.py module
 """
 
+import datetime
+from tg import abort
+from repoze.what.predicates import Predicate
 
 from hollyrosa.model import booking
-
-from repoze.what.predicates import Predicate
-import datetime
-
 
 
 workflow_map = dict()
@@ -190,6 +189,14 @@ def getLoggedInUser(request):
     
 def getLoggedInUserId(request):
     return request.identity.get('user', None)['_id']
+
+
+def ensurePostRequest(request, name=''):
+    """
+    The purpose of this little method is to ensure that the controller was called with appropriate HTTP verb. 
+    """
+    if not request.method == 'POST':
+        abort(405)
     
     
 def computeCacheContent(visiting_group, content):

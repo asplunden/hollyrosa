@@ -98,9 +98,9 @@ function navigation_calendar_clicked(x) {
            
       var menu_new_booking_choice = common_menu.add_booking_op_menu_item_for_block(menu, menu, "New booking...", '${tg.url('book_slot')}','program');
       common_menu.add_menu_separator(menu);
-      common_menu.add_booking_op_menu_item(menu, menu, "View...", '${tg.url('/booking/view_booked_booking')}');
-      common_menu.add_booking_op_menu_item(menu, menu, "Edit...", '${tg.url('/booking/edit_booked_booking')}');
-      common_menu.add_booking_op_menu_item(menu, menu, "Unschedule", '${tg.url('/booking/unschedule_booking')}');		      
+      common_menu.add_booking_op_menu_item(menu, menu, "View...", '${tg.url('/booking/view_booked_booking')}', 'GET');
+      common_menu.add_booking_op_menu_item(menu, menu, "Edit...", '${tg.url('/booking/edit_booked_booking')}',' GET');
+      common_menu.add_booking_op_menu_item(menu, menu, "Unschedule", '${tg.url('/booking/unschedule_booking')}', 'POST');		      
       common_menu.add_menu_separator(menu);	
 			 
       /* add submenu with more entries  */
@@ -112,8 +112,8 @@ function navigation_calendar_clicked(x) {
         	popup: more
       }));
            
-		common_menu.add_booking_op_menu_item(menu, more, "Move...", '${tg.url('/booking/move_booking')}');
-		common_menu.add_booking_op_menu_item(menu, more, "Prolong", '${tg.url('/booking/prolong')}');
+		common_menu.add_booking_op_menu_item(menu, more, "Move...", '${tg.url('/booking/move_booking')}', 'GET');
+		common_menu.add_booking_op_menu_item(menu, more, "Prolong", '${tg.url('/booking/prolong')}', 'POST');
 		           
       common_menu.add_menu_separator(more);     
 		
@@ -122,10 +122,10 @@ function navigation_calendar_clicked(x) {
     	array.forEach(common_menu.state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(menu, more, x['name'], x['state'], 0, set_state_url);});
       common_menu.add_menu_separator(more);     
 		     
-   	common_menu.add_booking_op_menu_item(menu, more, "Multi-book...", '${tg.url('/booking/multi_book')}');
-      common_menu.add_booking_op_menu_item(menu, more, "Delete", '${tg.url('delete_booking')}');
+   	  common_menu.add_booking_op_menu_item(menu, more, "Multi-book...", '${tg.url('/booking/multi_book')}', 'GET');
+      common_menu.add_booking_op_menu_item(menu, more, "Delete", '${tg.url('delete_booking')}', 'POST');
      
-      common_menu.add_menu_separator(menu);     
+      common_menu.add_menu_separator(menu);
 		     
       common_menu.add_visiting_group_list_bookings_menu_item(menu, menu, "List bookings of group...", '${tg.url('/visiting_group/view_bookings_of_name')}');
       common_menu.add_visiting_group_menu_item(menu, menu, "View visiting group...", '${tg.url('/visiting_group/show_visiting_group')}');
@@ -173,13 +173,10 @@ function navigation_calendar_clicked(x) {
                leftClickToOpen: common_menu.load_left_click_menu()
               });
               
-          	 common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "View...", '${tg.url('/booking/view_booked_booking')}');
-          	 common_menu.add_visiting_group_list_bookings_menu_item(unschedule_menu, unschedule_menu, "List bookings of group", '${tg.url('/visiting_group/view_bookings_of_name')}');
-		    	 common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Edit...", '${tg.url('/booking/edit_booking')}');
-             common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Delete...", '${tg.url('delete_booking')}'); 
-             
-             
-       
+          	 common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "View...", '${tg.url('/booking/view_booked_booking')}', 'POST');
+          	 common_menu.add_visiting_group_list_bookings_menu_item(unschedule_menu, unschedule_menu, "List bookings of group", '${tg.url('/visiting_group/view_bookings_of_name')}', 'GET');
+		     common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Edit...", '${tg.url('/booking/edit_booking')}', 'GET');
+             common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Delete...", '${tg.url('delete_booking')}', 'POST'); 
              
               
              var schedule_more_menu = new Menu();

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -19,29 +19,21 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from tg import expose, flash, require, url, request, redirect,  validate
+from tg import expose, flash, require, url, request, redirect, validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import genUID,  holly_couch
+from hollyrosa.model import genUID, holly_couch
 from hollyrosa.model.booking_couch import getAllScheduledBookings,  getAllUnscheduledBookings,  gelAllBookingsWithBookingState,  getActivityTitleMap,  getBookingDayInfoMap,  getUserNameMap,  getSchemaSlotActivityMap, getAllSimilarBookings
-from sqlalchemy import and_
-import datetime
+from hollyrosa.controllers.common import ensurePostRequest
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
-
-
-
-#### from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
-#### from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
-#### from hollyrosa.widgets.edit_new_booking_request import  create_edit_new_booking_request_form
-#### from hollyrosa.widgets.edit_book_slot_form import  create_edit_book_slot_form
-#### from hollyrosa.widgets.validate_get_method_inputs import  create_validate_schedule_booking,  create_validate_unschedule_booking
 
 from booking_history import  remember_workflow_state_change
 from hollyrosa.controllers.common import workflow_map,  getLoggedInUserId,  has_level
 
 from formencode import validators
+from hollyrosa.controllers.activity import ensurePostRequest
 
 __all__ = ['Workflow']
 
@@ -124,6 +116,7 @@ class Workflow(BaseController):
     @validate(validators={'booking_id':validators.UnicodeString(not_empty=True), 'state':validators.Int(not_empty=True), 'all':validators.Int(not_empty=False)})    
     @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def set_state(self, booking_id=None,  state=0, all=0):
+        ensurePostRequest(request, __name__)
         if all == 0 or all==None:
             booking_o = holly_couch[booking_id] 
             self.do_set_state(holly_couch, booking_id,  booking_o, state)

@@ -24,8 +24,6 @@ from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch
 
-#### from hollyrosa.widgets.edit_visiting_group_program_request_form import create_edit_visiting_group_program_request_form
-
 from tg import tmpl_context
 
 import datetime,logging, json, time
@@ -37,7 +35,7 @@ from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUs
 
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr
 from hollyrosa.controllers.booking_history import remember_tag_change
-from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map
+from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, ensurePostRequest
 from hollyrosa.controllers.booking_history import remember_new_booking_request
 from hollyrosa.controllers import common_couch
 
@@ -210,7 +208,8 @@ class VisitingGroupProgramRequest(BaseController):
         #
         #
         # 
-        
+        log.info("update_visiting_group_program_request()")
+        ensurePostRequest(request, __name__)
         validation_error_messages = ValidationErrorMessages()
         
         visiting_group_id = str(vgroup_id)

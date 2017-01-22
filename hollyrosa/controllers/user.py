@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -19,18 +19,19 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
+import datetime, StringIO, time, hashlib, logging
 
-from tg import expose, flash, require, url, request, redirect,  validate
+
+from tg import expose, flash, require, url, request, redirect, validate, abort
 from formencode import validators
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
 
-import datetime,  StringIO,  time
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
-import hashlib
+
 
 
 from hollyrosa.widgets.change_password_form import create_change_password_form
@@ -38,20 +39,15 @@ from hollyrosa.widgets.edit_user_form import create_edit_user_form
 
 
 from booking_history import  remember_workflow_state_change
-from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level
+from hollyrosa.controllers.common import workflow_map,  getLoggedInUser,  getRenderContent,  has_level, ensurePostRequest
 
 from hollyrosa.model.booking_couch import getAllUsers, getAllActiveUsers
 from hollyrosa.controllers.common_couch import getCouchDBDocument
 
+log = logging.getLogger(__name__)
 __all__ = ['User']
 
-workflow_submenu = """<ul class="any_menu">
-        <li><a href="overview">overview</a></li>
-        <li><a href="view_nonapproved">non-approved</a></li>
-        <li><a href="view_unscheduled">unscheduled</a></li>
-        <li><a href="view_scheduled">scheduled</a></li>
-        <li><a href="view_disapproved">dissapproved</a></li>
-    </ul>"""
+
 
 class User(BaseController):
     def view(self, url):
@@ -93,6 +89,8 @@ class User(BaseController):
     @validate(validators={'id':validators.UnicodeString(not_empty=False), 'user_name':validators.UnicodeString(not_empty=True), 'display_name':validators.UnicodeString(not_empty=True)})
     @require(Any(has_level('pl'),  msg='Only PL can save user properties right now'))
     def save_user(self, user_id='', display_name='', user_name=''):
+        log.info("save_user()")
+        ensurePostRequest(request, __name__)
         """edit user properties""" 
         if user_id != '':
             user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
@@ -113,9 +111,12 @@ class User(BaseController):
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False), 'level':validators.UnicodeString(not_empty=True)})
     @require(Any(has_level('pl'),  msg='Only PL can change user levels for other users'))
     def set_level(self, user_id='', level=''):
+        log.info("set_level()")
+        ensurePostRequest(request, __name__)
         user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
         
         # Rules for setting levels.
+        # TODO: refactor out
         level_map = dict()
         level_map['viewer'] = ['viewer']
         level_map['staff'] = ['viewer','staff']
@@ -131,6 +132,8 @@ class User(BaseController):
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
     @require(Any(has_level('pl'),  msg='Only PL can change user levels for other users'))
     def deactivate(self, user_id=''):
+        log.info("deactivate()")
+        ensurePostRequest(request, __name__)
         user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
         
         # Rules for setting levels.
@@ -144,6 +147,8 @@ class User(BaseController):
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
     @require(Any(has_level('pl'),  msg='Only PL can change user levels for other users'))
     def activate(self, user_id=''):
+        log.info("activate()")
+        ensurePostRequest(request, __name__)
         user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
         
         # Rules for setting levels.
@@ -167,6 +172,8 @@ class User(BaseController):
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
     @require(Any(has_level('pl'), msg='Only PL can change passwords'))
     def update_password(self, user_id, password, password2):
+        log.info("update_password()")
+        ensurePostRequest(request, __name__)
         if not password==password2:
             raise IOError, 'passwords must agree'
  

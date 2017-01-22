@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -22,7 +22,7 @@ import datetime,  logging
 
 log = logging.getLogger(__name__)
 
-from tg import expose, flash, require, url, request, redirect,  validate,  override_template
+from tg import expose, flash, require, url, request, redirect, validate, abort
 from tg import tmpl_context
 
 from repoze.what.predicates import Any, is_user, has_permission
@@ -36,18 +36,16 @@ from hollyrosa.model.booking_couch import getAllHistoryForBookings,  getAllActiv
 from formencode import validators
 
 
-#...this can later be moved to the VisitingGroup module whenever it is broken out
-
-
-
 from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
 
-#from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  ,  reFormatDate
-from hollyrosa.controllers.common import has_level
+from hollyrosa.controllers.common import has_level, ensurePostRequest
 from hollyrosa.controllers import common_couch
 from hollyrosa.model import holly_couch
 
 __all__ = ['Calendar']
+
+
+
 
 
 class Calendar(BaseController):
@@ -107,12 +105,14 @@ class Calendar(BaseController):
         tmpl_context.form = create_edit_booking_day_form
         return dict(booking_day=booking_day,  usage='edit')
         
+    
+    
         
-    #### @validate(create_edit_booking_day_form, error_handler=edit_booking_day)      
     @expose()
     @require(Any(has_level('staff'), has_level('viewer'), msg='Only staff members may change booking day properties'))
-    def save_booking_day_properties(self,  recid=None,  note='', title='', num_program_crew_members=0,  num_fladan_crew_members=0):
-        
+    @validate({"recid":validators.UnicodeString(not_empty=True), "note":validators.UnicodeString, "title":validators.UnicodeString, "num_program_crew_members":validators.Int, "num_fladan_crew_members":validators.Int})
+    def save_booking_day_properties(self, recid=None, note='', title='', num_program_crew_members=0, num_fladan_crew_members=0):
+        ensurePostRequest(request, __name__)
         booking_day_c = common_couch.getBookingDay(holly_couch, recid)
         booking_day_c['note'] = note
         booking_day_c['title'] = title

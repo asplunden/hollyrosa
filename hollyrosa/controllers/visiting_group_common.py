@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -18,7 +18,7 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-import copy,  types
+import copy, types
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange
 from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId
 from hollyrosa.controllers.booking_history import remember_tag_change,  remember_booking_vgroup_properties_change

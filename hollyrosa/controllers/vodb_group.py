@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -35,7 +35,7 @@ import datetime,logging, json, time, types, copy
 log = logging.getLogger()
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
-from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, reFormatDate
+from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, reFormatDate, ensurePostRequest
 
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange,  getVisitingGroupsByGroupType, getRoomBookingsOfVODBGroup,  getAllActivities, getVisitingGroupTypes
 from hollyrosa.controllers.booking_history import remember_tag_change,  remember_booking_vgroup_properties_change
@@ -172,6 +172,7 @@ class VODBGroup(BaseController):
     @validate(create_edit_vodb_group_form, error_handler=edit_group_data)
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may change visiting group properties'))
     def save_vodb_group_properties(self, vodb_group_id='', boknr='', name='', info='', camping_location='', vodb_contact_name='', vodb_contact_phone='', vodb_contact_email='', vodb_contact_address='', from_date='', to_date='', subtype='', visiting_group_properties=None):
+        ensurePostRequest(request, __name__)
         #...how do we handle new groups? Like new visiting_group, right?
         #   better have type=visiting_group for all groups and then have subtypes=group, course, daytrip, funk, etc for filtering/deciding on additional capabillities
         id = vodb_group_id
@@ -351,6 +352,7 @@ class VODBGroup(BaseController):
     @expose()
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members may update vodb group sheets'))
     def update_group_sheets(self, vgroup_id='', tag_sheet=None, eat_sheet=None, live_sheet=None, saveButton=''):
+        ensurePostRequest(request, __name__)
         # todo: accessor function making sure the type really is visiting_group
         visiting_group_o = holly_couch[vgroup_id] 
         visiting_group_properties = visiting_group_o['visiting_group_properties']
@@ -716,6 +718,7 @@ class VODBGroup(BaseController):
     @validate(validators={'visiting_group_id':validators.UnicodeString(not_empty=True), 'live':validators.UnicodeString(not_empty=True), 'change_schema':validators.UnicodeString()})
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may set up vodb calculation schemas'))
     def create_calculation_schema(self,  visiting_group_id=None,  live='outdoor',  change_schema='live'):
+        ensurePostRequest(request, __name__)
         # todo: accessor function making sure the type really is visiting_group
         visiting_group_o = holly_couch[visiting_group_id] 
         visiting_group_properties = visiting_group_o['visiting_group_properties']
