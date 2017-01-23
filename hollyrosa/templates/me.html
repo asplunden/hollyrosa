@@ -21,63 +21,56 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
-
   <xi:include href="master.html" />
-
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - My personal Settings</title>
-   <script>
-   require(["common_menu", "dojo/dom","dojo/dom-attr", "dojo/cookie", "dojo/query", "dojo/ready", "dojo/on", "dojo/json", "dojo/domReady!"], function(common_menu, dom, domAttr, cookie, query, ready, on, json) {
-   		
-   		
-	function save_left_click_menu(a_left_click_status) {
-		cookie('left_click_menu', json.stringify(a_left_click_status), {expires:5, path:'/'});		
-	}
-		
-   	ready(function(){
-   		var menu_cookie = common_menu.load_left_click_menu();
-				
-			var node = dom.byId("left_click_menu_input_checkbox");
-   		
-   		if (true == menu_cookie) {
-				node.checked = true;	
-   		} else {
-				node.checked = false;
-   		}
-   		
-   		on(node, 'change', function(evt){
-   		   var chk = node.checked; 		
-     			save_left_click_menu(chk);
-   			});
-   		});
-   	
-   	});
-   
-  
-   
-   
-   
-   </script>
+  <script>
+
+require(["common_menu", "dojo/dom","dojo/dom-attr", "dojo/cookie", "dojo/query", "dojo/ready", "dojo/on", "dojo/json", "dojo/domReady!"], function(common_menu, dom, domAttr, cookie, query, ready, on, json) {
+
+
+  function save_left_click_menu(a_left_click_status) {
+    cookie('left_click_menu', json.stringify(a_left_click_status), {expires:5, path:'/'});
+  }
+
+  ready(function(){
+    var menu_cookie = common_menu.load_left_click_menu();
+    var node = dom.byId("left_click_menu_input_checkbox");
+
+    // TODO find out how to do NOT in JS
+    if (true == menu_cookie) {
+      node.checked = true;
+    } else {
+      node.checked = false;
+    }
+
+    on(node, 'change', function(evt){
+      var chk = node.checked;
+      save_left_click_menu(chk);
+    });
+  });
+});
+  </script>
 </head>
 
-<body>
-    <h2>Your Settings ${request.identity['user']['display_name']}</h2>
-    <div style="border:1px dotted black;">
-      Authorization: 
-      <ul><li py:for="l in request.identity['user']['level']">$l</li></ul>
-      Active: ${request.identity['user']['active']}
-    </div>
-    <ul>
-    	<li><a href="${tg.url('/user/change_password', params={'user_id':request.identity['user']['id']})}" >Change Password</a></li>
-		<li><a href="${tg.url('/history/show', params={'user_id':request.identity['user']['id']})}" >History</a></li>		
-    </ul>
-    <p>
+<body class="tundra">
+  <h2>Your Settings ${request.identity['user']['display_name']}</h2>
+  <div style="border:1px dotted black;">
+    Authorization:
+    <ul><li py:for="l in request.identity['user']['level']">$l</li></ul>
+    Active: ${request.identity['user']['active']}
+  </div>
+  <ul>
+    <li><a href="${tg.url('/user/change_password', params={'user_id':request.identity['user']['id']})}" >Change Password</a></li>
+    <li><a href="${tg.url('/history/show', params={'user_id':request.identity['user']['id']})}" >History</a></li>
+  </ul>
+  <p>
     <fieldset>
-    <form>
-		<legend>Left click context menu: </legend><input type="checkbox" id="left_click_menu_input_checkbox" name="left_click_context_menu"></input>    
-    </form>
+      <form>
+        <legend>Left click context menu: </legend><input type="checkbox" id="left_click_menu_input_checkbox" name="left_click_context_menu"></input>
+      </form>
     </fieldset>
-    </p>
+  </p>
 </body>
 </html>

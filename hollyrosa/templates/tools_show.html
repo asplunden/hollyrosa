@@ -22,37 +22,31 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
-
   <xi:include href="master.html" />
-
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Tools</title>
-  
-  
 </head>
-
 <body class="tundra">
-    <h2>Tools planning bookings</h2>
-    <ul>
-        <li><a href="${tg.url('sanity_check_property_usage')}">Check for bookig errors and warnings</a></li>
-        <li py:if="request.identity"><a href="${tg.url('/history/show')}">Booking history</a></li>
-    </ul>
-    <h3>Tools for managing users</h3>
-    <ul>
-      <li><a href="${tg.url('/user/show')}">Manage all Active Users</a></li>
-		<li><a href="${tg.url('/user/show', params={'show_deactive':True})}">Manage all Users</a></li>
-	</ul>
-    <h3>Statistics tools</h3>
-    <ul>
-        <!-- <li><a href="${tg.url('booking_statistics')}">Booking Statistics</a></li> -->
-        <li><a href="${tg.url('visitor_statistics')}">Age Group Statistics</a></li>        
-        <li><a href="${tg.url('vodb_statistics')}">VODB Statistics</a></li>
-    </ul>
-    <h3>Tools in development (alpha &amp; beta)</h3>
-    <ul>
-    <!-- <li py:if="request.identity"><a href="${tg.url('/workflow/overview')}">Workflow</a></li> -->
-        <li py:if="request.identity"><a href="${tg.url('/vodb_group/vodb_booking_overview')}">VODB Booking Overview (beta)</a></li>
-	</ul>    
+  <h2>Tools planning bookings</h2>
+  <ul>
+    <li><a href="${tg.url('sanity_check_property_usage')}">Check for bookig errors and warnings</a></li>
+    <li py:if="request.identity"><a href="${tg.url('/history/show')}">Booking history</a></li>
+  </ul>
+  <h3>Tools for managing users</h3>
+  <ul>
+    <li><a href="${tg.url('/user/show')}">Manage all Active Users</a></li>
+    <li><a href="${tg.url('/user/show', params={'show_deactive':True})}">Manage all Users</a></li>
+  </ul>
+  <h3>Statistics tools</h3>
+  <ul>
+    <!-- <li><a href="${tg.url('booking_statistics')}">Booking Statistics</a></li> -->
+    <li><a href="${tg.url('visitor_statistics')}">Age Group Statistics</a></li>
+    <li><a href="${tg.url('vodb_statistics')}">VODB Statistics</a></li>
+  </ul>
+  <h3>Tools in development (alpha &amp; beta)</h3>
+  <ul>
+    <li py:if="request.identity"><a href="${tg.url('/vodb_group/vodb_booking_overview')}">VODB Booking Overview (beta)</a></li>
+  </ul>
 </body>
 </html>

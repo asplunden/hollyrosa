@@ -22,15 +22,13 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
-
   <xi:include href="master.html" />
-
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Book Slot</title>
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
   <script>
-require(["edit_booking", "dojo/_base/array", "dojo/query", "dojo/dom", "dojo/on", "dojo/dom-construct", "dojo/dom-attr", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready"], function(edit_booking, array, query, dom, on, domConstruct, domAttr, xhr, Memory, FilteringSelect, ready) { 
+require(["edit_booking", "dojo/_base/array", "dojo/query", "dojo/dom", "dojo/on", "dojo/dom-construct", "dojo/dom-attr", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready"], function(edit_booking, array, query, dom, on, domConstruct, domAttr, xhr, Memory, FilteringSelect, ready) {
 
 
 function get_visiting_group_data_from_XHR_helper(value) {
@@ -49,7 +47,7 @@ function get_visiting_group_data_from_XHR(value) {
 function set_visiting_group_id(value) {
     edit_booking.set_form_field_value('visiting_group_id', value);
     if (null != value) {
-			get_visiting_group_data_from_XHR(value);    
+			get_visiting_group_data_from_XHR(value);
     } else {
          edit_booking.clean_properties_table();
     }
@@ -59,14 +57,14 @@ function set_visiting_group_display_name(store, value) {
     var obj = store.get(value);
     if (null != obj) {
     	edit_booking.set_form_field_value('visiting_group_display_name', obj.name);
-    } 
+    }
 }
 
 
 /**
 http://stackoverflow.com/questions/3844995/preventing-form-submission-with-dojo
 **/
-function validate_form(evt, visiting_group_filtering_select) {	
+function validate_form(evt, visiting_group_filtering_select) {
 	if (!visiting_group_filtering_select.validate()) {
 			set_visiting_group_id(null);
 	}
@@ -82,11 +80,11 @@ function validate_form(evt, visiting_group_filtering_select) {
  also need to clear all pre-existing options
 **/
 
-function populateSingleSelectFieldHack(single_select_field_elem, data, clear_preexisting_options) {	
+function populateSingleSelectFieldHack(single_select_field_elem, data, clear_preexisting_options) {
     if (clear_preexisting_options) {
     	domConstruct.empty(single_select_field_elem);
     }
-    
+
     array.forEach(data, function(a) {
     	var tmp_option = domConstruct.create("option", {value:a[0]}, single_select_field_elem, "last"); // TODO: first should maybe be last
     	tmp_option.innerHTML = a[1];
@@ -96,10 +94,10 @@ function populateSingleSelectFieldHack(single_select_field_elem, data, clear_pre
 
 ready(function(){
     var elem = dom.byId('visiting_group_id');
- 
+
     is_new_booking = '0' == '${edit_this_visiting_group}' ;
     get_visiting_group_data_from_XHR_helper('${booking.visiting_group_id}');
-    
+
     //...set up filtering select for activity
     var visiting_group_options = ${visiting_group_options};
 	var visiting_group_store = new Memory({
@@ -119,25 +117,25 @@ ready(function(){
         searchAttr: "name"
     }, "visiting_group_name");
     set_visiting_group_display_name(visiting_group_store, '${booking.visiting_group_id}');
-    
+
     var slot_id_elem = dom.byId('slot_id');
     populateSingleSelectFieldHack(slot_id_elem, ${start_slot_id_options}, true);
-    
+
     var slot_end_time_elem = dom.byId('booking_end_slot_id');
     populateSingleSelectFieldHack(slot_end_time_elem, ${end_slot_id_options}, true);
-    
+
     // This is horribly hackish, but why does tw2 widget fail to set action on this widget form only????
     var form_elems = query('form[method="post"]');
     var form_elem = form_elems[0];
     domAttr.set(form_elem, 'action', 'save_booked_live_booking_properties')
-    
-    
+
+
     // this is to find the submit button who's id disappeared when migrating from tw to tw2
   	var submit_button_elems = query('input[type="Submit"]');
     on(submit_button_elems[0], "submit", function(evt) { return validate_form(evt, visiting_group_filtering_select); }  );
   });
 });
-  
+
   </script>
 </head>
 <body class="tundra">
@@ -155,14 +153,14 @@ ready(function(){
         </table>
         <h4>properties</h4>
         <table id="visiting_group_properties_table">
-            
+
         </table>
     </div>
     <p>
     <span py:if="None != booking_day">Start date: ${booking_day.date} </span><span py:if="None != slot_position"><b> ${slot_position.time_from} to ${slot_position.time_to} </b> </span><span py:if="None != booking_day"><a py:if="booking.booking_id != None " href="${tg.url('unschedule_booking', params={'booking_id':booking.booking_id, 'booking_day_id':booking_day.id})}">unschedule</a></span>
     </p>
-    
+
     <div py:replace="tmpl_context.form.display(booking)">Input Form</div>
-    
+
 </body>
 </html>

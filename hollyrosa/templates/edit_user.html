@@ -21,18 +21,13 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
-
   <xi:include href="master.html" />
-
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Edit user</title>
 </head>
-
-<body>
+<body class="tundra">
     <h2>Edit user</h2>
-    
-    <!--<div py:replace="tmpl_context.form(user, action='save_user')">Input Form</div>-->
 	<div>${tmpl_context.form.display(value=user)}</div>
 </body>
 </html>

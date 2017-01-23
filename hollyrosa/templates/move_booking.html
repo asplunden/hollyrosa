@@ -21,76 +21,68 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
-
   <xi:include href="master.html" />
-
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Move Booking ${activity.title} for ${booking.visiting_group_name}</title>
-  
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
   <script src="${tg.url('/scripts/dojo-release-1.11.2/dojo/dojo.js')}" data-dojo-config="async: true"></script>
   <script>
-require(["edit_booking", "dojo/query", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready"], function(edit_booking, query, dom, on, xhr, Memory, FilteringSelect, ready) { 
+require(["edit_booking", "dojo/query", "dojo/dom", "dojo/on", "dojo/request/xhr", "dojo/store/Memory", "dijit/form/FilteringSelect", "dojo/ready"], function(edit_booking, query, dom, on, xhr, Memory, FilteringSelect, ready) {
 
 
-function set_activity_id(value) {
-	edit_booking.set_form_field_value('activity_id', value);
-}
+  function set_activity_id(value) {
+  	edit_booking.set_form_field_value('activity_id', value);
+  }
 
 
-/**
-http://stackoverflow.com/questions/3844995/preventing-form-submission-with-dojo
-**/
-function validate_form(evt, activity_select) {
+  /**
+  http://stackoverflow.com/questions/3844995/preventing-form-submission-with-dojo
+  **/
+  function validate_form(evt, activity_select) {
+    if (!activity_select.validate()) {
+      alert("activity not valid");
+      evt.preventDefault();
+      return false;
+    }
+    return true;
+  }
 
-	if (!activity_select.validate()) {
-			alert("activity not valid");
-			evt.preventDefault();
-			return false;
-	}	
-	return true;
-}
 
-
-ready(function(){
+  ready(function(){
     //...set up filtering select for activity
     var activity_entries = ${activity_entries};
-	var activity_store = new Memory({
-        data:activity_entries });
-
+    var activity_store = new Memory({
+      data:activity_entries
+    });
 
     var activity_filtering_select = new FilteringSelect({
-        id: "activity_name",
-        name: "activity_name",
-        value: "${booking.activity_id}",
-        onChange: function(value) {
-        		set_activity_id(value);
-    			},
-        store: activity_store,
-        searchAttr: "name"
+      id: "activity_name",
+      name: "activity_name",
+      value: "${booking.activity_id}",
+      onChange: function(value) {
+        set_activity_id(value);
+      },
+      store: activity_store,
+      searchAttr: "name"
     }, "activity_name");
-        
+
     var submit_button_elems = query('input[type="Submit"]');
     on(submit_button_elems[0], "submit", function(evt) { return validate_form(evt, activity_filtering_select); }  );
-    
-});
 
-
+  });
 });
   </script>
 </head>
-
 <body class="tundra">
-    <h2>Move booking ${activity.title} for ${booking.visiting_group_name}</h2>
-    <table>
-        <tr><td>visiting group:</td><td>${booking.visiting_group_name}</td></tr>
-        <tr><td>activity:</td><td>${activity.title}</td></tr>
-        <tr><td>date:</td><td>${booking_day.date} at ${slot.time_from} to ${slot.time_to}</td></tr>
-        <tr><td>content:</td><td>${getRenderContentDict(booking)}</td></tr>
-        
-    </table>
-    <h4>Change activity below</h4>
-    <div py:replace="tmpl_context.form.display(booking)">Input Form</div> 
+  <h2>Move booking ${activity.title} for ${booking.visiting_group_name}</h2>
+  <table>
+    <tr><td>visiting group:</td><td>${booking.visiting_group_name}</td></tr>
+    <tr><td>activity:</td><td>${activity.title}</td></tr>
+    <tr><td>date:</td><td>${booking_day.date} at ${slot.time_from} to ${slot.time_to}</td></tr>
+    <tr><td>content:</td><td>${getRenderContentDict(booking)}</td></tr>
+  </table>
+  <h4>Change activity below</h4>
+  <div py:replace="tmpl_context.form.display(booking)">Input Form</div>
 </body>
 </html>

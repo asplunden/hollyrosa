@@ -21,384 +21,359 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:hollyrosa="http://asplunden.org/guldkant/hollyrosa"  xmlns:xi="http://www.w3.org/2001/XInclude">
-
   <xi:include href="master.html" />
-
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - VODB Group Edit Sheet ${vodb_group.name}</title>
 
+<!-- TODO: is the div widget ever used ??? -->
   <link rel="stylesheet" type="text/css" href="${tg.url('/css/div_widget.css')}" />
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.11.2/dojox/grid/resources/tundraGrid.css')}" />
-   
+
+  <!-- DOJO MODULE STARTS HERE -->
   <script>
 
 require(['dojo/_base/array', 'dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on','dojo/ready', 'dijit/registry', 'dojo/domReady!'],
-  function(array, lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready, registry ){
-    
-    
-    
-    
-    function formatDate(datum) {
-        var d = stamp.fromISOString(datum);
-        return locale.format(d, {selector: 'date', formatLength: 'short'});
+  function(array, lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready, registry ) {
+
+
+  function formatDate(datum) {
+    var d = stamp.fromISOString(datum);
+    return locale.format(d, {selector: 'date', formatLength: 'short'});
+  }
+
+  function getDateValue(){
+    //...override the default getValue function for dojox.grid.cells.DateTextBox
+    return stamp.toISOString(this.widget.get('value'));
+  }
+
+  // TODO: something nicer than alerts
+  function saveCompleteCallback(){
+    alert('save done');
+  }
+
+  // TODO: something nicer than alerts
+  function saveFailedCallback() {
+    alert('save failed');
+  }
+
+  var eat_grid_data = ${vodb_group.vodb_eat_sheet};
+  var live_grid_data = ${vodb_group.vodb_live_sheet};
+  var tag_grid_data = ${vodb_group.vodb_tag_sheet};
+
+  var live_grid_store = new ItemFileWriteStore({
+    data: live_grid_data
+  });
+
+  var eat_grid_store = new ItemFileWriteStore({
+    data: eat_grid_data
+  });
+
+  var tag_grid_store = new ItemFileWriteStore({
+    data: tag_grid_data
+  });
+
+  live_grid_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
+    a_saveFailedCallback /*Your callback to call if save fails*/,
+    a_newFileContentString /*The generated JSON data to send somewhere*/) {
+      var inp = dom.byId('live_grid_div_input');
+      inp.value = a_newFileContentString;
+      a_saveCompleteCallback();
+  };
+
+  eat_grid_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
+    a_saveFailedCallback /*Your callback to call if save fails*/,
+    a_newFileContentString /*The generated JSON data to send somewhere*/) {
+      var inp = dom.byId('eat_grid_div_input');
+      inp.value = a_newFileContentString;
+      a_saveCompleteCallback();
+  };
+
+  tag_grid_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
+    a_saveFailedCallback /*Your callback to call if save fails*/,
+    a_newFileContentString /*The generated JSON data to send somewhere*/) {
+      var inp = dom.byId('tag_grid_div_input');
+      inp.value = a_newFileContentString;
+      a_saveCompleteCallback();
+  };
+
+  var global_edit_allowed = true;
+
+  var live_layout = [[
+    {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+    {'name': 'Tid', 'field': 'time', 'width': '50px', editable:false},
+    {'name': 'Bo tält', 'field': 'outdoor', 'width': '100px', editable: global_edit_allowed},
+    {'name': 'Bo inne', 'field': 'indoor', 'width': '60px', editable:global_edit_allowed},
+    {'name': 'Bo dagsbesök', 'field': 'daytrip', 'width': '60px', editable:global_edit_allowed}
+  ]];
+
+
+  var eat_layout = [[
+    {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+    {'name': 'Tid', 'field': 'time', 'width': '50px', editable: false},
+    {'name': 'Ute', 'field': 'outdoor', 'width': '60px', editable:global_edit_allowed},
+    {'name': 'Inne', 'field': 'indoor', 'width': '60px', editable:global_edit_allowed},
+    {'name': 'Egen', 'field': 'own', 'width': '60px', editable:global_edit_allowed},
+  ]];
+
+  var tag_layout_inner = [
+    {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+    {'name': 'Tid', 'field': 'time', 'width': '50px', editable: false}];
+
+  array.forEach($tag_layout_tags, function(entry, i) {
+    tag_layout_inner.push({'name': entry, 'field': entry, 'width': '60px', editable:global_edit_allowed});
+  });
+
+
+  var tag_layout = [tag_layout_inner];
+
+  //... create a new grid
+  var live_grid_grid = new DataGrid({
+    id: 'live_grid',
+    store: live_grid_store,
+    structure: live_layout,
+    rowSelector: '10px'
+  });
+
+
+  var eat_grid_grid = new DataGrid({
+    id: 'eat_grid',
+    store: eat_grid_store,
+    structure: eat_layout,
+    rowSelector: '10px'
+  });
+
+
+  var tag_grid_grid = new DataGrid({
+    id: 'tag_grid',
+    store: tag_grid_store,
+    structure: tag_layout,
+    rowSelector: '10px'
+  });
+
+
+  function on_save_grid_to_input() {
+    //...find dojo store and serialize it. Should be simple. Then write serialized data into
+    live_grid_store.save(saveCompleteCallback, saveFailedCallback);
+    eat_grid_store.save(saveCompleteCallback, saveFailedCallback);
+    tag_grid_store.save(saveCompleteCallback, saveFailedCallback);
+  };
+
+
+  function on_validate() {
+    var myForm = registry.byId('myForm');
+    if(myForm.validate()){
+
+      return true;
+    } else {
+      alert('Form contains invalid data.  Please correct first');
+      return false;
     }
+    return true;
+  }
 
-    function getDateValue(){
-        /*Override the default getValue function for dojox.grid.cells.DateTextBox   */
-        return stamp.toISOString(this.widget.get('value'));
+
+  function on_validate_finalize() {
+    var myForm = registry.byId('myForm');
+    if(myForm.validate()){
+      var result = confirm('Form is valid and ready to be sent for processing, pressing OK will submit your requests and thereafter you cannot change your request data except for contact info and request text');
+
+      return result;
+    } else {
+      alert('Form contains invalid data.  Please correct first');
+      return false;
     }
-    
-    
-    function saveCompleteCallback(){
-    	alert('save done');
-    	}
-
-	function saveFailedCallback() {
-		alert('save failed');
-		}
-  
- 
-    var eat_grid_data = ${vodb_group.vodb_eat_sheet}; 
-    var live_grid_data = ${vodb_group.vodb_live_sheet};
-    var tag_grid_data = ${vodb_group.vodb_tag_sheet};
-   
-    var live_grid_store = new ItemFileWriteStore({
-    	data: live_grid_data
-   });
-   
-   
-   var eat_grid_store = new ItemFileWriteStore({
-    	data: eat_grid_data
-   });
-   
-   
-   var tag_grid_store = new ItemFileWriteStore({
-    	data: tag_grid_data
-   });
-
-    live_grid_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
-                                a_saveFailedCallback /*Your callback to call if save fails*/,
-                                a_newFileContentString /*The generated JSON data to send somewhere*/){
-                                
-                                	var inp = dom.byId('live_grid_div_input');
-                                	inp.value = a_newFileContentString;
-                                	a_saveCompleteCallback();
-    										};
-    
-    eat_grid_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
-                                a_saveFailedCallback /*Your callback to call if save fails*/,
-                                a_newFileContentString /*The generated JSON data to send somewhere*/){
-                                	//alert(a_newFileContentString);
-                                	var inp = dom.byId('eat_grid_div_input');
-                                	inp.value = a_newFileContentString;
-                                	a_saveCompleteCallback();
-                                	};
-                                	
-    tag_grid_store._saveEverything = function(a_saveCompleteCallback /*Your callback to call when save is completed */,
-                                a_saveFailedCallback /*Your callback to call if save fails*/,
-                                a_newFileContentString /*The generated JSON data to send somewhere*/){
-                                	//alert(a_newFileContentString);
-                                	var inp = dom.byId('tag_grid_div_input');
-                                	inp.value = a_newFileContentString;
-                                	a_saveCompleteCallback();
-                                	};   
+    return true;
+  }
 
 
-    
-    var global_edit_allowed = true;
-    
-    var live_layout = [[
-      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'Tid', 'field': 'time', 'width': '50px', editable:false},      
-      {'name': 'Bo tält', 'field': 'outdoor', 'width': '100px', editable: global_edit_allowed},
-      {'name': 'Bo inne', 'field': 'indoor', 'width': '60px', editable:global_edit_allowed},  
-      {'name': 'Bo dagsbesök', 'field': 'daytrip', 'width': '60px', editable:global_edit_allowed}
-      
-    ]];
-    
-    
-var eat_layout = [[
-      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'Tid', 'field': 'time', 'width': '50px', editable: false},      
-      {'name': 'Ute', 'field': 'outdoor', 'width': '60px', editable:global_edit_allowed},
-      {'name': 'Inne', 'field': 'indoor', 'width': '60px', editable:global_edit_allowed},
-      {'name': 'Egen', 'field': 'own', 'width': '60px', editable:global_edit_allowed},
-      
-   
-    ]];
+  function on_ready(){
+    var save_button = registry.byId('save_button');
+    on( save_button , 'click', on_save_grid_to_input );
+    on( save_button , 'click', on_validate);
 
-var tag_layout_inner = [
-      {'name': 'Datum', 'field': 'date', 'width': '100px', editable: false, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'Tid', 'field': 'time', 'width': '50px', editable: false}];
+    // startup grid
+    live_grid_grid.placeAt('live_grid_div');
+    live_grid_grid.startup();
+    eat_grid_grid.placeAt('eat_grid_div');
+    eat_grid_grid.startup();
+    tag_grid_grid.placeAt('tag_grid_div');
+    tag_grid_grid.startup();
 
-array.forEach($tag_layout_tags, function(entry, i) {
-	tag_layout_inner.push({'name': entry, 'field': entry, 'width': '60px', editable:global_edit_allowed});
+  }
 
-	}); 
-var tag_layout = [tag_layout_inner];      
-
-    //... create a new grid
-   
-
-	 var live_grid_grid = new DataGrid({
-        id: 'live_grid',
-        store: live_grid_store,
-        structure: live_layout,
-        rowSelector: '10px'});
-        
-        
-    var eat_grid_grid = new DataGrid({
-        id: 'eat_grid',
-        store: eat_grid_store,
-        structure: eat_layout,
-        rowSelector: '10px'});
-        
-        
-   var tag_grid_grid = new DataGrid({
-        id: 'tag_grid',
-        store: tag_grid_store,
-        structure: tag_layout,
-        rowSelector: '10px'});
-
-
-
-    function on_save_grid_to_input() {
-    	//...find dojo store and serialize it. Should be simple. Then write serialized data into 
-    	live_grid_store.save(saveCompleteCallback, saveFailedCallback);
-    	eat_grid_store.save(saveCompleteCallback, saveFailedCallback);
-    	tag_grid_store.save(saveCompleteCallback, saveFailedCallback);
-    	
-    	};
-    	
-    
-    
-    
-    
-    function on_validate() {
-      var myForm = registry.byId('myForm');
-    	if(myForm.validate()){
-            //var result = confirm('Form is valid, press OK to submit');
-            
-            return true;
-        } else {
-            alert('Form contains invalid data.  Please correct first');
-            return false;
-        }
-        return true;
-    }
-    
-    
-    function on_validate_finalize() {
-      var myForm = registry.byId('myForm');
-    	if(myForm.validate()){
-            var result = confirm('Form is valid and ready to be sent for processing, pressing OK will submit your requests and thereafter you cannot change your request data except for contact info and request text');
-            
-            return result;
-        } else {
-            alert('Form contains invalid data.  Please correct first');
-            return false;
-        }
-        return true;
-    }
-    
-    
-    function on_ready(){
-      var save_button = registry.byId('save_button');
-      on( save_button , 'click', on_save_grid_to_input );
-		on( save_button , 'click', on_validate); 
-		
-      // startup grid
-		live_grid_grid.placeAt('live_grid_div');
-      live_grid_grid.startup();
-      eat_grid_grid.placeAt('eat_grid_div');
-      eat_grid_grid.startup();
-      tag_grid_grid.placeAt('tag_grid_div');
-      tag_grid_grid.startup();
-     
-    }
-    	
-      ready(on_ready);
+  ready(on_ready);
 });
 
-</script>
-
-
+  </script> <!-- END DOJO MODULE 1 -->
   <script>
 
 require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem", "dojo/dom", "dojo/_base/array", "dojo/query!css2", "dojo/on", "dojo/_base/window", "dojo/parser", "dijit/registry", "dojo/domReady!"], function(ready, tags, common_menu, Menu, PopupMenuItem, dom, array, query, on, win, parser, registry) {
 
-
-function deleteTagHelper(evt) {
-   var tag_elem = evt.srcElement.parentElement;
-   var inner_text = tag_elem.innerText;
-   inner_text = inner_text.replace(' (X)',''); 
-   tags.deleteTag("${tg.url('/tag/delete_tag')}", "${vodb_group.id}", inner_text);
-}
-
-
-function addTagHelper() {
-   tags.addTags("${tg.url('/tag/add_tags')}", "${vodb_group.id}", tag_input);
-}
+  // TODO: tag and note code should be in its own js files -->
+  function deleteTagHelper(evt) {
+    var tag_elem = evt.srcElement.parentElement;
+    var inner_text = tag_elem.innerText;
+    inner_text = inner_text.replace(' (X)','');
+    tags.deleteTag("${tg.url('/tag/delete_tag')}", "${vodb_group.id}", inner_text);
+  }
 
 
-function startup() {
-	//...setup main menu for visiting group  	
-	var use_left_click_menu = common_menu.load_left_click_menu();
-   	var change_program_status_menu = new Menu();
-   
-   	var menu = new Menu({
-       targetNodeIds: ["visiting_group_menu", "note"],
-       leftClickToOpen: use_left_click_menu
-       });
-       
+  function addTagHelper() {
+    tags.addTags("${tg.url('/tag/add_tags')}", "${vodb_group.id}", tag_input);
+  }
 
-	//...load all tags for visiting group
-	tags.getTags("${tg.url('/tag/get_tags')}", "${vodb_group.id}");
-   
-   
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request...", '${vodb_group.id}', '${tg.url('/booking/edit_booking')}'); 
-   common_menu.add_menu_separator(menu);   
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "View vodb group...", '${vodb_group.id}', '${tg.url('view_vodb_group')}');
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb data...", '${vodb_group.id}', '${tg.url('edit_group_data')}');
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb Sheet...", '${vodb_group.id}', '${tg.url('edit_group_sheet')}');
-   common_menu.add_note_redirect_menu_item(menu, menu, "Add note...", '${vodb_group.id}', '${tg.url('/note/add_note')}');
-   common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${vodb_group.id}', '${tg.url('/note/add_attachment')}');
-   common_menu.add_menu_separator(menu);
-   common_menu.add_list_bookings_redirect_menu_item(menu, menu, "List bookings of group...", '${vodb_group['name']}', '${tg.url('/visiting_group/view_bookings_of_name')}');
-      
-   //...attach the add tag handler
-	var the_add_tag_href_elem = dom.byId('add_tag_href2');
-	on(the_add_tag_href_elem, 'click', addTagHelper);
-	
-	//...link delete tag handler to any element with class .tag in document.
-	on(win.doc, '.tag:click', deleteTagHelper);
-	
-	
-	//...create menu for add/edit/show/delete note
-	var note_menu = new Menu({
-       targetNodeIds: ["content"],
-       selector: "div.note2",
-       leftClickToOpen: common_menu.load_left_click_menu()
-       });
-       
+
+  function startup() {
+    //...setup main menu for visiting group
+    var use_left_click_menu = common_menu.load_left_click_menu();
+    var change_program_status_menu = new Menu();
+
+    var menu = new Menu({
+      targetNodeIds: ["visiting_group_menu", "note"],
+      leftClickToOpen: use_left_click_menu
+    });
+
+
+    //...load all tags for visiting group
+    tags.getTags("${tg.url('/tag/get_tags')}", "${vodb_group.id}");
+
+
+    common_menu.add_vgid_redirect_menu_item(menu, menu, "New booking request...", '${vodb_group.id}', '${tg.url('/booking/edit_booking')}');
+    common_menu.add_menu_separator(menu);
+    common_menu.add_vgid_redirect_menu_item(menu, menu, "View vodb group...", '${vodb_group.id}', '${tg.url('view_vodb_group')}');
+    common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb data...", '${vodb_group.id}', '${tg.url('edit_group_data')}');
+    common_menu.add_vgid_redirect_menu_item(menu, menu, "Edit vodb Sheet...", '${vodb_group.id}', '${tg.url('edit_group_sheet')}');
+    common_menu.add_note_redirect_menu_item(menu, menu, "Add note...", '${vodb_group.id}', '${tg.url('/note/add_note')}');
+    common_menu.add_note_redirect_menu_item(menu, menu, "Add attachment...", '${vodb_group.id}', '${tg.url('/note/add_attachment')}');
+    common_menu.add_menu_separator(menu);
+    common_menu.add_list_bookings_redirect_menu_item(menu, menu, "List bookings of group...", '${vodb_group['name']}', '${tg.url('/visiting_group/view_bookings_of_name')}');
+
+    //...attach the add tag handler
+    var the_add_tag_href_elem = dom.byId('add_tag_href2');
+    on(the_add_tag_href_elem, 'click', addTagHelper);
+
+    //...link delete tag handler to any element with class .tag in document.
+    on(win.doc, '.tag:click', deleteTagHelper);
+
+
+    //...create menu for add/edit/show/delete note
+    var note_menu = new Menu({
+      targetNodeIds: ["content"],
+      selector: "div.note2",
+      leftClickToOpen: common_menu.load_left_click_menu()
+    });
+
     common_menu.add_note_redirect_menu_item(note_menu, note_menu, "Add note...", '${vodb_group.id}', '${tg.url('/note/add_note')}');
     common_menu.add_note_redirect_menu_item(note_menu, note_menu, "Add attachment...", '${vodb_group.id}', '${tg.url('/note/add_attachment')}');
     common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Edit note...",  '${tg.url('/note/edit_note')}');
     common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Delete note...", '${tg.url('/note/delete_note')}');
-    
-    
+
+
     //...create menu for add/edit/show/delete note
-	var attachment_menu = new Menu({
-       targetNodeIds: ["content"],
-       selector: "div.attachment2",
-       leftClickToOpen: common_menu.load_left_click_menu()
-       });
-       
+    var attachment_menu = new Menu({
+      targetNodeIds: ["content"],
+      selector: "div.attachment2",
+      leftClickToOpen: common_menu.load_left_click_menu()
+    });
+
     common_menu.add_note_redirect_menu_item(attachment_menu, attachment_menu, "Add note...", '${vodb_group.id}', '${tg.url('/note/add_note')}');
     common_menu.add_note_redirect_menu_item(attachment_menu, attachment_menu, "Add attachment...", '${vodb_group.id}', '${tg.url('/note/add_attachment')}');
     common_menu.add_visiting_group_edit_note_menu_item(attachment_menu, attachment_menu, "Edit attachment...",  '${tg.url('/note/edit_attachment')}');
     common_menu.add_visiting_group_edit_note_menu_item(attachment_menu, attachment_menu, "Delete attachment...", '${tg.url('/note/delete_note')}');
-    
+
     /**** assembling change program state and vodb state menus ***/
-	var change_vodb_status_menu = new Menu();
+    var change_vodb_status_menu = new Menu();
     menu.addChild(new PopupMenuItem({
-   	label: "Change vodb status",
+      label: "Change vodb status",
       popup: change_vodb_status_menu,
       leftClickToOpen: common_menu.load_left_click_menu()
-   })); 
-   
-   var set_vodb_state_url = '${tg.url('/visiting_group/set_vodb_state')}';       
-    
-   array.forEach(common_menu.vodb_state_change_list, function(x) {console.log(x); common_menu.add_change_program_state_menu_item(menu, change_vodb_status_menu, x['name'], x['state'], 0, set_vodb_state_url);});
-	
-	common_menu.add_menu_separator(menu);   
-   common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history...", '${vodb_group['id']}', '${tg.url('/history/show')}');
-	};
-    
-	ready(function() {
-	    parser.parse();
-		startup();
-		});  
- });
+    }));
+
+    var set_vodb_state_url = '${tg.url('/visiting_group/set_vodb_state')}';
+
+    array.forEach(common_menu.vodb_state_change_list, function(x) {console.log(x); common_menu.add_change_program_state_menu_item(menu, change_vodb_status_menu, x['name'], x['state'], 0, set_vodb_state_url);});
+
+    common_menu.add_menu_separator(menu);
+    common_menu.add_vgid_redirect_menu_item(menu, menu, "Show history...", '${vodb_group['id']}', '${tg.url('/history/show')}');
+  };
+
+  ready(function() {
+    parser.parse();
+    startup();
+  });
+});
+  </script> <!-- DOJO MODULE 2 ends here -->
+
+  <!-- TODO: why these empty DOJO module below ?? -->
+  <script>
+require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/ValidationTextBox", "dijit/form/DateTextBox", "dojo/domReady!"]);
   </script>
 
-
-  
-<script>
-require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/ValidationTextBox", "dijit/form/DateTextBox", "dojo/domReady!"]);
-</script>
 </head>
-
 <body class="tundra">
-    <h2 id="visiting_group_menu" hollyrosa:vgid="${vodb_group.id}" class="context_menu_symbol">${vodb_group.name}</h2> 
-    <p class="context_menu_symbol">${reFormatDate(vodb_group.from_date)} to ${reFormatDate(vodb_group.to_date)}</p>
+  <h2 id="visiting_group_menu" hollyrosa:vgid="${vodb_group.id}" class="context_menu_symbol">${vodb_group.name}</h2>
+  <p class="context_menu_symbol">${reFormatDate(vodb_group.from_date)} to ${reFormatDate(vodb_group.to_date)}</p>
 
-	
-	<div class="note context_menu_symbol" id="note" hollyrosa:vgid="${vodb_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
-<a id="add_tag_href2" href="javascript:;">Add Tags</a>
-</form></div>
+  <div class="note context_menu_symbol" id="note" hollyrosa:vgid="${vodb_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul><form style="display:inline;"><input id="tag_input" type="text" name="tags" value="" />
+    <a id="add_tag_href2" href="javascript:;">Add Tags</a>
+  </form></div>
 
-<table class="visiting_group_info_table">
-<tr><td class="legend">bok.nr:</td><td class="info">${vodb_group.boknr}</td></tr>
-<tr><td class="legend">subtype:</td><td class="info">${vodb_group.get('subtype','')}</td></tr>
-<tr><td class="legend">vodb status:</td><td class="info">${vodb_state_map.get(vodb_group.get('vodbstatus','-'))}</td></tr>
-<tr><td class="legend">program status:</td><td class="info">${program_state_map.get(vodb_group.boknstatus,'')}</td></tr>
+  <table class="visiting_group_info_table">
+    <tr><td class="legend">bok.nr:</td><td class="info">${vodb_group.boknr}</td></tr>
+    <tr><td class="legend">subtype:</td><td class="info">${vodb_group.get('subtype','')}</td></tr>
+    <tr><td class="legend">vodb status:</td><td class="info">${vodb_state_map.get(vodb_group.get('vodbstatus','-'))}</td></tr>
+    <tr><td class="legend">program status:</td><td class="info">${program_state_map.get(vodb_group.boknstatus,'')}</td></tr>
 
-<tr><td class="legend">camping location:</td><td class="info">${vodb_group.camping_location}</td></tr>
-</table>
+    <tr><td class="legend">camping location:</td><td class="info">${vodb_group.camping_location}</td></tr>
+  </table>
 
-<p>${HTML(vodb_group.info)}</p></div>
-<h3>Notes and attachments</h3>
-<p><i>These are currently not shown, info overload otherwise</i></p>
-    <div py:for="n in notes" >
-            
-        <div class="${n.type}2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${vodb_group.id}"><i><b>${n.timestamp}</b> ${n.type} by ${n.last_changed_by}</i><br/><br/>
-        <div py:if="'note' == n.type">${HTML(n.text)}</div>
-        <div py:if="('attachment' == n.type)">${n.text}<br/><br/>
-        	<div py:for="at in n.get('_attachments',[''])"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n.id,'doc_id':at})}"><b>${at}</b> ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>
-        	 
-        	</div>
-        </div>
-                
+  <p>${HTML(vodb_group.info)}</p></div>
+  <h3>Notes and attachments</h3>
+  <p><i>These are currently not shown, info overload otherwise</i></p>
+  <div py:for="n in notes" >
+    <div class="${n.type}2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${vodb_group.id}"><i><b>${n.timestamp}</b> ${n.type} by ${n.last_changed_by}</i><br/><br/>
+      <div py:if="'note' == n.type">${HTML(n.text)}</div>
+      <div py:if="('attachment' == n.type)">${n.text}<br/><br/>
+        <div py:for="at in n.get('_attachments',[''])"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n.id,'doc_id':at})}"><b>${at}</b> ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>
+      </div>
     </div>
-    
-    <p>${vodb_group.get('vodb_contact_name','')}<br/>${vodb_group.get('vodb_contact_phone','')}<br/><a href="mailto:${vodb_group.get('contact_person_email','')}">${vodb_group.get('vodb_contact_email','')}</a><br/>
-    </p>
-    <p><pre>${vodb_group.get('vodb_contact_address','')}</pre></p> 
+  </div>
+
+  <p>${vodb_group.get('vodb_contact_name','')}<br/>${vodb_group.get('vodb_contact_phone','')}<br/><a href="mailto:${vodb_group.get('contact_person_email','')}">${vodb_group.get('vodb_contact_email','')}</a><br/>
+  </p>
+  <p><pre>${vodb_group.get('vodb_contact_address','')}</pre></p>
 
 
-    <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_group_sheets" method="post">
-    
+  <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_group_sheets" method="post">
+
     <h3>Properties</h3>
     <table class="data">
-        <tr>
-            <th>Property = Value Unit</th><th>Description</th><th>From date</th><th>To date</th>
-        </tr>
-        <tr py:for="prop in vodb_group.visiting_group_properties.values()">
-            <td class="info">$$$prop.property = $prop.value $prop.unit</td><td class="info">$prop.description</td><td class="info">$prop.from_date</td><td class="info">$prop.to_date</td>
-        </tr>
+      <tr>
+        <th>Property = Value Unit</th><th>Description</th><th>From date</th><th>To date</th>
+      </tr>
+      <tr py:for="prop in vodb_group.visiting_group_properties.values()">
+        <td class="info">$$$prop.property = $prop.value $prop.unit</td><td class="info">$prop.description</td><td class="info">$prop.from_date</td><td class="info">$prop.to_date</td>
+      </tr>
     </table>
-    
-    
+
     <div>
-    	<label for="live_grid_div"><h3>Live Sheet</h3></label><br/>
-    	<div id="live_grid_div" style="height:600px;"><input type="hidden" id="live_grid_div_input" name="live_sheet"/></div>
-    	</div>
-    
-    	<div>    
-    	<label for="eat_grid_div"><h3>Eat Sheet</h3></label><br/>
-    	<div id="eat_grid_div" style="height:600px;"><input type="hidden" id="eat_grid_div_input" name="eat_sheet"/></div>
-    	</div>
+      <label for="live_grid_div"><h3>Live Sheet</h3></label><br/>
+      <div id="live_grid_div" style="height:600px;"><input type="hidden" id="live_grid_div_input" name="live_sheet"/></div>
+    </div>
 
-    	<div>    
-    	<label for="tag_grid_div"><h3>Tag Sheet</h3></label><br/>
-    	<div id="tag_grid_div" style="height:600px;"><input type="hidden" id="tag_grid_div_input" name="tag_sheet"/></div>
-    	</div>
+    <div>
+      <label for="eat_grid_div"><h3>Eat Sheet</h3></label><br/>
+      <div id="eat_grid_div" style="height:600px;"><input type="hidden" id="eat_grid_div_input" name="eat_sheet"/></div>
+    </div>
 
-    
-		<input type="hidden" name="vgroup_id" value="$vodb_group._id"/>
-    	<button data-dojo-type="dijit/form/Button" type="submit" name="saveButton" value="Save" id="save_button">Save</button>
-	</div>
+    <div>
+      <label for="tag_grid_div"><h3>Tag Sheet</h3></label><br/>
+      <div id="tag_grid_div" style="height:600px;"><input type="hidden" id="tag_grid_div_input" name="tag_sheet"/></div>
+    </div>
+
+    <input type="hidden" name="vgroup_id" value="$vodb_group._id"/>
+    <button data-dojo-type="dijit/form/Button" type="submit" name="saveButton" value="Save" id="save_button">Save</button>
+  </div>
 </body>
 </html>
