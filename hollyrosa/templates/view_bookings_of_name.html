@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <!--
-Copyright 2010-2016 Martin Eliasson
+Copyright 2010-2017 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -21,195 +21,188 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:hollyrosa="http://asplunden.org/guldkant/hollyrosa" xmlns:xi="http://www.w3.org/2001/XInclude">
-
   <xi:include href="master_external.html" />
-
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Program Bookings for ${name}</title>
-  
+
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
+
+<!-- DOJO module begins -->
   <script>
-  
+
 require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/on", "dojo/ready", "dojo/_base/window", "dojo/domReady!"], function(common_menu, tags, array, Menu, MenuItem, PopupMenuItem, query, ioQuery, dom, on, ready, win) {
 
-
-function deleteTagHelper(evt) {
-   var tag_elem = evt.srcElement.parentElement;
-   var inner_text = tag_elem.innerText;
-   inner_text = inner_text.replace(' (X)',''); 
-   tags.deleteTag("${tg.url('/tag/delete_tag')}", "${visiting_group.id}", 'taglist', inner_text);
-}
-
-
-function addTagHelper() {
-   tags.addTags("${tg.url('/tag/add_tags')}", "${visiting_group.id}", tag_input);
-}
-
-var tag_dialog = tags.createAddTagDialog( '${tg.url('/tag/add_tags')}', tags.updateTagsCloseDialog );
+  // TODO: all tag code should be in its own module ??
+  function deleteTagHelper(evt) {
+    var tag_elem = evt.srcElement.parentElement;
+    var inner_text = tag_elem.innerText;
+    inner_text = inner_text.replace(' (X)','');
+    tags.deleteTag("${tg.url('/tag/delete_tag')}", "${visiting_group.id}", 'taglist', inner_text);
+  }
 
 
-function show_add_tag_dialog_ng() {
+  function addTagHelper() {
+    tags.addTags("${tg.url('/tag/add_tags')}", "${visiting_group.id}", tag_input);
+  }
+
+  var tag_dialog = tags.createAddTagDialog( '${tg.url('/tag/add_tags')}', tags.updateTagsCloseDialog );
+
+
+  function show_add_tag_dialog_ng() {
     tags.showAddTagDialog(tag_dialog, '${visiting_group.id}', 'taglist');
-}
- 
- 
-ready(function() {
-	//...load tags
-   tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group._id}");
+  }
 
-   //...setup menu for each little booking
-	var menu = new Menu({
-   	targetNodeIds: ["clustered_booking_list"],
+
+  ready(function() {
+    //...load tags
+    tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group._id}");
+
+    //...setup menu for each little booking
+    var menu = new Menu({
+      targetNodeIds: ["clustered_booking_list"],
       selector: "div.booking_meta_info",
       leftClickToOpen: common_menu.load_left_click_menu()
-      });
-      
-	var cluster_menu = new Menu({
-   	targetNodeIds: ["clustered_booking_list"],
+    });
+
+    var cluster_menu = new Menu({
+      targetNodeIds: ["clustered_booking_list"],
       selector: "div.cluster_meta_info",
       leftClickToOpen: common_menu.load_left_click_menu()
-      });
+    });
 
 
-   /* refactor  show booked booking adding menus to it, then attack booking day add menus to it, then attack the clanedar overview...list visiting groups */
-   
-	
-	common_menu.add_booking_op_menu_item(menu, menu, "View booking", '${tg.url('/booking/view_booked_booking')}');
-	common_menu.add_booking_op_menu_item(menu, menu, "Edit booking", '${tg.url('/booking/edit_booked_booking')}');
-	common_menu.add_booking_op_menu_item(menu, menu, "Unschedule booking", '${tg.url('/booking/unschedule_booking')}');
-	common_menu.add_menu_separator(menu);
-	                    
-   var more = new Menu();
-   menu.addChild(new PopupMenuItem({
-   	label: "more...",
-   	leftClickToOpen: common_menu.load_left_click_menu(),
+    /* refactor  show booked booking adding menus to it, then attack booking day add menus to it, then attack the clanedar overview...list visiting groups */
+
+
+    common_menu.add_booking_op_menu_item(menu, menu, "View booking", '${tg.url('/booking/view_booked_booking')}', 'GET');
+    common_menu.add_booking_op_menu_item(menu, menu, "Edit booking", '${tg.url('/booking/edit_booked_booking')}', 'GET');
+    common_menu.add_booking_op_menu_item(menu, menu, "Unschedule booking", '${tg.url('/booking/unschedule_booking')}', 'POST');
+    common_menu.add_menu_separator(menu);
+
+    var more = new Menu();
+    menu.addChild(new PopupMenuItem({
+      label: "more...",
+      leftClickToOpen: common_menu.load_left_click_menu(),
       popup: more
-   }));  
+    }));
 
-	common_menu.add_menu_separator(menu);
-   common_menu.add_booking_op_menu_item(menu, menu, "Multi-book", '${tg.url('/booking/multi_book')}');
+    common_menu.add_menu_separator(menu);
+    common_menu.add_booking_op_menu_item(menu, menu, "Multi-book", '${tg.url('/booking/multi_book')}', 'GET');
 
-    
-    var set_state_url = '${tg.url('/workflow/set_state')}';       
-    
+
+    var set_state_url = '${tg.url('/workflow/set_state')}';
+
     array.forEach(common_menu.state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(menu, more, x['name'], x['state'], 0, set_state_url);});
     array.forEach(common_menu.state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(cluster_menu, cluster_menu, x['name'], x['state'], 1, set_state_url);});
-    
-	//...setup menu for visiting group itself.
-	var vgroup_menu = new Menu({
-   	targetNodeIds: ["visiting_group_menu"],
-   	leftClickToOpen: common_menu.load_left_click_menu()
-   });
-    
-   common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "New booking request", '${visiting_group['id']}', '${tg.url('/booking/edit_booking')}');
-   common_menu.add_menu_separator(vgroup_menu);
-	common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "View visiting group", '${visiting_group['id']}', '${tg.url('show_visiting_group')}');   
-   common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Edit visiting group", '${visiting_group['id']}', '${tg.url('edit_visiting_group')}');
-   common_menu.add_menu_separator(vgroup_menu);
-   common_menu.add_call_function_menu_item(vgroup_menu, vgroup_menu, "Add tags...",  show_add_tag_dialog_ng  );
-   common_menu.add_note_redirect_menu_item(vgroup_menu, vgroup_menu, "Add note", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
-   common_menu.add_note_redirect_menu_item(vgroup_menu, vgroup_menu, "Add attachment...", '${visiting_group.id}', '${tg.url('/note/add_attachment')}');
-   common_menu.add_menu_separator(vgroup_menu);
-   common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Show history", '${visiting_group['id']}', '${tg.url('/history/show')}');
-   
+
+    //...setup menu for visiting group itself.
+    var vgroup_menu = new Menu({
+      targetNodeIds: ["visiting_group_menu"],
+      leftClickToOpen: common_menu.load_left_click_menu()
+    });
+
+    common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "New booking request", '${visiting_group['id']}', '${tg.url('/booking/edit_booking')}');
+    common_menu.add_menu_separator(vgroup_menu);
+    common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "View visiting group", '${visiting_group['id']}', '${tg.url('show_visiting_group')}');
+    common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Edit visiting group", '${visiting_group['id']}', '${tg.url('edit_visiting_group')}');
+    common_menu.add_menu_separator(vgroup_menu);
+    common_menu.add_call_function_menu_item(vgroup_menu, vgroup_menu, "Add tags...",  show_add_tag_dialog_ng  );
+    common_menu.add_note_redirect_menu_item(vgroup_menu, vgroup_menu, "Add note", '${visiting_group['id']}', '${tg.url('/note/add_note')}');
+    common_menu.add_note_redirect_menu_item(vgroup_menu, vgroup_menu, "Add attachment...", '${visiting_group.id}', '${tg.url('/note/add_attachment')}');
+    common_menu.add_menu_separator(vgroup_menu);
+    common_menu.add_vgid_redirect_menu_item(vgroup_menu, vgroup_menu, "Show history", '${visiting_group['id']}', '${tg.url('/history/show')}');
+
     //...link delete tag handler to any element with class .tag in document.
-	on(win.doc, '.tag:click', deleteTagHelper);
-	
-	//...attach the add tag handler, wont work if show_group is 0 so I disable it here
-	/*
-	var the_add_tag_href_elem = dom.byId('add_tag_href2');
-	on(the_add_tag_href_elem, 'click', addTagHelper);
-	
-	//...link delete tag handler to any element with class .tag in document.
-	on(win.doc, '.tag:click', deleteTagHelper);
-	*/
-	})
+    on(win.doc, '.tag:click', deleteTagHelper);
+
+    //...attach the add tag handler, wont work if show_group is 0 so I disable it here
+    /*
+    var the_add_tag_href_elem = dom.byId('add_tag_href2');
+    on(the_add_tag_href_elem, 'click', addTagHelper);
+
+    //...link delete tag handler to any element with class .tag in document.
+    on(win.doc, '.tag:click', deleteTagHelper);
+    */
+  })
 });
 
 </script>
-
 </head>
-
 <body class="tundra">
-    <div py:if="show_group==1">
+  <div py:if="show_group==1">
     <h2 class="more_menu_symbol" style="width:30em;">${name}</h2>
     <p>${formatDate(visiting_group.from_date)} to ${formatDate(visiting_group.to_date)}</p>
     <div class="note" >
       <div class="tag_list">
         <ul style="display:inline;" id="taglist" class="tag_list"></ul>
       </div>
-    <p>bok.nr: <b>${visiting_group.boknr}</b><br/>
-    boknstatus: <b>${bokn_status_map.get(visiting_group.boknstatus,'')}</b><br/>
-    camping location: <b>${visiting_group.camping_location}</b></p>${HTML(visiting_group.info)}</div>
+      <p>bok.nr: <b>${visiting_group.boknr}</b><br/>
+        boknstatus: <b>${bokn_status_map.get(visiting_group.boknstatus,'')}</b><br/>
+        camping location: <b>${visiting_group.camping_location}</b></p>${HTML(visiting_group.info)}
+    </div>
+
     <div py:for="n in notes" >
-            
-        <div class="note2"><i>${n.timestamp} ${n.last_changed_by}</i><br/>
+      <div class="note2"><i>${n.timestamp} ${n.last_changed_by}</i><br/>
         <ul class="any_menu context_inline_menu ">
-           <li><a href="${tg.url('/note/edit_note', {'_id':n._id})}">edit</a></li>
-           <li><a href="${tg.url('/note/add_note', {'target_id':visiting_group._id})}">add note</a></li>
-           <li><a href="${tg.url('/note/delete_note', {'_id':n._id})}">delete</a></li>
-        </ul>${HTML(n.text)}</div>
-                
+          <li><a href="${tg.url('/note/edit_note', {'_id':n._id})}">edit</a></li>
+          <li><a href="${tg.url('/note/add_note', {'target_id':visiting_group._id})}">add note</a></li>
+          <li><a href="${tg.url('/note/delete_note', {'_id':n._id})}">delete</a></li>
+        </ul>${HTML(n.text)}
+      </div>
     </div>
     <p>${visiting_group.contact_person}<br/>$visiting_group.contact_person_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.contact_person_email</a><br/>
-    </p> 
-
-    
-    
+    </p>
 
     <table class="data">
-        <tr>
-            <th>Property = Value Unit</th><th>Description</th><th>From date</th><th>To date</th>
-        </tr>
-        <tr py:for="prop in visiting_group.visiting_group_properties.values()">
-            <td class="info">$$$prop.property = $prop.value $prop.unit</td><td class="info">$prop.description</td><td class="info">$prop.from_date</td><td class="info">$prop.to_date</td>
-        </tr>
+      <tr>
+        <th>Property = Value Unit</th><th>Description</th><th>From date</th><th>To date</th>
+      </tr>
+      <tr py:for="prop in visiting_group.visiting_group_properties.values()">
+        <td class="info">$$$prop.property = $prop.value $prop.unit</td><td class="info">$prop.description</td><td class="info">$prop.from_date</td><td class="info">$prop.to_date</td>
+      </tr>
     </table>
-    
-    
-    </div> <!-- end  show group info -->
-    
-    <h2 id="visiting_group_menu" class="more_menu_symbol" style="width:30em;">Program Bookings for ${name}</h2>
-    <div py:if="show_group!=1"> <!-- else show group info (tags) -->
-        <div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul></div>
-    </div> <!-- end else -->
-    <div id="clustered_booking_list">
-                
-        <div py:for="cb in clustered_bookings">
-          <h3><a href="${tg.url('/booking/view_activity', {'activity_id':cb[0].activity['_id']})}">${cb[0].activity.title}</a></h3>
-            <div style="margin-left:2em;" class="cluster_meta_info context_menu_symbol" hollyrosa:bid="${cb[0].id}">
-                <div class="note"> ${getRenderContent(cb[0])}</div>
-           </div>
+  </div> <!-- end  show group info -->
 
-          <div py:for="b in cb">
-            <div py:if="None != b.booking_day" class="booking_meta_info context_menu_symbol" hollyrosa:bid="${b['id']}" hollyrosa:bdayid="${b['booking_day_id']}">
-                <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day', {'day_id':b.booking_day.id})}">${formatDate(b.booking_day.date)}</a>
-                <span py:if="b.slot_id!=None"> 
-                  <span py:if="render_time=='time'" ><b>${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b></span>
-                  <span py:if="render_time=='title'" ><b>${b.slot.title}</b></span>
-                  <span py:if="render_time=='' and b.slot.pref=='time'" ><b>${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b></span>
-                  <span py:if="render_time=='' and b.slot.pref=='title'" ><b>${b.slot.title}</b></span>
-                  <span py:if="render_time=='' and b.slot.pref=='silent'" ></span>       
-                </span>
-                  ${workflow_map[b.booking_state]}</span>
-            </div>
-            <div py:if="None == b.booking_day" style="margin-left:2em;">
-                <span class="workflow_state_unscheduled">unscheduled requested from ${formatDate(b.valid_from)} to ${formatDate(b.valid_to)} <a href="${tg.url('/booking/day',params={'day':b.requested_date})}">requested date ${formatDate(b.requested_date)}</a></span>
-                <ul class="any_menu context_inline_menu" style="padding-left:2em;">
-                    
-                    <li><a href="${tg.url('/booking/edit_booking', params={'id':b.id})}">edit</a></li>
-                    <li><a href="${tg.url('/booking/view_booked_booking', params={'id':b.id})}">view</a></li>
-                    
-                </ul>
-            </div>
+  <h2 id="visiting_group_menu" class="more_menu_symbol" style="width:30em;">Program Bookings for ${name}</h2>
+  <div py:if="show_group!=1"> <!-- else show group info (tags) -->
+    <div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul></div>
+  </div> <!-- end else -->
+  <div id="clustered_booking_list">
+
+    <div py:for="cb in clustered_bookings">
+      <h3><a href="${tg.url('/booking/view_activity', {'activity_id':cb[0].activity['_id']})}">${cb[0].activity.title}</a></h3>
+      <div style="margin-left:2em;" class="cluster_meta_info context_menu_symbol" hollyrosa:bid="${cb[0].id}">
+        <div class="note"> ${getRenderContent(cb[0])}</div>
+      </div>
+
+      <div py:for="b in cb">
+        <div py:if="None != b.booking_day" class="booking_meta_info context_menu_symbol" hollyrosa:bid="${b['id']}" hollyrosa:bdayid="${b['booking_day_id']}">
+          <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day', {'day_id':b.booking_day.id})}">${formatDate(b.booking_day.date)}</a>
+            <span py:if="b.slot_id!=None">
+              <span py:if="render_time=='time'" ><b>${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b></span>
+              <span py:if="render_time=='title'" ><b>${b.slot.title}</b></span>
+              <span py:if="render_time=='' and b.slot.pref=='time'" ><b>${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b></span>
+              <span py:if="render_time=='' and b.slot.pref=='title'" ><b>${b.slot.title}</b></span>
+              <span py:if="render_time=='' and b.slot.pref=='silent'" ></span>
+            </span>
+            ${workflow_map[b.booking_state]}
+          </span>
         </div>
+        <div py:if="None == b.booking_day" style="margin-left:2em;">
+          <span class="workflow_state_unscheduled">unscheduled requested from ${formatDate(b.valid_from)} to ${formatDate(b.valid_to)} <a href="${tg.url('/booking/day',params={'day':b.requested_date})}">requested date ${formatDate(b.requested_date)}</a></span>
+          <ul class="any_menu context_inline_menu" style="padding-left:2em;">
+            <li><a href="${tg.url('/booking/edit_booking', params={'id':b.id})}">edit</a></li>
+            <li><a href="${tg.url('/booking/view_booked_booking', params={'id':b.id})}">view</a></li>
+          </ul>
         </div>
-        
-	</div>
-	<div py:if="len(booking_info_notes)" style="border: 1px dashed red; padding:1em;margin:2em;">
-   <h2>Att tänka på</h2>
-       <div py:for="n in booking_info_notes" style="padding:2em;">${HTML(n.get('text','missing text for note %s' % n['_id']))}</div>
-   </div>
+      </div>
+    </div>
+
+  </div>
+  <div py:if="len(booking_info_notes)" style="border: 1px dashed red; padding:1em;margin:2em;">
+    <h2>Att tänka på</h2>
+    <div py:for="n in booking_info_notes" style="padding:2em;">${HTML(n.get('text','missing text for note %s' % n['_id']))}</div>
+  </div>
 </body>
 </html>

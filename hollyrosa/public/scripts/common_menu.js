@@ -1,4 +1,4 @@
-/*
+/**
 * Copyright 2010-2017 Martin Eliasson
 *
 * This file is part of Hollyrosa
@@ -474,7 +474,7 @@ function add_change_booking_state_menu_item(a_menu, a_sub_menu, state_name, stat
     }));
   }
 
-  
+
   return {
     add_redirect_menu_item:add_redirect_menu_item,
     add_call_function_menu_item:add_call_function_menu_item,
