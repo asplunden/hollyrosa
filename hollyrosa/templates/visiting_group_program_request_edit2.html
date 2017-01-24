@@ -21,271 +21,264 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
-
   <xi:include href="master_external.html" />
-
 <head>
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Program ${visiting_group_program_request.name}</title>
-
   <link rel="stylesheet" type="text/css" href="${tg.url('/css/div_widget.css')}" />
   <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.11.2/dojox/grid/resources/tundraGrid.css')}" />
-
   <script>dojoConfig = {parseOnLoad: true}</script>
-  <!--<script src="${tg.url('/scripts/dojo-release-1.11.2/dojo/dojo.js')}" data-dojo-config="async: true" djConfig="parseOnLoad: true"></script>-->
-   
+
+  <!-- BEGIN DOJO MODULE -->
   <script>
 
 require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on','dojo/ready', 'dojo/domReady!'],
-  function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready ){
-    
-    function formatDate(datum) {
-        /*var d = stamp.fromISOString(datum);
-        return locale.format(d, {selector: 'date', formatLength: 'short'});*/
-        return datum;
-    }
+function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready ){
 
-    function getDateValue(){
-        /*Override the default getValue function for dojox.grid.cells.DateTextBox   */
-        /* return stamp.toISOString(this.widget.get('value')); */
-        return locale.format(this.widget.get('value'), {selector: 'date', datePattern: 'yyyy-MM-dd'});
-        
-    }
-    
-    
-    function saveCompleteCallback(){
-    	alert('save done');
-    	}
+  // TODO: fif date functions
+  function formatDate(datum) {
+    /*var d = stamp.fromISOString(datum);
+    return locale.format(d, {selector: 'date', formatLength: 'short'});*/
+    return datum;
+  }
 
-	function saveFailedCallback() {
-		alert('save failed');
-		}
-  
- 
-    var age_group_data = ${visiting_group_program_request.program_request_age_group}; 
-    var program_request_data = ${visiting_group_program_request.program_request};
-    
-    
-   
-    var program_request_store = new ItemFileWriteStore({
-    	data: program_request_data
+  // TODO: fix date functions
+  function getDateValue(){
+    /*Override the default getValue function for dojox.grid.cells.DateTextBox   */
+    /* return stamp.toISOString(this.widget.get('value')); */
+    return locale.format(this.widget.get('value'), {selector: 'date', datePattern: 'yyyy-MM-dd'});
+
+  }
+
+
+  function saveCompleteCallback(){
+    alert('save done');
+  }
+
+  function saveFailedCallback() {
+    alert('save failed');
+  }
+
+
+  var age_group_data = ${visiting_group_program_request.program_request_age_group};
+  var program_request_data = ${visiting_group_program_request.program_request};
+
+  var program_request_store = new ItemFileWriteStore({
+    data: program_request_data
+  });
+
+  var age_group_store = new ItemFileWriteStore({
+    data: age_group_data
+  });
+
+  age_group_store._saveEverything = function(a_saveCompleteCallback,
+    a_saveFailedCallback /*Your callback to call if save fails*/,
+    a_newFileContentString /*The generated JSON data to send somewhere*/)
+  {
+    var inp = dom.byId('age_group_div_input');
+    inp.value = a_newFileContentString;
+    a_saveCompleteCallback();
+  };
+
+  program_request_store._saveEverything = function(a_saveCompleteCallback,
+    a_saveFailedCallback,
+    a_newFileContentString /*The generated JSON data to send somewhere*/)
+  {
+    var inp = dom.byId('program_request_div_input');
+    inp.value = a_newFileContentString;
+    a_saveCompleteCallback();
+  };
+
+  var global_edit_allowed = ( ${visiting_group_program_request.boknstatus} == 0 );
+
+  var program_request_layout = [[
+    {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+    {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed, type: dojox.grid.cells.Select, options: [ 'FM', 'EM', 'Kväll' ], values: [ 'FM', 'EM', 'EVENING' ]},
+    {'name': 'Program', 'field': 'requested_activity', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.Select, options: ['-', 'Trapper', 'Sammarbetsgläntan', 'Storbåt','Optimist','Kanot','Flottbygge','Hinderbana','Naturstigen (utb)'], values: [ '', 'activity.1', 'activity.19','activity.30','activity.34','activity.35','activity.40','activity.41','activity.3' ]},
+    {'name': 'Småbarn', 'field': 'age_sma', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+    {'name': 'Spårare', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+    {'name': 'Upptäckare', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+    {'name': 'Äventyrare', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+    {'name': 'Utmanare', 'field': 'age_utm', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+    {'name': 'Rover', 'field': 'age_rov', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
+    {'name': 'Note', 'field': 'note', 'width': '200px', editable:global_edit_allowed}
+  ]];
+
+
+  var age_group_layout = [[
+    {'name': 'Ålder',                     field: 'age', 'width': '100px'},
+    {'name': 'Grupp',                     field: 'age_group', 'width': '100px'},
+    {'name': 'Antal deltagare',       field: 'value', 'width': '150px', editable: global_edit_allowed},
+    {'name': 'Från datum',              field: 'from_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
+    {'name': 'Till datum',                field: 'to_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue}
+  ]];
+
+  /*create a new grid*/
+  var age_group_grid = new DataGrid({
+    id: 'age_group_gridx',
+    singleClickEdit: true,
+    store: age_group_store,
+    structure: age_group_layout,
+    rowSelector: '10px'
+  });
+
+  var program_request_grid = new DataGrid({
+    id: 'program_request_gridx',
+    store: program_request_store,
+    structure: program_request_layout,
+    rowSelector: '10px'
+  });
+
+
+  function on_save_grid_to_input() {
+    age_group_store.save(saveCompleteCallback, saveFailedCallback);
+    program_request_store.save(saveCompleteCallback, saveFailedCallback);
+    dom.byId('program_request_info').value = dijit.byId('program_request_info_editor').value;
+  };
+
+
+  function on_validate() {
+    var myForm = dijit.byId('myForm');
+    if(myForm.validate()){
+      /* do some more advanced form data validation
+      * all requested dates should be within the range of the visiting group
+      */
+      return true;
+    } else {
+      alert('Form contains invalid data.  Please correct first');
+      return false;
+    }
+    return true;
+  }
+
+
+  function on_validate_finalize() {
+    var myForm = dijit.byId('myForm');
+    if(myForm.validate()){
+      var result = confirm('Form is valid and ready to be sent for processing, pressing OK will submit yuur requests and thereafter you cannot change your request data except for contact info and request text');
+
+      return result;
+    } else {
+      alert('Form contains invalid data.  Please correct first');
+      return false;
+    }
+    return true;
+  }
+
+
+  function on_ready(){
+    var submit_button = dijit.byId('submit_button');
+    var save_button = dijit.byId('save_button');
+
+
+    if (submit_button) {
+      on( submit_button , 'click', on_save_grid_to_input );
+
+      on( submit_button , 'click', function() {
+        dom.byId('ready_to_process').value = 'True';
       });
-      
-    
-    var age_group_store = new ItemFileWriteStore({
-    	data: age_group_data
-      });
 
-    age_group_store._saveEverything = function(a_saveCompleteCallback,
-                                a_saveFailedCallback /*Your callback to call if save fails*/,
-                                a_newFileContentString /*The generated JSON data to send somewhere*/){
-                                
-                                	var inp = dom.byId('age_group_div_input');
-                                	inp.value = a_newFileContentString;
-                                	a_saveCompleteCallback();
-    										};
-    
-    program_request_store._saveEverything = function(a_saveCompleteCallback,
-                                a_saveFailedCallback,
-                                a_newFileContentString /*The generated JSON data to send somewhere*/){
-                                	var inp = dom.byId('program_request_div_input');
-                                	inp.value = a_newFileContentString;
-                                	a_saveCompleteCallback();
-                                	};  
-                                    
-    var global_edit_allowed = ( ${visiting_group_program_request.boknstatus} == 0 ); 
-    
-    var program_request_layout = [[
-      {'name': 'Datum', 'field': 'requested_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'Tid', 'field': 'requested_time', 'width': '50px', editable:global_edit_allowed, type: dojox.grid.cells.Select, options: [ 'FM', 'EM', 'Kväll' ], values: [ 'FM', 'EM', 'EVENING' ]},      
-      {'name': 'Program', 'field': 'requested_activity', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.Select, options: ['-', 'Trapper', 'Sammarbetsgläntan', 'Storbåt','Optimist','Kanot','Flottbygge','Hinderbana','Naturstigen (utb)'], values: [ '', 'activity.1', 'activity.19','activity.30','activity.34','activity.35','activity.40','activity.41','activity.3' ]},
-      {'name': 'Småbarn', 'field': 'age_sma', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},  
-      {'name': 'Spårare', 'field': 'age_spar', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Upptäckare', 'field': 'age_uppt', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Äventyrare', 'field': 'age_aven', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Utmanare', 'field': 'age_utm', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},  
-      {'name': 'Rover', 'field': 'age_rov', 'width': '60px', editable:global_edit_allowed, type: dojox.grid.cells.Bool},
-      {'name': 'Note', 'field': 'note', 'width': '200px', editable:global_edit_allowed}
-    ]];
-
-    
-    var age_group_layout = [[
-      {'name': 'Ålder',                     field: 'age', 'width': '100px'},
-      {'name': 'Grupp',                     field: 'age_group', 'width': '100px'},
-      {'name': 'Antal deltagare',       field: 'value', 'width': '150px', editable: global_edit_allowed},
-      {'name': 'Från datum',              field: 'from_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue},
-      {'name': 'Till datum',                field: 'to_date', 'width': '100px', editable: global_edit_allowed, type: dojox.grid.cells.DateTextBox, formatter: formatDate, getValue: getDateValue}
-    ]];
-
-    /*create a new grid*/
-    var age_group_grid = new DataGrid({
-        id: 'age_group_gridx',
-        singleClickEdit: true,
-        store: age_group_store,
-        structure: age_group_layout,
-        rowSelector: '10px'});
-
-
-	 var program_request_grid = new DataGrid({
-        id: 'program_request_gridx',
-        store: program_request_store,
-        structure: program_request_layout,
-        rowSelector: '10px'});
-
-
-
-    function on_save_grid_to_input() {
-    	age_group_store.save(saveCompleteCallback, saveFailedCallback);
-    	program_request_store.save(saveCompleteCallback, saveFailedCallback);
-    	dom.byId('program_request_info').value = dijit.byId('program_request_info_editor').value;
-    	};
-    
-    
-    function on_validate() {
-      var myForm = dijit.byId('myForm');
-    	if(myForm.validate()){
-            /* do some more advanced form data validation
-             * all requested dates should be within the range of the visiting group
-             */ 
-            return true;
-        } else {
-            alert('Form contains invalid data.  Please correct first');
-            return false;
-        }
-        return true;
+      on( submit_button , 'click', on_validate_finalize);
     }
-    
-    
-    function on_validate_finalize() {
-      var myForm = dijit.byId('myForm');
-    	if(myForm.validate()){
-            var result = confirm('Form is valid and ready to be sent for processing, pressing OK will submit yuur requests and thereafter you cannot change your request data except for contact info and request text');
-            
-            return result;
-        } else {
-            alert('Form contains invalid data.  Please correct first');
-            return false;
-        }
-        return true;
-    }
-    
-    
-    function on_ready(){
-      var submit_button = dijit.byId('submit_button');
-      var save_button = dijit.byId('save_button');
-      
-      
-      if (submit_button) {
-        on( submit_button , 'click', on_save_grid_to_input );
-      
-        on( submit_button , 'click', function() {
-			dom.byId('ready_to_process').value = 'True';      
-        });
-        
-        on( submit_button , 'click', on_validate_finalize);
-    }
-    
+
     if (save_button) {
-        on( save_button , 'click', on_save_grid_to_input );
-        on( save_button , 'click', on_validate); 
+      on( save_button , 'click', on_save_grid_to_input );
+      on( save_button , 'click', on_validate);
     }
-    
+
     age_group_grid.placeAt('age_group_div');
     age_group_grid.startup();
     program_request_grid.placeAt('age_group_div');
     program_request_grid.startup();
-     
-    }
-    	
-    ready(on_ready);
+
+  }
+
+  ready(on_ready);
 });
-
-</script>
-
+</script> <!-- END DOJO MODULE -->
+<!-- TODO: BEGIN DOJO MODULE 2 ??? -->
 <script>
 require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/ValidationTextBox", "dijit/form/DateTextBox"]);
 </script>
 </head>
 
 <body class="tundra">
-    <h2>Programönskemål för ${visiting_group_program_request.name}</h2>
-    
+  <h2>Programönskemål för ${visiting_group_program_request.name}</h2>
 
-	<p>Lägertid: <b>${reFormatDate(visiting_group_program_request.from_date)} - ${reFormatDate(visiting_group_program_request.to_date)}</b><br/>
+  <p>Lägertid: <b>${reFormatDate(visiting_group_program_request.from_date)} - ${reFormatDate(visiting_group_program_request.to_date)}</b><br/>
     Boknings status: <b>${bokn_status_map[visiting_group_program_request.boknstatus]}</b></p>
-    
+
     <div style="padding-left:2em; background:#ffc;">
-    <p>Hej och tack för att du vågar prova vårt it-system!<br/>
-    Den här anmälan ersätter programönskemålen du skickar in på papper. Om du känner att dina programönskemål inte passar in i mallen nedan så skicka in dom på papper.
-    Om du känner att mallen nästan stämmer så skriv dina extra önskemål/modifieringar i info-fältet.
-    </p>
-    <p>
-    Det finns i grunden fyra sorters information du behöver mata in:
-    <ol>
-		<li>Kontaktinfo och speciellt info</li>
-		<li>Övrig programönskemåls info</li>
-		<li>Antal och lägertid per åldersgrupp. Passar er grupp inte mallen, använd hellre vårt pappers-formulär</li>
-		<li>Programönskemål. Välj dag, tid och kryssa sedan i vilka åldersgrupper det gäller.</li>   
-    </ol>
-    </p>
-    <p>Sist av allt tryck "spara utkast". <b>OBS! du kan alltid spara som utkast och fortsätta fylla i formuläret tills dess att du har bestämt dig, men du måste tillslut välja att "spara och processa". Efter att du valt "spara och processa" så tar vi hand om era programönskemål</b>
-    men det är också så att efter att du tryckt "spara och processa" så kan du inte ändra i annat än kontaktinfo.
-    </p>
+      <p>Hej och tack för att du vågar prova vårt it-system!<br/>
+        Den här anmälan ersätter programönskemålen du skickar in på papper. Om du känner att dina programönskemål inte passar in i mallen nedan så skicka in dom på papper.
+        Om du känner att mallen nästan stämmer så skriv dina extra önskemål/modifieringar i info-fältet.
+      </p>
+      <p>
+        Det finns i grunden fyra sorters information du behöver mata in:
+        <ol>
+          <li>Kontaktinfo och speciellt info</li>
+          <li>Övrig programönskemåls info</li>
+          <li>Antal och lägertid per åldersgrupp. Passar er grupp inte mallen, använd hellre vårt pappers-formulär</li>
+          <li>Programönskemål. Välj dag, tid och kryssa sedan i vilka åldersgrupper det gäller.</li>
+        </ol>
+      </p>
+      <p>Sist av allt tryck "spara utkast". <b>OBS! du kan alltid spara som utkast och fortsätta fylla i formuläret tills dess att du har bestämt dig, men du måste tillslut välja att "spara och processa". Efter att du valt "spara och processa" så tar vi hand om era programönskemål</b>
+        men det är också så att efter att du tryckt "spara och processa" så kan du inte ändra i annat än kontaktinfo.
+      </p>
     </div>
-    
+
     <div id="validation_error_messages" py:if="hasValidationErrors(visiting_group_program_request)" style="background:#fcc;">
-    <h3>Att rätta till</h3>
-    <p>Den här rutan visas för att det finns minst en sak som behöver korrigeras i programönskemålen innan "spara och processa" kan genomföras och lyckas. Tillsvidare kan du använda "spara utkast" så du inte förlorar det du matat in.</p>
-    <p py:for="msg in visiting_group_program_request.get('validation_error_explanations',{}).values()">$msg</p>
-    <table>
+      <h3>Att rätta till</h3>
+      <p>Den här rutan visas för att det finns minst en sak som behöver korrigeras i programönskemålen innan "spara och processa" kan genomföras och lyckas. Tillsvidare kan du använda "spara utkast" så du inte förlorar det du matat in.</p>
+      <p py:for="msg in visiting_group_program_request.get('validation_error_explanations',{}).values()">$msg</p>
+      <table>
         <tr><th>Sektion</th><th>Att korrigera</th><th>Problematiskt värde</th></tr>
         <tr py:for="m in visiting_group_program_request.validation_error_messages"><td>${m['section']}</td><td>${m['message']}</td><td>${m['problematic_value']}</td></tr>
-    </table>
+      </table>
     </div>
-       
-    
-    
-    <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_visiting_group_program_request" method="post">
-    
-    <p>
-    <label for="contact_name">Kontaktperson för program:</label><br/>
-    <input type="text" id="contact_person" name="contact_person" value="$visiting_group_program_request.contact_person" data-dojo-type="dijit/form/ValidationTextBox"/>
-    </p>
-    <p> 
-    <label for="contact_email">Email:</label><br/>
-    <input type="text" id="contact_person_email" name="contact_person_email" value="$visiting_group_program_request.contact_person_email" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
-    </p>
-    <p>
-    <label for="contact_phone">Mobil:</label><br/>
-    <input type="text" id="contact_person_phone" name="contact_person_phone" value="$visiting_group_program_request.contact_person_phone" data-dojo-type="dijit/form/ValidationTextBox"/>
-    </p>
-    <div> 
-    <label for="program_request_info_editor">Info:</label><br/>
-    <div data-dojo-type="dijit/Editor" id="program_request_info_editor">$visiting_group_program_request.program_request_info</div>
-    </div> 
-    <div>
-    <label for="age_group_div">Åldersgrupper:</label><br/>        		
-    	<div id="age_group_div" style="height:300px;"><input type="hidden" id="age_group_div_input" name="age_group_input"/></div>
-    </div>
-    
-    <div>    
-    <label for="program_request_div">Programönskemål:</label><br/>
-    <div id="program_request_div" style="height:400px;">Program request...<input type="hidden" id="program_request_div_input" name="program_request_input"/></div>
-    </div>
-    <p>
-    <label for="have_skippers">Har egna skeppare:</label>
-    <input type="checkbox" id="have_skippers" name="have_skippers" py:attrs="['',{'checked':'true'}][visiting_group_program_request.program_request_have_skippers == 'on']" data-dojo-type="dijit/form/CheckBox"/>
-    </p>
-    <p>
-    <label for="miniscout">Önskar deltaga i Miniscout (om det är aktuellt)</label>
-    <input type="checkbox" id="miniscout" name="miniscout"  py:attrs="['',{'checked':'true'}][visiting_group_program_request.program_request_miniscout == 'on']" data-dojo-type="dijit/form/CheckBox"/>
-    </p>    
-	<input type="hidden" name="vgroup_id" value="$visiting_group_program_request._id"/>
-	<input type="hidden" id="ready_to_process" name="ready_to_process" value="False"/>
-	<input type="hidden" name="program_request_info" id="program_request_info" />
-    <button py:if="visiting_group_program_request.boknstatus==0" data-dojo-type="dijit/form/Button" type="submit" name="saveButton" value="Save" id="save_button">Spara som utkast</button>
-    <button py:if="visiting_group_program_request.boknstatus==0" data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Finalize-and-send" id="submit_button">Spara och processa</button>
 
-</div>
-</body>
-</html>
+
+
+    <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_visiting_group_program_request" method="post">
+      <p>
+        <label for="contact_name">Kontaktperson för program:</label><br/>
+        <input type="text" id="contact_person" name="contact_person" value="$visiting_group_program_request.contact_person" data-dojo-type="dijit/form/ValidationTextBox"/>
+      </p>
+      <p>
+        <label for="contact_email">Email:</label><br/>
+        <input type="text" id="contact_person_email" name="contact_person_email" value="$visiting_group_program_request.contact_person_email" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
+      </p>
+      <p>
+        <label for="contact_phone">Mobil:</label><br/>
+        <input type="text" id="contact_person_phone" name="contact_person_phone" value="$visiting_group_program_request.contact_person_phone" data-dojo-type="dijit/form/ValidationTextBox"/>
+      </p>
+      <div>
+        <label for="program_request_info_editor">Info:</label><br/>
+        <div data-dojo-type="dijit/Editor" id="program_request_info_editor">$visiting_group_program_request.program_request_info</div>
+      </div>
+      <div>
+        <label for="age_group_div">Åldersgrupper:</label><br/>
+        <div id="age_group_div" style="height:300px;"><input type="hidden" id="age_group_div_input" name="age_group_input"/></div>
+      </div>
+
+      <div>
+        <label for="program_request_div">Programönskemål:</label><br/>
+        <div id="program_request_div" style="height:400px;">Program request...<input type="hidden" id="program_request_div_input" name="program_request_input"/></div>
+      </div>
+      <p>
+        <label for="have_skippers">Har egna skeppare:</label>
+        <input type="checkbox" id="have_skippers" name="have_skippers" py:attrs="['',{'checked':'true'}][visiting_group_program_request.program_request_have_skippers == 'on']" data-dojo-type="dijit/form/CheckBox"/>
+      </p>
+      <p>
+        <label for="miniscout">Önskar deltaga i Miniscout (om det är aktuellt)</label>
+        <input type="checkbox" id="miniscout" name="miniscout"  py:attrs="['',{'checked':'true'}][visiting_group_program_request.program_request_miniscout == 'on']" data-dojo-type="dijit/form/CheckBox"/>
+      </p>
+      <input type="hidden" name="vgroup_id" value="$visiting_group_program_request._id"/>
+      <input type="hidden" id="ready_to_process" name="ready_to_process" value="False"/>
+      <input type="hidden" name="program_request_info" id="program_request_info" />
+      <button py:if="visiting_group_program_request.boknstatus==0" data-dojo-type="dijit/form/Button" type="submit" name="saveButton" value="Save" id="save_button">Spara som utkast</button>
+      <button py:if="visiting_group_program_request.boknstatus==0" data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Finalize-and-send" id="submit_button">Spara och processa</button>
+
+    </div>
+  </body>
+  </html>

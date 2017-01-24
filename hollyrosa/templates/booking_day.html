@@ -42,31 +42,31 @@ require(["dojo/dom", "dojo/query!css2", "dojo/dom-form", "dojo/dom-attr", "dojo/
   var jdata = {};
 
   /**
-   * Called when document has completely loaded.
-   **/
+  * Called when document has completely loaded.
+  **/
   ready(function() {
 
-      //...sets up the calendar navigation widget
-      var e = dom.byId('navigation_calendar');
-      domAttr.set(e, 'dojoType', 'dijit.Calendar');
+    //...sets up the calendar navigation widget
+    var e = dom.byId('navigation_calendar');
+    domAttr.set(e, 'dojoType', 'dijit.Calendar');
 
-      //...set the name of the callback function to call when the calendar is clicked.
-      domAttr.set(e, 'onChange', 'navigation_calendar_clicked');
+    //...set the name of the callback function to call when the calendar is clicked.
+    domAttr.set(e, 'onChange', 'navigation_calendar_clicked');
 
-      //...set name of callback function that tells if a date i disabled. I think this function is defined in std.js
-      domAttr.set(e, 'isDisabledDate','navigation_calendar_is_disabled');
-      parser.parse(e.parentNode);
+    //...set name of callback function that tells if a date i disabled. I think this function is defined in std.js
+    domAttr.set(e, 'isDisabledDate','navigation_calendar_is_disabled');
+    parser.parse(e.parentNode);
 
-      var tools_link_elem = dom.byId('toolslink');
-      var href = domAttr.get(tools_link_elem, "href");
-      domAttr.get(tools_link_elem, "href", href + "?day=" + "${booking_day.date}" );
+    var tools_link_elem = dom.byId('toolslink');
+    var href = domAttr.get(tools_link_elem, "href");
+    domAttr.get(tools_link_elem, "href", href + "?day=" + "${booking_day.date}" );
   });
 }); /* END OF DOJO MODULE */
 
 
 /**
- * Local JavaScript function called when calendar date is clocked.
- **/
+* Local JavaScript function called when calendar date is clocked.
+**/
 function navigation_calendar_clicked(x) {
   //...format date to our preferred yyyy-MM-dd format
   var selected_date = dojo.date.locale.format(x, {datePattern: "yyyy-MM-dd", selector: "date"});
@@ -265,7 +265,7 @@ require(["common_menu","dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit
           <div class="booking_day_overview_slots">Evening</div>
           <div class="booking_day_overview_slots">After hours</div>
         </div>
-        
+
         <div py:for="slot_row in slot_rows" hollyrosa:acgid="${slot_row.activity_group_id}"  class="booking_day_overview_slot_row" style="background: ${slot_row.bg_color};">
           <div class="booking_day_overview_activity"><a href="${tg.url('/activity/view_activity', params={'activity_id':slot_row.activity_id})}">${slot_row.title}</a><a name="activity_row_id_${slot_row.activity_id}" class="ag_anchor">&nbsp;</a><span py:if="0 != slot_row.capacity">[${str(slot_row.capacity)}]</span></div>
           <div py:for="slot_position in slot_row.slot_row_position" hollyrosa:w="$slot_position.time_from - $slot_position.time_to" class="booking_day_overview_slots ${['','slot_row_position_blocked'][blockings_map.has_key(slot_position.id)]}">
