@@ -225,6 +225,30 @@ function add_change_booking_state_menu_item(a_menu, a_sub_menu, state_name, stat
   }
 
 
+  /**
+   * This is a helper function that wraps  add_call_function_menu_item() and picks out the node
+   * that the event that is associated with the menu click. BAsically, the node on which the menu was shown.
+   * Then, for each oaram name in param_list, the hollyrosa:<param_name> attribute is obtained from
+   * the node and set as parameter in a request with METHOD POST or GET depending on a_method string.
+   *
+   * Also, a_init_params is a dict with pre-filled params.
+   **/
+  function add_transfer_map_function_menu_item_2(a_menu, a_sub_menu, a_name, a_url, a_param_list, a_init_params, a_method) {
+    return add_call_function_menu_item(a_menu, a_sub_menu, a_name, function(evt) {
+      var node = a_menu.currentTarget;
+      var ioq = a_init_params;
+      array.forEach(a_param_list, function(param_name) {
+        ioq[param_name] = node.attributes["hollyrosa:"+param_name].value;
+      });
+      if (a_method == 'GET') {
+        window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+      } else {
+        make_form_and_post(a_url, ioq)
+      }
+    });
+  }
+
+
   function add_booking_op_menu_item_for_block(a_menu, a_sub_menu, a_name, a_url, a_subtype) {
     var menu_item =new MenuItem({
       label: a_name,
@@ -306,6 +330,8 @@ function add_change_booking_state_menu_item(a_menu, a_sub_menu, state_name, stat
       }
     }));
   }
+
+
 
   /**
    * Loads actitivty group checkbox status from the cookie visible_ag
@@ -415,6 +441,7 @@ function add_change_booking_state_menu_item(a_menu, a_sub_menu, state_name, stat
         jdata = json.parse(cdata);
       }
       catch(SyntaxError) {
+        console.log('SyntaxError when parsing JSON data for cookie left click menu');
         jdata = false;
       }
     }
@@ -499,6 +526,7 @@ function add_change_booking_state_menu_item(a_menu, a_sub_menu, state_name, stat
     add_calc_sheet_redirect_menu_item:add_calc_sheet_redirect_menu_item,
     program_state_map:program_state_map, vodb_state_map:vodb_state_map,
     update_visiting_group_type_visible_rows:update_visiting_group_type_visible_rows,
-    add_transfer_map_function_menu_item:add_transfer_map_function_menu_item
+    add_transfer_map_function_menu_item:add_transfer_map_function_menu_item,
+    add_transfer_map_function_menu_item_2:add_transfer_map_function_menu_item_2
   };
 });

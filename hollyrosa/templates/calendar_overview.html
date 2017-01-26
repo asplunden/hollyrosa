@@ -20,7 +20,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
 
-<!-- remove python code -->
+<!-- TODO: remove python code, I really need a JS framework that does the date parsing and date conversion for me.  -->
 <?python
 import datetime
 def makeDate(s):
@@ -35,121 +35,64 @@ def makeDate(s):
   <!-- BEGIN DOJO MODULE -->
   <script>
 
-  require(["dijit/registry","common_menu","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query", "dojo/domReady!"], function(registry, common_menu, Menu, MenuItem, xq, ioQuery) {
-    var menu = new Menu({
+  require(["common_menu", "page/calendar_overview", "dijit/registry","common_menu","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query", "dojo/domReady!"],
+    function(common_menu, page, registry, common_menu, Menu, MenuItem, xq, ioQuery) {
+
+    var menu_config = {
       targetNodeIds: ["calendar_listing"],
       selector: "tr.calendar_overview",
       leftClickToOpen: common_menu.load_left_click_menu()
-    });
+    }
+
+    var page_config = {
+      menu_config: menu_config,
+      calendar_menu_target_node_ids:["calendar_listing"],
+    };
+
+
 
     // TODO: refactor the direct calendar code
 
-    menu.addChild(new MenuItem({
-      label: "Day overview",
-      onClick: function(evt) {
-        var node = menu.currentTarget;
-        var bdayid = node.attributes["hollyrosa:bdayid"].value;
-        var ioq = {
-          day_id: bdayid
-        };
-        window.location = '${tg.url('/booking/day')}' + '?' + ioQuery.objectToQuery(ioq);
-      }
-    }));
+    /*
 
-    menu.addChild(new MenuItem({
-      label: "Room overview",
-      onClick: function(evt) {
-        var node = menu.currentTarget;
-        var bdayid = node.attributes["hollyrosa:bdayid"].value;
-        var ioq = {
-          day_id: bdayid,
-          subtype: 'room'
-        };
-        window.location = '${tg.url('/booking/live')}' + '?' + ioQuery.objectToQuery(ioq);
+    // TODO: should be replaceable wit the map version + extra parameters from a dict
+      function add_calendar_overview_menu_item(a_menu, a_sub_menu, a_name, a_url, a_subtype) {
+        a_sub_menu.addChild(new MenuItem({
+          label: a_name,
+          onClick: function(evt) {
+            var node = a_menu.currentTarget;
+            var bdayid = node.attributes["hollyrosa:booking_day_id"].value;
+            var ioq = {
+              day_id: bdayid,
+              subtype: a_subtype
+            };
+            window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
+          }
+        }));
       }
-    }));
 
-    menu.addChild(new MenuItem({
-      label: "Staff overview",
-      onClick: function(evt) {
-        var node = menu.currentTarget;
-        var bdayid = node.attributes["hollyrosa:bdayid"].value;
-        var ioq = {
-          day_id: bdayid,
-          subtype: 'staff'
-        };
-        window.location = '${tg.url('/booking/live')}' + '?' + ioQuery.objectToQuery(ioq);
-      }
-    }));
+*/
 
-    common_menu.add_menu_separator(menu);
-    menu.addChild(new MenuItem({
-      label: "Edit...",
-      onClick: function(evt) {
-        var node = menu.currentTarget;
-        var bdayid = node.attributes["hollyrosa:bdayid"].value;
-        var ioq = {
-          booking_day_id: bdayid
-        };
-        window.location = '${tg.url('/calendar/edit_booking_day')}' + '?' + ioQuery.objectToQuery(ioq);
-      }
-    }));
+    var menu = new Menu(menu_config);
+    common_menu.add_transfer_map_function_menu_item_2(menu, menu, 'Day overview', '${tg.url('/booking/day')}', ['booking_day_id'], {}, 'GET' );
+    common_menu.add_transfer_map_function_menu_item_2(menu, menu, 'Room overview', '${tg.url('/booking/live')}', ['booking_day_id'],  {subtype:'room'}, 'GET');
+    common_menu.add_transfer_map_function_menu_item_2(menu, menu, 'Staff overview', '${tg.url('/booking/live')}', ['booking_day_id'],  {subtype:'staff'}, 'GET');
     common_menu.add_menu_separator(menu);
 
-    menu.addChild(new MenuItem({
-      label: "Visiting groups this day",
-      onClick: function(evt) {
-        var node = menu.currentTarget;
-        var bdate = node.attributes["hollyrosa:bdate"].value;
-        var ioq = {
-          at_date: bdate
-        };
-        window.location = '${tg.url('/visiting_group/view_at_date')}' + '?' + ioQuery.objectToQuery(ioq);
-      }
-    }));
-
+    // TODO: for the edit controller, booking_day_id is now called bdayid, also check the day template
+    common_menu.add_transfer_map_function_menu_item(menu, menu, "Edit day info...", '${tg.url('/calendar/edit_booking_day')}', ['booking_day_id']);
     common_menu.add_menu_separator(menu);
 
-    menu.addChild(new MenuItem({
-      label: "Fladan schema",
-      onClick: function(evt) {
-        var node = menu.currentTarget;
-        var bdate = node.attributes["hollyrosa:bdate"].value;
-        var ioq = {
-          ag: "activity_group.6",
-          day: bdate
-        };
-        window.location = '${tg.url("/booking/fladan_day")}' + '?' + ioQuery.objectToQuery(ioq);
-      }
-    }));
+    // TODO: changed parameter name from at_date to bdate
+    // TODO: ***************** SCHEIZE, needs to be GET or POST + Extra Params
+    common_menu.add_transfer_map_function_menu_item_2(menu, menu, "Visiting groups this day", '${tg.url('/visiting_group/view_at_date')}', ['date'], {},'GET');
+    common_menu.add_menu_separator(menu);
 
-    menu.addChild(new MenuItem({
-      label: "Trapper schema",
-      onClick: function(evt) {
-        var node = menu.currentTarget;
-        var bdate = node.attributes["hollyrosa:bdate"].value;
-        var ioq = {
-          ag: "activity_group.1",
-          day: bdate
-        };
+    // TODO: day changed name to bdate
+    common_menu.add_transfer_map_function_menu_item_2(menu, menu, "Fladan schema", '${tg.url('/booking/fladan_day')}', ['date'], {ag: "activity_group.6"},'GET');
+    common_menu.add_transfer_map_function_menu_item_2(menu, menu, "Trapper schema", '${tg.url('/booking/fladan_day')}', ['date'], {ag: "activity_group.1"},'GET');
+    common_menu.add_transfer_map_function_menu_item_2(menu, menu, 'All schema', '${tg.url("/booking/fladan_day")}', ['date'], {}, 'GET');
 
-        window.location = '${tg.url("/booking/fladan_day")}' + '?' + ioQuery.objectToQuery(ioq);
-
-      }
-    }));
-
-    menu.addChild(new MenuItem({
-      label: "All schema",
-      onClick: function(evt) {
-        var node = menu.currentTarget;
-        var bdate = node.attributes["hollyrosa:bdate"].value;
-        var ioq = {
-          day: bdate
-        };
-
-        window.location = '${tg.url("/booking/fladan_day")}' + '?' + ioQuery.objectToQuery(ioq);
-      }
-    }));
   });
   </script>
 </head>
@@ -157,7 +100,7 @@ def makeDate(s):
   <h2>Calendar Overview</h2>
   <table class="data" id="calendar_listing">
     <tr><th>Day</th><th>Note</th></tr>
-    <tr py:for="booking_day in booking_days" style="${['','background:#fdd;'][6==makeDate(booking_day['date']).weekday()]}" class="calendar_overview" hollyrosa:bdate="${booking_day['date']}" hollyrosa:bdayid="${booking_day['_id']}">
+    <tr py:for="booking_day in booking_days" style="${['','background:#fdd;'][6==makeDate(booking_day['date']).weekday()]}" class="calendar_overview" hollyrosa:date="${booking_day['date']}" hollyrosa:booking_day_id="${booking_day['_id']}">
       <td class="data info context_menu_symbol"><a href="${tg.url('/booking/day', params={'day_id':str(booking_day['_id'])})}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a><br/>
       </td>
       <td class="data info context_menu_symbol"><h2>${booking_day.get('title','')}</h2>

@@ -171,14 +171,14 @@ require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem"
   <div id="clustered_booking_list">
 
     <div py:for="cb in clustered_bookings">
-      <h3><a href="${tg.url('/booking/view_activity', {'activity_id':cb[0].activity['_id']})}">${cb[0].activity.title}</a></h3>
+      <h3><a href="${tg.url('/activity/view_activity', {'activity_id':cb[0].activity['_id']})}">${cb[0].activity.title}</a></h3>
       <div style="margin-left:2em;" class="cluster_meta_info context_menu_symbol" hollyrosa:bid="${cb[0].id}">
         <div class="note"> ${getRenderContent(cb[0])}</div>
       </div>
 
       <div py:for="b in cb">
         <div py:if="None != b.booking_day" class="booking_meta_info context_menu_symbol" hollyrosa:bid="${b['id']}" hollyrosa:bdayid="${b['booking_day_id']}">
-          <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day', {'day_id':b.booking_day.id})}">${formatDate(b.booking_day.date)}</a>
+          <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day', {'booking_day_id':b.booking_day.id})}">${formatDate(b.booking_day.date)}</a>
             <span py:if="b.slot_id!=None">
               <span py:if="render_time=='time'" ><b>${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b></span>
               <span py:if="render_time=='title'" ><b>${b.slot.title}</b></span>
@@ -192,8 +192,8 @@ require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem"
         <div py:if="None == b.booking_day" style="margin-left:2em;">
           <span class="workflow_state_unscheduled">unscheduled requested from ${formatDate(b.valid_from)} to ${formatDate(b.valid_to)} <a href="${tg.url('/booking/day',params={'day':b.requested_date})}">requested date ${formatDate(b.requested_date)}</a></span>
           <ul class="any_menu context_inline_menu" style="padding-left:2em;">
-            <li><a href="${tg.url('/booking/edit_booking', params={'id':b.id})}">edit</a></li>
-            <li><a href="${tg.url('/booking/view_booked_booking', params={'id':b.id})}">view</a></li>
+            <!-- <li><a href="${tg.url('/booking/edit_booking', params={'id':b.id})}">edit</a></li> -->
+            <!--<li><a href="${tg.url('/booking/view_booked_booking', params={'id':b.id})}">view</a></li>-->
           </ul>
         </div>
       </div>
