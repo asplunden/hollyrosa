@@ -37,7 +37,6 @@ define(["common_menu", "dojo/dom-attr", "dojo/_base/array", "dojo/dom-construct"
     common_menu.add_menu_separator(menu);
 
     // TODO: changed parameter name from at_date to bdate
-    // TODO: ***************** SCHEIZE, needs to be GET or POST + Extra Params
     common_menu.add_transfer_map_function_menu_item_2(menu, menu, "Visiting groups this day", page_config.visiting_group_view_at_date_url, ['date'], {},'GET');
     common_menu.add_menu_separator(menu);
 

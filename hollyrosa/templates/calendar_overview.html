@@ -35,8 +35,8 @@ def makeDate(s):
   <!-- BEGIN DOJO MODULE -->
   <script>
 
-  require(["common_menu", "page/calendar_overview", "dijit/registry","common_menu","dijit/Menu","dijit/MenuItem","dojo/query!css2", "dojo/io-query", "dojo/domReady!"],
-    function(common_menu, page, registry, common_menu, Menu, MenuItem, xq, ioQuery) {
+  require(["common_menu", "page/calendar_overview"],
+    function(common_menu, page) {
 
     var menu_config = {
       targetNodeIds: ["calendar_listing"],
@@ -56,7 +56,7 @@ def makeDate(s):
 
     page.setup(page_config);
 
-    
+
   });
   </script>
 </head>
@@ -65,7 +65,7 @@ def makeDate(s):
   <table class="data" id="calendar_listing">
     <tr><th>Day</th><th>Note</th></tr>
     <tr py:for="booking_day in booking_days" style="${['','background:#fdd;'][6==makeDate(booking_day['date']).weekday()]}" class="calendar_overview" hollyrosa:date="${booking_day['date']}" hollyrosa:booking_day_id="${booking_day['_id']}">
-      <td class="data info context_menu_symbol"><a href="${tg.url('/booking/day', params={'day_id':str(booking_day['_id'])})}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a><br/>
+      <td class="data info context_menu_symbol"><a href="${tg.url('/booking/day', params={'booking_day_id':str(booking_day['_id'])})}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a><br/>
       </td>
       <td class="data info context_menu_symbol"><h2>${booking_day.get('title','')}</h2>
         <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day['events']">$e</li></ul>

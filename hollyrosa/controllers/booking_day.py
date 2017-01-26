@@ -295,7 +295,7 @@ class BookingDay(BaseController):
 
     @expose('hollyrosa.templates.booking_day')
     @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=False), 'day':validators.DateValidator(not_empty=False), 'subtype':validators.UnicodeString(not_empty=False)})
-    def day(self,  day=None,  booking_day_id=None, subtype=None):
+    def day(self, day=None, booking_day_id=None, subtype=None):
         """Show a complete booking day"""
 
         # TODO: we really need to get only the slot rows related to our booking day schema or things will go wrong at some point when we have more than one schema to work with.
@@ -318,7 +318,7 @@ class BookingDay(BaseController):
         booking_day_o['id'] = booking_day_id
 
         day_schema_id = booking_day_o['day_schema_id']
-        day_schema = common_couch.getDaySchema(holly_couch,  day_schema_id)
+        day_schema = common_couch.getDaySchema(holly_couch, day_schema_id)
 
         slot_rows = self.make_slot_rows__of_day_schema(day_schema, activities_map, dates=[booking_day_o['date']])
 
@@ -334,7 +334,7 @@ class BookingDay(BaseController):
 
         #...find all unscheduled bookings
         showing_sql_date = str(booking_day_o['date'])
-        unscheduled_bookings = self.getUnscheduledProgramBookingsForToday(holly_couch, showing_sql_date,  activities_map)
+        unscheduled_bookings = self.getUnscheduledProgramBookingsForToday(holly_couch, showing_sql_date, activities_map)
 
         #...compute all blockings, create a dict mapping slot_row_position_id to actual state
         blockings_map = self.getSlotBlockingsForBookingDay(holly_couch, booking_day_id)
@@ -498,7 +498,7 @@ class BookingDay(BaseController):
 
         redirect_map = dict(room='live', program='day', staff='live')
         # TODO Redirect to live or day ?
-        raise redirect('/booking/%s?day_id=%s&subtype=%s' % (redirect_map[subtype], str(return_to_day_id), subtype + make_booking_day_activity_anchor(tmp_activity_id)))
+        raise redirect('/booking/%s?booking_day_id=%s&subtype=%s' % (redirect_map[subtype], str(return_to_day_id), subtype + make_booking_day_activity_anchor(tmp_activity_id)))
 
 
     def getBookingDayDate(self, booking_day_id):
@@ -569,7 +569,7 @@ class BookingDay(BaseController):
 
         remember_unschedule_booking(holly_couch, booking=b, slot_row_position=slot, booking_day=booking_day,  changed_by='',  activity=activity)
 
-        raise redirect('day?day_id='+return_to_day_id + make_booking_day_activity_anchor(b['activity_id']))
+        raise redirect('day?booking_day_id='+return_to_day_id + make_booking_day_activity_anchor(b['activity_id']))
 
 
     @expose()
@@ -599,7 +599,7 @@ class BookingDay(BaseController):
 
         if return_to_day_id == None:
             return_to_day_id = booking_day_id
-        raise redirect('day?day_id='+return_to_day_id + make_booking_day_activity_anchor(b['activity_id']))
+        raise redirect('day?booking_day_id='+return_to_day_id + make_booking_day_activity_anchor(b['activity_id']))
 
 
     @expose('hollyrosa.templates.edit_booked_booking')
@@ -802,7 +802,7 @@ class BookingDay(BaseController):
 
 
         tmp_activity_id = self._saveBookedBookingPropertiesHelper(booking_id, booking_content, visiting_group_display_name, visiting_group_id,  activity_id,  return_to_day_id, slot_id,  booking_day_id,  booking_date=booking_date,  block_after_book=block_after_book,  subtype=subtype,  booking_end_date=booking_end_date,  booking_end_slot_id=booking_end_slot_id)
-        raise redirect('live?day_id='+str(return_to_day_id)+'&subtype='+subtype+make_booking_day_activity_anchor(tmp_activity_id))
+        raise redirect('live?booking_day_id='+str(return_to_day_id)+'&subtype='+subtype+make_booking_day_activity_anchor(tmp_activity_id))
 
 
     @expose()
@@ -819,7 +819,7 @@ class BookingDay(BaseController):
         ensurePostRequest(request, name=__name__)
 
         tmp_activity_id = self._saveBookedBookingPropertiesHelper(id, booking_content, visiting_group_display_name, visiting_group_id, activity_id, return_to_day_id, slot_id, booking_day_id, block_after_book=block_after_book, subtype='program')
-        raise redirect('day?day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id))
+        raise redirect('day?booking_day_id='+str(return_to_day_id) + make_booking_day_activity_anchor(tmp_activity_id))
 
 
     def _saveBookedBookingPropertiesHelper(self, id=None, content=None, visiting_group_name=None, visiting_group_id=None, activity_id=None, return_to_day_id=None, slot_id=None, booking_day_id=None, booking_date=None,  block_after_book=False,  subtype='program',  booking_end_date='',  booking_end_slot_id=''):
@@ -1161,7 +1161,7 @@ class BookingDay(BaseController):
             return_path = 'live'
         remember_booking_move(holly_couch, booking=booking_o,  booking_day=booking_day_o,  old_activity_title=activity_title_map[old_activity_id],  new_activity_title=activity_title_map[activity_id])
 
-        raise redirect('/booking/'+return_path+'?day_id='+str(return_to_day_id))
+        raise redirect('/booking/'+return_path+'?booking_day_id='+str(return_to_day_id))
 
 
     def getN_A_VisitingGroupId(self, holly_couch):
@@ -1177,9 +1177,6 @@ class BookingDay(BaseController):
         else:
             raise ValueError, "failed to obtain the N/A visiting group from DB"
         return visiting_group_id
-
-
-
 
 
     @require(Any(is_user('root'), has_level('view'), has_level('staff'), has_level('pl'),  msg='Only viewers, staff and PL can submitt a new booking request'))
@@ -1239,7 +1236,7 @@ class BookingDay(BaseController):
 
         if return_to_day_id != None:
             if return_to_day_id != '':
-                raise redirect('/booking/day?day_id='+str(return_to_day_id))
+                raise redirect('/booking/day?booking_day_id='+str(return_to_day_id))
         if is_new:
             raise redirect('/visiting_group/view_all#vgroupid_'+str(visiting_group_id))
         raise redirect('/calendar/overview')
@@ -1326,11 +1323,11 @@ class BookingDay(BaseController):
             remember_new_booking_request(holly_couch, new_booking)
         else:
             flash('wont prolong since next slot is blocked',  'warning')
-            redirect('/booking/day?day_id='+str(booking_day_id))
+            redirect('/booking/day?booking_day_id='+str(booking_day_id))
 
         # TODO: remember prolong
 
-        raise redirect('/booking/day?day_id='+str(new_booking['booking_day_id']) + make_booking_day_activity_anchor(new_booking['activity_id']))
+        raise redirect('/booking/day?booking_day_id='+str(new_booking['booking_day_id']) + make_booking_day_activity_anchor(new_booking['activity_id']))
 
 
     def getActivityIdOfBooking(self, holly_couch, booking_day_id,  slot_id, subtype='program'):
@@ -1372,8 +1369,8 @@ class BookingDay(BaseController):
         self.block_slot_helper(holly_couch, booking_day_id, slot_id, level=level)
         activity_id = self.getActivityIdOfBooking(holly_couch, booking_day_id,  slot_id, subtype=subtype)
         if subtype == 'program':
-            raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(activity_id))
-        raise redirect('live?day_id='+booking_day_id+'&subtype='+subtype + make_booking_day_activity_anchor(activity_id))
+            raise redirect('day?booking_day_id='+booking_day_id + make_booking_day_activity_anchor(activity_id))
+        raise redirect('live?booking_day_id='+booking_day_id+'&subtype='+subtype + make_booking_day_activity_anchor(activity_id))
 
 
     @expose()
@@ -1395,7 +1392,7 @@ class BookingDay(BaseController):
         remember_unblock_slot(holly_couch, slot_row_position=slot, booking_day=booking_day,  changed_by=getLoggedInUserId(request),  level=0,  activity_title=common_couch.getActivity(holly_couch,  activity_id)['title'])
 
         if subtype == 'program':
-            raise redirect('day?day_id='+booking_day_id + make_booking_day_activity_anchor(activity_id))
+            raise redirect('day?booking_day_id='+booking_day_id + make_booking_day_activity_anchor(activity_id))
         raise redirect('live?day_id='+booking_day_id+'&subtype='+subtype + make_booking_day_activity_anchor(activity_id))
 
 

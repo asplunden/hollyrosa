@@ -34,12 +34,12 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" />
 
   <!-- DOJO script starts here -->
-  <!-- TODO: move into its own booking_day.js dojo module so it doesent have to be loaded every time -->
+
   <script>
 
 require(["dojo/dom", "dojo/query!css2", "dojo/dom-form", "dojo/dom-attr", "dojo/_base/array", "dojo/query", "dojo/cookie", "dojo/date", "dijit/Calendar", "dojo/on", "dojo/parser", "dojo/ready", "dojo/json", "dojo/domReady!"], function(dom, query, domForm, domAttr, array, query, cookie, date, calendar, on, parser, ready, json) {
 
-  var jdata = {};
+  //var jdata = {};
 
   /**
   * Called when document has completely loaded.
@@ -60,8 +60,9 @@ require(["dojo/dom", "dojo/query!css2", "dojo/dom-form", "dojo/dom-attr", "dojo/
     var tools_link_elem = dom.byId('toolslink');
     var href = domAttr.get(tools_link_elem, "href");
     domAttr.get(tools_link_elem, "href", href + "?day=" + "${booking_day.date}" );
-  });
+  }); 
 }); /* END OF DOJO MODULE */
+
 
 
 /**
@@ -80,149 +81,36 @@ function navigation_calendar_clicked(x) {
 
 <!-- set up menus -->
 <script>
-require(["common_menu","dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dijit/CheckedMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/ready", "dojo/domReady!"], function(common_menu, array, Menu, MenuItem, PopupMenuItem, CheckedMenuItem, xq, ioQuery, ready) {
+require(["common_menu","page/booking_day", "dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dijit/CheckedMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/ready", "dojo/domReady!"],
+  function(common_menu, page, array, Menu, MenuItem, PopupMenuItem, CheckedMenuItem, xq, ioQuery, ready) {
 
   /**
    * Called when document has completely loaded.
-   * TODO: I think all of it can be moved to its own module.
-   * TODO: all tg.url has to be refactored into some kind of object
    **/
   ready(function() {
+    var page_config = {
+      set_state_url: '${tg.url('/workflow/set_state')}',
+      book_slot_url: '${tg.url('book_slot')}',
+      block_slot_url: '${tg.url('block_slot')}',
+      unblock_slot_url: '${tg.url('unblock_slot')}',
+      view_booked_booking_url: '${tg.url('/booking/view_booked_booking')}',
+      edit_booked_booking_url: '${tg.url('/booking/edit_booked_booking')}',
+      unschedule_booking_url: '${tg.url('/booking/unschedule_booking')}',
+      move_booking_url: '${tg.url('/booking/move_booking')}',
+      prolong_booking_url: '${tg.url('/booking/prolong')}',
+      multibook_url: '${tg.url('/booking/multi_book')}',
+      delete_booking_url: '${tg.url('delete_booking')}',
+      visiting_group_view_bookings_of_name_url: '${tg.url('/visiting_group/view_bookings_of_name')}',
+      show_visiting_group_url: '${tg.url('/visiting_group/show_visiting_group')}',
+      edit_unscheduled_booking_url: '${tg.url('/booking/edit_booking')}',
+      delete_unscheduled_booking_url: '${tg.url('delete_booking')}',
+      edit_booking_day_url: '${tg.url('/calendar/edit_booking_day')}',
+      agroups: ${"[" + ','.join( ['["'+a.id + '", "' + a.title +'"]' for a in activity_groups]) + "]"} // TODO: used ???
+    }
 
-    //...create menu that is attached to all bookings that live in a slot
-    var menu = new Menu({
-      targetNodeIds: ["booking_day_overview"],
-      selector: "div.slot_booking",
-      leftClickToOpen: common_menu.load_left_click_menu(),
-      onOpen: function(evt) {
-        var node = menu.currentTarget;
-        var locked = node.attributes["hollyrosa:lock"].value;
-
-        if (locked == 'block') {
-          menu_new_booking_choice.disabled=true;
-          menu_block_slot_choice.disabled = true;
-          menu_unblock_slot_choice.disabled = false;
-        } else {
-          menu_new_booking_choice.disabled=false;
-          menu_block_slot_choice.disabled = false;
-          menu_unblock_slot_choice.disabled = true;
-        }
-      }
-    });
-
-    var menu_new_booking_choice = common_menu.add_booking_op_menu_item_for_block(menu, menu, "New booking...", '${tg.url('book_slot')}','program');
-    common_menu.add_menu_separator(menu);
-    common_menu.add_booking_op_menu_item(menu, menu, "View...", '${tg.url('/booking/view_booked_booking')}', 'GET');
-    common_menu.add_booking_op_menu_item(menu, menu, "Edit...", '${tg.url('/booking/edit_booked_booking')}',' GET');
-    common_menu.add_booking_op_menu_item(menu, menu, "Unschedule", '${tg.url('/booking/unschedule_booking')}', 'POST');
-    common_menu.add_menu_separator(menu);
-
-    //...add submenu with more entries
-    var more = new Menu();
-    menu.addChild(new PopupMenuItem({
-      label: "More...",
-      leftClickToOpen: common_menu.load_left_click_menu(),
-      popup: more
-    }));
-
-    common_menu.add_booking_op_menu_item(menu, more, "Move...", '${tg.url('/booking/move_booking')}', 'GET');
-    common_menu.add_booking_op_menu_item(menu, more, "Prolong", '${tg.url('/booking/prolong')}', 'POST');
-    common_menu.add_menu_separator(more);
-
-
-    var set_state_url = '${tg.url('/workflow/set_state')}';
-    array.forEach(common_menu.state_change_list, function(x) {common_menu.add_change_booking_state_menu_item(menu, more, x['name'], x['state'], 0, set_state_url);});
-    common_menu.add_menu_separator(more);
-
-    common_menu.add_booking_op_menu_item(menu, more, "Multi-book...", '${tg.url('/booking/multi_book')}', 'GET');
-    common_menu.add_booking_op_menu_item(menu, more, "Delete", '${tg.url('delete_booking')}', 'POST');
-
-    common_menu.add_menu_separator(menu);
-
-    common_menu.add_visiting_group_list_bookings_menu_item(menu, menu, "List bookings of group...", '${tg.url('/visiting_group/view_bookings_of_name')}');
-    common_menu.add_visiting_group_menu_item(menu, menu, "View visiting group...", '${tg.url('/visiting_group/show_visiting_group')}');
-
-
-    common_menu.add_menu_separator(menu);
-    var menu_block_slot_choice = common_menu.add_booking_op_menu_item_for_block(menu, menu, "Block slot", '${tg.url('block_slot')}','program');
-    var menu_unblock_slot_choice = common_menu.add_booking_op_menu_item_for_block(menu, menu, "Unblock slot", '${tg.url('unblock_slot')}','program');
-
-
-    /*..........................*/
-    //...create menu that is attached to all slots that have no booking in them
-    var book_menu = new Menu({
-      targetNodeIds: ["booking_day_overview"],
-      selector: "div.slot_empty",
-      leftClickToOpen: common_menu.load_left_click_menu(),
-      onOpen: function(evt) {
-        var node = book_menu.currentTarget;
-        var locked = node.attributes["hollyrosa:lock"].value;
-
-
-        if (locked == 'block') {
-          book_menu_new_booking_choice.disabled=true;
-          book_menu_block_slot_choice.disabled = true;
-          book_menu_unblock_slot_choice.disabled = false;
-        } else {
-          book_menu_new_booking_choice.disabled=false;
-          book_menu_block_slot_choice.disabled = false;
-          book_menu_unblock_slot_choice.disabled = true;
-        }
-      }
-    });
-
-    var book_menu_new_booking_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "New booking...", '${tg.url('book_slot')}','program');
-    common_menu.add_menu_separator(book_menu);
-    var book_menu_block_slot_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "Block slot", '${tg.url('block_slot')}','program');
-    var book_menu_unblock_slot_choice = common_menu.add_booking_op_menu_item_for_block(book_menu, book_menu, "Unblock slot", '${tg.url('unblock_slot')}','program');
-
-
-
-    /******************* unschedule menu ********************/
-
-    //...create menus for bookings which are listed as unscheduled
-    var unschedule_menu = new Menu({
-      targetNodeIds: ["unscheduled_bookings"],
-      selector: "li.unscheduled_booking",
-      leftClickToOpen: common_menu.load_left_click_menu()
-    });
-
-    common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "View...", '${tg.url('/booking/view_booked_booking')}', 'POST');
-    common_menu.add_visiting_group_list_bookings_menu_item(unschedule_menu, unschedule_menu, "List bookings of group", '${tg.url('/visiting_group/view_bookings_of_name')}', 'GET');
-    common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Edit...", '${tg.url('/booking/edit_booking')}', 'GET');
-    common_menu.add_booking_op_menu_item(unschedule_menu, unschedule_menu, "Delete...", '${tg.url('delete_booking')}', 'POST');
-
-
-    var schedule_more_menu = new Menu();
-    unschedule_menu.addChild(new PopupMenuItem({
-      label: "Schedule...",
-      leftClickToOpen: common_menu.load_left_click_menu(),
-      popup: schedule_more_menu
-    }));
-
-    /*********************************/
-
-    //...crete the menu for the whole bage which mostly is used to select the activity groups to show.
-    var agroups = ${"[" + ','.join( ['["'+a.id + '", "' + a.title +'"]' for a in activity_groups]   )   + "]"};
-    var ag_status = common_menu.load_ag_checkbox_status();
-
-    var view_ag_menu = new Menu({
-      targetNodeIds: ["view_ag_menu"],
-      leftClickToOpen: common_menu.load_left_click_menu()
-    });
-
-    common_menu.add_transfer_map_function_menu_item(view_ag_menu, view_ag_menu, "Edit day info...", '${tg.url('/calendar/edit_booking_day')}', ['booking_day_id']);
-    common_menu.add_menu_separator(view_ag_menu);
-
-    array.forEach(agroups, function(a) {
-      common_menu.add_ag_checkbox_menu_item(view_ag_menu, a[1], a[0], ag_status, common_menu.update_activity_group_visible_rows);
-    });
-
-    common_menu.update_activity_group_visible_rows(ag_status);
-
-
+    page.setup(page_config);
+    //page.setup_navigation_calendar();
   }); /* end ready */
-
 }); /* end require */
 </script>
 
