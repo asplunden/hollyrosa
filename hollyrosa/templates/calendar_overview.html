@@ -47,52 +47,16 @@ def makeDate(s):
     var page_config = {
       menu_config: menu_config,
       calendar_menu_target_node_ids:["calendar_listing"],
+      booking_day_url: '${tg.url('/booking/day')}',
+      booking_live_url: '${tg.url('/booking/live')}',
+      calendar_edit_booking_day_url: '${tg.url('/calendar/edit_booking_day')}',
+      visiting_group_view_at_date_url: '${tg.url('/visiting_group/view_at_date')}',
+      booking_fladan_day_url: '${tg.url('/booking/fladan_day')}'
     };
 
+    page.setup(page_config);
 
-
-    // TODO: refactor the direct calendar code
-
-    /*
-
-    // TODO: should be replaceable wit the map version + extra parameters from a dict
-      function add_calendar_overview_menu_item(a_menu, a_sub_menu, a_name, a_url, a_subtype) {
-        a_sub_menu.addChild(new MenuItem({
-          label: a_name,
-          onClick: function(evt) {
-            var node = a_menu.currentTarget;
-            var bdayid = node.attributes["hollyrosa:booking_day_id"].value;
-            var ioq = {
-              day_id: bdayid,
-              subtype: a_subtype
-            };
-            window.location = a_url + '?' + ioQuery.objectToQuery(ioq);
-          }
-        }));
-      }
-
-*/
-
-    var menu = new Menu(menu_config);
-    common_menu.add_transfer_map_function_menu_item_2(menu, menu, 'Day overview', '${tg.url('/booking/day')}', ['booking_day_id'], {}, 'GET' );
-    common_menu.add_transfer_map_function_menu_item_2(menu, menu, 'Room overview', '${tg.url('/booking/live')}', ['booking_day_id'],  {subtype:'room'}, 'GET');
-    common_menu.add_transfer_map_function_menu_item_2(menu, menu, 'Staff overview', '${tg.url('/booking/live')}', ['booking_day_id'],  {subtype:'staff'}, 'GET');
-    common_menu.add_menu_separator(menu);
-
-    // TODO: for the edit controller, booking_day_id is now called bdayid, also check the day template
-    common_menu.add_transfer_map_function_menu_item(menu, menu, "Edit day info...", '${tg.url('/calendar/edit_booking_day')}', ['booking_day_id']);
-    common_menu.add_menu_separator(menu);
-
-    // TODO: changed parameter name from at_date to bdate
-    // TODO: ***************** SCHEIZE, needs to be GET or POST + Extra Params
-    common_menu.add_transfer_map_function_menu_item_2(menu, menu, "Visiting groups this day", '${tg.url('/visiting_group/view_at_date')}', ['date'], {},'GET');
-    common_menu.add_menu_separator(menu);
-
-    // TODO: day changed name to bdate
-    common_menu.add_transfer_map_function_menu_item_2(menu, menu, "Fladan schema", '${tg.url('/booking/fladan_day')}', ['date'], {ag: "activity_group.6"},'GET');
-    common_menu.add_transfer_map_function_menu_item_2(menu, menu, "Trapper schema", '${tg.url('/booking/fladan_day')}', ['date'], {ag: "activity_group.1"},'GET');
-    common_menu.add_transfer_map_function_menu_item_2(menu, menu, 'All schema', '${tg.url("/booking/fladan_day")}', ['date'], {}, 'GET');
-
+    
   });
   </script>
 </head>
