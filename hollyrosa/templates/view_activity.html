@@ -35,6 +35,7 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
         edit_activity_url: '${tg.url('edit_activity')}',
         internal_link_url: '${activity.internal_link}',
         external_link_url:'${activity.external_link}',
+        edit_special_info_note_url: '${tg.url('/note/edit_note')}',
         printOnDemand: function() {console.log('xx'); window.print(); return false;},
         activity_id: '${activity.id}'
       };
@@ -45,8 +46,8 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
 
 </head>
 <body class="tundra">
-  <div class="more_menu_symbol" id="view_activity_menu" hollyrosa:activity_id="${activity.id}"><h2>Kort beskrivning av ${activity.title}</h2></div>
-  <h3>${activity_group['title']}</h3>
+  <div class="more_menu_symbol" id="view_activity_menu" hollyrosa:activity_id="${activity.id}" hollyrosa:note_id="${activity.get('booking_info_id','')}"><h2>Kort beskrivning av ${activity.title}</h2></div>
+  <h3>Activity Group: ${activity_group['title']}</h3>
 
   <div class="note">Description: ${HTML(activity.description)}</div>
   <p>Capacity: ${activity.capacity}</p>
@@ -56,6 +57,17 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
 
   <!-- <p>GPS: ${activity.gps_lat} - ${activity.gps_long} Add google map</p> -->
   <em><span py:if="True==activity.equipment_needed">Equipment needed</span> <span py:if="True==activity.education_needed">Education needed</span> <span py:if="True==activity.certificate_needed">Certificate needed</span> </em>
-  <p>Speical info note: <a href="${tg.url('/note/edit_note', params={'note_id':activity.get('booking_info_id','')})}">${activity.get('booking_info_id','')}</a></p>
+  <p style="margin-top:5em;">Speical booking info note below, it is included in booking confirmations if the group has booked one or more if this activity. </p>
+
+<!-- TODO: this below is kind of a widget -->
+  <div py:for="n in notes" >
+    <div class="${n.type}2 context_menu_symbol" hollyrosa:nid="${n.id}" hollyrosa:vgid="${activity.id}"><i><b>${n.timestamp}</b> ${n.type} by ${n.last_changed_by}</i><br/><br/>
+      <div py:if="'note' == n.type">${HTML(n.text)}</div>
+      <div py:if="('attachment' == n.type)">${n.text}<br/><br/>
+        <div py:for="at in n.get('_attachments',[])"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n.id,'doc_id':at})}"><b>${at}</b> ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
