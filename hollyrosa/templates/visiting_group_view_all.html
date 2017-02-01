@@ -29,216 +29,48 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
 <!-- BEGIN DOJO MODULE -->
   <script>
-require(["common_menu", "tags", "dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/on", "dojo/_base/window", "dojo/ready"], function(common_menu, tags, array, registry, Menu, MenuItem, PopupMenuItem, xq, ioQuery, dom, domConstruct, xhr, on, win, ready) {
-
-  function updateNotes(data) {
-    var vgroup_id = data['id'];
-    var load_note_link = dom.byId('load_notes_for_' + vgroup_id);
-    domConstruct.destroy(load_note_link);
-
-    var notes = data['notes'];
-    for (n in notes) {
-      note = notes[n];
-      var notes_for_id = 'notes_for_' + note['target_id'];
-
-      e = dom.byId(notes_for_id);
-      var note_div = domConstruct.create("div", {innerHTML: note['text'], class:note['type']+'2'}, e);
-      if (note['type'] == 'attachment') {
-        var note_div2 = domConstruct.create("div", {}, note_div);
-
-        var attachments = note['_attachments'];
-        var keys = Object.keys(attachments);
-        array.forEach(keys, function(key) {
-          var ioq = {
-            attachment_id: note._id,
-            doc_id: key
-          };
-
-          var ul = domConstruct.create("ul", {}, note_div2);
-          var li = domConstruct.create("li", {}, ul);
-
-          domConstruct.create("a", {href:'${tg.url('/note/download_attachment')}' + '?' + ioQuery.objectToQuery(ioq), innerHTML: key}, li);
-        });
-      }
-    }
-  }
-
-
-  /// TODO: need to fix this deleteTagHelper so it
-  function deleteTagHelper(evt) {
-    var tag_elem = evt.target.parentElement;
-    var inner_text = tag_elem.textContent;
-    inner_text = inner_text.replace(' (X)','');
-    var visiting_group_id = tag_elem.attributes['hollyrosa:vgid'].value;
-    tags.deleteTag("${tg.url('/tag/delete_tag')}", visiting_group_id, tag_elem.parentElement.id, inner_text);
-  }
-
-
-  var tag_dialog = tags.createAddTagDialog( '${tg.url('/tag/add_tags')}', tags.updateTagsCloseDialog );
-
-
-  function show_add_tag_dialog(node_id) {
-    var visiting_group_id = node_id.attributes['hollyrosa:vgid'].value;
-    tags.showAddTagDialog(tag_dialog, visiting_group_id, node_id.attributes['hollyrosa:taglist_node_id'].value);
-  }
-
-
-  function loadNotesFor(id) {
-    xhr("${tg.url('/note/get_notes_for_visiting_group')}", {
-      query: {id: id},
-      handleAs: 'json',
-      method: "GET"
-    }).then( updateNotes );
-  }
-
-
-  var menu = new Menu({
-    targetNodeIds: ["vgroup_listing"],
-    selector: "tr.name_menu",
-    leftClickToOpen: common_menu.load_left_click_menu(),
-    onOpen: function(evt) {
-      var node = menu.currentTarget;
-      var has_notes = node.attributes["hollyrosa:has_notes"].value;
-      console.log( has_notes );
-
-      if (has_notes == 'True') {
-        load_notes_menu_item.disabled = false;
-      } else {
-        load_notes_menu_item.disabled = true;
-      }
-    } // end function
-  });
-
-  common_menu.add_visiting_group_menu_item(menu, menu, "New booking request...", '${tg.url('/booking/edit_booking')}');
-  common_menu.add_menu_separator(menu);
-  common_menu.add_visiting_group_menu_item(menu, menu, "View...", '${tg.url('show_visiting_group')}');
-  common_menu.add_visiting_group_menu_item(menu, menu, "Edit...", '${tg.url('edit_visiting_group')}');
-  common_menu.add_call_function_menu_item(menu, menu, "Add tags...",  show_add_tag_dialog  );
-  common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add note...", '${tg.url('/note/add_note')}');
-  common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add attachment...", '${tg.url('/note/add_attachment')}');
-  common_menu.add_menu_separator(menu);
-  //common_menu.add_visiting_group_list_bookings_menu_item(menu, menu, "List bookings of group...", '${tg.url('view_bookings_of_name')}');
-
-  common_menu.add_visiting_group_menu_item(menu, menu, "List bookings of group...", '${tg.url('view_bookings_of_visiting_group_id')}');
-
-  var program_layers_menu = new Menu();
-  menu.addChild(new PopupMenuItem({
-    label: "Program Layers ->",
-    popup: program_layers_menu,
-    leftClickToOpen: common_menu.load_left_click_menu()
-  }));
-
-  common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Printable ...", '${tg.url('/program_layer/layers_printable')}');
-  common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Live Calendar...", '${tg.url('/program_layer/layers')}');
-  common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Edit Connected Layers...", '${tg.url('/program_layer/edit_layers')}');
-  common_menu.add_menu_separator(menu);
-  common_menu.add_visiting_group_menu_item(menu, menu, "Ext. Booking Request", '${tg.url('/visiting_group_program_request/edit_request')}');
-
-  var load_notes_menu_item = new MenuItem({
-    label: "Load notes",
-    onClick: function(evt) {
-      var node = this.getParent().currentTarget;
-      var vgroup_id = node.attributes["hollyrosa:vgid"].value;
-      loadNotesFor(vgroup_id);
-
-      //...this isn't bulletproof, should be in a callback after the notes have loaded.
-      var node = menu.currentTarget;
-      node.attributes["hollyrosa:has_notes"].value = "False";
-    }
-  });
-  menu.addChild(load_notes_menu_item);
-
-  common_menu.add_menu_separator(menu);
-  common_menu.add_visiting_group_menu_item(menu, menu, "Show history...", '${tg.url('/history/show')}');
-
-
-  // assembling the filter booking status menu
-  var filter_menu = new Menu({
-    targetNodeIds: ["bokn_status_menu"],
-    leftClickToOpen: common_menu.load_left_click_menu()
-  });
-
-  common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All visiting groups", '', '${tg.url('/visiting_group/view_all')}');
-  common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All visiting groups today", '', '${tg.url('/visiting_group/view_today')}');
-
-  common_menu.add_menu_separator(filter_menu);
-
-  var bokn_status_menu = new Menu();
-  filter_menu.addChild(new PopupMenuItem({
-    label: "Select on Program status...",
-    popup: bokn_status_menu,
-    leftClickToOpen: common_menu.load_left_click_menu()
-  }));
-
-  var vodb_state_menu = new Menu();
-  filter_menu.addChild(new PopupMenuItem({
-    label: "Select on VODB status...",
-    popup: vodb_state_menu,
-    leftClickToOpen: common_menu.load_left_click_menu()
-  }));
-
-  var tag_menu = new Menu();
-  filter_menu.addChild(new PopupMenuItem({
-    label: "Select Tags...",
-    popup: tag_menu,
-    leftClickToOpen: common_menu.load_left_click_menu()
-  }));
-
-  var date_range_menu = new Menu();
-  filter_menu.addChild(new PopupMenuItem({
-    label: "Select Date range...",
-    popup: date_range_menu,
-    leftClickToOpen: common_menu.load_left_click_menu()
-  }));
-
-
-  common_menu.add_menu_separator(filter_menu);
-
-  var view_vgt_menu = new Menu();
-  filter_menu.addChild(new PopupMenuItem({
-    label: "Filter on Group Type...",
-    popup: view_vgt_menu,
-    leftClickToOpen: common_menu.load_left_click_menu()
-  }));
-
-
-  var l1 = ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in program_state_map.items()] ) +']' };
-  var l2 = ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in vodb_state_map.items()] ) +']' };
-
-  array.forEach(l1, function(l) {
-    common_menu.add_redirect_menu_item(filter_menu, bokn_status_menu, l[1], {program_state:l[0]}, '${tg.url('view_program_state')}');
-  });
-
-  array.forEach(l2, function(l) {
-    common_menu.add_redirect_menu_item(filter_menu, vodb_state_menu, l[1], {'vodb_state':l[0]}, '${tg.url('view_vodb_state')}');
-  });
-
-  var all_tags = ${ '[' + ''.join(['"'+l+'", ' for l in all_tags]  ) +']' };
-  array.forEach(all_tags, function(l) {
-    common_menu.add_redirect_menu_item(filter_menu, tag_menu, l, {tag:l}, '${tg.url('view_tags')}');
-  });
-  /* assembling the filter tag menu */
-
-  on(win.doc, '.tag:click', deleteTagHelper);
+require(["common_menu", "page/visiting_group_view_all", "page/tag_and_note", "dojo/_base/array", "dijit/registry","dijit/Menu","dijit/MenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/dom-construct", "dojo/request/xhr", "dojo/_base/window", "dojo/ready"],
+  function(common_menu, page, tagAndNote, array, registry, Menu, MenuItem,  xq, ioQuery, dom, domConstruct, xhr, win, ready) {
 
   ready(function() {
-    var tag_ul_elems = xq('.tag_list');
 
-    array.forEach(tag_ul_elems, function(ul_tag_elem) {
-      var node_id = ul_tag_elem.id;
-      var vgid = ul_tag_elem.attributes['hollyrosa:vgid'].value;
-      tags.getTags("${tg.url('/tag/get_tags')}", vgid, node_id ) ;
-    });
+    tag_and_note_config = {
+      all_tags: ${ '[' + ''.join(['"'+l+'", ' for l in all_tags]  ) +']' },
+      view_tags_url: '${tg.url('view_tags')}',
+      get_tags_url: '${tg.url('/tag/get_tags')}',
+
+      download_attachment_url: '${tg.url('/note/download_attachment')}',
+      delete_tag_url: '${tg.url('/tag/delete_tag')}',
+      add_tag_url: '${tg.url('/tag/add_tags')}',
+      get_notes_for_visiting_group_url: '${tg.url('/note/get_notes_for_visiting_group')}',
+    }
+
+
+    page_config = {
+      tag_and_note_config: tag_and_note_config,
+      edit_booking_url: '${tg.url('/booking/edit_booking')}',
+      show_visiting_group_url: '${tg.url('show_visiting_group')}',
+      edit_visiting_group_url: '${tg.url('edit_visiting_group')}',
+      add_note_url: '${tg.url('/note/add_note')}',
+      add_attachment_url: '${tg.url('/note/add_attachment')}',
+      view_bookings_of_visiting_group_id_url: '${tg.url('view_bookings_of_visiting_group_id')}',
+      layers_printable_url: '${tg.url('/program_layer/layers_printable')}',
+      layers_url: '${tg.url('/program_layer/layers')}',
+      edit_layers_url: '${tg.url('/program_layer/edit_layers')}',
+      visiting_group_program_request_edit_request: '${tg.url('/visiting_group_program_request/edit_request')}',
+      show_history_url: '${tg.url('/history/show')}',
+      visiting_groups_view_all_url: '${tg.url('/visiting_group/view_all')}',
+      visiting_groups_view_today_url: '${tg.url('/visiting_group/view_today')}',
+      program_state_map: ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in program_state_map.items()] ) +']' }, // TODO: load via AJAX, wont change betweeen logins
+      vodb_state_map: ${ '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for k,v in vodb_state_map.items()] ) +']' }, // TODO: load via AJAX, wont change betweeen logins
+      view_program_state_url: '${tg.url('view_program_state')}',
+      view_vodb_state_url: '${tg.url('view_vodb_state')}',
+      visiting_group_type_list: ${"[" + ','.join( ['["'+a.id + '", "' + a.title +'"]' for a in visiting_group_types]   )   + "]"} // TODO: refactor into its own module
+    }
+
+    page.setup(page_config);
+    tagAndNote.setup(page_config.tag_and_note_config);
   });
-
-  var vgtgroups = ${"[" + ','.join( ['["'+a.id + '", "' + a.title +'"]' for a in visiting_group_types]   )   + "]"};
-  var vgt_status = common_menu.load_ag_checkbox_status();
-
-  array.forEach(vgtgroups, function(a) {
-    common_menu.add_ag_checkbox_menu_item(view_vgt_menu, a[1], a[0], vgt_status, common_menu.update_visiting_group_type_visible_rows);
-  });
-
-  common_menu.update_visiting_group_type_visible_rows(vgt_status);
 });
 
   </script> <!-- END DOJO MODULE -->
@@ -264,13 +96,14 @@ require(["dojo/_base/array", "dojo/dom-construct", "dojo/query!css2", "dojo/dom"
       handleAs: "json",
       method: "GET"}).then(function(data){updateUnboundNames(data);});
     }
-
+/*
     function loadNotesFor(id) {
       xhr("${tg.url('/note/get_notes_for_visiting_group')}", {
         query: {'id': id},
         handleAs: "json",
         method: "GET"}).then(function(data){ updatedNotes(data); })
       }
+*/
     });
   </script>
 </head>
