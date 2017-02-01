@@ -35,27 +35,28 @@ def makeDate(s):
   <!-- BEGIN DOJO MODULE -->
   <script>
 
-  require(["common_menu", "page/calendar_overview"],
-    function(common_menu, page) {
+  require(["common_menu", "page/calendar_overview","dojo/ready"],
+    function(common_menu, page, ready) {
 
-    var menu_config = {
-      targetNodeIds: ["calendar_listing"],
-      selector: "tr.calendar_overview",
-      leftClickToOpen: common_menu.load_left_click_menu()
-    }
+    ready(function() {
+      var menu_config = {
+        targetNodeIds: ["calendar_listing"],
+        selector: "tr.calendar_overview",
+        leftClickToOpen: common_menu.load_left_click_menu()
+      }
 
-    var page_config = {
-      menu_config: menu_config,
-      calendar_menu_target_node_ids:["calendar_listing"],
-      booking_day_url: '${tg.url('/booking/day')}',
-      booking_live_url: '${tg.url('/booking/live')}',
-      calendar_edit_booking_day_url: '${tg.url('/calendar/edit_booking_day')}',
-      visiting_group_view_at_date_url: '${tg.url('/visiting_group/view_at_date')}',
-      booking_fladan_day_url: '${tg.url('/booking/fladan_day')}'
-    };
+      var page_config = {
+        menu_config: menu_config,
+        calendar_menu_target_node_ids:["calendar_listing"],
+        booking_day_url: '${tg.url('/booking/day')}',
+        booking_live_url: '${tg.url('/booking/live')}',
+        calendar_edit_booking_day_url: '${tg.url('/calendar/edit_booking_day')}',
+        visiting_group_view_at_date_url: '${tg.url('/visiting_group/view_at_date')}',
+        booking_fladan_day_url: '${tg.url('/booking/fladan_day')}'
+      };
 
     page.setup(page_config);
-
+    });
 
   });
   </script>

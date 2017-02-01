@@ -21,8 +21,8 @@
 Modules that can be loaded:
 
 **/
-define(["tags", "dojo/dom-attr", "dojo/_base/array", "dojo/dom-construct", "dojo/_base/window", "dijit/Menu","dijit/MenuItem", "dijit/CheckedMenuItem", "dijit/MenuSeparator", "dojo/query", "dojo/on", "dojo/io-query", "dojo/json", "dojo/cookie", "dojo/dom-style", "dojo/domReady!"],
-  function(tags, domAttr, array, domConstruct, win, Menu, MenuItem, CheckedMenuItem, MenuSeparator, query, on, ioQuery, json, cookie, domStyle)
+define(["tags", "dojo/dom-attr", "dojo/_base/array", "dojo/dom-construct", "dojo/_base/window", "dijit/Menu","dijit/MenuItem", "dijit/CheckedMenuItem", "dijit/MenuSeparator", "dojo/query", "dojo/on", "dojo/io-query", "dojo/dom", "dojo/json", "dojo/cookie", "dojo/dom-style", "dojo/request/xhr", "dojo/domReady!"],
+  function(tags, domAttr, array, domConstruct, win, Menu, MenuItem, CheckedMenuItem, MenuSeparator, query, on, ioQuery, dom, json, cookie, domStyle, xhr)
   {
     function updateNotes(data, tag_and_note_config) {
       var vgroup_id = data['id'];
@@ -81,7 +81,7 @@ define(["tags", "dojo/dom-attr", "dojo/_base/array", "dojo/dom-construct", "dojo
         query: {id: id},
         handleAs: 'json',
         method: "GET"
-      }).then( updateNotes );
+      }).then( function(data){  updateNotes(data, tag_and_note_config) } );
     }
 
     function setup(tag_and_note_config) {

@@ -22,7 +22,7 @@ Modules that can be loaded:
 
 **/
 define(["common_menu", "page/tag_and_note", "dojo/dom-attr", "dojo/_base/array", "dojo/dom-construct", "dojo/_base/window", "dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dijit/CheckedMenuItem", "dijit/MenuSeparator", "dojo/query", "dojo/io-query", "dojo/json", "dojo/cookie", "dojo/dom-style", "dojo/domReady!"],
-  function(common_menu, pageAndNote, domAttr, array, domConstruct, win, Menu, MenuItem, PopupMenuItem, CheckedMenuItem, MenuSeparator, query, ioQuery, json, cookie, domStyle)
+  function(common_menu, tagAndNote, domAttr, array, domConstruct, win, Menu, MenuItem, PopupMenuItem, CheckedMenuItem, MenuSeparator, query, ioQuery, json, cookie, domStyle)
 {
 
   function setup(page_config) {
@@ -49,7 +49,7 @@ define(["common_menu", "page/tag_and_note", "dojo/dom-attr", "dojo/_base/array",
     common_menu.add_menu_separator(menu);
     common_menu.add_visiting_group_menu_item(menu, menu, "View...", page_config.show_visiting_group_url);
     common_menu.add_visiting_group_menu_item(menu, menu, "Edit...", page_config.edit_visiting_group_url);
-    common_menu.add_call_function_menu_item(menu, menu, "Add tags...",  pageAndNote.show_add_tag_dialog  );
+    common_menu.add_call_function_menu_item(menu, menu, "Add tags...",  tagAndNote.show_add_tag_dialog  );
     common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add note...", page_config.add_note_url);
     common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add attachment...", page_config.add_attachment_url);
     common_menu.add_menu_separator(menu);
