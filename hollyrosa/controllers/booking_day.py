@@ -238,18 +238,21 @@ class BookingDay(BaseController):
         """
         Get a list of all unscheduled program bookings for a given day
         """
+
         # need to convert 2011-10-01 to something like Fri Aug 05 2011
         # TODO: refactor
         tmp_date = datetime.datetime.strptime(date, "%Y-%m-%d" )
         tmp_date_f = tmp_date.strftime("%a %b %d %Y")
 
+        log.debug('getUnscheduledProgramBookingsForToday() - %s , %s (subtype %s)' % (date, tmp_date_f, subtype))
+
         # TODO: need refactoring, add subtype component too
-        unscheduled_bookings_c= holly_couch.view('booking_day/unscheduled_bookings_by_date', keys=[tmp_date_f, subtype], descending=True)
+        unscheduled_bookings_c = holly_couch.view('booking_day/unscheduled_bookings_by_date', key=[tmp_date_f, subtype], descending=True)
 
         #...somehow convert all unscheduled bookings to a list form that can be returned
         unscheduled_bookings = list()
         for x in unscheduled_bookings_c:
-
+            print '--', x
             b = x.value
             a_id = b['activity_id']
             a = activity_map[a_id]
@@ -260,6 +263,8 @@ class BookingDay(BaseController):
                                         visiting_group_name=b['visiting_group_name'],  valid_from=b['valid_from'],  valid_to=b['valid_to'],  requested_date=b['requested_date'],  last_changed_by_id=b['last_changed_by_id'],  slot_id=b['slot_id'],  activity_title=a['title'],  activity_group_id=a['activity_group_id'],  activity_id=a_id)
             unscheduled_bookings.append(new_booking)
 
+        print unscheduled_bookings_c
+        print unscheduled_bookings
         return unscheduled_bookings
 
 
@@ -578,6 +583,8 @@ class BookingDay(BaseController):
     def schedule_booking(self, return_to_day_id=None, booking_id=None, booking_day_id=None, slot_row_position_id=None):
         # TODO: ensure we do not have a GET request here (necessary at the momen)
         b = common_couch.getBooking(holly_couch,  booking_id)
+        if '' != b['booking_day_id']:
+            abort(500)
         b['last_changed_by_id'] = getLoggedInUserId(request)
         b['booking_day_id'] = booking_day_id
         b['slot_id'] = slot_row_position_id
@@ -590,14 +597,14 @@ class BookingDay(BaseController):
 
         # TODO: check save
         holly_couch[b['_id']] = b
-        booking_day = common_couch.getBookingDay(holly_couch,  b['booking_day_id'])
+        booking_day = common_couch.getBookingDay(holly_couch, b['booking_day_id'])
         slot_map = getSchemaSlotActivityMap(holly_couch, booking_day,  subtype='program')
         slot = slot_map[slot_row_position_id]
 
         #...TODO: have all lookuped data in some local ctx that can be passed on to all helper functions so we dont have to do a lot of re-lookups
-        remember_schedule_booking(holly_couch, booking=b, slot_row_position=slot, booking_day=booking_day,  activity=activity)
+        remember_schedule_booking(holly_couch, booking=b, slot_row_position=slot, booking_day=booking_day, activity=activity)
 
-        if return_to_day_id == None:
+        if return_to_day_id == None or return_to_day_id == '':
             return_to_day_id = booking_day_id
         raise redirect('day?booking_day_id='+return_to_day_id + make_booking_day_activity_anchor(b['activity_id']))
 
