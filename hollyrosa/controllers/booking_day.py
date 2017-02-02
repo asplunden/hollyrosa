@@ -252,7 +252,6 @@ class BookingDay(BaseController):
         #...somehow convert all unscheduled bookings to a list form that can be returned
         unscheduled_bookings = list()
         for x in unscheduled_bookings_c:
-            print '--', x
             b = x.value
             a_id = b['activity_id']
             a = activity_map[a_id]
@@ -263,8 +262,6 @@ class BookingDay(BaseController):
                                         visiting_group_name=b['visiting_group_name'],  valid_from=b['valid_from'],  valid_to=b['valid_to'],  requested_date=b['requested_date'],  last_changed_by_id=b['last_changed_by_id'],  slot_id=b['slot_id'],  activity_title=a['title'],  activity_group_id=a['activity_group_id'],  activity_id=a_id)
             unscheduled_bookings.append(new_booking)
 
-        print unscheduled_bookings_c
-        print unscheduled_bookings
         return unscheduled_bookings
 
 
