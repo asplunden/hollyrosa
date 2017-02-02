@@ -48,5 +48,16 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <ul>
     <li py:if="request.identity"><a href="${tg.url('/vodb_group/vodb_booking_overview')}">VODB Booking Overview (beta)</a></li>
   </ul>
+  <div>
+    <h3>System Info</h3>
+    <table class="data">
+      <tr><th class="data info">Parameter</th><th class="data info">Value</th></tr>
+      <tr><td class="data info">DB Name</td><td class="data info">${db_name}</td></tr>
+      <tr><td class="data info">DB Url</td><td class="data info">${db_url}</td></tr>
+      <tr py:if="debug_enabled==True"><td class="data info"  style="background: #eeee88;">Debug Enabled</td><td class="data info" style="background: #eeee88;">${debug_enabled}</td></tr>
+      <tr py:if="debug_enabled!=True"><td class="data info">Debug Enabled</td><td class="data info">${debug_enabled}</td></tr>
+      <tr><td class="data info">Serve Static</td><td class="data info">${serve_static}</td></tr>
+    </table>
+  </div>
 </body>
 </html>

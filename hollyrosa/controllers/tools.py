@@ -20,7 +20,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 
-from tg import expose, flash, require, url, request, redirect, validate, abort
+from tg import expose, flash, require, url, request, redirect, validate, abort, config
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
@@ -53,7 +53,7 @@ class Tools(BaseController):
             day = datetime.datetime.today().date().strftime("%Y-%m-%d")
 
         activity_groups = [h.value for h in getAllActivityGroups(holly_couch)]
-        return dict(show_day=day,  activity_groups=activity_groups)
+        return dict(show_day=day, activity_groups=activity_groups, db_name=config['couch.database'], db_url=config['couch.db_url'], debug_enabled=config['debug'], serve_static=config['serve_static'])
 
 
 
