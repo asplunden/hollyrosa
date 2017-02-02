@@ -53,23 +53,23 @@ class Note(BaseController):
     def view(self, url):
         """Abort the request with a 404 HTTP status code."""
         abort(404)
-   
+
     @expose('hollyrosa.templates.edit_note')
-    @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))  
+    @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def add_note(self, target_id):
         tmpl_context.form = create_edit_note_form
         note_o = dict(text='', target_id=target_id, note_id='')
         return dict(note=note_o)
-        
-        
+
+
     @expose('hollyrosa.templates.edit_attachment')
-    @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))  
+    @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def add_attachment(self, target_id):
         tmpl_context.form = create_edit_attachment_form
         attachment_o = dict(text='', target_id=target_id, attachment_id='')
         return dict(attachment=attachment_o)
-        
-   
+
+
     @expose('hollyrosa.templates.edit_note')
     @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def edit_note(self, note_id=None, visiting_group_id=None):
@@ -77,10 +77,10 @@ class Note(BaseController):
         if note_id == '':
             note_o = DataContainer(text='', target_id=visiting_group_id, note_id='')
         else:
-            note_o = common_couch.getNote(holly_couch,  note_id) 
+            note_o = common_couch.getNote(holly_couch,  note_id)
         return dict(note=note_o)
-        
-        
+
+
     @expose('hollyrosa.templates.edit_attachment')
     @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def edit_attachment(self, note_id=None, visiting_group_id=None):
@@ -91,9 +91,9 @@ class Note(BaseController):
         else:
             attachment_o = common_couch.getAttachment(holly_couch,  attachment_id)
         return dict(attachment=attachment_o)
-        
+
     @expose("json")
-    #@require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
+    @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def get_notes_for_visiting_group(self, id):
         notes = [n.doc for n in getNotesForTarget(holly_couch, id)]
         return dict(notes=notes, id=id)
@@ -118,12 +118,12 @@ class Note(BaseController):
                 history.append([timestamp, note_o['text']])
             note_o['history'] = history
             note_change = 'changed'
-            
-        
+
+
         note_o['last_changed_by'] = getLoggedInUserId(request)
         note_o['text'] = text
         holly_couch[note_o['note_id']] = note_o
-        
+
         remember_note_change(holly_couch, target_id=target_id, note_id=note_o['note_id'], changed_by=getLoggedInUserId(request), note_change=note_change)
 
         # TODO: where do we go from here?
@@ -131,8 +131,8 @@ class Note(BaseController):
         if 'visiting_group' in note_o['target_id']:
             redirect_to = '/visiting_group/show_visiting_group?visiting_group_id='+note_o['target_id']
         raise redirect(redirect_to)
-        
-        
+
+
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def save_attachment(self, target_id, text, attachment, _id='', **kwargs):
@@ -152,16 +152,16 @@ class Note(BaseController):
                 history.append([timestamp, attachment_o['text']])
             attachment_o['history'] = history
             attachment_change = 'changed'
-        
+
         attachment_o['last_changed_by'] = getLoggedInUserId(request)
         attachment_o['text'] = text
         holly_couch[attachment_o['_id']] = attachment_o
-        
+
         file = request.POST['attachment']
 
         if file != '':
             holly_couch.put_attachment(attachment_o, attachment.file, filename=attachment.filename)
-        
+
         # TODO FIX BELOW
         #remember_attachment_change(holly_couch, target_id=target_id, attachment_id=attachment_o['_id'], changed_by=getLoggedInUserId(request), attachment_change=attachment_change)
 
@@ -170,16 +170,31 @@ class Note(BaseController):
         if 'visiting_group' in attachment_o['target_id']:
             redirect_to = '/visiting_group/show_visiting_group?visiting_group_id='+attachment_o['target_id']
         raise redirect(redirect_to)
-        
-        
+
+
     @expose()
     @validate(validators={"attachment_id":validators.UnicodeString(), "doc_id":validators.UnicodeString()})
-    @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may view visiting group attachments'))   
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members may view visiting group attachments'))
     def download_attachment(self, attachment_id, doc_id):
         response.content_type='x-application/download'
-        log.debug(u'Trying to download attachment="%s" filename="%s"' % (attachment_id, doc_id))  
+        log.debug(u'Trying to download attachment="%s" filename="%s"' % (attachment_id, doc_id))
         headers = ('Content-Disposition', ('attachment;filename=%s' % doc_id).replace(u' ',u'_').replace(u'å',u'a').replace(u'ö',u'o').encode('ascii', 'replace'))
         response.headerlist.append(headers)
         return holly_couch.get_attachment(attachment_id, doc_id).read()
 
+    @expose()
+    @validate(validators={"note_id":validators.UnicodeString(), "visiting_group_id":validators.UnicodeString()})
+    @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may delete notes and attachments'))
+    def delete_note(self, note_id, visiting_group_id):
+        log.debug(u'Trying to delete note with id="%s" visting_group_id="%s"' % (note_id, visiting_group_id))
+        note_o = common_couch.getCouchDBDocument(holly_couch, note_id, doc_type=None)
+        if note_o['target_id'] != visiting_group_id:
+            abort(403) # TODO: NOT ALLOWED TO DO THIS, FORBIDDEN.
+        if note_o['type'] == 'attachment':
+            note_o['attachment_state'] = -100
+        elif note_o['type'] == 'note':
+            note_o['note_state'] = -100
+        holly_couch[note_id] = note_o
 
+        # TODO: add to history
+        raise redirect(request.referrer)
