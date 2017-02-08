@@ -114,4 +114,4 @@ class Calendar(BaseController):
         booking_day_c['num_fladan_crew_members'] = num_fladan_crew_members
         holly_couch[recid]=booking_day_c
 
-        raise redirect('/booking/day?day_id='+str(recid))
+        raise redirect('/booking/day?booking_day_id='+str(recid))

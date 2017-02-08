@@ -118,9 +118,9 @@ class User(BaseController):
         # Rules for setting levels.
         # TODO: refactor out
         level_map = dict()
-        level_map['viewer'] = ['viewer']
-        level_map['staff'] = ['viewer','staff']
-        level_map['pl'] = ['viewer','staff','pl']
+        level_map['viewer'] = ['view']
+        level_map['staff'] = ['view','staff']
+        level_map['pl'] = ['view','staff','pl']
         
         user_o['level'] = level_map.get(level,[])
         holly_couch[user_id] = user_o
