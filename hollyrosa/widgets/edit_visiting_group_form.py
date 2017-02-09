@@ -44,12 +44,12 @@ class EditVisitingGroupForm(twd.CustomisedTableForm):
 
         from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d') 
         to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d') 
-        contact_person = twf.TextField(validator=twc.Required, label_text="contact person:")
+        contact_person = twf.TextField(label_text="contact person:")
         contact_person_email = twf.TextField(validator=twc.EmailValidator)
-        contact_person_phone = twf.TextField(validator=twc.Required)
+        contact_person_phone = twf.TextField()
         boknr = twf.TextField(validator=twc.Required)
-        password = twf.TextField(validator=twc.Required)
-        camping_location = twf.TextField(validator=twc.Required)
+        password = twf.TextField()
+        camping_location = twf.TextField()
 
         class visiting_group_properties(twd.GrowingGridLayout):
             extra_reps = 1

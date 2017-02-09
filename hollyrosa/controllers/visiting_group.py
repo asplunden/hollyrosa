@@ -19,7 +19,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-import datetime,  logging
+import datetime, json, logging
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
 from hollyrosa.model.booking_couch import getAllActivities, getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus, getNotesForTarget, getBookingInfoNotesOfUsedActivities
 from hollyrosa.model.booking_couch import getBookingDays, getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap, getVisitingGroupsByVodbState,  dateRange,  getActivityTitleMap,  getAllProgramLayerBucketTexts,  getProgramLayerBucketTextByDayAndTime, getVisitingGroupTypes
-import datetime,  json
+from hollyrosa.controllers.common import sanitizeDate
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
@@ -304,7 +304,7 @@ class VisitingGroup(BaseController):
         if is_new:
             # TODO: make sure subtype is in one of
             if not subtype in ['program','course','staff']:
-                tg.flash('error with subtype')
+                flash('error with subtype')
                 raise redirect(request.referrer)
 
             visiting_group_c = dict(type='visiting_group',  subtype=subtype,  tags=[],  boknstatus=0,  vodbstatus=0)
@@ -318,21 +318,20 @@ class VisitingGroup(BaseController):
         visiting_group_c['name'] = name
         visiting_group_c['info'] = info
 
-        # TODO: sanitize dates. REFACTOR
-        try:
-            tmp_date = datetime.datetime.strptime(str(from_date),'%Y-%m-%d')
-        except ValueError:
-            tg.flash('error with from-date')
+        ok, ok_from_date = sanitizeDate(from_date)
+        if not ok:
+            # TODO better error handling here
+            flash('error with from-date')
             raise redirect(request.referrer)
 
-        visiting_group_c['from_date'] = str(from_date)
+        visiting_group_c['from_date'] = ok_from_date
 
-        try:
-            tmp_date = datetime.datetime.strptime(str(to_date),'%Y-%m-%d')
-        except ValueError:
-            tg.flash('error with to-date')
+        ok, ok_to_date = sanitizeDate(to_date)
+        if not ok:
+            # TODO: better error handling here
+            flash('error with to-date')
             raise redirect(request.referrer)
-        visiting_group_c['to_date'] = str(to_date)
+        visiting_group_c['to_date'] = ok_to_date
 
 
         visiting_group_c['contact_person'] = contact_person
@@ -344,7 +343,8 @@ class VisitingGroup(BaseController):
         visiting_group_c['boknr'] = boknr
 
         # TODO: password for group should be set in special page
-        visiting_group_c['password'] = password
+        if password != '':
+            visiting_group_c['password'] = password
 
         visiting_group_c['camping_location'] = camping_location
 

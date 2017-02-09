@@ -28,8 +28,8 @@ from formencode.validators import DateConverter
 
 class EditVodbGroupForm(twd.CustomisedTableForm):
     class child(twf.TableLayout):
-        vodb_group_id = twf.HiddenField(validator=twc.Required)
-        subtype = twf.HiddenField(validator=twc.Required) 
+        vodb_group_id = twf.HiddenField()
+        subtype = twf.HiddenField() 
         name = twf.TextField(validator=twc.StringLengthValidator(min=4), css_class="edit_name", size=40)
         boknr = twf.TextField(validator=twc.Required)
 
@@ -43,11 +43,12 @@ class EditVodbGroupForm(twd.CustomisedTableForm):
         to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')
         vodb_contact_name = twf.TextField(validator=twc.Required)
         vodb_contact_email = twf.TextField(validator=twc.EmailValidator)
-        vodb_contact_phone = twf.TextField(validator=twc.Required)
-        vodb_contact_address = twf.TextArea(validator=twc.StringLengthValidator(min=4))
-        camping_location = twf.TextField(validator=twc.Required)
+        vodb_contact_phone = twf.TextField()
+        vodb_contact_address = twf.TextArea()
+        camping_location = twf.TextField()
 
         class visiting_group_properties(twd.GrowingGridLayout):
+            extra_reps = 1
             propery_id = twf.HiddenField('property_id')
             property = twf.TextField('property', size=10)
             value = twf.TextField('value', size=4)

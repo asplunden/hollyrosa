@@ -75,12 +75,13 @@ def sanitizeDate(d,  default_date=''):
     
     try:
         #...only use first ten chars
-        d_trunc = d[:10]
+        d_trunc = str(d)[:10]
         d_pars = datetime.datetime.strptime(d_trunc, '%Y-%m-%d')
-        return True,  d_pars.strftime('%Y-%m-%d')
+        return True, d_pars.strftime('%Y-%m-%d')
     except ValueError:
         return False, default_date
     
+
 def getSanitizeDate(d, default_date=''):
     """Make sure d is on the form YYYY-mm-dd and return a Date object from datetime library"""
     # TODO we really should use formenc validate here

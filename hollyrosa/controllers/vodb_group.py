@@ -19,27 +19,27 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
+import datetime, logging, json, time, types, copy
+
 
 from tg import expose, flash, require, url, request, redirect,  validate
 from repoze.what.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch
 
-#### from hollyrosa.widgets.edit_visiting_group_program_request_form import create_edit_visiting_group_program_request_form
 from hollyrosa.widgets.edit_vodb_group_form import create_edit_vodb_group_form
 
 from tg import tmpl_context
 
-import datetime,logging, json, time, types, copy
 
 log = logging.getLogger()
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
-from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, reFormatDate, ensurePostRequest
+from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, reFormatDate, ensurePostRequest, sanitizeDate
 
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange,  getVisitingGroupsByGroupType, getRoomBookingsOfVODBGroup,  getAllActivities, getVisitingGroupTypes
 from hollyrosa.controllers.booking_history import remember_tag_change,  remember_booking_vgroup_properties_change
-from hollyrosa.controllers.common import workflow_map,  DataContainer,  getLoggedInUserId,  change_op_map,  getRenderContent, getRenderContentDict,  computeCacheContent,  has_level,  reFormatDate, bokn_status_map, vodb_status_map, makeVODBGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options
+from hollyrosa.controllers.common import workflow_map, DataContainer, getLoggedInUserId,  change_op_map, getRenderContent, getRenderContentDict,  computeCacheContent, has_level,  reFormatDate, bokn_status_map, vodb_status_map, makeVODBGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options, sanitizeDate
 from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange, updateVisitingGroupComputedSheets, computeAllUsedVisitingGroupsTagsForTagSheet,  program_visiting_group_properties_template,  staff_visiting_group_properties_template,  course_visiting_group_properties_template
 from hollyrosa.controllers.booking_history import remember_new_booking_request
 from hollyrosa.controllers import common_couch
@@ -167,23 +167,24 @@ class VODBGroup(BaseController):
             
         return is_new, r_id
     
+    
 
     @expose()
     @validate(create_edit_vodb_group_form, error_handler=edit_group_data)
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may change visiting group properties'))
     def save_vodb_group_properties(self, vodb_group_id='', boknr='', name='', info='', camping_location='', vodb_contact_name='', vodb_contact_phone='', vodb_contact_email='', vodb_contact_address='', from_date='', to_date='', subtype='', visiting_group_properties=None):
         ensurePostRequest(request, __name__)
-        #...how do we handle new groups? Like new visiting_group, right?
-        #   better have type=visiting_group for all groups and then have subtypes=group, course, daytrip, funk, etc for filtering/deciding on additional capabillities
+        log.debug('save_vodb_group_properties')
         id = vodb_group_id
         is_new, vgroup_id = self.newOrExistingVgroupId(id) 
         
         #...load or create new vgroup
         if is_new:
+            log.info("saving new group")
 #            program_state = 0
 #            vodb_state = 0
             if not subtype in ['program','course','staff']:
-                tg.flash('error with subtype')
+                flash('error with subtype')
                 raise redirect(request.referrer)
                 
             visiting_group_o = dict(type='visiting_group',  subtype=subtype,  tags=[],  boknstatus=0,  vodbstatus=0)
@@ -195,8 +196,8 @@ class VODBGroup(BaseController):
         #...fill in data
         visiting_group_o['name'] = name
         visiting_group_o['info'] = info
-        visiting_group_o['from_date'] = str(from_date)
-        visiting_group_o['to_date'] = str(to_date)
+        visiting_group_o['from_date'] = sanitizeDate(from_date)[1] # TODO better error handling
+        visiting_group_o['to_date'] = sanitizeDate(to_date)[1] # TODO better error handling
         visiting_group_o['vodb_contact_name'] = vodb_contact_name
         visiting_group_o['vodb_contact_email'] = vodb_contact_email
         visiting_group_o['vodb_contact_phone'] = vodb_contact_phone
@@ -207,7 +208,7 @@ class VODBGroup(BaseController):
         # TODO: figure out the order of updating things if something goes wrong.
         
         #...update properties
-        visiting_group_o['visiting_group_properties'] = populatePropertiesAndRemoveUnusedProperties(visiting_group_o,  visiting_group_properties)
+        visiting_group_o['visiting_group_properties'] = populatePropertiesAndRemoveUnusedProperties(visiting_group_o, visiting_group_properties)
         
         updateBookingsCacheContentAfterPropertyChange(holly_couch, visiting_group_o,  getLoggedInUserId(request))
         vodb_tag_times_tags = computeAllUsedVisitingGroupsTagsForTagSheet(visiting_group_o['tags'], visiting_group_o.get('vodb_tag_sheet',dict(items=[]))['items'])

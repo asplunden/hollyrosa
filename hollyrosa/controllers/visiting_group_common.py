@@ -20,7 +20,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 import copy, types
 from hollyrosa.model.booking_couch import genUID, getBookingDayOfDate, getSchemaSlotActivityMap, getVisitingGroupByBoknr, getAllVisitingGroups, getTargetNumberOfNotesMap, getAllTags, getNotesForTarget, getBookingsOfVisitingGroup, getBookingOverview, getBookingEatOverview, getDocumentsByTag, getVisitingGroupsByVodbState, getVisitingGroupsByBoknstatus, dateRange
-from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer,  getRenderContent, computeCacheContent,  has_level,  reFormatDate, getLoggedInUserId
+from hollyrosa.controllers.common import workflow_map, bokn_status_map, bokn_status_options, DataContainer, getRenderContent, computeCacheContent,  has_level, reFormatDate, getLoggedInUserId, sanitizeDate
 from hollyrosa.controllers.booking_history import remember_tag_change,  remember_booking_vgroup_properties_change
 
 
@@ -74,7 +74,7 @@ def updateBookingsCacheContentAfterPropertyChange(a_holly_couch, a_visiting_grou
                 a_holly_couch[tmp_booking['_id']] = tmp_booking
 
 
-def populatePropertiesAndRemoveUnusedProperties(a_visiting_group,  a_visiting_group_properties):
+def populatePropertiesAndRemoveUnusedProperties(a_visiting_group, a_visiting_group_properties):
     """used when a property dict is obtained from edit_vodb group or edit vgroup forms"""
     visiting_group_property_o = dict()
 
@@ -87,8 +87,8 @@ def populatePropertiesAndRemoveUnusedProperties(a_visiting_group,  a_visiting_gr
     for param in a_visiting_group_properties:
         is_new_param = False
         if param['property'] != '' and param['property'] != None:
-            if param['id'] != '' and param['id'] != None:
-                visiting_group_property_o[param['id']] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
+            if param['property_id'] != '' and param['property_id'] != None:
+                visiting_group_property_o[param['property_id']] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=sanitizeDate(param['from_date'])[1], to_date=sanitizeDate(param['to_date'])[1]) # TODO: better error handling of sanitieDate
             else:
                 #...compute new unsued id
                 # TODO: these ids are not perfectly unique. It could be a problem with dojo grid
@@ -103,7 +103,7 @@ def populatePropertiesAndRemoveUnusedProperties(a_visiting_group,  a_visiting_gr
                 #    new_id_int += 1
                 used_param_ids.append(str(new_id_int))
                 
-                visiting_group_property_o[str(new_id_int)] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=str(param['from_date']),  to_date=str(param['to_date']))
+                visiting_group_property_o[str(new_id_int)] = dict(property=param['property'],  value=param.get('value',''),  description=param.get('description',''),  unit=param.get('unit',''),  from_date=sanitizeDate(param['from_date'])[1],  to_date=sanitizeDate(param['to_date'])[1]) # TODO: the usage of sanitizeDate is a little loose I think
                 
     # TODO: we need to add to history how params are changed and what it affects
     return visiting_group_property_o
