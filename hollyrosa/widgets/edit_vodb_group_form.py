@@ -31,7 +31,7 @@ class EditVodbGroupForm(twd.CustomisedTableForm):
         vodb_group_id = twf.HiddenField()
         subtype = twf.HiddenField() 
         name = twf.TextField(validator=twc.StringLengthValidator(min=4), css_class="edit_name", size=40)
-        boknr = twf.TextField(validator=twc.Required)
+        boknr = twf.TextField()
 
         info = TinyMCEWidget(mce_options = dict(theme='advanced',  
                                                                    theme_advanced_toolbar_align ="left",  
@@ -39,16 +39,16 @@ class EditVodbGroupForm(twd.CustomisedTableForm):
                                                                    theme_advanced_buttons2 = "",
                                                                    theme_advanced_buttons3 = ""
 ))
-        from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')
-        to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')
-        vodb_contact_name = twf.TextField(validator=twc.Required)
+        from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', required=True)
+        to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', required=True)
+        vodb_contact_name = twf.TextField()
         vodb_contact_email = twf.TextField(validator=twc.EmailValidator)
         vodb_contact_phone = twf.TextField()
         vodb_contact_address = twf.TextArea()
         camping_location = twf.TextField()
 
         class visiting_group_properties(twd.GrowingGridLayout):
-            extra_reps = 1
+            extra_reps = 0
             propery_id = twf.HiddenField('property_id')
             property = twf.TextField('property', size=10)
             value = twf.TextField('value', size=4)

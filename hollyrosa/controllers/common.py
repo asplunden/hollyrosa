@@ -249,20 +249,19 @@ class has_level(Predicate):
             self.unmet(level=self.level)
             
         if self.level not in environ['repoze.who.identity']['user_level']:
-            #self.unmet(post_id=post_id, author=post.author_userid)
-            self.unmet(level=self.level) # self.level
+            self.unmet(level=self.level) 
         if not environ['repoze.who.identity']['user_active']:
             self.unmet(active=True)
 
 
-
+# TODO: introduce daterange default date when parse error of date troies with a default value.
 def makeVisitingGroupObjectOfVGDictionary(a_visiting_group):
     obj_params = makeParamsForObjectOfVGDictionary(a_visiting_group)
     
     visiting_group = dict(name=a_visiting_group['name'],  visiting_group_id=a_visiting_group['_id'], info=a_visiting_group['info'], visiting_group_properties=obj_params, 
                                    contact_person=a_visiting_group.get('contact_person', ''),  contact_person_email=a_visiting_group.get('contact_person_email', ''),  contact_person_phone=a_visiting_group.get('contact_person_phone', ''), 
                                    boknr=a_visiting_group['boknr'], password=a_visiting_group.get('password',''), boknstatus=a_visiting_group['boknstatus'],  camping_location=a_visiting_group['camping_location'],  
-                                   from_date=datetime.datetime.strptime(a_visiting_group['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(a_visiting_group['to_date'], '%Y-%m-%d'), 
+                                   from_date=getSanitizeDate(a_visiting_group['from_date'],'2017-01-01')[1], to_date=getSanitizeDate(a_visiting_group['to_date'], '2017-12-30')[1], 
                                    subtype=a_visiting_group['subtype'])
     
     

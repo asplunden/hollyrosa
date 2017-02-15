@@ -137,10 +137,10 @@ class VODBGroup(BaseController):
             if subtype =='course':
                 properties_template = course_visiting_group_properties_template
                 
-            visiting_group = dict(name='',  id=None, _id=None,   info='',  visiting_group_properties=properties_template,  subtype=subtype,  contact_person='',  contact_person_email='',  contact_person_phone='',  boknr='')
+            visiting_group = dict(name='', id=None, _id=None, info='', visiting_group_properties=properties_template, subtype=subtype, contact_person='', contact_person_email='', contact_person_phone='', boknr='')
         
         else:
-            visiting_group_c = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+            visiting_group_c = common_couch.getVisitingGroup(holly_couch, visiting_group_id)
             for k in ['vodb_contact_name', 'vodb_contact_email', 'vodb_contact_phone', 'vodb_contact_address']:
                 if not visiting_group_c.has_key(k):
                     visiting_group_c[k] = ''

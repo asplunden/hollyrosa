@@ -42,12 +42,12 @@ class EditVisitingGroupForm(twd.CustomisedTableForm):
                                                                    theme_advanced_buttons2 = "",
                                                                    theme_advanced_buttons3 = ""))
 
-        from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d') 
-        to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d') 
+        from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', required=True) 
+        to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', required=True) 
         contact_person = twf.TextField(label_text="contact person:")
         contact_person_email = twf.TextField(validator=twc.EmailValidator)
         contact_person_phone = twf.TextField()
-        boknr = twf.TextField(validator=twc.Required)
+        boknr = twf.TextField()
         password = twf.TextField()
         camping_location = twf.TextField()
 
@@ -58,8 +58,8 @@ class EditVisitingGroupForm(twd.CustomisedTableForm):
             value = twf.TextField(size=4)
             unit = twf.TextField(size=8)
             description = twf.TextField()
-            from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')
-            to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d') 
+            from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', required=True)
+            to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', required=True) 
 
     action = lurl('save_visiting_group_properties')
 
