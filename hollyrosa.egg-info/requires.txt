@@ -3,3 +3,7 @@ zope.sqlalchemy >= 0.4
 repoze.who
 couchdb >= 1.0.0
 webhelpers >= 1.3
+tw2.core
+tw2.dynforms
+
+
