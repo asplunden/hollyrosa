@@ -21,7 +21,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from tg import expose, flash, require, url, request, redirect,  validate, abort
-from repoze.what.predicates import Any, is_user, has_permission
+from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch,  genUID
 from hollyrosa.controllers import common_couch
@@ -38,7 +38,7 @@ from tg import tmpl_context
 from hollyrosa.widgets.edit_note_form import create_edit_note_form
 from hollyrosa.widgets.edit_attachment_form import create_edit_attachment_form
 
-from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, ensurePostRequest
+from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, ensurePostRequest, cleanHtml
 
 from hollyrosa.model.booking_couch import genUID, getNotesForTarget
 from hollyrosa.controllers.booking_history import remember_note_change
@@ -121,7 +121,7 @@ class Note(BaseController):
 
 
         note_o['last_changed_by'] = getLoggedInUserId(request)
-        note_o['text'] = text
+        note_o['text'] = cleanHtml(text)
         holly_couch[note_o['note_id']] = note_o
 
         remember_note_change(holly_couch, target_id=target_id, note_id=note_o['note_id'], changed_by=getLoggedInUserId(request), note_change=note_change)
@@ -154,7 +154,7 @@ class Note(BaseController):
             attachment_change = 'changed'
 
         attachment_o['last_changed_by'] = getLoggedInUserId(request)
-        attachment_o['text'] = text
+        attachment_o['text'] = cleanHtml(text)
         holly_couch[attachment_o['_id']] = attachment_o
 
         file = request.POST['attachment']

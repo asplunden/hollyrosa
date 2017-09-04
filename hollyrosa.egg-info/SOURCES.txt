@@ -8,6 +8,7 @@ hollyrosa/hollyrosa_schema_tool.py
 hollyrosa/hollyrosa_tool.py
 hollyrosa/hollyrosa_view_tool.py
 hollyrosa/websetup.py
+hollyrosa.egg-info/=
 hollyrosa.egg-info/PKG-INFO
 hollyrosa.egg-info/SOURCES.txt
 hollyrosa.egg-info/dependency_links.txt
@@ -22,6 +23,7 @@ hollyrosa/config/environment.py
 hollyrosa/config/middleware.py
 hollyrosa/controllers/OOorg.py
 hollyrosa/controllers/__init__.py
+hollyrosa/controllers/activity.py
 hollyrosa/controllers/booking_day.py
 hollyrosa/controllers/booking_history.py
 hollyrosa/controllers/calendar.py
@@ -97,15 +99,18 @@ hollyrosa/public/images/under_the_hood_blue.png
 hollyrosa/public/images/warning.png
 hollyrosa/public/scripts/calendar_url_helper.js
 hollyrosa/public/scripts/common_menu.js
-hollyrosa/public/scripts/div_widget.js
 hollyrosa/public/scripts/edit_booking.js
 hollyrosa/public/scripts/std.js
 hollyrosa/public/scripts/tags.js
 hollyrosa/public/scripts/visiting_group_program_request_widget.js
+hollyrosa/public/scripts/page/booking_day.js
+hollyrosa/public/scripts/page/calendar_overview.js
+hollyrosa/public/scripts/page/tag_and_note.js
+hollyrosa/public/scripts/page/view_activity.js
+hollyrosa/public/scripts/page/visiting_group_view_all.js
 hollyrosa/templates/__init__.py
 hollyrosa/templates/about.html
 hollyrosa/templates/activity_statistics.html
-hollyrosa/templates/authentication.html
 hollyrosa/templates/booking_day.html
 hollyrosa/templates/booking_day_fladan.html
 hollyrosa/templates/booking_day_properties.html
@@ -114,7 +119,6 @@ hollyrosa/templates/booking_day_summary.html~
 hollyrosa/templates/booking_view.html
 hollyrosa/templates/calendar_overview.html
 hollyrosa/templates/calendar_upcoming.html
-hollyrosa/templates/calendar_upcoming.html~
 hollyrosa/templates/change_password.html
 hollyrosa/templates/debug.html
 hollyrosa/templates/edit_activity.html
@@ -148,13 +152,11 @@ hollyrosa/templates/view_bookings_of_name.html
 hollyrosa/templates/view_bookings_of_name2.html~
 hollyrosa/templates/view_sanity_check_property_usage.html
 hollyrosa/templates/visiting_group_edit_layers.html
-hollyrosa/templates/visiting_group_program_request_edit.html
 hollyrosa/templates/visiting_group_program_request_edit2.html
 hollyrosa/templates/visiting_group_program_request_login.html
 hollyrosa/templates/visiting_group_view.html
 hollyrosa/templates/visiting_group_view_all.html
 hollyrosa/templates/visitor_statistics.html
-hollyrosa/templates/vodb_group_booking_overview.html
 hollyrosa/templates/vodb_group_booking_overview2.html
 hollyrosa/templates/vodb_group_edit.html
 hollyrosa/templates/vodb_group_edit_sheet.html
@@ -172,7 +174,6 @@ hollyrosa/tests/models/__init__.py
 hollyrosa/tests/models/test_auth.py
 hollyrosa/widgets/__init__.py
 hollyrosa/widgets/change_password_form.py
-hollyrosa/widgets/div_widget.py
 hollyrosa/widgets/edit_activity_form.py
 hollyrosa/widgets/edit_attachment_form.py
 hollyrosa/widgets/edit_book_live_slot_form.py
@@ -186,4 +187,3 @@ hollyrosa/widgets/edit_visiting_group_program_request_form.py
 hollyrosa/widgets/edit_vodb_group_form.py
 hollyrosa/widgets/move_booking_form.py
 hollyrosa/widgets/validate_get_method_inputs.py
-hollyrosa/widgets/visiting_group_program_request_widget.py

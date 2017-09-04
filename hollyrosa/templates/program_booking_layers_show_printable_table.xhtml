@@ -1,0 +1,68 @@
+<html py:extends="master.xhtml" py:strip="True">
+
+<!--
+Copyright 2010-2017 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<head py:block="head" py:strip="True">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Program Bookings for ${visiting_group['name']}</title>
+</head>
+<body class="tundra" py:block="body" py:strip="True">
+  <h2 id="visiting_group_menu" hollyrosa:vgid="${visiting_group.id}" class="context_menu_symbol">Program bookings for ${visiting_group['boknr']}</h2>
+  <p class="context_menu_symbol">${reFormatDate(visiting_group['from_date'])} to ${reFormatDate(visiting_group['to_date'])}</p>
+  <div class="note" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul></div>
+
+  <table class="visiting_group_info_table">
+    <tr><td class="legend">bok.nr:</td><td class="info">${visiting_group['boknr']}</td></tr>
+  </table>
+</div>
+
+<table class="program_layers_printable_table">
+  <tr> <!--- header -->
+    <th class="program_layers_printable_table_time_label">&nbsp;</th>
+    <th class="program_layers_printable_table" py:for="layer_day in layer_days">${layer_day['date']}</th>
+  </tr>
+  <tdata>
+    <tr py:for="tmp_layer_time in layer_time">
+      <td class="program_layers_printable_table_time_label" style="width:${width_ratio}%">${tmp_layer_time['title']}</td>
+      <td py:for="layer_day in layer_days" class="program_layers_printable_table" style="width:${width_ratio}%">
+        <div py:for="booking in bookings.get(layer_day['booking_day_id'] +':'+ tmp_layer_time['symbol'] ,[])" class="program_layer_slot" hollyrosa:layer_booking_id="${booking['_id']}" style="background-color: ${booking['layer_colour']}">
+          <span style="font-style:italic; padding-left:2em;">${booking['layer_title']}</span><br/>
+          <span class="workflow_state_${booking['booking_state']}">${activity_title_map[booking['activity_id']]}</span><br/>
+          <span style="padding-left:2em;">${booking['cache_content']}</span>
+        </div>
+      </td>
+    </tr>
+  </tdata>
+</table>
+<h3 py:if="0 != len(unscheduled_bookings)">Unscheduled bookings</h3>
+
+<div py:for="booking in unscheduled_bookings" class="program_layer_slot" hollyrosa:layer_booking_id="${booking['_id']}" style="background-color: ${booking['layer_colour']}; width:20em; ">
+  <span style="font-style:italic; padding-left:2em;">${booking['layer_title']}</span><br/>
+  <span class="workflow_state_${booking['booking_state']}">${activity_title_map[booking['activity_id']]}</span><br/>
+  <span style="padding-left:2em;">${booking['cache_content']}</span>
+</div>
+
+<div py:if="len(booking_info_notes)" style="border: 1px dashed red; padding:1em;margin:2em;">
+  <h2>Att tänka på</h2>
+  <div py:for="n in booking_info_notes" style="padding:2em;">${literal(n.get('text','missing text for note %s' % n['_id']))}</div>
+</div>
+</body>
+</html>

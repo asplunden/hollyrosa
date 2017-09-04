@@ -35,7 +35,7 @@ log = logging.getLogger(__name__)
 from tg import expose, flash, require, url, request, redirect, validate, override_template, abort, tmpl_context
 import webob
 
-from repoze.what.predicates import Any, is_user, has_permission
+from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch, genUID
 from hollyrosa.model.booking_couch import getBookingDays, getAllBookingDays, getSlotAndActivityIdOfBooking, getBookingDayOfDate, getVisitingGroupsInDatePeriod, dateRange2,  getBookingDayOfDateList,  getSlotRowSchemaOfActivity,  getActivityGroupNameAndIdList
@@ -55,7 +55,7 @@ from hollyrosa.widgets.move_booking_form import create_move_booking_form
 
 from hollyrosa.controllers.booking_history import remember_booking_change, remember_schedule_booking, remember_unschedule_booking, remember_book_slot, remember_booking_properties_change,  remember_new_booking_request,  remember_booking_request_change, remember_delete_booking_request, remember_block_slot, remember_unblock_slot, remember_booking_move, remember_ignore_booking_warning
 
-from hollyrosa.controllers.common import DataContainer, workflow_map, getLoggedInUserId, change_op_map, getRenderContent, getRenderContentDict,  computeCacheContent, has_level, reFormatDate, getSanitizeDate
+from hollyrosa.controllers.common import DataContainer, workflow_map, getLoggedInUserId, change_op_map, getRenderContent, getRenderContentDict,  computeCacheContent, has_level, reFormatDate, getSanitizeDate, cleanHtml
 from hollyrosa.controllers import common_couch
 
 __all__ = ['BookingDay']
@@ -254,13 +254,16 @@ class BookingDay(BaseController):
         for x in unscheduled_bookings_c:
             b = x.value
             a_id = b['activity_id']
-            a = activity_map[a_id]
 
-            # TODO: remove DataContainer here (will break templates)
-            new_booking = DataContainer(id=b['_id'],  content=b['content'],  cache_content=b['cache_content'],
-                                        booking_state=b['booking_state'],  visiting_group_id=b['visiting_group_id'],
-                                        visiting_group_name=b['visiting_group_name'],  valid_from=b['valid_from'],  valid_to=b['valid_to'],  requested_date=b['requested_date'],  last_changed_by_id=b['last_changed_by_id'],  slot_id=b['slot_id'],  activity_title=a['title'],  activity_group_id=a['activity_group_id'],  activity_id=a_id)
-            unscheduled_bookings.append(new_booking)
+            #...TODO note that it is possible an unscheduled booking doesent belong to room or live (might be program)
+            if activity_map.has_key(a_id):
+                a = activity_map[a_id]
+
+                # TODO: remove DataContainer here (will break templates)
+                new_booking = DataContainer(id=b['_id'],  content=b['content'],  cache_content=b['cache_content'],
+                                            booking_state=b['booking_state'],  visiting_group_id=b['visiting_group_id'],
+                                            visiting_group_name=b['visiting_group_name'],  valid_from=b['valid_from'],  valid_to=b['valid_to'],  requested_date=b['requested_date'],  last_changed_by_id=b['last_changed_by_id'],  slot_id=b['slot_id'],  activity_title=a['title'],  activity_group_id=a['activity_group_id'],  activity_id=a_id)
+                unscheduled_bookings.append(new_booking)
 
         return unscheduled_bookings
 
@@ -684,15 +687,18 @@ class BookingDay(BaseController):
         schema_id = self.getSchemaSubNameOfSubtype(subtype)
         schema_o = booking_day[schema_id]
 
-        end_slot_id_options = self.getEndSlotIdOptions(schema_o, slot['activity_id'])
+        end_slot_id_options_o = self.getEndSlotIdOptions(schema_o, slot['activity_id'])
+        new_clean_booking['booking_end_slot_id'] = (end_slot_id_options_o[0][0], end_slot_id_options_o)
+        end_slot_id_options = json.dumps(end_slot_id_options_o)
+        start_slot_id_options = end_slot_id_options
+
         visiting_group_options = json.dumps([dict(name=a[1], id=a[0]) for a in visiting_groups] )
 
         #...modify singel select field
         #new_clean_booking['slot_id'] = dict(value=new_clean_booking['slot_id'], options=slot)
-        log.debug(str(end_slot_id_options))
-        slot_id_options = json.dumps(end_slot_id_options)
-        new_clean_booking['booking_end_slot_id'] = (end_slot_id_options[0][0], end_slot_id_options)
-        return dict(booking=new_clean_booking, booking_day=booking_day, visiting_groups=visiting_groups, edit_this_visiting_group=0, slot_position=slot, end_slot_id_options=end_slot_id_options, visiting_group_options=visiting_group_options, slot_id_data=slot_id_options)
+        ##log.debug(str(end_slot_id_options))
+        ##slot_id_options = json.dumps(end_slot_id_options)
+        return dict(booking=new_clean_booking, booking_day=booking_day, visiting_groups=visiting_groups, edit_this_visiting_group=0, slot_position=slot, start_slot_id_options=start_slot_id_options, end_slot_id_options=end_slot_id_options, visiting_group_options=visiting_group_options)
 
 
     @expose('hollyrosa.templates.booking_view')
@@ -759,7 +765,7 @@ class BookingDay(BaseController):
             tmpl_context.form = create_edit_book_live_slot_form
 
             # TODO: find out how to express this
-            template = 'genshi:hollyrosa.templates.edit_booked_live_booking'
+            template = 'kajiki:hollyrosa.templates.edit_booked_live_booking'
             override_template(self.edit_booked_booking, template)
 
         booking_o['return_to_day_id'] = return_to_day_id
@@ -1406,9 +1412,9 @@ class BookingDay(BaseController):
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may use multibook functionality'))
     @validate(validators={'booking_id':validators.UnicodeString(not_empty=True)})
     def multi_book(self,  booking_id=None,  **kw):
-        booking_o = common_couch.getBooking(holly_couch,  booking_id)
+        booking_o = common_couch.getBooking(holly_couch, booking_id)
         booking_day_id = booking_o['booking_day_id']
-        booking_day = common_couch.getBookingDay(holly_couch,  booking_day_id)
+        booking_day = common_couch.getBookingDay(holly_couch, booking_day_id)
         day_schema_id = booking_day['day_schema_id']
         day_schema = common_couch.getDaySchema(holly_couch,  day_schema_id)
 

@@ -24,7 +24,7 @@ import datetime, json, logging
 from tg import expose, flash, require, url, request, response,  redirect,  validate
 
 from formencode import validators
-from repoze.what.predicates import Any, is_user, has_permission
+from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
 from hollyrosa.controllers import common_couch

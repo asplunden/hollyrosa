@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 from tg import expose, flash, require, url, request, redirect, validate, abort
 from tg import tmpl_context
 
-from repoze.what.predicates import Any, is_user, has_permission
+from tg.predicates import Any, is_user, has_permission
 
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch, genUID
@@ -38,7 +38,7 @@ from formencode import validators
 
 from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
 
-from hollyrosa.controllers.common import has_level, ensurePostRequest
+from hollyrosa.controllers.common import has_level, ensurePostRequest, getDateObject, cleanHtml
 from hollyrosa.controllers import common_couch
 from hollyrosa.model import holly_couch
 
@@ -57,15 +57,15 @@ class Calendar(BaseController):
     @expose('hollyrosa.templates.calendar_overview')
     def overview_all(self):
         """Show an overview of all booking days"""
-        return dict(booking_days=[b.doc for b in getAllBookingDays(holly_couch)])
+        return dict(booking_days=[b.doc for b in getAllBookingDays(holly_couch)], makeDate=getDateObject)
 
 
     @expose('hollyrosa.templates.calendar_overview')
     def overview(self):
         """Show an overview of all booking days"""
         today = datetime.date.today().strftime('%Y-%m-%d')
-        return dict(booking_days=[b.doc for b in getBookingDays(holly_couch, from_date=today)])
 
+        return dict(booking_days=[b.doc for b in getBookingDays(holly_couch, from_date=today)], makeDate=getDateObject)
 
     @expose('hollyrosa.templates.calendar_upcoming')
     def upcoming(self):
@@ -85,7 +85,7 @@ class Calendar(BaseController):
 
             group_info[tmp_date_today_str] = dict(arrives=[v.doc for v in vgroups if v.doc.get('from_date','') == tmp_date_today_str], leaves=[v.doc for v in vgroups if v.doc.get('to_date','') == tmp_date_today_str], stays=[v.doc for v in vgroups if v.doc.get('to_date','') > tmp_date_today_str and v.doc.get('from_date','') < tmp_date_today_str])
 
-        return dict(booking_days=bdays, group_info=group_info)
+        return dict(booking_days=bdays, group_info=group_info, makeDate=getDateObject)
 
 
     @expose('hollyrosa.templates.booking_day_properties')
@@ -108,7 +108,7 @@ class Calendar(BaseController):
     def save_booking_day_properties(self, recid=None, note='', title='', num_program_crew_members=0, num_fladan_crew_members=0):
         ensurePostRequest(request, __name__)
         booking_day_c = common_couch.getBookingDay(holly_couch, recid)
-        booking_day_c['note'] = note
+        booking_day_c['note'] = cleanHtml(note)
         booking_day_c['title'] = title
         booking_day_c['num_program_crew_members'] = num_program_crew_members
         booking_day_c['num_fladan_crew_members'] = num_fladan_crew_members

@@ -29,13 +29,13 @@ from formencode.validators import DateConverter
 class EditVodbGroupForm(twd.CustomisedTableForm):
     class child(twf.TableLayout):
         vodb_group_id = twf.HiddenField()
-        subtype = twf.HiddenField() 
+        subtype = twf.HiddenField()
         name = twf.TextField(validator=twc.StringLengthValidator(min=4), css_class="edit_name", size=40)
         boknr = twf.TextField()
 
-        info = TinyMCEWidget(mce_options = dict(theme='advanced',  
-                                                                   theme_advanced_toolbar_align ="left",  
-                                                                   theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat", 
+        info = TinyMCEWidget(mce_options = dict(theme='advanced',
+                                                                   theme_advanced_toolbar_align ="left",
+                                                                   theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat",
                                                                    theme_advanced_buttons2 = "",
                                                                    theme_advanced_buttons3 = ""
 ))
@@ -48,7 +48,7 @@ class EditVodbGroupForm(twd.CustomisedTableForm):
         camping_location = twf.TextField()
 
         class visiting_group_properties(twd.GrowingGridLayout):
-            extra_reps = 0
+            extra_reps = 1
             propery_id = twf.HiddenField('property_id')
             property = twf.TextField('property', size=10)
             value = twf.TextField('value', size=4)

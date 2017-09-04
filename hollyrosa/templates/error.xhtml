@@ -1,0 +1,10 @@
+<html py:extends="master.xhtml" py:strip="True">
+<head py:block="head" py:strip="True">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>A ${code} Error has Occurred </title>
+</head>
+<body class="tundra" py:block="body" py:strip="True">
+<h1>Error ${code}</h1>
+<div>${literal(message)}</div>
+</body>
+</html>

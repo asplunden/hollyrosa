@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 
 from tg import expose, flash, require, url, request, redirect, validate, response
 from formencode import validators
-from repoze.what.predicates import Any, is_user, has_permission
+from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
 from hollyrosa.model.booking_couch import getAllActivities, getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus, getNotesForTarget, getBookingInfoNotesOfUsedActivities
@@ -38,7 +38,7 @@ from tg import tmpl_context
 
 from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
 
-from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer, getRenderContent, computeCacheContent, has_level, reFormatDate, getLoggedInUserId, makeVisitingGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options, hide_cache_content_in_booking, getLoggedInUser, vodb_status_map, ensurePostRequest
+from hollyrosa.controllers.common import workflow_map,  bokn_status_map, bokn_status_options,  DataContainer, getRenderContent, computeCacheContent, has_level, reFormatDate, getLoggedInUserId, makeVisitingGroupObjectOfVGDictionary, vodb_eat_times_options, vodb_live_times_options, hide_cache_content_in_booking, getLoggedInUser, vodb_status_map, ensurePostRequest, cleanHtml
 from hollyrosa.controllers.visiting_group_common import populatePropertiesAndRemoveUnusedProperties,  updateBookingsCacheContentAfterPropertyChange, updateVisitingGroupComputedSheets,  computeAllUsedVisitingGroupsTagsForTagSheet, program_visiting_group_properties_template, staff_visiting_group_properties_template, course_visiting_group_properties_template
 from hollyrosa.controllers.booking_history import remember_tag_change
 from hollyrosa.controllers import common_couch
@@ -316,7 +316,7 @@ class VisitingGroup(BaseController):
 
         #visiting_group_c['type'] = 'visiting_group'
         visiting_group_c['name'] = name
-        visiting_group_c['info'] = info
+        visiting_group_c['info'] = cleanHtml(info)
 
         ok, ok_from_date = sanitizeDate(from_date)
         if not ok:

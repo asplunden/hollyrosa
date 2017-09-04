@@ -19,7 +19,7 @@ import hashlib
 
 
 base_config = AppConfig()
-base_config.renderers = []
+base_config.renderers = ['kajiki']
 
 # True to prevent dispatcher from striping extensions
 # For example /socket.io would be served by "socket_io"
@@ -44,7 +44,7 @@ base_config.renderers.append('json')
 base_config.renderers.append('genshi')
 
 # Set the default renderer
-base_config.default_renderer = 'genshi'
+base_config.default_renderer = 'kajiki'
 # Configure the base SQLALchemy Setup
 base_config.use_sqlalchemy = False
 base_config.model = None ## authtest.model
@@ -54,7 +54,7 @@ base_config.auth_backend = 'sqlalchemy'
 # YOU MUST CHANGE THIS VALUE IN PRODUCTION TO SECURE YOUR APP
 base_config.sa_auth.cookie_secret = "5e3d194a-4a6c-4969-9eda-9adfaae78bb4"
 # what is the class you want to use to search for users in the database
-base_config.sa_auth.user_class = None ##model.User
+base_config.sa_auth.user_class = None
 
 from tg.configuration.auth import TGAuthMetadata
 
