@@ -1,0 +1,72 @@
+<html py:extends="master.xhtml" py:strip="True">
+
+<!--
+Copyright 2010-2017 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<!-- TODO: refactor away python code -->
+<?python
+import datetime
+def formatDate(b):
+    if b == None:
+        return 'None'
+    elif b == '':
+        return '-'
+    return datetime.datetime.strptime(booking_date_map[b], '%Y-%m-%d').strftime('%A %d %B')
+?>
+
+<head py:block="head" py:strip="True">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>${result_title}</title>
+  <!-- TODO: is std.js used here ?? -->
+  <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
+</head>
+
+<body class="tundra" py:block="body" py:strip="True">
+  <!-- TODO: refactor add new style js menus -->
+  ${XML(workflow_submenu)}
+  <h2>${result_title}</h2>
+
+  <table class="data">
+    <tr>
+      <th>booking_state</th>
+      <th>group</th>
+      <th>activity</th>
+      <th>content</th>
+      <th>scheduleing info</th>
+      <th>last changed by</th>
+    </tr>
+    <tr py:for="b in scheduled_bookings">
+      <td class="data info"><span class="workflow_state_${str(b.booking_state)}">${workflow_map[b.booking_state]}</span>
+        <ul class="any_menu context_inline_menu">
+          <li><a href="${tg.url('set_state', booking_id=b.id, state=10)}">booked</a></li>
+          <li><a href="${tg.url('set_state', booking_id=b.id, state=20)}">approve</a></li>
+          <li><a href="${tg.url('set_state', booking_id=b.id, state=-10)}">disapprove</a></li>
+          <li><a href="${tg.url('set_state', booking_id=b.id, state=0)}">preliminary</a></li>
+        </ul></td>
+        <td class="data info"><a href="${tg.url('/visiting_group/view_bookings_of_name',name=b.visiting_group_name)}">${b.visiting_group_name}</a></td>
+        <td class="data info">${activity_map[b.activity_id]}</td>
+        <td class="data info">${b.cache_content}</td>
+
+        <td class="data info"><a href="${tg.url('/booking/day',day_id=b.booking_day_id)}">booked ${formatDate(b.booking_day_id)} between ${slot_map[b.slot_id]['time_from']} to ${slot_map[b.slot_id]['time_to']} </a></td>
+        <td class="data info">${user_name_map.get(b.last_changed_by_id,b.last_changed_by_id)}</td>
+      </tr>
+    </table>
+  </body>
+</html>

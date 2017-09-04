@@ -21,8 +21,9 @@ Note: functions in this module should rarely if ever access holly_couch (couch d
 """
 
 import datetime
+import bleach
 from tg import abort
-from repoze.what.predicates import Predicate
+from tg.predicates import Predicate
 
 from hollyrosa.model import booking
 
@@ -72,7 +73,7 @@ vodb_live_times_options = [u'indoor',u'outdoor',u'daytrip']
 def sanitizeDate(d,  default_date=''):
     """Make sure d is on the form YYYY-mm-dd and return a unicode string"""
     # TODO we really should use formenc validate here
-    
+
     try:
         #...only use first ten chars
         d_trunc = str(d)[:10]
@@ -80,12 +81,12 @@ def sanitizeDate(d,  default_date=''):
         return True, d_pars.strftime('%Y-%m-%d')
     except ValueError:
         return False, default_date
-    
+
 
 def getSanitizeDate(d, default_date=''):
     """Make sure d is on the form YYYY-mm-dd and return a Date object from datetime library"""
     # TODO we really should use formenc validate here
-    
+
     try:
         #...only use first ten chars
         d_trunc = d[:10]
@@ -93,27 +94,36 @@ def getSanitizeDate(d, default_date=''):
         return True,  d_pars
     except ValueError:
         return False, default_date
-        
-        
+
+
 def reFormatDate(b):
     try:
         r = datetime.datetime.strptime(b, '%Y-%m-%d').strftime('%A %d %B')
     except:
         r = b
     return r
-    
+
+
+def getDateObject(s):
+    """
+    Get date object of string.
+
+    TODO: replace / enhance with arrow
+    """
+    return datetime.datetime.strptime(s, '%Y-%m-%d')
+
 
 def getFormatedDate(date_obj):
     if None == date_obj:
         return ''
     else:
         return date_obj.strftime('%A %d %B')
-    
-    
+
+
 def fixCalendarDatePickerWrongKindOfDateFormat(str_or_date_obj):
         """
         This is an uggly fix because somehow the new tw2 widgets like to show dates as YYYY/MM/DD in widgets wich go wrong when we save.
-        
+
         I also think the validators are somehow not catching this
         """
         return str(str_or_date_obj).replace('/','-')
@@ -124,8 +134,8 @@ def getRenderContent(booking):
         return booking.content
     else:
         return booking.cache_content
-        
-        
+
+
 def getRenderContentDict(booking):
     if booking['cache_content']=='' or booking['cache_content'] == None:
         return booking['content']
@@ -135,7 +145,7 @@ def getRenderContentDict(booking):
 
 def hide_cache_content_in_booking(booking):
     """warn - changes booking in-place"""
-    tmp = booking['cache_content'] 
+    tmp = booking['cache_content']
     i = tmp.find('//')
     if i > 0:
         booking['cache_content'] = booking['cache_content'][:i]
@@ -148,29 +158,29 @@ class DataContainer(object):
     def __init__(self, **kwds):
         for k, v in kwds.items():
             self.__setattr__(k, v)
-   
+
     def has_key(self, key):
         return self.__hasattr__(key)
-        
+
     def __getitem__(self, key):
         try:
             return self.__getattribute__(key)
         except AttributeError:
             raise KeyError, 'key "%s" not found' % key
-        
+
 class DummyIdentity(object):
     def __init__(self):
         self.display_name = 'not logged in'
-        
+
     def __getitem__(self, key):
         try:
             return self.__getattribute__(key)
         except AttributeError:
             raise KeyError, 'key "%s" not found' % key
-            
+
     def has_key(self, key):
         return self.__hasattr__(key)
-    
+
 dummy_identity = DummyIdentity()
 
 
@@ -180,44 +190,44 @@ def getLoggedInDisplayName(request):
         return user['display_name']
     else:
         return user.get('name', 'Unknown')
-    
+
     #return request.identity.get('user', dummy_identity)['display_name']
-    
-    
+
+
 def getLoggedInUser(request):
     return request.identity.get('user', None)
-    
-    
+
+
 def getLoggedInUserId(request):
     return request.identity.get('user', None)['_id']
 
 
 def ensurePostRequest(request, name=''):
     """
-    The purpose of this little method is to ensure that the controller was called with appropriate HTTP verb. 
+    The purpose of this little method is to ensure that the controller was called with appropriate HTTP verb.
     """
     if not request.method == 'POST':
         abort(405)
-    
-    
+
+
 def computeCacheContent(visiting_group, content):
     """
     Generate cached content must be done here. Only visiting groups that exists (has a visiting group) can be rendered using property substitution.
-        
+
     $param is substituted for the value
     #param is substutured for the unit
     $#param or $$param is substituted for it all
-        
+
     TODO: copied for booking_day.py , how share it between all?
     """
     # TODO: this is very wastefull when updating visiting groups which already are loaded from the couch database
     if visiting_group != None:
         cache_content = content
-         
+
         for tmp_property in visiting_group['visiting_group_properties'].values():
             tmp_unit = tmp_property['unit']
             if tmp_unit == None:
-                tmp_unit = '' 
+                tmp_unit = ''
             tmp_value = tmp_property['value']
             if tmp_value == None:
                 tmp_value = ''
@@ -227,7 +237,7 @@ def computeCacheContent(visiting_group, content):
             cache_content = cache_content.replace('#'+tmp_property['property'],  tmp_unit)
     else:
         cache_content = content
-            
+
     return cache_content
 
 
@@ -244,12 +254,12 @@ class has_level(Predicate):
 
 
     def evaluate(self, environ, credentials):
-        
+
         if not environ.has_key('repoze.who.identity'):
             self.unmet(level=self.level)
-            
+
         if self.level not in environ['repoze.who.identity']['user_level']:
-            self.unmet(level=self.level) 
+            self.unmet(level=self.level)
         if not environ['repoze.who.identity']['user_active']:
             self.unmet(active=True)
 
@@ -257,36 +267,36 @@ class has_level(Predicate):
 # TODO: introduce daterange default date when parse error of date troies with a default value.
 def makeVisitingGroupObjectOfVGDictionary(a_visiting_group):
     obj_params = makeParamsForObjectOfVGDictionary(a_visiting_group)
-    
-    visiting_group = dict(name=a_visiting_group['name'],  visiting_group_id=a_visiting_group['_id'], info=a_visiting_group['info'], visiting_group_properties=obj_params, 
-                                   contact_person=a_visiting_group.get('contact_person', ''),  contact_person_email=a_visiting_group.get('contact_person_email', ''),  contact_person_phone=a_visiting_group.get('contact_person_phone', ''), 
-                                   boknr=a_visiting_group['boknr'], password=a_visiting_group.get('password',''), boknstatus=a_visiting_group['boknstatus'],  camping_location=a_visiting_group['camping_location'],  
-                                   from_date=getSanitizeDate(a_visiting_group['from_date'],'2017-01-01')[1], to_date=getSanitizeDate(a_visiting_group['to_date'], '2017-12-30')[1], 
+
+    visiting_group = dict(name=a_visiting_group['name'],  visiting_group_id=a_visiting_group['_id'], info=a_visiting_group['info'], visiting_group_properties=obj_params,
+                                   contact_person=a_visiting_group.get('contact_person', ''),  contact_person_email=a_visiting_group.get('contact_person_email', ''),  contact_person_phone=a_visiting_group.get('contact_person_phone', ''),
+                                   boknr=a_visiting_group['boknr'], password=a_visiting_group.get('password',''), boknstatus=a_visiting_group['boknstatus'],  camping_location=a_visiting_group['camping_location'],
+                                   from_date=getSanitizeDate(a_visiting_group['from_date'],'2017-01-01')[1], to_date=getSanitizeDate(a_visiting_group['to_date'], '2017-12-30')[1],
                                    subtype=a_visiting_group['subtype'])
-    
-    
+
+
     return visiting_group
-    
-    
+
+
 def makeVODBGroupObjectOfVGDictionary(a_visiting_group):
     obj_params = makeParamsForObjectOfVGDictionary(a_visiting_group)
-    
-    visiting_group = dict(name=a_visiting_group['name'],  vodb_group_id=a_visiting_group['_id'],  info=a_visiting_group['info'],  visiting_group_properties=obj_params, 
-                                   vodb_contact_person=a_visiting_group.get('vodb_contact_person', ''),  vodb_contact_email=a_visiting_group.get('vodb_contact_email', ''),  
-                                   vodb_contact_phone=a_visiting_group.get('vodb_contact_phone', ''), vodb_contact_address=a_visiting_group.get('vodb_contact_address', ''), 
-                                   boknr=a_visiting_group['boknr'], password=a_visiting_group.get('password',''), boknstatus=a_visiting_group['boknstatus'],  camping_location=a_visiting_group['camping_location'],  
-                                   from_date=datetime.datetime.strptime(a_visiting_group['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(a_visiting_group['to_date'], '%Y-%m-%d'), 
+
+    visiting_group = dict(name=a_visiting_group['name'],  vodb_group_id=a_visiting_group['_id'],  info=a_visiting_group['info'],  visiting_group_properties=obj_params,
+                                   vodb_contact_person=a_visiting_group.get('vodb_contact_person', ''),  vodb_contact_email=a_visiting_group.get('vodb_contact_email', ''),
+                                   vodb_contact_phone=a_visiting_group.get('vodb_contact_phone', ''), vodb_contact_address=a_visiting_group.get('vodb_contact_address', ''),
+                                   boknr=a_visiting_group['boknr'], password=a_visiting_group.get('password',''), boknstatus=a_visiting_group['boknstatus'],  camping_location=a_visiting_group['camping_location'],
+                                   from_date=datetime.datetime.strptime(a_visiting_group['from_date'],'%Y-%m-%d'), to_date=datetime.datetime.strptime(a_visiting_group['to_date'], '%Y-%m-%d'),
                                    subtype=a_visiting_group['subtype'])
-    
-    
-    
-    
+
+
+
+
     return visiting_group
-    
-    
+
+
 def makeParamsForObjectOfVGDictionary(visiting_group_c):
     """
-    This function is for making an object that tw forms understands from a couchdb dict like object    
+    This function is for making an object that tw forms understands from a couchdb dict like object
     """
     vgps = []
     for id, vgp in visiting_group_c['visiting_group_properties'].items():
@@ -294,18 +304,26 @@ def makeParamsForObjectOfVGDictionary(visiting_group_c):
             tmp_to_date = datetime.datetime.strptime(vgp['to_date'],'%Y-%m-%d')
         except ValueError:
             tmp_to_date = None
-                
+
         try:
             tmp_from_date = datetime.datetime.strptime(vgp['from_date'],'%Y-%m-%d')
         except ValueError:
             tmp_from_date = None
-                
-                
+
+
         vgpx = dict(property=vgp['property'],  value=vgp['value'],  unit=vgp['unit'], description=vgp['description'],  from_date=tmp_from_date,  to_date=tmp_to_date,  id=str(id))
         vgps.append(vgpx)
     return vgps
 
 
+def cleanHtml(htmltxt):
+    """
+    Common cleaning function using bleach library
+    @param htmltext - the text to clean. presumably html
+    @return cleaned text
 
-
-    
+    TODO: add span style="color, font-family, text-decoration"
+    """
+    bleach_allowed_tags = [u'a', u'abbr', u'acronym', u'b', u'blockquote', u'code', u'em', u'i', u'li', u'ol', u'strong', u'ul', u'p', u'h1', u'h2', u'h3', u'h4', u'h5', u'h6', u'pre', u'address', u'span']
+    bleach_allowed_attrs =  {u'a': [u'href', u'title'], u'acronym': [u'title'], u'abbr': [u'title'], u'span': [u'style'], u'p':[u'style']}
+    return bleach.clean(htmltxt, tags=bleach_allowed_tags, attributes=bleach_allowed_attrs)

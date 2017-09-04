@@ -78,12 +78,17 @@ define(["dojo/dom-attr", "dojo/_base/array", "dojo/dom-construct", "dojo/_base/w
 
 
   function add_calc_sheet_redirect_menu_item(a_menu, a_sub_menu, a_name, a_vgid, a_live, change_schema, a_url) {
-    var l_params = {
-      visiting_group_id: a_vgid,
-      live: a_live,
-      change_schema: change_schema
-    }
-    add_redirect_menu_item(a_menu, a_sub_menu, a_name, l_params, a_url);
+    console.log('add_calc_sheet_redirect_menu_item');
+    a_sub_menu.addChild(new MenuItem({
+      label: a_name,
+      onClick: function(evt) {
+        var ioq = {
+          visiting_group_id: a_vgid,
+          live: a_live,
+          change_schema: change_schema
+        }
+        make_form_and_post(a_url, ioq);
+    }}));
   }
 
 
@@ -111,6 +116,7 @@ define(["dojo/dom-attr", "dojo/_base/array", "dojo/dom-construct", "dojo/_base/w
  * request which is solved with make_form_and_post call.
  **/
 function add_change_booking_state_menu_item(a_menu, a_sub_menu, state_name, state_value, a_all, a_url) {
+
   a_sub_menu.addChild(new MenuItem({
     label: state_name,
     onClick: function(evt) {

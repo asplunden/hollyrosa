@@ -20,18 +20,19 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-import logging
+import logging, datetime
 log = logging.getLogger(__name__)
 
 from tg import expose, flash, require, url, request, redirect, validate, abort, tmpl_context
-from repoze.what.predicates import Any, is_user, has_permission
+from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch
 
-import datetime
+import bleach
+
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
-from hollyrosa.controllers.common import has_level, getLoggedInUserId
+from hollyrosa.controllers.common import has_level, getLoggedInUserId, cleanHtml
 from hollyrosa.widgets.edit_activity_form import create_edit_activity_form
 
 from hollyrosa.model.booking_couch import genUID
@@ -125,7 +126,7 @@ class Activity(BaseController):
             activity = common_couch.getActivity(holly_couch,  id)
 
         activity['title'] = title
-        activity['description'] = description
+        activity['description'] = cleanHtml(description)
         activity['external_link'] = external_link
         activity['internal_link'] = internal_link
         activity['print_on_demand_link'] = print_on_demand_link

@@ -1,0 +1,457 @@
+<html py:extends="master.xhtml" py:strip="True">
+
+<!--
+Copyright 2010-2017 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<head py:block="head" py:strip="True">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Program Booking Layers ${visiting_group['name']}</title>
+  <!-- BEGIN DOJO MODULE -->
+  <!-- TODO: look through the whole layers code base and refactor -->
+  <script>
+
+  require(["common_menu",  "tags", "dijit/registry","dijit/Menu","dijit/MenuItem","dijit/PopupMenuItem", 'dijit/Dialog', 'dijit/form/Form', 'dijit/form/TextBox', "dijit/form/Textarea", "dijit/form/Button", "dijit/layout/ContentPane", 'dojox/layout/TableContainer', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/date/locale', 'dojo/request/xhr', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-geometry', 'dojo/dom-style', 'dojo/query', 'dojo/on','dojo/ready', 'dojo/domReady!'],
+  function(common_menu, tags, registry, Menu, MenuItem, PopupMenuItem, Dialog, dijitForm, dijitTextBox, dijitTextarea, dijitButton, contentPane, tableContainer, array, lang, locale, xhr, dom, domConstruct, domGeom, style, query, on, ready, domReady ){
+
+    var g_slot_id_time_map;
+    var g_bucket_divs = [];
+    var activity_title_map;
+    var layer_time_divs = [];
+    var total_width = 0;
+    var calls_that_want_to_adjust_bucket_heights = 0;
+
+    /**
+    * Draw the grid that all bookings will fit into
+    * Expand functionality to draw div or table (table seems necessary for printint)
+    *
+    * Called as callback from initial request for data to load onto page
+    **/
+    function draw_layer_grid_and_set_data(data) {
+
+      var layer_container = dom.byId('program_layers_container');
+      var div_or_table = {'grid':'table','row':'tr','bucket':'td','bucket_head':'th'};
+      div_or_table = {'grid':'div','row':'div','bucket':'div','bucket_head':'div'};
+
+      //...create container div for all layers
+      var program_layers_div = domConstruct.create(div_or_table['grid'], {id:'program_layers_grid'}, program_layers_container);
+
+      //...create one div for each time. Add an extra header div on top
+      var layer_times = data.layer_time;
+      var layer_time_header_div = domConstruct.create(div_or_table['row'], {style:"background: #ccc;", id:'layer_time_header'}, program_layers_div);
+      array.forEach(layer_times, function(t) {
+        var tmp_div = domConstruct.create(div_or_table['row'], {id:'layer_time_'+t['symbol'], 'hollyrosa:title':t['title'], 'hollyrosa:time':t['symbol'], 'class':'program_layer_time_container'}, program_layers_div);
+        layer_time_divs.push(tmp_div);
+      });
+
+      var layer_days = data.layer_days;
+
+      //...draw dates in layer time header
+      var empty_header__div = domConstruct.create(div_or_table['bucket_head'], {'class':'program_layer_bucket_time_label_empty'}, layer_time_header_div);
+      total_width = total_width + domGeom.position(empty_header__div, true).w;
+      array.forEach(layer_days, function(t) {
+        var tmp_div = domConstruct.create(div_or_table['bucket_head'], {'class':'program_layer_bucket program_layer_bucket_date_header'}, layer_time_header_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+        tmp_div.innerHTML = t.date;
+        total_width = total_width + domGeom.position(tmp_div, true).w;
+      });
+
+      // look in data and create divs for all the days
+      array.forEach(layer_time_divs, function(dv) {
+
+        //...first draw a div to contain the time (like fm/em)
+        datetime_value = dv.attributes['hollyrosa:title'].value;
+        var tmp_div = domConstruct.create(div_or_table['bucket'], {style:"display:inline-block;", 'class':'program_layer_bucket_time_label'}, dv); // add atribues for slot id which is matching day and time, but how do we learn about that?
+        tmp_div.innerHTML = datetime_value;
+
+        array.forEach(layer_days, function(t) {
+          // also add class that makes it become inline
+          var datetime_bucket_value = t.booking_day_id+':'+dv.attributes['hollyrosa:time'].value;
+          var tmp_div = domConstruct.create(div_or_table['bucket'], {'hollyrosa:datetime_bucket':datetime_bucket_value, 'hollyrosa:vgid':'${visiting_group.id}', 'hollyrosa:bdayid':t.booking_day_id, 'hollyrosa:bucket_time':dv.attributes['hollyrosa:time'].value, 'class':'program_layer_bucket'}, dv);
+          g_bucket_divs[datetime_bucket_value] = tmp_div;
+        });
+      });
+      g_bucket_divs['unscheduled_bookings'] = dom.byId('unscheduled_bookings');
+
+      g_slot_id_time_map = data.slot_id_time_map;
+      activity_title_map= data.activity_title_map
+      //...now do get the bookings
+
+      calls_that_want_to_adjust_bucket_heights = 1 + data.program_layers.length; //calls_that_want_to_adjust_bucket_heights + 1;
+
+      get_program_layer_bookings_from_XHR(data.visiting_group_id, '${visiting_group['name']}', '#ffffef');
+
+      array.forEach(data.program_layers, function(vgid) {
+        var layer_id = vgid['layer_id'];
+        get_program_layer_bookings_from_XHR(layer_id, vgid['name'], vgid['colour']);
+      });
+    }
+
+
+    /**
+    * Adjusting the layout of the grid according to the contents of the grid layer layout.
+    *
+    * Bucket widths must be adjusted first since it impacts the heights.
+    **/
+    function adjust_bucket_heights() {
+      calls_that_want_to_adjust_bucket_heights = calls_that_want_to_adjust_bucket_heights -1;
+      if (0 == calls_that_want_to_adjust_bucket_heights) {
+
+        tmp = dom.byId('program_layers_grid');
+        style.set(tmp, {'width': total_width+'px'});
+
+        //...for each layer time
+        array.forEach(layer_time_divs, function(layer_time_div) {
+          //...for each bucket in layer time, readout height, try to figure out max height
+          var max_height = 0;
+          var xpos = domGeom.position(layer_time_div, true);
+
+          var bucket_divs = query('.program_layer_bucket', layer_time_div);
+          //...look for max height
+          array.forEach(bucket_divs, function(bucket_div) {
+            //...can we look into the bucket_divs and find each div of type
+            var data_divs_in_bucket = query('.program_layer_data', bucket_div);
+            var height_sum = 0;
+            array.forEach(data_divs_in_bucket, function(data_div) {
+              height_sum = height_sum + domGeom.position(data_div).h;
+            });
+            tmp_pos = domGeom.position(bucket_div, true);
+            max_height = Math.max(/*tmp_pos.h*/ height_sum, max_height);
+          });
+
+          array.forEach(bucket_divs, function(bucket_div) {
+            style.set(bucket_div, 'height', max_height + 0 + 'px');
+            style.set(bucket_div, 'top', '0px');
+          });
+        });
+        calls_that_want_to_adjust_bucket_heights = 0;
+      }
+    }
+
+    /**
+    * This function is a callback to be called when a xhr request to get all bookings and layer texts for a visiting group returns
+    **/
+    function on_recieved_bookings(data) {
+      draw_layer_bookings(data.bookings, g_bucket_divs, g_slot_id_time_map);
+      draw_layer_texts(data.bucket_texts, g_bucket_divs);
+      adjust_bucket_heights();
+    }
+
+
+    /**
+    * This is a helper function for generating a unique id for day-and-time in a grid of buckets for day-and-time
+    **/
+    function get_program_layer_bucket_id(booking, slot_id_time_map) {
+      if ('' != booking.slot_id) {
+        return booking.booking_day_id+':'+slot_id_time_map[booking.slot_id];
+      } else {
+        return 'unscheduled_bookings';
+      }
+    }
+
+
+    /**
+    *
+    **/
+    function draw_layer_bookings(layer_bookings, bucket_divs, slot_id_time_map) {
+      //..this is not going to work for unscheduled bookings....
+      array.forEach(layer_bookings, function(booking) {
+        var datetime_bucket_value = get_program_layer_bucket_id(booking, slot_id_time_map);
+        var bucket_div = bucket_divs[datetime_bucket_value];
+
+        var tmp_div = domConstruct.create('div', {style:"background-color: "+booking['layer_colour'], class:"program_layer_slot program_layer_data", 'hollyrosa:layer_booking_id':booking['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+        var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic; padding-left:2em;'}, tmp_div);
+        tmp_layer_title_elem.innerHTML = '(' + booking['layer_title'] + ')BR';
+        var tmp_span = domConstruct.create('span', {class:"workflow_state_"+booking['booking_state']}, tmp_div);
+        //...need to pre-render content....
+        tmp_span.innerHTML = activity_title_map[booking['activity_id']]+"BR";
+        var tmp_span_content = domConstruct.create('span', {style:'padding-left:2em;'}, tmp_div);
+        tmp_span_content.innerHTML = booking['cache_content'];
+
+      });
+    }
+
+    /**
+    * This function is used to destroy a booking or a layer text entry in the grid. Typically, this is for redrawing updated information.
+    **/
+    function destroy_layer_text(layer_text) {
+      var elems_to_destroy = query('[hollyrosa:layer_text_id=\"'+layer_text['_id']+'\"]')
+      array.forEach(elems_to_destroy, function(g){
+        domConstruct.destroy(g);
+      });
+    }
+
+        function draw_layer_texts(layer_texts, bucket_divs) {
+          array.forEach(layer_texts, function(layer_text) {
+            destroy_layer_text(layer_text)
+
+            var datetime_bucket_value = layer_text.booking_day_id+':'+layer_text.bucket_time;
+
+            var bucket_div = bucket_divs[datetime_bucket_value];
+
+            var tmp_div = domConstruct.create('div', {style:"background-color: "+layer_text['layer_colour'], class:"program_layer_text program_layer_data", 'hollyrosa:layer_text_id':layer_text['_id'], 'hollyrosa:vgid':layer_text['visiting_group_id'], 'hollyrosa:bucket_time':layer_text['bucket_time'], 'hollyrosa:bdayid':layer_text['booking_day_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
+            var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic; padding-left:2em;'}, tmp_div);
+            tmp_layer_title_elem.innerHTML = '(' + layer_text['layer_title'] +')BR';
+            var tmp_span = domConstruct.create('span', {style:'font-weight:bold'}, tmp_div);
+            //...need to pre-render content....
+            tmp_span.innerHTML = layer_text['title']+"BR";
+            var tmp_span_content = domConstruct.create('span', {style:'padding-left:2em;'}, tmp_div);
+            tmp_span_content.innerHTML = layer_text['text'];
+          });
+        }
+
+      /**
+      * This callback is called from the "then" of a xhr request and it updates/draws a layer text in a bucket
+      **/
+      function on_recieved_layer_text(data) {
+        //...copied! - maybe add destructor before creator!
+        calls_that_want_to_adjust_bucket_heights = calls_that_want_to_adjust_bucket_heights + 1;
+        program_layer_text_dialog.hide();
+        layer_texts = [data.layer_text];
+        draw_layer_texts(layer_texts, g_bucket_divs);
+        adjust_bucket_heights();
+      }
+
+
+      /**
+      * get data for drawing layer grid via ajax
+      **/
+      function get_program_layer_days_from_XHR(visiting_group_id) {
+        xhr("${tg.url('/program_layer/program_layer_get_days')}", {
+          handleAs:"json",
+          method:"GET",
+          query: {'visiting_group_id':visiting_group_id}
+        }).then( draw_layer_grid_and_set_data );
+      }
+
+      /**
+      * get booking data for specific layer via ajax
+      **/
+      function get_program_layer_bookings_from_XHR(visiting_group_id, title, colour) {
+        xhr("${tg.url('/program_layer/program_layer_get_bookings')}", {
+          handleAs:"json",
+          method:"GET",
+          query: {'visiting_group_id':visiting_group_id, 'layer_title':title, 'layer_colour':colour}
+        }).then( on_recieved_bookings );
+      }
+
+      /*** create edit layer text dialog *****/
+      var program_layer_text_dialog = new Dialog({
+        title: "Edit Program Layer Text",
+        style: ""
+      });
+
+      var program_layer_text_form = new dijitForm();
+
+      var tabContainer = new tableContainer({cols:1, id:'tabcont'}, program_layer_text_form.containerNode);
+
+      var program_layer_text_form_title_input = new dijitTextBox({
+        name: "title",
+        label: "Title",
+        value: "",
+        placeHolder: "type in your name"
+      }, 'title'); //.placeAt(tabContainer.containerNode);
+      tabContainer.addChild(program_layer_text_form_title_input);
+
+
+      var program_layer_text_form_content_input = new dijitTextarea({
+        name: "text",
+        id: "my_textarea",
+        label: "Text",
+        value: "---",
+        style: "width:30em;min-height:200px;_height:200px;",
+      }, "text"); //.placeAt(tabContainer.containerNode);
+      tabContainer.addChild(program_layer_text_form_content_input);
+
+      var program_layer_text_form_OK = new dijitButton({
+        label: "Save",
+        onClick: function(){
+          form_values = program_layer_text_form.getValues();
+
+          xhr("${tg.url('/program_layer/program_layer_save_layer_text')}", {
+            handleAs:"json",
+            method:"POST",
+            query: {'layer_text_id':program_layer_text_dialog.hollyrosa_attrs['layer_text_id'], 'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':program_layer_text_dialog.hollyrosa_attrs['bucket_time'], title:form_values.title, text:form_values.text}
+          }).then( on_recieved_layer_text );
+        }
+      }, "progButtonNode"); //.placeAt(tabContainer.containerNode);
+
+      tabContainer.addChild(program_layer_text_form_OK);
+
+      program_layer_text_dialog.set('content', program_layer_text_form);
+
+
+      /**
+      * This function sets values in forms inputs and forms hidden javascript attributes and displays the form
+      **/
+      function do_edit_bucket_text(data) {
+        layer_text = data.layer_text;
+        program_layer_text_dialog.hollyrosa_attrs = {'bdayid':layer_text['booking_day_id'], 'vgid':layer_text['visiting_group_id'], 'bucket_time':layer_text['bucket_time'], 'layer_text_id':layer_text['layer_text_id']};
+        form_values = program_layer_text_form.getValues();
+        form_values.title=layer_text['title'];
+        form_values.text = layer_text['text'];
+        program_layer_text_form.setValues(form_values);
+        program_layer_text_dialog.show();
+      }
+
+
+      /**
+      * This functuon shows a yes/no dialog and if yes is choosen asks the server to destroy the layer text. If server answers ok, the layer text is removed from the grid.
+      **/
+      function show_program_layer_delete_text_dialog(node) {
+        var layer_text_id = node.attributes["hollyrosa:layer_text_id"].value;
+
+        if (confirm('Really delete layer text?')) {
+          xhr("${tg.url('/program_layer/program_layer_delete_layer_text')}", {
+            handleAs:"json",
+            method:"GET",
+            query: {'layer_text_id':layer_text_id}
+          }).then( function(data) {
+            domConstruct.destroy(node);
+            adjust_bucket_heights();
+          });
+        }
+      }
+
+
+      function show_new_text_dialog(node) {
+        var bdayid = node.attributes["hollyrosa:bdayid"].value;
+        var vgid = node.attributes["hollyrosa:vgid"].value;
+        var buckettime = node.attributes["hollyrosa:bucket_time"].value;
+
+        program_layer_text_dialog.hollyrosa_attrs = {'bdayid':bdayid, 'vgid':vgid, 'bucket_time':buckettime, 'layer_text_id':''};
+
+        //...need to load values either thrue XHR or looking into the node itself.
+        xhr("${tg.url('/program_layer/program_layer_new_layer_text')}", {
+          handleAs:"json",
+          method:"GET",
+          query: {'visiting_group_id':program_layer_text_dialog.hollyrosa_attrs['vgid'], 'booking_day_id':program_layer_text_dialog.hollyrosa_attrs['bdayid'], 'bucket_time':buckettime}
+        }).then( do_edit_bucket_text );
+      }
+
+
+      function show_program_layer_edit_text_dialog(node) {
+        var layer_text_id = node.attributes["hollyrosa:layer_text_id"].value;
+        var bdayid = node.attributes["hollyrosa:bdayid"].value;
+        var vgid = node.attributes["hollyrosa:vgid"].value;
+        var buckettime = node.attributes["hollyrosa:bucket_time"].value;
+
+        program_layer_text_dialog.hollyrosa_attrs = {'bdayid':bdayid, 'vgid':vgid, 'bucket_time':buckettime, 'layer_text_id':layer_text_id};
+
+        //...need to load values either thrue XHR or looking into the node itself.
+        xhr("${tg.url('/program_layer/program_layer_get_layer_text')}", {
+          handleAs:"json",
+          method:"GET",
+          query: {'layer_text_id':layer_text_id}
+        }).then( do_edit_bucket_text );
+      }
+
+
+      /**************** show text dialog ********************/
+
+      var program_layer_view_text_dialog = new Dialog({
+        title: "View Program Layer Text",
+        style: ""
+      });
+
+      var program_layer_view_text_title_content = new contentPane({style:'height:125px;'}).placeAt(program_layer_view_text_dialog);
+      program_layer_view_text_dialog.dat = program_layer_view_text_title_content;
+      /**
+      *
+      **/
+      function show_program_layer_view_text_dialog(node) {
+        program_layer_view_text_dialog.dat.set('content', 'DIV style="white-space: pre;">' + node.innerHTML + 'ENDDIV');
+        program_layer_view_text_dialog.show();
+      }
+
+      //...build menues
+      var menu = new Menu({
+        targetNodeIds: ["program_layers_container"],
+        selector: ".program_layer_bucket",
+        leftClickToOpen: common_menu.load_left_click_menu(),
+        onOpen: function(evt) {
+          var node = menu.currentTarget;
+        } // end function
+      });
+
+      // TODO: refactor later
+      common_menu.add_call_function_menu_item(menu, menu, "Add layer text...",  show_new_text_dialog);
+
+      var layer_text_menu = new Menu({
+        targetNodeIds: ["program_layers_container"],
+        selector: "div.program_layer_text",
+        leftClickToOpen: common_menu.load_left_click_menu(),
+        onOpen: function(evt) {
+          var node = menu.currentTarget;
+        }
+      });
+
+      common_menu.add_call_function_menu_item(layer_text_menu, layer_text_menu, "Edit layer text...",  show_program_layer_edit_text_dialog);
+      common_menu.add_call_function_menu_item(layer_text_menu, layer_text_menu, "View layer text...",  show_program_layer_view_text_dialog);
+      common_menu.add_call_function_menu_item(layer_text_menu, layer_text_menu, "Delete layer text...", show_program_layer_delete_text_dialog);
+
+      //...end of menus
+
+      function on_ready(){
+        program_layer_text_form.startup();
+        get_program_layer_days_from_XHR('${visiting_group.id}');
+
+        //...load all tags for visiting group
+        tags.getTags("${tg.url('/tag/get_tags')}", "${visiting_group.id}", 'taglist');
+      }
+
+      ready(on_ready);
+      });
+</script>
+</head>
+<body class="tundra" py:block="body" py:strip="True">
+  <h2 id="visiting_group_menu" hollyrosa:vgid="${visiting_group.id}" class="context_menu_symbol">${visiting_group['name']}</h2>
+  <p class="context_menu_symbol">${reFormatDate(visiting_group['from_date'])} to ${reFormatDate(visiting_group['to_date'])}</p>
+  <div class="note" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul></div>
+    <table class="visiting_group_info_table">
+      <tr><td class="legend">bok.nr:</td><td class="info">${visiting_group['boknr']}</td></tr>
+      <tr><td class="legend">subtype:</td><td class="info">${visiting_group.get('subtype','')}</td></tr>
+
+      <tr><td class="legend">program status:</td><td class="info">${program_state_map.get(visiting_group['boknstatus'],'')}</td></tr>
+      <tr><td class="legend">camping location:</td><td class="info">${visiting_group['camping_location']}</td></tr>
+    </table>
+  <p>${literal(visiting_group['info'])}</p>
+  </div>
+
+  <h3>Program Contact Info</h3>
+  <p>${visiting_group.get('vodb_contact_name','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('vodb_contact_email','')}</a><br/>
+  </p>
+  <p><pre>${visiting_group.get('vodb_contact_address','')}</pre></p>
+
+  <div id="program_layers_container"></div>
+
+  <h3>Unscheduled bookings</h3>
+  <div id="unscheduled_bookings" style="width:20em;"></div>
+
+  <h3>Notes and attachments</h3>
+  <div py:for="n in notes" >
+    <div class="${n['type']}2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i><b>${n['timestamp']}</b> ${n['type']} by ${n['last_changed_by']}</i><br/><br/>
+      <div py:if="'note' == n['type']">${literal(n['text'])}</div>
+      <div py:if="('attachment' == n['type'])">${n['text']}<br/><br/>
+
+        <div py:for="aname, atinfo in n.get('_attachments',{}).items()"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}"><b>${aname}</b> ${atinfo['content_type']} ${atinfo['length']}</a></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<html py:extends="master.xhtml" py:strip="True">
+
+<!--
+Copyright 2010-2017 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<head py:block="head" py:strip="True">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - My personal Settings</title>
+  <script>
+
+require(["common_menu", "dojo/dom","dojo/dom-attr", "dojo/cookie", "dojo/query", "dojo/ready", "dojo/on", "dojo/json", "dojo/domReady!"], function(common_menu, dom, domAttr, cookie, query, ready, on, json) {
+
+  function save_left_click_menu(a_left_click_status) {
+    cookie('left_click_menu', json.stringify(a_left_click_status), {expires:5, path:'/'});
+  }
+
+  ready(function(){
+    var menu_cookie = common_menu.load_left_click_menu();
+    var node = dom.byId("left_click_menu_input_checkbox");
+
+    // TODO find out how to do NOT in JS
+    if (true == menu_cookie) {
+      node.checked = true;
+    } else {
+      node.checked = false;
+    }
+
+    on(node, 'change', function(evt){
+      var chk = node.checked;
+      save_left_click_menu(chk);
+    });
+  });
+});
+  </script>
+</head>
+
+<body class="tundra" py:block="body" py:strip="True">
+  <h2>Your Settings ${request.identity['user']['display_name']}</h2>
+  <div style="border:1px dotted black;">
+    Authorization:
+    <ul><li py:for="l in request.identity['user']['level']">$l</li></ul>
+    Active: ${request.identity['user']['active']}
+  </div>
+  <ul>
+    <li><a href="${tg.url('/user/change_password', params={'user_id':request.identity['user']['_id']})}" >Change Password</a></li>
+    <li><a href="${tg.url('/history/show', params={'user_id':request.identity['user']['_id']})}" >History</a></li>
+  </ul>
+  <p>
+    <fieldset>
+      <form>
+        <legend>Left click context menu: </legend><input type="checkbox" id="left_click_menu_input_checkbox" name="left_click_context_menu"></input>
+      </form>
+    </fieldset>
+  </p>
+  <div>
+    <h2>Instruktioner</h2>
+    <p>Det finns en del instruktionsmaterial framtaget för Hollyrosa:
+      <ul>
+        <li><a href="https://asplunden.org/guldkant/instruktioner/enkel-manual-for-bokningssystemet/">Enkel manual för bokningsystemet</a> finns på program IIs blogg.</li>
+        <li><a href="https://program.vassaro.net/screencast/hollyrosa_screencast_part_1_2016.mp4">Screencast part 1 (2016)</a></li>
+        <li><a href="https://program.vassaro.net/screencast/hollyrosa_screencast_part_2_2016.mp4">Screencast part 2 (2016)</a></li>
+        <li><a href="https://program.vassaro.net/screencast/hollyrosa_screencast_part_3_2016.mp4">Screencast part 3 (2016)</a></li>
+        <li><a href="https://program.vassaro.net/screencast/hollyrosa_screencast_part_4_2016.mp4">Screencast part 4 (2016)</a></li>
+     </ul>
+   För frågor kring hur programbokningssystemet fungerar, buggrapporter mm. prova att emaila Martin Eliasson: martin.eliasson@arstascouterna.org
+   </p>
+  </div>
+</body>
+</html>

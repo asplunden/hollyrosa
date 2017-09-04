@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html py:extends="master.xhtml" py:strip="True">
+
+<!--
+Copyright 2010-2017 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<head py:block="head" py:strip="True">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Calendar Overview</title>
+  <!-- BEGIN DOJO MODULE -->
+  <script>
+
+  require(["common_menu", "page/calendar_overview","dojo/ready"],
+    function(common_menu, page, ready) {
+
+    ready(function() {
+      var menu_config = {
+        targetNodeIds: ["calendar_listing"],
+        selector: "tr.calendar_overview",
+        leftClickToOpen: common_menu.load_left_click_menu()
+      }
+
+      var page_config = {
+        menu_config: menu_config,
+        calendar_menu_target_node_ids:["calendar_listing"],
+        booking_day_url: '${tg.url('/booking/day')}',
+        booking_live_url: '${tg.url('/booking/live')}',
+        calendar_edit_booking_day_url: '${tg.url('/calendar/edit_booking_day')}',
+        visiting_group_view_at_date_url: '${tg.url('/visiting_group/view_at_date')}',
+        booking_fladan_day_url: '${tg.url('/booking/fladan_day')}'
+      };
+
+    page.setup(page_config);
+    });
+
+  });
+  </script>
+</head>
+<body class="tundra" py:block="body" py:strip="True">
+  <h2>Calendar Overview</h2>
+  <table class="data" id="calendar_listing">
+    <tr><th>Day</th><th>Note</th></tr>
+    <tr py:for="booking_day in booking_days" style="${['','background:#fdd;'][6==makeDate(booking_day['date']).weekday()]}" class="calendar_overview" hollyrosa:date="${booking_day['date']}" hollyrosa:booking_day_id="${booking_day['_id']}">
+      <td class="data info context_menu_symbol"><a href="${tg.url('/booking/day', params={'booking_day_id':str(booking_day['_id'])})}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a><br/>
+      </td>
+      <td class="data info context_menu_symbol"><h2>${booking_day.get('title','')}</h2>
+        <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day['events']">$e</li></ul>
+        ${literal(booking_day['note'])}</td>
+    </tr>
+  </table>
+</body>
+</html>

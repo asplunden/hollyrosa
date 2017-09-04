@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html py:extends="master.xhtml" py:strip="True">
+<!--
+Copyright 2010-2017 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+
+<head py:block="head" py:strip="True">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - ${activities_map[booking['activity_id']]['title']} booking</title>
+
+  <!-- DOJO module starts here -->
+  <!-- TODO: the whole MULTIBOOK needs a serious overhaul -->
+  <script type="text/javascript">
+
+require(["edit_booking", "dojo/dom", "dojo/dom-geometry", "dojo/dom-attr", "dojo/dom-style", "dojo/dom-form", "dojo/dom-construct", "dojo/on", "dojo/request/xhr", "dojo/query", "dojo/_base/array", "dojo/ready", "dojo/domReady!"], function(edit_booking, dom, domGeom, domAttr, domStyle, domForm, domConstruct, on, xhr, query, array, ready) {
+
+  function draw_booked_slot(booking_day_id, slot_row_id, activity_id, visiting_group_id, text, booking_id, slot_row_position_state) {
+    var booking_container = query('[hollyrosa:bk$="'+booking_day_id+':'+slot_row_id+'"]');
+
+    booking_div = domConstruct.create('div', {style:"border-bottom:1px dashed #ccc;", id:"booking_id_"+booking_id}, booking_container[0]);
+    booking_span = domConstruct.create('span', {class:"workflow_state_0"}, booking_div);
+    domConstruct.create('a', {href:"\"${tg.url('/visiting_group/view_bookings_of_name', params={'name':booking['visiting_group_name']})}\"", innerHTML:"${booking['visiting_group_name']}"}, booking_span);
+    domConstruct.create('br', null, booking_div);
+    domConstruct.create('a', {href:"${tg.url('view_booked_booking')}" + "id="+booking_id, style:"padding-left:2em;", innerHTML:text}, booking_div);
+    menu_ul = domConstruct.create('ul', {class:"any_menu context_inline_menu"}, booking_div);
+    tmp_li = domConstruct.create('li', {}, menu_ul);
+    domConstruct.create('a', {innerHTML:'edit', href:"edit_booked_booking?id="+booking_id}, tmp_li);
+    tmp_li = domConstruct.create('li', {}, menu_ul);
+    domConstruct.create('a', {innerHTML:'view', href:"view_booked_booking?id="+booking_id}, tmp_li);
+    tmp_li = domConstruct.create('li', {}, menu_ul);
+    tmp_delete = domConstruct.create('a', {innerHTML:'delete'}, tmp_li);
+    domAttr.set(tmp_delete, 'hollyrosa:bid', booking_id);
+    on(tmp_delete, 'click', function() { delete_booking(booking_id);} );
+    tmp_li = domConstruct.create('li', {}, menu_ul);
+    tmp_unschedule = domConstruct.create('a', {innerHTML:'unschedule'}, tmp_li);
+    domAttr.set(tmp_unschedule, 'hollyrosa:bid', booking_id);
+    on(tmp_unschedule, 'click', function() { unschedule_booking(booking_id);} );
+
+    //...create menu with delete | unschedule etc
+
+    if (0 != slot_row_position_state) {
+      var e = dojo.query('[hollyrosa:bj$="'+booking_day_id+':'+slot_row_id+'"]');
+      dojo.addClass(e[0],'slot_row_position_blocked');
+    }
+  }
+
+  /**
+  * Callback called when XHR for a booking is returnd.
+  **/
+  function on_booking_confirmed(response_data) {
+    var booking = response_data['booking'];
+
+    var error_msg = response_data['error_msg'];
+    if (error_msg) {
+      alert(error_msg);
+    }
+    else {
+      var slot_row_position_state = response_data['slot_row_position_state'];
+      draw_booked_slot(response_data['booking_day_id'], response_data['slot_row_position_id'], booking['activity_id'], booking['visiting_group_id'], booking.cache_content, booking._id, slot_row_position_state);
+    }
+  }
+
+
+  /**
+   * Basically, put data in html and let callback use that element to find out data.
+   **/
+  function book_slot(elem, booking_day_id, slot_row_position_id, activity_id, visiting_group_id) {
+
+    dom.byId('req_form_booking_day_id').value =  booking_day_id;
+    dom.byId('req_form_slot_row_position_id').value = slot_row_position_id;
+
+    //...show form centered over slot
+
+    var the_form = dom.byId('booking_req_form');
+    var booking_container = query('[hollyrosa:bk=' + booking_day_id + ':' + slot_row_position_id+']' );
+    var cpos = domGeom.position(booking_container[0], true);
+
+    domStyle.set(the_form, "position", "absolute");
+    domStyle.set(the_form, "top", cpos.y + 'px');
+    domStyle.set(the_form, "left", cpos.x + 'px');
+
+    domStyle.set(the_form, "display","block");
+  }
+
+
+  /**
+  *
+  **/
+  function cancel_book_stage_2() {
+    var the_form = dom.byId('booking_req_form');
+    domStyle.set(the_form, "display","none");
+  }
+
+  /**
+  *
+  **/
+  function book_slot_stage_2() {
+    qf = domForm.toQuery("booking_req_form");
+    xhr('${tg.url("/booking/create_booking_async")}', {
+      method: "POST",
+      handleAs: "json",
+      query:qf
+    }).then(on_booking_confirmed);
+
+    the_form = dom.byId('booking_req_form');
+    domStyle.set(the_form, "display","none");
+  }
+
+  /**
+  *
+  **/
+  function on_booking_deleted(response_data) {
+    var booking = response_data['delete_req_booking_id'];
+    var to_remove = dom.byId('booking_id_' + booking);
+    domConstruct.destroy(to_remove);
+  }
+
+  /**
+  *
+  **/
+  function delete_booking(booking_id) {
+    dom.byId('delete_req_booking_id').value =  booking_id;
+    qf = domForm.toQuery("delete_booking_form");
+    xhr('${tg.url("/booking/delete_booking_async")}', {
+      method: "POST",
+      handleAs:"json",
+      query : qf
+    }).then(on_booking_deleted);
+  }
+
+  /**
+  *
+  **/
+  function unschedule_booking(booking_id)
+  {
+    dojo.byId('delete_req_booking_id').value =  booking_id;
+    qf = domForm.toQuery("delete_booking_form");
+    xhr('${tg.url("/booking/unschedule_booking_async")}', {
+      method: "POST",
+      handleAs:"json",
+      query:qf
+    }).then(on_booking_deleted);
+  }
+
+  /**
+  * Function called when whole document has finnished loading and is ready.
+  **/
+  ready(function(){
+    var book_ahrefs = query('a[hollyrosa:action="book"]');
+
+    array.forEach(book_ahrefs, function(a_href) {
+
+      //...now, find out the attributes of the href
+      on(a_href, "click", function() {
+        bday_id = domAttr.get(a_href, "hollyrosa:bday_id");
+        visiting_group_id = domAttr.get(a_href, "hollyrosa:vgroup_id");
+        activity_id = domAttr.get(a_href, "hollyrosa:activity_id");
+        slot_row_position_id = domAttr.get(a_href, "hollyrosa:spid");
+        book_slot(a_href, bday_id, slot_row_position_id, activity_id, visiting_group_id);
+      });
+    });
+
+    // repeat !
+    var delete_ahrefs = query('a[hollyrosa:action="delete"]');
+
+    array.forEach(delete_ahrefs, function(a_href) {
+
+      //...now, find out the attributes of the href
+      on(a_href, "click", function() {
+        bid = domAttr.get(a_href, "hollyrosa:bid");
+        delete_booking(bid);
+      });
+    });
+
+
+    // repeat !
+    var unschedule_ahrefs = query('a[hollyrosa:action="unschedule"]');
+
+    array.forEach(unschedule_ahrefs, function(a_href) {
+
+      //...now, find out the attributes of the href
+      on(a_href, "click", function() {
+        bid = domAttr.get(a_href, "hollyrosa:bid");
+        unschedule_booking(bid);
+      });
+    });
+
+    on(dom.byId("input_button_book_slot_stage_2"), "click", function() {
+      book_slot_stage_2();
+    });
+
+    on(dom.byId("input_button_cancel_slot_stage_2"), "click", function() {
+      cancel_book_stage_2();
+    });
+  }); // END READY
+}); // END DOJO BLOCK
+  </script>
+</head>
+<body class="tundra" py:block="body" py:strip="True">
+  <form name="booking_req_form" id="booking_req_form" method="get" style="display:none; backgroud:#fff;">
+    <div style="background:#fff;">
+      <fieldset>
+        <legend>Enter ${activities_map[booking['activity_id']]['title']} details</legend>
+        <input type="hidden" name="booking_day_id" id="req_form_booking_day_id" />
+        <input type="hidden" name="slot_row_position_id" id="req_form_slot_row_position_id"/>
+        <input type="hidden" name="visiting_group_id" value="${booking['visiting_group_id']}"/>
+        <input type="hidden" name="activity_id" value="${booking['activity_id']}"/>
+        <textarea name="content" rows="5" cols="40">${booking['content']}</textarea><br/>
+        <input type="checkbox" name="block_after_book"/>Block after book<br/><br/>
+        <input type="button" id="input_button_book_slot_stage_2" value="book" />
+        <input type="button" id="input_button_cancel_slot_stage_2" value="cancel" />
+      </fieldset>
+    </div>
+  </form>
+  <form name="delete_booking_form" id="delete_booking_form" method="get" >
+    <input type="hidden" name="delete_req_booking_id" id="delete_req_booking_id" />
+    <input type="hidden" name="visiting_group_id" value="${booking['visiting_group_id']}"/>
+    <input type="hidden" name="activity_id" value="${booking['activity_id']}"/>
+  </form>
+
+  <h2>${activities_map[booking['activity_id']]['title']} booking</h2>
+  <h3>${booking['visiting_group_name']}</h3>
+
+  <div class="note">${booking['content']}</div>
+  <h3>${activities_map[booking['activity_id']]['title']}</h3>
+
+  <!-- iterate over all days, one div for each -->
+  <div py:for="tmp_day in booking_days">
+    <div class="booking_day_overview_slot_row" style="background: ${activities_map[slot_row['activity_id']]['bg_color']};">
+      <div class="booking_day_overview_activity"><a href="${tg.url('/booking/day', params={'day_id':tmp_day.id})}">${tmp_day['date']}</a></div>
+
+      <div py:for="slot_position in slot_row.slot_row_position" hollyrosa:w="$slot_position.time_from - $slot_position.time_to" class="booking_day_overview_slots ${['','slot_row_position_blocked'][blockings_map.has_key(str(tmp_day.id)+':'+str(slot_position.id))]}" hollyrosa:bj="${tmp_day.id}:${slot_position.id}">
+        <!-- we may have several slot bookings-->
+        <div py:if="bookings[tmp_day.id].has_key(slot_position.id)" hollyrosa:bk="${tmp_day.id}:${slot_position.id}">
+          <div py:for="b in bookings[tmp_day.id][slot_position.id]" style="border-bottom:1px dashed #ccc;" id="booking_id_$b.id">
+            <span class="workflow_state_${b['booking_state']}"><a href="${tg.url('/visiting_group/view_bookings_of_name', params={'name':b['visiting_group_name']})}">${b['visiting_group_name']}</a></span><br/><a href="${tg.url('view_booked_booking', params={'id':b.id})}" style="padding-left:2em;">${getRenderContent(b)}</a>
+            <ul class="any_menu context_inline_menu">
+              <li><a href="${tg.url('edit_booked_booking', params={'return_to_day_id':tmp_day.id, 'id':b.id})}">edit</a></li>
+              <li><a href="${tg.url('view_booked_booking', params={'return_to_day_id':tmp_day.id, 'id':b.id})}">view</a></li>
+              <li><a hollyrosa:action="delete" hollyrosa:bid="${b.id}" >delete</a></li>
+              <li><a hollyrosa:action="unschedule" hollyrosa:bid="${b.id}" >unschedule</a></li>
+            </ul>
+          </div>
+        </div>
+        <div py:if="not bookings[tmp_day.id].has_key(slot_position.id)" hollyrosa:bk="${tmp_day.id}:${slot_position.id}" />
+
+        <div py:if="blockings_map.has_key(str(tmp_day.id)+':'+str(slot_position.id))">&nbsp;</div>
+        <ul id="minimenu_${slot_position.id}" class="context_inline_menu any_menu">
+          <li py:if="not blockings_map.has_key(str(tmp_day.id)+':'+str(slot_position.id))"><a hollyrosa:action="book" hollyrosa:bday_id="${tmp_day.id}" hollyrosa:spid="${slot_position.id}" hollyrosa:activity_id="${booking['activity_id']}" hollyrosa:vgroup_id="${booking['visiting_group_id']}" >book</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

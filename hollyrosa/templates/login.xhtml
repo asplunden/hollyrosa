@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html py:extends="master.xhtml" py:strip="True">
+<head py:block="head" py:strip="True">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Login Form</title>
+</head>
+<body class="tundra" py:block="body" py:strip="True">
+  <div id="loginform">
+    <form action="${tg.url('/login_handler', params={'came_from':  came_from.encode('utf-8'), '__logins' : login_counter.encode('utf-8')})}" method="POST" class="loginfields">
+      <h2><span>Login</span></h2>
+      <label for="login">Username or bokn.nr:</label><input type="text" id="login" name="login" class="text"></input><br/>
+      <label for="password">Password:</label><input type="password" id="password" name="password" class="text"></input>
+      <input type="submit" id="submit" value="Login" />
+    </form>
+  </div>
+</body>
+</html>

@@ -20,7 +20,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import time
-from repoze.what.predicates import Any, is_user, has_permission
+from tg.predicates import Any, is_user, has_permission
 from formencode import validators
 from tg import expose, flash, require, url, request, redirect,  validate
 from hollyrosa.lib.base import BaseController

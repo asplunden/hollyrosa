@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html py:extends="master.xhtml" py:strip="True">
+
+<!--
+Copyright 2010-2017 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<!-- TODO: refactor away python -->
+<?python
+import datetime
+def makeDate(s):
+    return datetime.datetime.strptime(s, '%Y-%m-%d')
+?>
+
+<head py:block="head" py:strip="True">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Booking Overview 2</title>
+  <link rel="stylesheet" type="text/css" href="${tg.url('/css/gnatt.css')}" />
+  <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
+
+<!-- BEGIN DOJO MODULE -->
+  <script>
+
+require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem", "dojo/dom", "dojo/dom-attr", "dojo/_base/array", "dojo/query", "dojo/on", "dojo/_base/window", 'dojo/dom-geometry', 'dojo/dom-style', "dojo/domReady!"], function(ready, tags, common_menu, Menu, PopupMenuItem, dom, domAttr, array, query, on, win, domGeom, style) {
+
+  function startup() {
+    //...setup main menu for visiting group
+    var use_left_click_menu = common_menu.load_left_click_menu();
+    var change_program_status_menu = new Menu();
+
+    var menu = new Menu({
+      targetNodeIds: ["viewport_outdoor", 'viewport_indoor', 'viewport_daytrip'],
+      selector: "div.gnatt_vgroup_block",
+      leftClickToOpen: use_left_click_menu
+    });
+
+    //...create menu for add/edit/show/delete note
+    var note_menu = new Menu({
+      targetNodeIds: ["content"],
+      selector: "div.note2",
+      leftClickToOpen: common_menu.load_left_click_menu()
+    });
+
+    common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Edit note...",  '${tg.url('/note/edit_note')}');
+    common_menu.add_visiting_group_edit_note_menu_item(note_menu, note_menu, "Delete note...", '${tg.url('/note/delete_note')}');
+
+    //...create menu for add/edit/show/delete note
+    var attachment_menu = new Menu({
+      targetNodeIds: ["content"],
+      selector: "div.attachment2",
+      leftClickToOpen: common_menu.load_left_click_menu()
+    });
+
+    /**** assembling change program state and vodb state menus ***/
+
+    common_menu.add_visiting_group_menu_item(menu, menu, "View...", '${tg.url('view_vodb_group')}');
+    common_menu.add_visiting_group_menu_item(menu, menu, "Edit...", '${tg.url('edit_group_data')}');
+    common_menu.add_visiting_group_menu_item(menu, menu, "Edit Sheet...", '${tg.url('edit_group_sheet')}');
+    common_menu.add_visiting_group_list_bookings_menu_item(menu, menu, "List bookings of group...", '${tg.url('view_bookings_of_name')}');
+    common_menu.add_menu_separator(menu);
+    common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add note...", '${tg.url('/note/add_note')}');
+    common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add attachment...", '${tg.url('/note/add_attachment')}');
+
+    common_menu.add_menu_separator(menu);
+    var change_program_status_menu = new Menu();
+    menu.addChild(new PopupMenuItem({
+      label: "Change program status",
+      popup: change_program_status_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+    }));
+
+    var set_program_state_url = '${tg.url('/visiting_group/set_program_state')}';
+
+    array.forEach(common_menu.program_state_change_list, function(x) {console.log(x); common_menu.add_change_program_state_menu_item(menu, change_program_status_menu, x['name'], x['state'], 0, set_program_state_url);});
+
+    var change_vodb_status_menu = new Menu();
+    menu.addChild(new PopupMenuItem({
+      label: "Change vodb status",
+      popup: change_vodb_status_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+    }));
+
+    var set_vodb_state_url = '${tg.url('/visiting_group/set_vodb_state')}';
+
+    array.forEach(common_menu.vodb_state_change_list, function(x) {console.log(x); common_menu.add_change_program_state_menu_item(menu, change_vodb_status_menu, x['name'], x['state'], 0, set_vodb_state_url);});
+  };
+
+  var header_date_positions = {};
+  var header_date_positions_stage_2 = {};
+
+  // TODO: refactor ready() function beacuse it does half of startup kind of...
+  ready(function() {
+    startup();
+
+    //...build array of header date positions mapping date to a dictionary date, fm, em, evening
+
+    var date_header_divs = query('.gnatt_date_header');
+
+    array.forEach(date_header_divs, function(date_header_div) {
+      date_header_div_date = domAttr.get(date_header_div, 'hollyrosa:date');
+      tmp_pos = domGeom.position(date_header_div, true);
+      header_date_positions[date_header_div_date] = tmp_pos;
+    });
+
+    //...set vgroup date blocks position and width
+    var date_blocks = query('.gnatt_date_block');
+    array.forEach(date_blocks, function(date_block) {
+      tmp_date = domAttr.get(date_block, 'hollyrosa:date');
+      tmp_pos = header_date_positions[tmp_date];
+      style.set(date_block, {left: tmp_pos.x+'px', width: tmp_pos.w-10 + 'px' });
+    });
+
+    //...try and re-compute the position dict or create another one perhaps
+
+    //...build array of header date positions mapping date to a dictionary date, fm, em, evening
+
+    var date_header_divs = query('.gnatt_date_header');
+
+    array.forEach(date_header_divs, function(date_header_div) {
+      date_header_div_date = domAttr.get(date_header_div, 'hollyrosa:date');
+      tmp_pos = domGeom.position(date_header_div, true);
+      header_date_positions_stage_2[date_header_div_date] = tmp_pos;
+    });
+
+    //...set vgroup blocks position and width
+    var vgroups = query('[hollyrosa:vgid]');
+
+    array.forEach(vgroups, function(vgdiv) {
+      from_date = vgdiv.attributes['hollyrosa:from_date'];
+      to_date = vgdiv.attributes['hollyrosa:to_date'];
+
+      tmp_from_pos = header_date_positions_stage_2[from_date.value];
+      tmp_to_pos = header_date_positions_stage_2[to_date.value];
+      my_pos = domGeom.position(vgdiv,true)
+
+      style.set(vgdiv, {left: tmp_from_pos.x-my_pos.x+'px', width: (tmp_to_pos.x - tmp_from_pos.x + tmp_to_pos.w + 1) + 'px' });
+    });
+
+    var hide_groups = query('[hollyrosa:all_values_zero="True"]');
+    array.forEach(hide_groups, function(vgdiv) {
+      style.set(vgdiv, {display:'none'});
+    });
+  });
+});
+  </script>
+</head>
+<body class="tundra" py:block="body" py:strip="True">
+  <h2 id="title">Booking Overview 2</h2>
+
+
+  <!-- container div -->
+  <div style="overflow:visible; margin-bottom:10em;" py:for="live_option in ['outdoor','indoor','daytrip']" id="viewport_$live_option">
+    <h2>$live_option</h2>
+    <!-- header div row with dates and everyting-->
+    <div style="border-bottom: 1px solid #888; overflow:visible; width:800em;">
+      <div py:for="d in header_dates" style="${['color: #888;','background:#fdd;'][6==makeDate(d).weekday()]}" class="gnatt_date_block gnatt_date_header" hollyrosa:date="$d" >$d<br/>
+        <div py:for="t in header_times" class="gnatt_date_time_block gnatt_date_time_header">
+          $t
+        </div>
+      </div>
+    </div>
+
+    <!-- first status groud div -->
+    <div>
+
+      <div py:for="vg in vgroups" hollyrosa:vgid="$vg.id" hollyrosa:from_date="$vg.from_date" hollyrosa:to_date="$vg.to_date"  hollyrosa:all_values_zero="${vg.all_values_zero[live_option]}" class="gnatt_vgroup_block gnatt_vodb_status_$vg.vodbstatus">$vg.boknr $vg.name [$vg.vodbstatus ${bokn_status_map[vg.vodbstatus]}] <ul class="tag_list"><li py:for="t in vg.tags">${t}</li></ul>
+        <br/><div py:for="d in vg.date_range"  class="gnatt_date_block" hollyrosa:date="$d">
+          <div py:for="t in header_times"  class="gnatt_date_time_block">
+            ${vg['live_computed_by_date'][live_option+':'+d+':'+t]}
+          </div>
+        </div>
+      </div>
+      <div py:for="sg in [s for s in summary_vgroups[live_option].values() if s.has_values ]"  hollyrosa:vgid="$sg.id" hollyrosa:from_date="$sg.from_date" hollyrosa:to_date="$sg.to_date"  hollyrosa:all_values_zero="$sg.all_values_zero" class="gnatt_vgroup_block gnatt_sgroup_block gnatt_vodb_status_$sg.vodbstatus">$sg.name [$sg.vodbstatus ${bokn_status_map[sg.vodbstatus]}]
+        <br/><div py:for="d in sg.date_range"  class="gnatt_date_block" hollyrosa:date="$d">
+          <div py:for="t in header_times"  class="gnatt_date_time_block">
+            ${sg['live_summary'].get(d+':'+t,'0')}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!--
+ * the edit sheet page needs to get lots of info copied from the other two views
+ * refactor JavaScript
+ * date range
+ * we will need to add island+confirmed in a special summary group. We probably also will need to add island+confirmed+preliminary
+ * remove program booking related menu options
+ * we probably dont want to mix lots of staff members with visiting groups, but we still need to get the overview count right.
+
+ * check dates on external edit visiting group
+   - both format
+   - and from less than to
+ * what happens when a group changes from and to dates?
+
+
+ * How we display groups having only zeros or prhaps no computed live sheet? I suppose such groups are 'new' or 'created'... maybe special grid since we cant compute them.
+ * automatically populate the computed sheets
+
+   Maybe we always show all zeros but mark the vgroup as having only zeros and then have a javascript that can hide them from view if requested.
+   We still have the problem with vgroups having no computed live sheet at all. Maybe a spearate list ?
+
+   Maybe vgroups with only zeros should be displayed with an colour outline and no fill?
+
+
+ House booking:
+  * activity group for bed (done)
+   * list of all beds / houses with numbers
+   * add those beds to a special schema. Which probably will be so much easier with a rudimentary schema editor. Maybe we can use Dojo DataGrid. Or I just use the offline tool.
+ * Two functions will be very needed:
+ 1. move-all-following
+ 2. book-from-now-until
+ 3. delete-from-now-until
+
+ Maybe 2 and 3 can be achieved by a DataGrid with ceckboxes if there should be a booking. Or multi book should be overhauled and put into action.
+
+-->
+
+
+</body>
+</html>

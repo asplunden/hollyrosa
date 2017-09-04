@@ -19,9 +19,9 @@ setup(
         "toscawidgets >= 0.9.7.1",
         "zope.sqlalchemy >= 0.4 ",
         "repoze.who",
-        "repoze.waht",
+        #"repoze.what",
         "tw.dynforms >= 0.9.8",
-        "tw.tinymce >= 0.8",
+        "tw2.tinymce",
         "couchdb >= 1.0.0",
         "webhelpers >= 1.3"
                 ],

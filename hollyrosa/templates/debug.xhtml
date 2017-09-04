@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<py:extends href="master.xhtml" />
+<head py:block="head" py:strip="True">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Sample Template, for looking at template locals</title>
+</head>
+<body class="tundra">
+  <h1>All objects from locals():</h1>
+  <div py:for="item in sorted(locals()['data'].keys())">
+    ${item}: ${repr(locals()['data'][item])}
+  </div>
+</body>
+</html>

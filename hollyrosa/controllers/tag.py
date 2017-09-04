@@ -23,7 +23,7 @@ import datetime, logging
 
 
 from tg import expose, flash, require, url, request, redirect, validate, abort
-from repoze.what.predicates import Any, is_user, has_permission
+from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import holly_couch
 

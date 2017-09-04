@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html py:extends="master.xhtml" py:strip="True">
+
+
+<!--
+Copyright 2010-2017 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<head py:block="head" py:strip="True">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Show Booking History ${for_group_name}</title>
+  <script type="text/javascript" src="${tg.url('/scripts/std.js')}" ></script>
+  <link href="rss" type="application/rss+xml" rel="alternate" title="RSS feed" />
+</head>
+
+<body class="tundra" py:block="body" py:strip="True">
+  <h2>Show booking history ${for_group_name}</h2>
+  <table class="data">
+    <tr>
+      <th>change op</th><th>time stamp</th><th>description</th><th>changed by</th><th>booking id</th>
+    </tr>
+    <tr py:for="h in history">
+      <td class="data info"><span class="change_op_${h['change_op']}">${change_op_map[h['change_op']]}</span></td>
+      <td class="data timestamp">${h['timestamp']}</td>
+      <td class="data info"><a href="${tg.url('/booking/day', {'day_id':h['booking_day_id']})}">${h['change']}</a></td>
+      <td class="data info">${h['changed_by']}</td>
+      <td class="data info"><a href="${tg.url('/booking/view_booked_booking', {'id':h['booking_id']})}">${h['booking_id']}</a><br/>
+        <a py:if="h.has_key('visiting_group_id')" href="${tg.url('/visiting_group/show_visiting_group', {'id':h.get('visiting_group_id','')})}">${h.get('visiting_group_id','')}</a></td>
+      </tr>
+    </table>
+  </body>
+  </html>
