@@ -21,7 +21,7 @@ setup(
         "repoze.who",
         #"repoze.what",
         "tw.dynforms >= 0.9.8",
-        #"tw2.tinymce",
+        "tw2.tinymce",
         "couchdb >= 1.0.0",
         "webhelpers >= 1.3",
         "bleach >= 2.0"
