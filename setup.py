@@ -14,16 +14,17 @@ setup(
     author_email='asplunden@gmail.com',
     url='http://github.com/asplunden/hollyrosa',
     install_requires=[
-        "TurboGears2 >= 2.3.8",
+        "TurboGears2 >= 2.3.11",
         #can be removed iif use_toscawidgets = False
         "toscawidgets >= 0.9.7.1",
         "zope.sqlalchemy >= 0.4 ",
         "repoze.who",
         #"repoze.what",
         "tw.dynforms >= 0.9.8",
-        "tw2.tinymce",
+        #"tw2.tinymce",
         "couchdb >= 1.0.0",
-        "webhelpers >= 1.3"
+        "webhelpers >= 1.3",
+        "bleach >= 2.0"
                 ],
     setup_requires=["PasteScript >= 1.7"],
     paster_plugins=['PasteScript', 'Pylons', 'TurboGears2', 'tg.devtools'],
