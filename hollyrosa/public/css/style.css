@@ -18,16 +18,19 @@
  **/
 
 html {
+	/*
 	margin: 0;
 	padding: 0;
+	*/
 }
 
 body {
-	text-align: left;
+	/* text-align: left;
 	margin: 0 auto;
 	padding: 0;
 	font-size: 12px;
 	font-family:"Lucida Grande","Lucida Sans Unicode",geneva,verdana,sans-serif;
+	*/
 }
 
 a {
@@ -64,8 +67,8 @@ a:hover {
 ul#mainmenu {
 	margin: 0;
 	padding: 0 5px;
-	
-	height: 16px; 
+
+	height: 16px;
 }
 
 .external_mainmenu {
@@ -98,8 +101,8 @@ ul#mainmenu li a {
 	vertical-align: middle;
 	padding: 0 10px;
 	font-size: 11px;
-	 text-decoration: none; 
-    
+	 text-decoration: none;
+
 }
 
 
@@ -112,8 +115,8 @@ ul#mainmenu li span {
 	vertical-align: middle;
 	padding: 0 10px;
 	font-size: 11px;
-	 text-decoration: none; 
-    
+	 text-decoration: none;
+
 }
 
 ul#mainmenu li a:hover, ul#mainmenu li a.active, ul#mainmenu li span:hover {
@@ -132,11 +135,11 @@ ul#mainmenu li.loginlogout
     right: 10px;
 }
 
-
+/*
 #content {
 	margin : 0 10px 10px 10px;
 	padding: 0 10px;
-	overflow: auto; /* hidden */
+	overflow: auto; /* hidden 
 }
 
 #content a {
@@ -152,7 +155,7 @@ ul#mainmenu li.loginlogout
 #content .currentpage {
 	margin-top: 0;
 }
-
+*/
 /* Login form*/
 
 #loginform
@@ -543,22 +546,22 @@ td.timestamp  {
 
 /*** Workflow state CSS ***/
 
-.workflow_state_0  { 
-    color: #884; 
+.workflow_state_0  {
+    color: #884;
     background-image:url('../images/sheep.png');
     background-repeat:no-repeat;
     padding-left: 2em;
     font-weight:bold;
     }
-.workflow_state_5  { /* workflow state 5 is standby which is lower than booked.*/ 
-    color: #884; 
-    background-image:url('../images/jarno_aircraft.png'); 
+.workflow_state_5  { /* workflow state 5 is standby which is lower than booked.*/
+    color: #884;
+    background-image:url('../images/jarno_aircraft.png');
     background-repeat:no-repeat;
     padding-left: 2em;
     font-weight:bold;
     }
 .workflow_state_10  {
-    color: #448; 
+    color: #448;
     background-image:url('../images/paper_to_sign.png');
     background-repeat:no-repeat;
     padding-left: 2em;
@@ -566,29 +569,29 @@ td.timestamp  {
     }
 
 .workflow_state_20  {
-    color: #484; 
+    color: #484;
     background-image:url('../images/check_mark.png');
     background-repeat:no-repeat;
     padding-left: 2em;
     font-weight:bold;
     }
 .workflow_state_30  { /* workflow state 30 is drop-in */
-    color: #484; 
+    color: #484;
     background-image:url('../images/cogwheel_dropin.png');
     background-repeat:no-repeat;
     padding-left: 2em;
     font-weight:bold;
     }
 .workflow_state_-10  {
-    color: #844; 
+    color: #844;
     font-weight:bold;
     background-image:url('../images/alert.png');
     background-repeat:no-repeat;
     padding-left: 2em;
     }
-    
+
 .workflow_state_unscheduled  {
-    color: #666; 
+    color: #666;
     font-weight:bold;
     background-image:url('../images/alert.png');
     background-repeat:no-repeat;
@@ -598,8 +601,8 @@ td.timestamp  {
 
 /*** GENERAL MENU ****/
 ul.any_menu {
-    list-style-type: circle;   
-    
+    list-style-type: circle;
+
     margin: 0px;
     padding: 0.2em;
 }
@@ -622,7 +625,7 @@ ul.any_menu li a{
 ul.context_inline_menu {
     padding: 0px;
     font-size:90%;
-    
+
 }
 
 ul.context_inline_menu li {
@@ -682,7 +685,7 @@ span.context_dropdown_menu:hover ul li {
     display:block;
 }
 
-span.context_dropdown_menu ul li:hover { 
+span.context_dropdown_menu ul li:hover {
     background: #f8f8f0;
 }
 
@@ -735,7 +738,7 @@ ul.context_dropdown_menu:hover li {
     display:block;
 }
 
-ul.context_dropdown_menu li:hover { 
+ul.context_dropdown_menu li:hover {
     background: #f8f8f0;
 }
 
@@ -759,7 +762,7 @@ ul.context_dropdown_menu li:hover {
 
 
 ul.booking_day_hide_slot_rows_control {
-    list-style-type: none;   
+    list-style-type: none;
     margin: 0px;
     padding: 0.2em;
 }
@@ -792,9 +795,9 @@ img.fladan_day_printout_img {
     visibility: hidden;
     display:none;
     }
-    
+
 /* booking day uncheduled bookings */
-    
+
 li.unscheduled_booking {
     color: #888;
 }
@@ -812,7 +815,7 @@ li.unscheduled_booking span.date_info {
 }
 
 li.unscheduled_booking span.requested_date {
-    
+
 }
 
 
@@ -833,7 +836,7 @@ tr.problem_severity_10 {
 }
 
 
-/*** tags ***/ 
+/*** tags ***/
 
 div.tag_list {
 }
@@ -879,9 +882,9 @@ ul.tag_list li {
 
 
 .slot_booking {
-	margin-bottom: 0.5em; 
-	margin-top: 0.5em; 
-	padding-bottom:0.5em; 
+	margin-bottom: 0.5em;
+	margin-top: 0.5em;
+	padding-bottom:0.5em;
 	border-bottom:1px dashed #ccc;
 }
 
@@ -896,10 +899,10 @@ table.visiting_group_info_table tr td.legend {
 
 table.visiting_group_info_table tr td.info {
 	font-weight: bold;
-	color: #000;	
+	color: #000;
 	}
 
-    
+
 .context_menu_symbol:hover {
     /* background-image: url('../images/dropdown_menu_symbol.png'); */
     background-image: url('../images/more_contextmenu_available_icon.svg');
@@ -921,16 +924,16 @@ table.visiting_group_info_table tr td.info {
 #program_layers_grid {
     border:1px solid #444;
     }
-    
-    
 
-    
+
+
+
 div.program_layer_time_container {
     border-bottom: 1px solid #444;
 }
 
 tr.program_layer_time_container {
-    
+
 }
 
 tr.program_layer_time_container td {
@@ -977,14 +980,14 @@ tr.program_layer_time_container td {
 }
 
 .program_layer_slot {
-    border-bottom:1px dashed #888; 
+    border-bottom:1px dashed #888;
     padding-bottom:0.5em;
     display:block;
     }
-    
+
 
 .program_layer_text {
-    border-bottom:1px dashed #888; 
+    border-bottom:1px dashed #888;
     padding-bottom:0.5em;
     display:block;
     /* white-space: pre; */
@@ -994,7 +997,7 @@ tr.program_layer_time_container td {
 table.program_layers_printable_table {
     border: 1px solid #444;
     }
-    
+
 th.program_layers_printable_table {
     border-left: 1px solid #444;
     border-bottom: 1px solid #444;
@@ -1005,7 +1008,7 @@ th.program_layers_printable_table {
     padding-bottom:0.1em;
     border-bottom: 1px solid #000;
     }
-    
+
 .program_layers_printable_table_time_label {
     border-bottom: 1px solid #444;
     background: #ddd;
@@ -1021,4 +1024,3 @@ td.program_layers_printable_table {
     border-bottom: 1px solid #000;
     vertical-align:top;
 }
-

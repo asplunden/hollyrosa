@@ -2,8 +2,10 @@
 
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/> <!-- required by Bulma -->
     <title py:replace="''">Your title goes here</title>
 
+    <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/bulma.css')}" />
     <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/style.css')}" />
     <link rel="stylesheet" type="text/css" media="print" href="${tg.url('/css/print.css')}" />
     <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.11.3/dijit/themes/tundra/tundra.css')}" />
@@ -35,20 +37,25 @@
         <li py:if="request.identity" id="login" class="loginlogout"><a href="${tg.url('/logout_handler')}">Logout <em py:if="request.identity['user'].has_key('display_name')">${request.identity['user'].get('display_name','')}</em><em py:if="request.identity['user'].has_key('name')">${request.identity['user'].get('name','')}</em></a></li>
     </span>
   </ul>
-  <div id="content">
-    <py:if test="defined('page')">
-    </py:if>
-    <py:with vars="flash=tg.flash_obj.render('flash', use_js=False)">
-        <div py:if="flash" py:content="XML(flash)" />
-    </py:with>
-    <py:block name="body"/>
+  <section class="section">
+    <div class="container">
+      <py:if test="defined('page')">
+      </py:if>
+      <py:with vars="flash=tg.flash_obj.render('flash', use_js=False)">
+          <div py:if="flash" py:content="XML(flash)" />
+        </py:with>
+        <py:block name="body"/>
     <!-- End of content -->
-    <div class="clearingdiv"></div>
-  <div id="footer">
+      <div class="clearingdiv"></div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
     <div class="foottext">
       <p><i>Hollyrosa</i> booking system is concieved and developed by Martin Eliasson. Copyright &copy; 2010-2017 <a href="http://asplunden.org">Martin Eliasson</a>. Hollyrosa is free software released under <a href="/about.html">AGPL (see license details)</a>, version controlled using Git and hosted at <a href="http://www.github.com/asplunden/hollyrosa">GitHub</a>.</p>
     </div>
-  </div>
-  </div>
+  </footer>
+
 </body>
 </html>

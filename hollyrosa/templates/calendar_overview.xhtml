@@ -54,7 +54,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   </script>
 </head>
 <body class="tundra" py:block="body" py:strip="True">
-  <h2>Calendar Overview</h2>
+  <h2 class="title">Calendar Overview</h2>
   <table class="data" id="calendar_listing">
     <tr><th>Day</th><th>Note</th></tr>
     <tr py:for="booking_day in booking_days" style="${['','background:#fdd;'][6==makeDate(booking_day['date']).weekday()]}" class="calendar_overview" hollyrosa:date="${booking_day['date']}" hollyrosa:booking_day_id="${booking_day['_id']}">
