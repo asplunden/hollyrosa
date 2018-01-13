@@ -89,23 +89,27 @@ if False:
         
 if False:
     #...try to generate all booking days. Ah, first generate day schema!
-    ds = holly_couch['summer_schema.2013']
+    ds = holly_couch['summer_schema.2016']
     new_ds = copy.deepcopy(ds)
-    holly_couch['summer_schema.2014'] = ds
+    holly_couch['summer_schema.2017'] = ds
     
-    ds = holly_couch['school_schema.2013']
+    ds = holly_couch['school_schema.2016']
     new_ds = copy.deepcopy(ds)
-    holly_couch['school_schema.2014'] = ds
+    holly_couch['school_schema.2017'] = ds
     
+    ds = holly_couch['60dn_schema.2013']
+    new_ds = copy.deepcopy(ds)
+    holly_couch['60dn_schema.2017'] = ds
     
-if True:
-    pos = 2500
-    school_dates_spring = dateRange('2016-05-01', '2016-06-04', format='%Y-%m-%d')
-    summer_dates = dateRange('2016-06-05', '2016-08-14', format='%Y-%m-%d')
-    sixtydn_dates = [] #dateRange('2013-0', '2013-08-18', format='%Y-%m-%d')
-    school_dates_autumn = dateRange('2016-08-15', '2016-10-31', format='%Y-%m-%d')
+if False:
+    pos = 3000
+    school_dates_spring = dateRange('2017-05-01', '2017-06-07', format='%Y-%m-%d')
+    summer_dates = dateRange('2017-06-08', '2017-07-28', format='%Y-%m-%d')
+    sixtydn_dates = dateRange('2017-07-29', '2017-08-05', format='%Y-%m-%d')
+    summer_dates2 = dateRange('2017-08-06', '2017-08-16', format='%Y-%m-%d')
+    school_dates_autumn = dateRange('2017-08-17', '2017-10-31', format='%Y-%m-%d')
     
-    worklist = [(school_dates_spring,  'school_schema.2014'), (summer_dates, 'summer_schema.2014'), (sixtydn_dates, '60dn_schema.2014'), (school_dates_autumn, 'school_schema.2014')]
+    worklist = [(school_dates_spring,  'school_schema.2017'), (summer_dates, 'summer_schema.2017'), (sixtydn_dates, '60dn_schema.2017'), (summer_dates2, 'summer_schema.2017'), (school_dates_autumn, 'school_schema.2017')]
     
     for days, day_schema_id in worklist:
         for d in days:

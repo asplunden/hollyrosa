@@ -5,14 +5,18 @@ Global configuration file for TG2-specific settings in authtest.
 This file complements development/deployment.ini.
 
 """
-from tg.configuration import AppConfig
 
+import logging
+
+from tg.configuration import AppConfig
 import hollyrosa
 from hollyrosa.model.booking_couch import getVisitingGroupByBoknr
 from hollyrosa import model, lib
 from hollyrosa.lib import app_globals, helpers 
 from hollyrosa.controllers.common import DataContainer
 import hashlib
+
+
 
 base_config = AppConfig()
 base_config.renderers = []
@@ -30,6 +34,7 @@ base_config.dispatch_path_translator = True
 base_config.prefer_toscawidgets2 = True
 
 base_config.package = hollyrosa
+base_config.custom_tw2_config['script_name'] = '/hollyrosa'
 
 # Enable json in expose
 base_config.renderers.append('json')
@@ -71,8 +76,9 @@ class ApplicationAuthMetadata(TGAuthMetadata):
         self.sa_auth = sa_auth
 
     def authenticate(self, environ, identity):
+        authlog = logging.getLogger('auth2')
         login = identity['login']
-        
+        supplied_login_name = identity['login']
         
         ##
         ##user = self.sa_auth.dbsession.query(self.sa_auth.user_class).filter_by(
@@ -106,13 +112,16 @@ class ApplicationAuthMetadata(TGAuthMetadata):
             params.pop('password', None)  # Remove password in case it was there
             if user is None:
                 params['failure'] = 'user-not-found'
+                authlog.info('login failed - user-not-found %s' % supplied_login_name[:100])
             else:
                 params['login'] = identity['login']
                 params['failure'] = 'invalid-password'
+                authlog.info('login failed - wrong password for %s' % supplied_login_name)
 
             # When authentication fails send user to login page.
+            # TODO: change /hollyrosa
             environ['repoze.who.application'] = HTTPFound(
-                location='?'.join(('/login', urlencode(params, True)))
+                location='?'.join(('/hollyrosa/login', urlencode(params, True)))
             )
 
         return login

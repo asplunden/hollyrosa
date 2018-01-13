@@ -35,7 +35,7 @@ parser.add_argument("-v", "--verbose", help="turn on verbose logging", action="s
 args = parser.parse_args()
 
 #...init logging'
-log = logging.getLogger("hollyrosa_view_tool")
+log = logging.getLogger("hollyrosa_room_tool")
 
 if args.verbose:
     logging.basicConfig(level=logging.DEBUG)
@@ -59,7 +59,7 @@ try:
 except couchdb.ResourceNotFound, e:
     holly_couch = couch_server.create(db_name)
     
-holly_couch_destination = couch_server['hollyrosa_2015_prod']
+#holly_couch_destination = couch_server['hollyrosa_2015_prod']
 
 if False:
     #...transfering room schema from one database to another
@@ -80,11 +80,11 @@ def copyDocument(db, from_id, to_id):
     db[to_id] = new_doc
     
     
-copyDocument(holly_couch, 'summer_schema.2014', 'summer_schema.2016')
-copyDocument(holly_couch, 'school_schema.2014', 'school_schema.2016')
+#copyDocument(holly_couch, 'summer_schema.2014', 'summer_schema.2016')
+#copyDocument(holly_couch, 'school_schema.2014', 'school_schema.2016')
 #copyDocument(holly_couch, 'arcanum_schema.2015', 'boomerang.2016')
 
-if True:
+if False:
     for b in holly_couch.view('booking_day/all_booking_days', include_docs=True):
         doc = holly_couch[b.doc['_id']]
         if doc['day_schema_id'] == 'summer_schema.2014':
@@ -135,8 +135,8 @@ def makeSlotRow(slot_id_start, zorder, activity_id):
     return result, slot_id_start
 
 
-if False:
-    doc = holly_couch['arcanum_schema.2015']
+if True:
+    doc = holly_couch['sjorok_schema.2017']
     schema = doc['schema']
     
     #...find max slot id
@@ -151,8 +151,8 @@ if False:
     max_slot_id += 1
     
     #...add the first 8 activities
-    for i in range(8):
-        tmp_activity_id = "activity.arcanum_%d" % (i+20+1)
+    for i in range(10):
+        tmp_activity_id = "activity.sjorok_%d" % (i)
         tmp_slot_row, max_slot_id = makeSlotRow(max_slot_id, 100+i, tmp_activity_id)
         schema[tmp_activity_id] = tmp_slot_row
         
@@ -162,4 +162,4 @@ if False:
 #        schema[tmp_activity_id] = tmp_slot_row
         
         
-    holly_couch['arcanum_schema.2015'] = doc
+    holly_couch['sjorok_schema.2017'] = doc
