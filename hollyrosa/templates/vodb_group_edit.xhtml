@@ -27,10 +27,12 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 <body class="tundra" py:block="body" py:strip="True">
   <section class="section">
-    <div class="container">  
+    <div class="container">
 
       <h2 class="title">Edit vodb ${vodb_group['subtype']} group ${vodb_group['name']}</h2>
-      <div>${tmpl_context.form.display(value=vodb_group)}</div>
+      <div class="content">
+        <div>${tmpl_context.form.display(value=vodb_group)}</div>
+      </div>
     </div>
   </section>
 </body>
