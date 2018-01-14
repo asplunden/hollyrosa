@@ -17,38 +17,62 @@
 
 <body class="tundra">
 
-  <div id="header">
-  </div>
-  <ul id="mainmenu" class="any_menu external_mainmenu">
-        <li py:if="request.identity['user'].get('type','') == 'user'" class="first"><a href="${tg.url('/')}">Frontpage</a></li>
-        <li py:if="request.identity['user'].get('type','') == 'user'"><a href="${tg.url('/calendar/overview')}">Calendar overview</a></li>
-        <li py:if="request.identity['user'].get('type','') == 'user'" ><a href="${tg.url('/visiting_group/view_all')}">Visiting groups</a></li>
-        <li py:if="request.identity['user'].get('type','') == 'user'" ><a href="${tg.url('/vodb_group/view_all')}">VODB groups</a></li>
-        <li py:if="request.identity['user'].get('type','') == 'user'"><a href="${tg.url('/tools/show')}" id="toolslink">Tools</a></li>
-		<li py:if="request.identity['user'].get('type','') == 'user'"><a href="${tg.url('/me/settings')}">Me</a></li>
+  <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="${tg.url('/about')}">
+        <img src="https://bulma.io/images/bulma-logo.png" alt="Bulma: a modern CSS framework based on Flexbox" width="112" height="28"/>
+      </a>
 
-    <li py:if="request.identity['user'].get('type','') == 'visiting_group'"><a href="${tg.url('/program_layer/layers', params={'visiting_group_id':request.identity['user'].get('_id','')})}">Live Calendar</a></li>
-    <li py:if="request.identity['user'].get('type','') == 'visiting_group'"><a href="${tg.url('/program_layer/layers_printable', params={'visiting_group_id':request.identity['user'].get('_id','')})}">Printable Program Layer</a></li>
-    <li py:if="request.identity['user'].get('type','') == 'visiting_group'"><a href="${tg.url('/visiting_group/view_bookings_of_name', params={'name':request.identity['user'].get('name','')})}">Printable Program Listing</a></li>
-    <li py:if="request.identity['user'].get('type','') == 'visiting_group'"><a href="${tg.url('/visiting_group_program_request/edit_request', params={'visiting_group_id':request.identity['user'].get('_id','')})}">Booking Requests</a></li>
-    <span py:if="tg.auth_stack_enabled" py:strip="True">
-        <li><a href="${tg.url('/about')}" class="${('', 'active')[defined('page') and page==page=='about']}">About</a></li>
-        <li py:if="not request.identity" id="login" class="loginlogout"><a href="${tg.url('/login')}">Login</a></li>
-        <li py:if="request.identity" id="login" class="loginlogout"><a href="${tg.url('/logout_handler')}">Logout <em py:if="request.identity['user'].has_key('display_name')">${request.identity['user'].get('display_name','')}</em><em py:if="request.identity['user'].has_key('name')">${request.identity['user'].get('name','')}</em></a></li>
-    </span>
-  </ul>
+      <button class="button navbar-burger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div class="navbar-menu is-active">
+      <!-- navbar start, navbar end -->
+      <div class="navbar-start">
+        <!-- navbar items -->
+        <a class="navbar-item" href="${tg.url('/')}">Home</a>
+        <a py:if="request.identity['user'].get('type','') == 'user'" class="navbar-item" href="${tg.url('/calendar/overview')}">Calendar overview</a>
+        <a py:if="request.identity['user'].get('type','') == 'user'" class="navbar-item" href="${tg.url('/visiting_group/view_all')}">Visiting groups</a>
+        <a py:if="request.identity['user'].get('type','') == 'user'" class="navbar-item" href="${tg.url('/vodb_group/view_all')}">VODB groups</a>
+        <a py:if="request.identity['user'].get('type','') == 'user'" class="navbar-item" href="${tg.url('/tools/show')}">Tools</a>
+        <a py:if="request.identity['user'].get('type','') == 'user'" class="navbar-item" href="${tg.url('/me/settings')}">Me</a>
+
+        <a py:if="request.identity['user'].get('type','') == 'visiting_group'" class="navbar-item" href="${tg.url('/program_layer/layers', params={'visiting_group_id':request.identity['user'].get('_id','')})}">Live Calendar</a>
+        <a py:if="request.identity['user'].get('type','') == 'visiting_group'" class="navbar-item" href="${tg.url('/program_layer/layers_printable', params={'visiting_group_id':request.identity['user'].get('_id','')})}">Printable Program Layer</a>
+        <a py:if="request.identity['user'].get('type','') == 'visiting_group'" class="navbar-item" href="${tg.url('/visiting_group/view_bookings_of_name', params={'name':request.identity['user'].get('name','')})}">Printable Program Listing</a>
+        <a py:if="request.identity['user'].get('type','') == 'visiting_group'" class="navbar-item" href="${tg.url('/visiting_group_program_request/edit_request', params={'visiting_group_id':request.identity['user'].get('_id','')})}">Booking Requests</a>
+
+
+      </div>
+      <div class="navbar-end">
+        <!-- navbar items -->
+        <a py:if="not request.identity" class="navbar-item" href="${tg.url('/login')}">Login</a>
+        <a py:if="request.identity" class="navbar-item" href="${tg.url('/logout_handler')}">Logout &nbsp;<em py:if="request.identity['user'].has_key('display_name')">${request.identity['user'].get('display_name','')}</em><em py:if="request.identity['user'].has_key('name')">${request.identity['user'].get('name','')}</em></a>
+      </div>
+    </div>
+
+  </nav>
+
+
+
   <section class="section">
     <div class="container">
       <py:if test="defined('page')">
       </py:if>
       <py:with vars="flash=tg.flash_obj.render('flash', use_js=False)">
           <div py:if="flash" py:content="XML(flash)" />
-        </py:with>
-        <py:block name="body"/>
-    <!-- End of content -->
-      <div class="clearingdiv"></div>
-
+      </py:with>
     </div>
+
+      <py:block name="body"/>
+      <!-- End of content -->
+
+      <!-- <div class="clearingdiv"></div> -->
+
+    
   </section>
 
   <footer class="footer">

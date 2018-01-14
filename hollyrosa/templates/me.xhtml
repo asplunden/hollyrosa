@@ -52,25 +52,45 @@ require(["common_menu", "dojo/dom","dojo/dom-attr", "dojo/cookie", "dojo/query",
 </head>
 
 <body class="tundra" py:block="body" py:strip="True">
-  <h2>Your Settings ${request.identity['user']['display_name']}</h2>
-  <div style="border:1px dotted black;">
-    Authorization:
-    <ul><li py:for="l in request.identity['user']['level']">$l</li></ul>
-    Active: ${request.identity['user']['active']}
+  <section class="section">
+    <div class="container">
+      <h2 class="title">Your Settings ${request.identity['user']['display_name']}</h2>
+
+        <div class="notification">
+            <h3 class="subtitle">Authorization</h3>
+            <span class="tag" py:for="l in request.identity['user']['level']">$l</span>
+            <p>
+            Active: ${request.identity['user']['active']}
+            </p>
+        </div>
+      </div>
+    <div class="container">
+      <div class="notification">
+        <a class="button is-primary" href="${tg.url('/user/change_password', params={'user_id':request.identity['user']['_id']})}" >Change Password</a>
+        <a class="button" href="${tg.url('/history/show', params={'user_id':request.identity['user']['_id']})}" >History</a>
+      </div>
+    </div>
+  <div class="container">
+    <div class="notification">
+      <fieldset>
+        <form>
+          <div class="field">
+            <div class="control">
+              <label class="checkbox">
+                <input type="checkbox" id="left_click_menu_input_checkbox" name="left_click_context_menu" />
+                Left click context menu:
+              </label>
+            </div>
+          </div>
+        </form>
+      </fieldset>
+    </div>
   </div>
-  <ul>
-    <li><a href="${tg.url('/user/change_password', params={'user_id':request.identity['user']['_id']})}" >Change Password</a></li>
-    <li><a href="${tg.url('/history/show', params={'user_id':request.identity['user']['_id']})}" >History</a></li>
-  </ul>
-  <p>
-    <fieldset>
-      <form>
-        <legend>Left click context menu: </legend><input type="checkbox" id="left_click_menu_input_checkbox" name="left_click_context_menu"></input>
-      </form>
-    </fieldset>
-  </p>
-  <div>
-    <h2>Instruktioner</h2>
+</section>
+<section class="hero is-info is-medium">
+  <div class="container">
+    <div class="hero-body">
+    <h1 class="title">Instruktioner</h1>
     <p>Det finns en del instruktionsmaterial framtaget för Hollyrosa:
       <ul>
         <li><a href="https://asplunden.org/guldkant/instruktioner/enkel-manual-for-bokningssystemet/">Enkel manual för bokningsystemet</a> finns på program IIs blogg.</li>
@@ -82,5 +102,7 @@ require(["common_menu", "dojo/dom","dojo/dom-attr", "dojo/cookie", "dojo/query",
    För frågor kring hur programbokningssystemet fungerar, buggrapporter mm. prova att emaila Martin Eliasson: martin.eliasson@arstascouterna.org
    </p>
   </div>
+</div>
+</section>
 </body>
 </html>

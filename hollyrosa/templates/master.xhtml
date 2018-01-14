@@ -93,38 +93,61 @@
 </head>
 
 <body class="tundra">
-  <div d="header">
-  </div>
+  <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="${tg.url('/about')}">
+        <img src="https://bulma.io/images/bulma-logo.png" alt="Bulma: a modern CSS framework based on Flexbox" width="112" height="28"/>
+      </a>
 
-  <ul id="mainmenu" class="any_menu internal_mainmenu">
-        <li class="first"><a href="${tg.url('/')}">Frontpage</a></li>
-        <li><a href="${tg.url('/calendar/overview')}">Calendar overview</a></li>
-        <li py:if="request.identity" class="mainmenu_visiting_groups_choice" ><a href="${tg.url('/visiting_group/view_all')}">Visiting groups</a></li>
-        <li py:if="request.identity" ><a href="${tg.url('/vodb_group/view_all')}">VODB groups</a></li>
-        <li py:if="request.identity" class="mainmenu_tools_choice"><a href="${tg.url('/tools/show')}" id="toolslink">Tools</a></li>
+      <button class="button navbar-burger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div class="navbar-menu is-active">
+      <!-- navbar start, navbar end -->
+      <div class="navbar-start">
+        <!-- navbar items -->
+        <a class="navbar-item" href="${tg.url('/')}">Home</a>
+        <a class="navbar-item" href="${tg.url('/calendar/overview')}">Calendar overview</a>
+        <a py:if="request.identity" class="navbar-item" href="${tg.url('/visiting_group/view_all')}">Visiting groups</a>
+        <a py:if="request.identity" class="navbar-item" href="${tg.url('/vodb_group/view_all')}">VODB groups</a>
+        <a py:if="request.identity" class="navbar-item" href="${tg.url('/tools/show')}">Tools</a>
+        <a py:if="request.identity" class="navbar-item" href="${tg.url('/me/settings')}">Me</a>
 
-		<li py:if="request.identity"><a href="${tg.url('/me/settings')}">Me</a></li>
 
-    <span py:if="tg.auth_stack_enabled" py:strip="True">
-        <li><a href="${tg.url('/about')}" class="${('', 'active')[defined('page') and page==page=='about']}">About</a></li>
-        <li py:if="not request.identity" id="login" class="loginlogout"><a href="${tg.url('/login')}">Login</a></li>
-        <li py:if="request.identity" id="login" class="loginlogout"><a href="${tg.url('/logout_handler')}">Logout <em py:if="request.identity['user'].has_key('display_name')">${request.identity['user'].get('display_name','')}</em><em py:if="request.identity['user'].has_key('name')">${request.identity['user'].get('name','')}</em></a></li>
-    </span>
-  </ul>
-  <section class="section">
+
+      </div>
+      <div class="navbar-end">
+        <!-- navbar items -->
+        <a py:if="not request.identity" class="navbar-item" href="${tg.url('/login')}">Login</a>
+        <a py:if="request.identity" class="navbar-item" href="${tg.url('/logout_handler')}">Logout &nbsp;<em py:if="request.identity['user'].has_key('display_name')">${request.identity['user'].get('display_name','')}</em><em py:if="request.identity['user'].has_key('name')">${request.identity['user'].get('name','')}</em></a>
+      </div>
+    </div>
+
+  </nav>
+
+  <py:with vars="flash=tg.flash_obj.render('flash', use_js=False)">
+  <section class="section" py:if="flash">
     <div class="container">
       <py:if test="defined('page')">
 
       </py:if>
-      <py:with vars="flash=tg.flash_obj.render('flash', use_js=False)">
+
           <div py:if="flash" py:content="literal(flash)" />
-      </py:with>
+      
+        </div>
+    </section>
+  </py:with>
+
       <py:block name="body"/>
     <!-- End of content -->
-      <div class="clearingdiv"></div>
+<!--
+      <div class="clearingdiv"></div> -->
 
-    </div>
-  </section>
+
+
   <footer class="footer">
     <div class="foottext">
       <p><i>Hollyrosa</i> booking system is concieved and developed by Martin Eliasson. Copyright &copy; 2010-2017 <a href="http://asplunden.org">Martin Eliasson</a>. Hollyrosa is free software released under <a href="/about.html">AGPL (see license details)</a>, version controlled using Git and hosted at <a href="http://www.github.com/asplunden/hollyrosa">GitHub</a>.</p>
