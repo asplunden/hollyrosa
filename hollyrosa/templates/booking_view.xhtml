@@ -58,8 +58,10 @@ require(["common_menu", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit
 
 </head>
 <body class="tundra" py:block="body" py:strip="True">
-  <h2>${activity['title']} ${booking['subtype']} booking</h2>
-  <h3>${booking['visiting_group_name']}</h3>
+  <section class="section">
+    <div class="container">
+  <h2 class="title">${activity['title']} ${booking['subtype']} booking</h2>
+  <h3 class="subtitle">${booking['visiting_group_name']}</h3>
   <div id="booking_info">
     <p py:if="booking['slot_id'] != '' and booking['slot_id'] != None and booking_day != None">
       <a href="${tg.url('day', params={'day_id':booking_day.id})}">${formatDate(booking_day['date'])}</a> <b py:if="booking['slot_id'] !=None"> ${slot_position['time_from']}</b><b py:if="(booking['slot_id'] !=None) and (end_slot==None)"> to ${slot_position['time_to']} </b>  <b py:if="booking['slot_id'] ==None">booking has no slot row position </b> <span py:if="booking.has_key('booking_end_date')">Booking ends  <a href="${tg.url('day', params={'day':booking['booking_end_date']})}">${booking['booking_end_date']}</a> at <b>${end_slot['time_to']}</b></span>
@@ -79,7 +81,7 @@ require(["common_menu", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit
     <p>gid: ${booking['_id']}</p>
   </div>
   <div id="history" style="margin-top:3em;">
-    <h3>History</h3>
+    <h3 class="subtitle">History</h3>
     <table class="data">
       <tr>
         <th>change op</th><th>time stamp</th><th>description</th><th>changed by</th>
@@ -92,5 +94,7 @@ require(["common_menu", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit
       </tr>
     </table>
   </div>
+</div>
+</section>
 </body>
 </html>

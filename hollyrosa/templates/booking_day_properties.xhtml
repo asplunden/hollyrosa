@@ -24,7 +24,11 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <title>Hollyrosa - Booking Day Properties</title>
 </head>
 <body class="tundra" py:block="body" py:strip="True">
-  <h2>Booking Day Properties ${booking_day['date']}</h2>
-  <div>${tmpl_context.form.display(value=booking_day)}</div>
+    <section class="section">
+      <div class="container">
+      <h2 class="title">Booking Day Properties ${booking_day['date']}</h2>
+    <div>${tmpl_context.form.display(value=booking_day)}</div>
+  </div>
+</section>
 </body>
 </html>

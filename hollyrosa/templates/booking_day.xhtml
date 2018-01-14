@@ -114,6 +114,8 @@ require(["common_menu","page/booking_day", "dojo/_base/array", "dijit/Menu","dij
 
 </head>
 <body class="tundra" py:block="body" py:strip="True">
+  <section class="section">
+    <div class="container is-fluid">
   <div id="booking_day_hide_slot_rows_control">
     <ul style="display:inline; list-style-type: none;   position:relative;">
       <li>
@@ -122,15 +124,15 @@ require(["common_menu","page/booking_day", "dojo/_base/array", "dijit/Menu","dij
     </ul>
   </div>
 
-  <div class="more_menu_symbol" id="view_ag_menu" hollyrosa:booking_day_id="${booking_day.id}"><h2>Program Day ${reFormatDate(booking_day['date'])}</h2></div>
+  <div class="more_menu_symbol" id="view_ag_menu" hollyrosa:booking_day_id="${booking_day.id}"><h2 class="title">Program Day ${reFormatDate(booking_day['date'])}</h2></div>
 
-  <div class="note" id="main_note" style="min-height:10em;"><h2>${booking_day.get('title','')}</h2>
+  <div class="note" id="main_note" style="min-height:10em;"><h2 class="title">${booking_day.get('title','')}</h2>
     <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day.events">$e</li></ul>${literal(booking_day['note'])}
     <br/>
   </div>
 
 
-  <h3>Unscheduled bookings</h3>
+  <h3 class="subtitle">Unscheduled bookings</h3>
   <ul id="unscheduled_bookings">
     <li py:for="booking in unscheduled_bookings" hollyrosa:acgid="${booking.activity_group_id}" class="unscheduled_booking" hollyrosa:bid="${booking.id}" hollyrosa:bdayid="${booking_day.id}"  hollyrosa:vgname="${booking.visiting_group_name}">${booking.activity_title}
       <span class="group_info">${booking.visiting_group_name}</span>  ${getRenderContent(booking)}, <span class="requested_date">requested date ${booking.requested_date}</span> <span class="date_info">  [${booking.valid_from}  - ${booking.valid_to}]</span>
@@ -140,7 +142,7 @@ require(["common_menu","page/booking_day", "dojo/_base/array", "dijit/Menu","dij
         </ul>
       </li></ul>
 
-      <h3>Scheduled bookings and daily overview</h3>
+      <h3 class="subtitle">Scheduled bookings and daily overview</h3>
       <div class="booking_day_overview" id="booking_day_overview">
 
         <!-- hack for 2011 for showing FM EM evening and after hours -->
@@ -168,5 +170,7 @@ require(["common_menu","page/booking_day", "dojo/_base/array", "dijit/Menu","dij
           </div>
         </div>
       </div>
+    </div>
+  </section>
     </body>
 </html>

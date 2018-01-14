@@ -29,7 +29,9 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 </head>
 
 <body class="tundra" py:block="body" py:strip="True">
-  <h2>${ag_title} ${reFormatDate(booking_day['date'])}</h2>
+  <section class="section">
+    <div class="container is-fluid">
+  <h2 class="title">${ag_title} ${reFormatDate(booking_day['date'])}</h2>
 
   <table>
     <tr class="tr_booking_day_overview_slot_row"><td class="td_booking_day_overview_activity">Aktivitet</td><td class="td_booking_day_overview_activity">FM</td><td class="td_booking_day_overview_activity">EM</td><td class="td_booking_day_overview_activity">Kväll</td><td class="td_booking_day_overview_activity">After Hours</td></tr>
@@ -47,5 +49,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
       </td>
     </tr>
   </table>
+</div>
+</section>
 </body>
 </html>

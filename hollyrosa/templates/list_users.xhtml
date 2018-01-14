@@ -65,18 +65,22 @@ require(["common_menu","dojo/_base/array", "dijit/Menu","dijit/MenuItem", "dijit
 
 </head>
 <body class="tundra" py:block="body" py:strip="True">
-  <h2>List Users</h2>
-  <table class="data" id="user_listing">
-    <tr>
-      <th>user name</th><th>display name</th><th>level</th><th>active</th><th>last active</th>
-    </tr>
-    <tr py:for="u in users" class="active_user" hollyrosa:userid="${u['_id']}">
-      <td class="data info context_menu_symbol" >${u['user_name']}</td>
-      <td class="data info context_menu_symbol">${u['display_name']}</td>
-      <td class="data info context_menu_symbol"><ul py:for="l in u.get('level',[])" style="display:inline"><li style="display:inline">${l}</li></ul></td>
-      <td class="data info context_menu_symbol">${u.get('active',False)}</td>
-      <td class="data info context_menu_symbol">${u.get('last_login', '-')}</td>
-    </tr>
-  </table>
+  <section class="section">
+    <div class="container">
+      <h2 class="title">List Users</h2>
+      <table class="data" id="user_listing">
+        <tr>
+          <th>user name</th><th>display name</th><th>level</th><th>active</th><th>last active</th>
+        </tr>
+        <tr py:for="u in users" class="active_user" hollyrosa:userid="${u['_id']}">
+          <td class="data info context_menu_symbol" >${u['user_name']}</td>
+          <td class="data info context_menu_symbol">${u['display_name']}</td>
+          <td class="data info context_menu_symbol"><ul py:for="l in u.get('level',[])" style="display:inline"><li style="display:inline">${l}</li></ul></td>
+          <td class="data info context_menu_symbol">${u.get('active',False)}</td>
+          <td class="data info context_menu_symbol">${u.get('last_login', '-')}</td>
+        </tr>
+      </table>
+    </div>
+  </section>
 </body>
 </html>

@@ -28,16 +28,20 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   </script>
 </head>
 <body class="tundra" py:block="body" py:strip="True">
-  <h2>Visitor Statistics</h2>
+  <section class="section">
+    <div class="container is-fluid">
+      <h2 class="title">Visitor Statistics</h2>
 
-  <table class="data">
-    <tr>
-      <th>day</th><th></th><th>visitors, bar shows percentage of 2000 guests</th><th>Age</th>
-    </tr>
-    <tr py:for="d in people_by_day" style="${['','background:#fdd;'][6==d[0].weekday()]}">
-      <td class="data info">${d[0].strftime("%A")}&nbsp;</td><td class="data timestamp">${d[0].strftime("%B %d")}</td> <td class="data info"> <div style="margin-left:4px; width:200px; height:20px; background-color:#eee;"><div style="width:${float(d[1]['tot'])/20.0}%; height:20px; background-color:${d[2]}; border-right:1px #fff solid; color:#fff;float:left;"> &nbsp;</div><div style="float:right;">${d[1]['tot']}</div></div></td>
-      <td class="data info">${round(100*d[1].get('spar',0)/d[1]['tot'], 0)}% (${d[1].get('spar',0)}) spårare, ${round(100*d[1].get('uppt',0)/d[1]['tot'], 0)}% (${d[1].get('uppt',0)}) upptäckare, ${round(100*d[1].get('aven',0)/d[1]['tot'], 0)}% (${d[1].get('aven',0)}) äventyrare, ${round(100*d[1].get('utm',0)/d[1]['tot'], 0)}% (${d[1].get('utm',0)}) utmanare, ${round(100*(d[1]['tot']-d[1].get('utm',0)-d[1].get('spar',0)-d[1].get('aven',0)-d[1].get('uppt',0))/d[1]['tot'], 0)}% övriga</td>
-    </tr>
-  </table>
+      <table class="data">
+        <tr>
+          <th>day</th><th></th><th>visitors, bar shows percentage of 2000 guests</th><th>Age</th>
+        </tr>
+        <tr py:for="d in people_by_day" style="${['','background:#fdd;'][6==d[0].weekday()]}">
+          <td class="data info">${d[0].strftime("%A")}&nbsp;</td><td class="data timestamp">${d[0].strftime("%B %d")}</td> <td class="data info"> <div style="margin-left:4px; width:200px; height:20px; background-color:#eee;"><div style="width:${float(d[1]['tot'])/20.0}%; height:20px; background-color:${d[2]}; border-right:1px #fff solid; color:#fff;float:left;"> &nbsp;</div><div style="float:right;">${d[1]['tot']}</div></div></td>
+          <td class="data info">${round(100*d[1].get('spar',0)/d[1]['tot'], 0)}% (${d[1].get('spar',0)}) spårare, ${round(100*d[1].get('uppt',0)/d[1]['tot'], 0)}% (${d[1].get('uppt',0)}) upptäckare, ${round(100*d[1].get('aven',0)/d[1]['tot'], 0)}% (${d[1].get('aven',0)}) äventyrare, ${round(100*d[1].get('utm',0)/d[1]['tot'], 0)}% (${d[1].get('utm',0)}) utmanare, ${round(100*(d[1]['tot']-d[1].get('utm',0)-d[1].get('spar',0)-d[1].get('aven',0)-d[1].get('uppt',0))/d[1]['tot'], 0)}% övriga</td>
+        </tr>
+      </table>
+    </div>
+  </section>
 </body>
 </html>

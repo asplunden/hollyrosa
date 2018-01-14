@@ -25,16 +25,20 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <title>Hollyrosa - VODB Statistics</title>
 </head>
 <body class="tundra" py:block="head" py:strip="True">
-  <h2>VODB Statistics</h2>
-  <table class="data">
-    <tr><th>day</th><th></th><th>tags totals, bar shows percentage of 2000 guests</th>
-      <th>Tag</th>
-    </tr>
-    <tr py:for="d in people_by_day" style="${['','background:#fdd;'][6==d[0].weekday()]}">
-      <!-- TODO: the dependency of strftime can be sligthly inconvenient -->
-      <td class="data info">${d[0].strftime("%A")}&nbsp;</td><td class="data timestamp">${d[0].strftime("%B %d")}</td> <td class="data info"> <div style="margin-left:4px; width:200px; height:20px; background-color:#eee;"><div style="width:${float(d[1].get('vodb:definitiv',0))/20.0}%; height:20px; background-color:${d[2]}; color:#fff;float:left;"> &nbsp;</div><div style="width:${float(d[1].get('vodb:preliminär',0))/20.0}%; height:20px; background-color:#aaa; color:#fff;float:left;"> &nbsp;</div><div style="width:${float(d[1].get('vodb:förfrågan',0))/20.0}%; height:20px; background-color:#ddd; border-right:1px #fff solid; color:#fff;float:left;"> &nbsp;</div><div style="float:right;">${d[1]['tot']}</div></div></td>
-      <td class="data info"><span py:for="t in tags">${d[1].get(t,0)} ${t[5:]}, </span></td>
-    </tr>
-  </table>
+  <section class="section">
+    <div class="container is-fluid">
+      <h2 class="title">VODB Statistics</h2>
+      <table class="data">
+        <tr><th>day</th><th></th><th>tags totals, bar shows percentage of 2000 guests</th>
+          <th>Tag</th>
+        </tr>
+        <tr py:for="d in people_by_day" style="${['','background:#fdd;'][6==d[0].weekday()]}">
+          <!-- TODO: the dependency of strftime can be sligthly inconvenient -->
+          <td class="data info">${d[0].strftime("%A")}&nbsp;</td><td class="data timestamp">${d[0].strftime("%B %d")}</td> <td class="data info"> <div style="margin-left:4px; width:200px; height:20px; background-color:#eee;"><div style="width:${float(d[1].get('vodb:definitiv',0))/20.0}%; height:20px; background-color:${d[2]}; color:#fff;float:left;"> &nbsp;</div><div style="width:${float(d[1].get('vodb:preliminär',0))/20.0}%; height:20px; background-color:#aaa; color:#fff;float:left;"> &nbsp;</div><div style="width:${float(d[1].get('vodb:förfrågan',0))/20.0}%; height:20px; background-color:#ddd; border-right:1px #fff solid; color:#fff;float:left;"> &nbsp;</div><div style="float:right;">${d[1]['tot']}</div></div></td>
+          <td class="data info"><span py:for="t in tags">${d[1].get(t,0)} ${t[5:]}, </span></td>
+        </tr>
+      </table>
+    </div>
+  </section>
 </body>
 </html>

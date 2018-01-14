@@ -30,7 +30,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 </head>
 
 <body class="tundra" py:block="body" py:strip="True">
-  <h2>Show booking history ${for_group_name}</h2>
+  <section class="section">
+    <div class="container is-fluid">
+  <h2 class="title">Show booking history ${for_group_name}</h2>
+
   <table class="data">
     <tr>
       <th>change op</th><th>time stamp</th><th>description</th><th>changed by</th><th>booking id</th>
@@ -44,5 +47,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         <a py:if="h.has_key('visiting_group_id')" href="${tg.url('/visiting_group/show_visiting_group', {'id':h.get('visiting_group_id','')})}">${h.get('visiting_group_id','')}</a></td>
       </tr>
     </table>
+  </div>
+  </section>
   </body>
   </html>

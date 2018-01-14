@@ -87,7 +87,7 @@ define(["tags", "dojo/dom-attr", "dojo/_base/array", "dojo/dom-construct", "dojo
     function setup(tag_and_note_config) {
       on(win.doc, '.tag:click', function(evt) { deleteTagHelper(evt, tag_and_note_config)});
 
-      var tag_ul_elems = query('.tag_list');
+      var tag_ul_elems = query('.tags');
 
       array.forEach(tag_ul_elems, function(ul_tag_elem) {
         var node_id = ul_tag_elem.id;

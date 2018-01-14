@@ -36,7 +36,7 @@ function(array, registry, Menu, MenuItem, dijitDialog, dijitForm, dijitTextBox, 
   * the data object comes from an ajax request.
   **/
   function updateTags(data, visiting_group_id, node_id) {
-    var query_str = '#'+node_id+' .tag';
+    var query_str = '#'+node_id+' .hollytag';
     var all_tags = query(query_str);
 
     array.forEach(all_tags, function(t) {domConstruct.destroy(t.parentElement) } );
@@ -45,7 +45,7 @@ function(array, registry, Menu, MenuItem, dijitDialog, dijitForm, dijitTextBox, 
     var ul_tag_list = dom.byId(node_id);
 
     for (t in tags) {
-      domConstruct.create("li", {innerHTML:tags[t]+' <a href="javascript:;" class="tag">(X)</a>', 'hollyrosa:vgid':visiting_group_id}, ul_tag_list);
+      domConstruct.create("span", {innerHTML: tags[t]+' <a href="javascript:;" class="hollytag">(X)</a>', 'hollyrosa:vgid':visiting_group_id, 'class':'tag is-info is-small'}, ul_tag_list);
     }
   }
 

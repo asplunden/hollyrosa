@@ -44,8 +44,10 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
 
 </head>
 <body class="tundra" py:block="body" py:strip="True">
-  <div class="more_menu_symbol" id="view_activity_menu" hollyrosa:activity_id="${activity.id}" hollyrosa:note_id="${activity.get('booking_info_id','')}"><h2>Kort beskrivning av ${activity['title']}</h2></div>
-  <h3>Activity Group: ${activity_group['title']}</h3>
+  <section class="section">
+    <div class="container">
+  <div class="more_menu_symbol" id="view_activity_menu" hollyrosa:activity_id="${activity.id}" hollyrosa:note_id="${activity.get('booking_info_id','')}"><h2 class="title">Kort beskrivning av ${activity['title']}</h2></div>
+  <h3 class="subtitle">Activity Group: ${activity_group['title']}</h3>
 
   <div class="note">Description: ${literal(activity['description'])}</div>
   <p>Capacity: ${activity['capacity']}</p>
@@ -66,6 +68,7 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
       </div>
     </div>
   </div>
-
+</div>
+</section>
 </body>
 </html>

@@ -6,9 +6,13 @@
   <title>Sample Template, for looking at template locals</title>
 </head>
 <body class="tundra">
+  <section class="section">
+    <div class="container is-fluid">
   <h1>All objects from locals():</h1>
   <div py:for="item in sorted(locals()['data'].keys())">
     ${item}: ${repr(locals()['data'][item])}
   </div>
+</div>
+</section>
 </body>
 </html>
