@@ -438,13 +438,15 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 </section>
 <section class="section">
   <div class="container is-fluid">
-    <h3 class="subtitle">Program Contact Info</h3>
-    <p>${visiting_group.get('vodb_contact_name','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('vodb_contact_email','')}</a><br/>
-    </p>
-    <p><pre>${visiting_group.get('vodb_contact_address','')}</pre></p>
-
-    <div id="program_layers_container"></div>
-
+    <div class="content">
+      <h3 class="subtitle">Program Contact Info</h3>
+      <p>${visiting_group.get('vodb_contact_name','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('vodb_contact_email','')}</a><br/>
+      </p>
+      <p><pre>${visiting_group.get('vodb_contact_address','')}</pre></p>
+    </div>
+    <div class="content">
+      <div id="program_layers_container"></div>
+    </div>
     <h3 class="subtitle">Unscheduled bookings</h3>
     <div id="unscheduled_bookings" style="width:20em;"></div>
 

@@ -110,10 +110,30 @@
       <div class="navbar-start">
         <!-- navbar items -->
         <a class="navbar-item" href="${tg.url('/')}">Home</a>
-        <a class="navbar-item" href="${tg.url('/calendar/overview')}">Calendar overview</a>
+        <div py:if="request.identity" class="navbar-item has-dropdown is-hoverable" href="${tg.url('/calendar/overview')}">
+          <a class="navbar-link" href="${tg.url('/calendar/overview')}">Calendar overview</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="${tg.url('/calendar/overview')}">Calendar Overview</a>
+            <a class="navbar-item" href="${tg.url('/calendar/overview_all')}">All Days</a>
+            <a class="navbar-item" href="${tg.url('/calendar/upcoming')}">Upcoming</a>
+          </div>
+        </div>
         <a py:if="request.identity" class="navbar-item" href="${tg.url('/visiting_group/view_all')}">Visiting groups</a>
         <a py:if="request.identity" class="navbar-item" href="${tg.url('/vodb_group/view_all')}">VODB groups</a>
-        <a py:if="request.identity" class="navbar-item" href="${tg.url('/tools/show')}">Tools</a>
+        <div py:if="request.identity" class="navbar-item has-dropdown is-hoverable" href="${tg.url('/tools/show')}">
+          <a class="navbar-link" href="${tg.url('/tools/show')}">Tools</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="${tg.url('/tools/show')}">Tools</a>
+            <a class="navbar-item" href="${tg.url('/tools/sanity_check_property_usage')}">Check for bookig errors and warnings</a>
+            <a class="navbar-item" href="${tg.url('/history/show')}">Recent Booking History</a>
+            <hr class="navbar-divider"/>
+            <a class="navbar-item" href="${tg.url('/user/show')}">Manage all Active Users</a>
+            <a class="navbar-item" href="${tg.url('/user/show', params={'show_deactive':True})}">Manage All Users</a>
+            <a class="navbar-item" href="${tg.url('/user/new')}">Create New User</a>
+            <hr class="navbar-divider"/>
+            <a class="navbar-item" href="${tg.url('/tools/visitor_statistics')}">Visitor Statistics</a>
+          </div>
+        </div>
         <a py:if="request.identity" class="navbar-item" href="${tg.url('/me/settings')}">Me</a>
 
 

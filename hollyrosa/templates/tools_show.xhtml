@@ -30,39 +30,74 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
       <h2 class="title">Tools</h2>
         <div class="columns">
           <div class="column is-one-third">
-
-            <aside class="menu">
-            <p class="menu-label">
+          <nav class="panel">
+            <p class="panel-heading">
               Bookings
             </p>
-            <ul class="menu-list">
-              <li><a href="${tg.url('sanity_check_property_usage')}">Check for bookig errors and warnings</a></li>
-              <li py:if="request.identity"><a href="${tg.url('/history/show')}">Booking history</a></li>
-            </ul>
-            <p class="menu-label">
+            <a class="panel-block" href="${tg.url('sanity_check_property_usage')}">
+              <span class="panel-icon">
+                <i class="fas fa-book"></i>
+              </span>
+              Check for bookig errors and warnings
+            </a>
+            <a class="panel-block" href="${tg.url('/history/show')}" py:if="request.identity">
+              <span class="panel-icon">
+                <i class="fas fa-book"></i>
+              </span>
+              Recent Booking History
+            </a>
+            <p class="panel-heading">
               Manage Users
             </p>
-            <ul class="menu-list">
-              <li><a href="${tg.url('/user/show')}">Manage all Active Users</a></li>
-              <li><a href="${tg.url('/user/show', params={'show_deactive':True})}">Manage all Users</a></li>
-            </ul>
-            <p class="menu-label">
-              Statistics
+            <a class="panel-block" href="${tg.url('/user/show')}">
+              <span class="panel-icon">
+                <i class="fas fa-book"></i>
+              </span>
+              Manage all Active Users
+            </a>
+            <a class="panel-block" href="${tg.url('/user/show', params={'show_deactive':True})}">
+              <span class="panel-icon">
+                <i class="fas fa-book"></i>
+              </span>
+              Manage all Users
+            </a>
+            <a class="panel-block" href="${tg.url('/user/new')}">
+              <span class="panel-icon">
+                <i class="fas fa-book"></i>
+              </span>
+              Create New User
+            </a>
+            <p class="panel-heading">
+            Statistics
             </p>
-            <ul class="menu-list">
-              <!-- <li><a href="${tg.url('booking_statistics')}">Booking Statistics</a></li> -->
-              <li><a href="${tg.url('visitor_statistics')}">Age Group Statistics</a></li>
-              <li><a href="${tg.url('vodb_statistics')}">VODB Statistics</a></li>
-            </ul>
-            <p class="menu-label">
-              Tools in development (alpha &amp; beta)
+            <a class="panel-block" href="${tg.url('visitor_statistics')}">
+              <span class="panel-icon">
+                <i class="fas fa-book"></i>
+              </span>
+              Visitor Statistics
+            </a>
+            <a class="panel-block" href="${tg.url('vodb_statistics')}">
+              <span class="panel-icon">
+                <i class="fas fa-book"></i>
+              </span>
+              VODB Statistics
+            </a>
+            <a class="panel-block" href="${tg.url('booking_statistics')}">
+              <span class="panel-icon">
+                <i class="fas fa-book"></i>
+              </span>
+              Booking Statistics
+            </a>
+            <p class="panel-heading">
+            Tools in Development (alpha &amp; beta)
             </p>
-            <ul class="menu-list">
-          <li py:if="request.identity"><a href="${tg.url('/vodb_group/vodb_booking_overview')}">VODB Booking Overview (beta)</a></li>
-            </ul>
-
-
-          </aside>
+            <a class="panel-block" href="${tg.url('/vodb_group/vodb_booking_overview')}" py:if="request.identity">
+              <span class="panel-icon">
+                <i class="fas fa-book"></i>
+              </span>
+            VODB Booking Overview (beta)
+            </a>
+          </nav>
         </div>
         <div class="column auto">
           <div class="notification">
