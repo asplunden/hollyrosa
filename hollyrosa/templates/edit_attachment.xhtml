@@ -27,7 +27,12 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <title>Hollyrosa - Add/Edit attachment</title>
 </head>
 <body py:block="body" py:strip="True">
-  <h2>Add/Edit attachment</h2>
-  <div>${tmpl_context.form.display(value=attachment)}</div>
+  <section class="section">
+    <div class="container">
+
+      <h2 class="title">Add/Edit attachment</h2>
+      <div>${tmpl_context.form.display(value=attachment)}</div>
+    </div>
+  </section>
 </body>
 </html>

@@ -43,175 +43,19 @@ a:hover {
     display:none;
 }
 
-
-ul#mainmenu {
-	display:none;
+.navbar {
+	display: None;
 }
 
-
-
-
-
-#content {
-	/* background: #fff url('../images/contentbg.png') left bottom no-repeat; */
-	margin : 0 10px 10px 10px;
-	padding: 0 10px;
-	overflow: hidden;
+.navbar-brand {
+	display: None;
 }
 
-#content a {
-	color: #286571;
-    text-decoration: None
-}
-
-#content a:hover {
-    text-decoration: underline;
-    }
-
-
-#content .currentpage {
-	margin-top: 0;
-}
 
 /* Login form*/
 
-#loginform
-{
-    text-align: center;
-}
-
-form.loginfields
-{
-    text-align: left;
-    width: 270px;
-    background: url('../images/loginbg.png') top left no-repeat;
-    padding: 0;
-    margin: 0 auto;
-    border: 0;
-}
-
-form.loginfields h2
-{
-    font-size: 16px;
-    float: left;
-    padding: 0;
-    margin: 5px;
-    margin-top: 0;
-    background: url('../images/loginheader-left.png') top left no-repeat;
-}
-
-* html form.loginfields h2
-{
-    margin-left: 3px;
-    width: 80px;
-    text-align: center;
-}
-
-form.loginfields h2 span
-{
-    background: url('../images/loginheader-right.png') right top no-repeat;
-    height: 30px;
-    line-height: 30px;
-    display: block;
-    font-size: 100%;
-    font-weight: normal;
-    color: #fff;
-    padding: 0 10px;
-}
-
-*+html form.loginfields h2 span
-{
-    padding: 0 20px;
-}
-
-form.loginfields label
-{
-    clear: left;
-    float: left;
-    margin-top: 5px;
-    margin-left: 10px;
-    width: 65px;
-    line-height: 31px;
-    vertical-align: middle;
-}
-
-form.loginfields input.text
-{
-    float: left;
-    margin-left: 10px;
-    margin-top: 5px;
-    width: 165px;
-    height: 21px;
-    padding: 5px;
-    border: 0;
-    background: url('../images/inputbg.png') top left no-repeat;
-    color: #fff;
-}
-
-form.loginfields input#submit
-{
-    background: url('../images/loginbottombg.png') bottom left no-repeat;
-    width: 270px;
-    height: 61px;
-    border: 0;
-    margin-top: 10px;
-    color: #fff;
-    padding: 10px 140px 20px 10px;
-}
-
-* html form.loginfields input#submit
-{
-    clear: both;
-    margin-left: -10px;
-}
-
-/* Sidebar */
-.sidebar {
-  border: 1px solid #cce;
-  background-color: #eee;
-  margin: 0.5em;
-  margin-left: 1.5em;
-  padding: 1em;
-  float: right;
-  width: 200px;
-  font-size: 88%;
-}
-
-.sidebar h2 {
-  margin-top: 0;
-  color: black;
-}
-
-.sidebar ul {
-  margin-left: 1.5em;
-  padding-left: 0;
-}
 
 
-
-#sb_top {
-  clear: right;
-}
-
-#sb_bottom {
-  clear: right;
-}
-
-#getting_started {
-  margin-left: 20px;
-}
-
-#getting_started_steps a {
-  text-decoration: none;
-}
-
-#getting_started_steps a:hover {
-  text-decoration: underline;
-}
-
-#getting_started_steps li {
-  margin-bottom: 0.5em;
-}
 
 /* Other and footer */
 #footer {
@@ -289,19 +133,19 @@ div.booking_day_overview_activity {
     padding:0em;
     top:0px;
     border-right: 1px solid #ccc;
-    
+
 }
 
 tr.tr_booking_day_overview_slot_row {
-    
+
     padding:0.2em;
     margin:0em;
     border: 1px solid #000;
 }
 
 td.td_booking_day_overview_activity {
-    
-    
+
+
     padding:0em;
     top:0px;
     border-right: 1px solid #000;
@@ -405,15 +249,15 @@ td.timestamp  {
 
 /*** Workflow state CSS ***/
 
-.workflow_state_0  { 
-    color: #884; 
+.workflow_state_0  {
+    color: #884;
     background-image:url('/images/sheep.png');
     background-repeat:no-repeat;
     padding-left: 2em;
     font-weight:bold;
     }
 .workflow_state_10  {
-    color: #448; 
+    color: #448;
     background-image:url('/images/paper_to_sign.png');
     background-repeat:no-repeat;
     padding-left: 2em;
@@ -421,7 +265,7 @@ td.timestamp  {
     }
 
 .workflow_state_20  {
-    color: #484; 
+    color: #484;
     background-image:url('/images/check_mark.png');
     background-repeat:no-repeat;
     padding-left: 2em;
@@ -429,15 +273,15 @@ td.timestamp  {
     }
 
 .workflow_state_-10  {
-    color: #844; 
+    color: #844;
     font-weight:bold;
     background-image:url('/images/alert.png');
     background-repeat:no-repeat;
     padding-left: 2em;
     }
-    
+
 .workflow_state_unscheduled  {
-    color: #666; 
+    color: #666;
     font-weight:bold;
     background-image:url('/images/alert.png');
     background-repeat:no-repeat;
@@ -447,8 +291,8 @@ td.timestamp  {
 
 /*** GENERAL MENU ****/
 ul.any_menu {
-    list-style-type: circle;   
-    
+    list-style-type: circle;
+
     margin: 0px;
     padding: 0.2em;
 }
@@ -473,12 +317,12 @@ ul.any_menu li a{
 ul.context_inline_menu {
     padding: 0px;
     font-size:90%;
-    
+
 }
 
 ul.context_inline_menu li {
     visibility: hidden;
-   
+
 }
 
 ul.context_inline_menu:hover li {
@@ -516,7 +360,7 @@ ul.context_dropdown_menu:hover li {
     display:block;
 }
 
-ul.context_dropdown_menu li:hover { 
+ul.context_dropdown_menu li:hover {
     background: #f8f8f0;
 }
 
@@ -525,23 +369,23 @@ img.fladan_day_printout_img {
     visibility: visible;
     }
 
-    
-    
+
+
 /* program layers. Break out to separate CSS */
 
 #program_layers_grid {
     border:1px solid #444;
     }
-    
-    
 
-    
+
+
+
 div.program_layer_time_container {
     border-bottom: 1px solid #444;
 }
 
 tr.program_layer_time_container {
-    
+
 }
 
 tr.program_layer_time_container td {
@@ -581,31 +425,31 @@ tr.program_layer_time_container td {
 }
 
 .program_layer_slot {
-    border-bottom:1px dashed #888; 
+    border-bottom:1px dashed #888;
     padding-bottom:0.5em;
     display:block;
     }
-    
+
 
 .program_layer_text {
-    border-bottom:1px dashed #888; 
+    border-bottom:1px dashed #888;
     padding-bottom:0.5em;
     display:block;
     white-space: pre;
     overflow:visible; // auto or hidden might be better
     }
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
     table.program_layers_printable_table {
     border: 1px solid #444;
     }
-    
+
 th.program_layers_printable_table {
     border-left: 1px solid #444;
     border-bottom: 1px solid #444;
@@ -616,7 +460,7 @@ th.program_layers_printable_table {
     padding-bottom:0.1em;
     border-bottom: 1px solid #000;
     }
-    
+
 .program_layers_printable_table_time_label {
     border-bottom: 1px solid #444;
     background: #ddd;
@@ -633,6 +477,6 @@ td.program_layers_printable_table {
     vertical-align:top;
 }
 
-#add_tag_form { 
+#add_tag_form {
     display:none;
     }

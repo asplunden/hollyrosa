@@ -25,7 +25,11 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <title>Hollyrosa - Editing ${visiting_group['subtype']} Visiting Group ${visiting_group['name']}</title>
 </head>
 <body class="tundra" py:block="body" py:strip="True">
-    <h2>Edit ${visiting_group['subtype']} Visting Group ${visiting_group['name']}</h2>
-    <div>${tmpl_context.form.display(value=visiting_group)}</div>
+  <section class="section">
+    <div class="container">
+      <h2 class="title">Edit ${visiting_group['subtype']} Visting Group ${visiting_group['name']}</h2>
+      <div>${tmpl_context.form.display(value=visiting_group)}</div>
+    </div>
+  </section>
 </body>
 </html>

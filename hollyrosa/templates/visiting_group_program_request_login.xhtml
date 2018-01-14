@@ -26,25 +26,29 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <title>Hollyrosa - Visiting Group Login</title>
 </head>
 
-<body class="tundra" py:block="body" py:strip="True">
-    <h2>Visiting Group Login</h2>
-    <p>Same login system as for regular users but why dont we have a special login record type (visiting group?) for this special login and with a special predicate for logged in visiting groups?</p>
-    <!--
+  <body class="tundra" py:block="body" py:strip="True">
+    <section class="section">
+      <div class="container">
+        <h2 class="title">Visiting Group Login</h2>
+        <p>Same login system as for regular users but why dont we have a special login record type (visiting group?) for this special login and with a special predicate for logged in visiting groups?</p>
+        <!--
 
-	login using bokn-nr and password.
+        login using bokn-nr and password.
 
-	show bokn .
+        show bokn .
 
-	edit groups params like names, email, telephone
+        edit groups params like names, email, telephone
 
-	then edit subgroup sizes
+        then edit subgroup sizes
 
-	then step three is requesting the five standards for each group. plus note.
+        then step three is requesting the five standards for each group. plus note.
 
-	Five standard: Trapper, big boat, small boat, canoe, fladan, sammarbetsgläntan...naturnäran...
+        Five standard: Trapper, big boat, small boat, canoe, fladan, sammarbetsgläntan...naturnäran...
 
 
-    <div py:replace="tmpl_context.form(visiting_group_program_request_login, action='external_login')">Input Form</div>
-   -->
-</body>
+        <div py:replace="tmpl_context.form(visiting_group_program_request_login, action='external_login')">Input Form</div>
+      -->
+    </div>
+  </section>
+  </body>
 </html>

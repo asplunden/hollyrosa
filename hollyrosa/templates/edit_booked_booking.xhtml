@@ -104,26 +104,30 @@ require(["edit_booking", "dojo/query", "dojo/dom", "dojo/on", "dojo/request/xhr"
 });
 </script>
 </head>
-<body class="tundra" py:block="body" py:strip="True">
-  <h2>${booking['activity']['title']} booking</h2>
-  <div id="visiting_group_data" style="font-size:80%; border:1px solid green; margin:2em; padding: 2em; float:right;">
-    <h3> Showing visiting group info: <span id="visiting_group_data_name"></span></h3>
-    <div class="note" id="visiting_group_data_info"></div>
-    <h4>group info</h4>
-    <table id="visiting_group_info_table">
-      <tr><td>From:</td><td id="visiting_group_data_fromdate"/></tr>
-      <tr><td>To:</td><td id="visiting_group_data_todate"/></tr>
-      <tr><td>Contact:</td><td id="visiting_group_data_contact"/></tr>
-      <tr><td>Phone:</td><td id="visiting_group_data_phone"/></tr>
-      <tr><td>Email:</td><td id="visiting_group_data_email"/></tr>
-    </table>
-    <h4>properties</h4>
-    <table id="visiting_group_properties_table">
-    </table>
-  </div>
-  <p>
-    <span py:if="None != booking_day">${booking_day['date']} </span><span py:if="None != slot_position"><b> ${slot_position['time_from']} to ${slot_position['time_to']} </b> </span><span py:if="None != booking_day"><a py:if="booking['id'] != None " href="${tg.url('unschedule_booking', params={'booking_id':booking['id'], 'booking_day_id':booking_day['_id']})}">unschedule</a></span>
-  </p>
-  <div>${tmpl_context.form.display(value=booking)}</div>
-</body>
+  <body class="tundra" py:block="body" py:strip="True">
+    <section class="section">
+      <div class="container">
+        <h2 class="title">${booking['activity']['title']} booking</h2>
+        <div id="visiting_group_data" style="font-size:80%; border:1px solid green; margin:2em; padding: 2em; float:right;">
+          <h3 class="subtitle"> Showing visiting group info: <span id="visiting_group_data_name"></span></h3>
+          <div class="note" id="visiting_group_data_info"></div>
+          <h4 class="subtitle is-6">group info</h4>
+          <table id="visiting_group_info_table">
+            <tr><td>From:</td><td id="visiting_group_data_fromdate"/></tr>
+            <tr><td>To:</td><td id="visiting_group_data_todate"/></tr>
+            <tr><td>Contact:</td><td id="visiting_group_data_contact"/></tr>
+            <tr><td>Phone:</td><td id="visiting_group_data_phone"/></tr>
+            <tr><td>Email:</td><td id="visiting_group_data_email"/></tr>
+          </table>
+          <h4 class="subtitle is-6">properties</h4>
+          <table id="visiting_group_properties_table">
+          </table>
+        </div>
+        <p>
+          <span py:if="None != booking_day">${booking_day['date']} </span><span py:if="None != slot_position"><b> ${slot_position['time_from']} to ${slot_position['time_to']} </b> </span><span py:if="None != booking_day"><a py:if="booking['id'] != None " href="${tg.url('unschedule_booking', params={'booking_id':booking['id'], 'booking_day_id':booking_day['_id']})}">unschedule</a></span>
+        </p>
+        <div>${tmpl_context.form.display(value=booking)}</div>
+      </div>
+    </section>
+  </body>
 </html>

@@ -56,53 +56,53 @@ require(["common_menu", "dojo/dom","dojo/dom-attr", "dojo/cookie", "dojo/query",
     <div class="container">
       <h2 class="title">Your Settings ${request.identity['user']['display_name']}</h2>
 
-        <div class="notification">
-            <h3 class="subtitle">Authorization</h3>
-            <span class="tag" py:for="l in request.identity['user']['level']">$l</span>
-            <p>
-            Active: ${request.identity['user']['active']}
-            </p>
-        </div>
+      <div class="notification">
+        <h3 class="subtitle">Authorization</h3>
+        <span class="tag" py:for="l in request.identity['user']['level']">$l</span>
+        <p>
+          Active: ${request.identity['user']['active']}
+        </p>
       </div>
+    </div>
     <div class="container">
       <div class="notification">
         <a class="button is-primary" href="${tg.url('/user/change_password', params={'user_id':request.identity['user']['_id']})}" >Change Password</a>
         <a class="button" href="${tg.url('/history/show', params={'user_id':request.identity['user']['_id']})}" >History</a>
       </div>
     </div>
-  <div class="container">
-    <div class="notification">
-      <fieldset>
-        <form>
-          <div class="field">
-            <div class="control">
-              <label class="checkbox">
-                <input type="checkbox" id="left_click_menu_input_checkbox" name="left_click_context_menu" />
-                Left click context menu:
-              </label>
+    <div class="container">
+      <div class="notification">
+        <fieldset>
+          <form>
+            <div class="field">
+              <div class="control">
+                <label class="checkbox">
+                  <input type="checkbox" id="left_click_menu_input_checkbox" name="left_click_context_menu" />
+                  Left click context menu:
+                </label>
+              </div>
             </div>
-          </div>
-        </form>
-      </fieldset>
+          </form>
+        </fieldset>
+      </div>
     </div>
-  </div>
-</section>
-<section class="hero is-info is-medium">
-  <div class="container">
-    <div class="hero-body">
-    <h1 class="title">Instruktioner</h1>
-    <p>Det finns en del instruktionsmaterial framtaget för Hollyrosa:
-      <ul>
-        <li><a href="https://asplunden.org/guldkant/instruktioner/enkel-manual-for-bokningssystemet/">Enkel manual för bokningsystemet</a> finns på program IIs blogg.</li>
-        <li><a href="https://program.vassaro.net/screencast/hollyrosa_screencast_part_1_2016.mp4">Screencast part 1 (2016)</a></li>
-        <li><a href="https://program.vassaro.net/screencast/hollyrosa_screencast_part_2_2016.mp4">Screencast part 2 (2016)</a></li>
-        <li><a href="https://program.vassaro.net/screencast/hollyrosa_screencast_part_3_2016.mp4">Screencast part 3 (2016)</a></li>
-        <li><a href="https://program.vassaro.net/screencast/hollyrosa_screencast_part_4_2016.mp4">Screencast part 4 (2016)</a></li>
-     </ul>
-   För frågor kring hur programbokningssystemet fungerar, buggrapporter mm. prova att emaila Martin Eliasson: martin.eliasson@arstascouterna.org
-   </p>
-  </div>
-</div>
-</section>
+  </section>
+  <section class="hero is-info is-medium">
+    <div class="container">
+      <div class="hero-body">
+        <h1 class="title">Instruktioner</h1>
+        <p>Det finns en del instruktionsmaterial framtaget för Hollyrosa:
+          <ul>
+            <li><a href="https://asplunden.org/guldkant/instruktioner/enkel-manual-for-bokningssystemet/">Enkel manual för bokningsystemet</a> finns på program IIs blogg.</li>
+            <li><a href="https://program.vassaro.net/screencast/hollyrosa_screencast_part_1_2016.mp4">Screencast part 1 (2016)</a></li>
+            <li><a href="https://program.vassaro.net/screencast/hollyrosa_screencast_part_2_2016.mp4">Screencast part 2 (2016)</a></li>
+            <li><a href="https://program.vassaro.net/screencast/hollyrosa_screencast_part_3_2016.mp4">Screencast part 3 (2016)</a></li>
+            <li><a href="https://program.vassaro.net/screencast/hollyrosa_screencast_part_4_2016.mp4">Screencast part 4 (2016)</a></li>
+          </ul>
+          För frågor kring hur programbokningssystemet fungerar, buggrapporter mm. prova att emaila Martin Eliasson: martin.eliasson@arstascouterna.org
+        </p>
+      </div>
+    </div>
+  </section>
 </body>
 </html>

@@ -288,23 +288,24 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 
 <body class="tundra" py:block="body" py:strip="True">
+  <section class="section is-fluid">
+    <div class="container">
+      <div class="more_menu_symbol" style="width:20em;" id="bokn_status_menu"><h2 class="title">Viewing VODB Groups</h2></div>
+      <table id="vgroup_listing">
+        <tr py:for="visiting_group in visiting_groups" class="name_menu" hollyrosa:vgid="${visiting_group.id}" hollyrosa:vgtid="${visiting_group['subtype']}" hollyrosa:vgname="${visiting_group['name']}" hollyrosa:taglist_node_id="taglist_for_${hash(visiting_group.id)}" hollyrosa:has_notes="${has_notes_map.has_key(visiting_group.id)}">
+          <td class="info data context_menu_symbol">${visiting_group['name']}<a name="vgroupid_${visiting_group.id}"/><br/>[${reFormatDate(visiting_group['from_date'])} to ${reFormatDate(visiting_group['to_date'])}]<br/><br/>${visiting_group.get('vodb_contact_person','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('vodb_contact_email','')}">${visiting_group.get('vodb_contact_email','')}</a></td>
+          <td class="info data">
+            <div class="note context_menu_symbol"><ul class="tag_list" id="taglist_for_${hash(visiting_group.id)}" hollyrosa:vgid="$visiting_group.id"></ul>
+              <p>bok.nr: <b>${visiting_group['boknr']}</b> <br/>
+                vodb status: <b>${vodb_state_map.get(visiting_group.get('vodbstatus','-'), '')}</b><br/>
+                program status: <b>${program_state_map.get(visiting_group['boknstatus'], '')}</b><br/>
+                camping location: <b>${visiting_group['camping_location']}</b></p>${literal(visiting_group['info'])}</div>
 
-
-
-  <div class="more_menu_symbol" style="width:20em;" id="bokn_status_menu"><h2>Viewing VODB Groups</h2></div>
-  <table id="vgroup_listing">
-    <tr py:for="visiting_group in visiting_groups" class="name_menu" hollyrosa:vgid="${visiting_group.id}" hollyrosa:vgtid="${visiting_group['subtype']}" hollyrosa:vgname="${visiting_group['name']}" hollyrosa:taglist_node_id="taglist_for_${hash(visiting_group.id)}" hollyrosa:has_notes="${has_notes_map.has_key(visiting_group.id)}">
-      <td class="info data context_menu_symbol">${visiting_group['name']}<a name="vgroupid_${visiting_group.id}"/><br/>[${reFormatDate(visiting_group['from_date'])} to ${reFormatDate(visiting_group['to_date'])}]<br/><br/>${visiting_group.get('vodb_contact_person','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('vodb_contact_email','')}">${visiting_group.get('vodb_contact_email','')}</a></td>
-      <td class="info data">
-        <div class="note context_menu_symbol"><ul class="tag_list" id="taglist_for_${hash(visiting_group.id)}" hollyrosa:vgid="$visiting_group.id"></ul>
-          <p>bok.nr: <b>${visiting_group['boknr']}</b> <br/>
-            vodb status: <b>${vodb_state_map.get(visiting_group.get('vodbstatus','-'), '')}</b><br/>
-            program status: <b>${program_state_map.get(visiting_group['boknstatus'], '')}</b><br/>
-            camping location: <b>${visiting_group['camping_location']}</b></p>${literal(visiting_group['info'])}</div>
-
-            <div id="notes_for_${visiting_group.id}"> <span py:if="has_notes_map.has_key(visiting_group.id)" id="load_notes_for_${visiting_group.id}">has notes, load using the context menu</span></div>
-        </td>
-      </tr>
-    </table>
-</body>
+                <div id="notes_for_${visiting_group.id}"> <span py:if="has_notes_map.has_key(visiting_group.id)" id="load_notes_for_${visiting_group.id}">has notes, load using the context menu</span></div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </section>
+    </body>
 </html>

@@ -57,44 +57,44 @@ require(["common_menu", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit
 <!-- TODO: Had to remove Python code that switched between 'day' and 'live' for showing bookings -->
 
 </head>
-<body class="tundra" py:block="body" py:strip="True">
-  <section class="section">
-    <div class="container">
-  <h2 class="title">${activity['title']} ${booking['subtype']} booking</h2>
-  <h3 class="subtitle">${booking['visiting_group_name']}</h3>
-  <div id="booking_info">
-    <p py:if="booking['slot_id'] != '' and booking['slot_id'] != None and booking_day != None">
-      <a href="${tg.url('day', params={'day_id':booking_day.id})}">${formatDate(booking_day['date'])}</a> <b py:if="booking['slot_id'] !=None"> ${slot_position['time_from']}</b><b py:if="(booking['slot_id'] !=None) and (end_slot==None)"> to ${slot_position['time_to']} </b>  <b py:if="booking['slot_id'] ==None">booking has no slot row position </b> <span py:if="booking.has_key('booking_end_date')">Booking ends  <a href="${tg.url('day', params={'day':booking['booking_end_date']})}">${booking['booking_end_date']}</a> at <b>${end_slot['time_to']}</b></span>
-      <p py:if="None !=booking_day"><span class="workflow_state_${str(booking['booking_state'])}">${workflow_map[booking['booking_state']]}</span></p>
-    </p>
-    <p py:if="'' == booking.get('slot_id','')">
-      <span class="workflow_state_unscheduled">unscheduled</span>
-      requested from ${booking.get('valid_from','-')} to ${booking.get('valid_to','-')} requested date ${booking.get('requested_date','-')}
-    </p>
+  <body class="tundra" py:block="body" py:strip="True">
+    <section class="section">
+      <div class="container">
+        <h2 class="title">${activity['title']} ${booking['subtype']} booking</h2>
+        <h3 class="subtitle">${booking['visiting_group_name']}</h3>
+        <div id="booking_info">
+          <p py:if="booking['slot_id'] != '' and booking['slot_id'] != None and booking_day != None">
+            <a href="${tg.url('day', params={'day_id':booking_day.id})}">${formatDate(booking_day['date'])}</a> <b py:if="booking['slot_id'] !=None"> ${slot_position['time_from']}</b><b py:if="(booking['slot_id'] !=None) and (end_slot==None)"> to ${slot_position['time_to']} </b>  <b py:if="booking['slot_id'] ==None">booking has no slot row position </b> <span py:if="booking.has_key('booking_end_date')">Booking ends  <a href="${tg.url('day', params={'day':booking['booking_end_date']})}">${booking['booking_end_date']}</a> at <b>${end_slot['time_to']}</b></span>
+            <p py:if="None !=booking_day"><span class="workflow_state_${str(booking['booking_state'])}">${workflow_map[booking['booking_state']]}</span></p>
+          </p>
+          <p py:if="'' == booking.get('slot_id','')">
+            <span class="workflow_state_unscheduled">unscheduled</span>
+            requested from ${booking.get('valid_from','-')} to ${booking.get('valid_to','-')} requested date ${booking.get('requested_date','-')}
+          </p>
 
-    <div class="note" hollyrosa:bid="${booking.id}" hollyrosa:bdayid="${booking['booking_day_id']}">${getRenderContent(booking)}</div>
-    <p>
-      <span py:if="booking.get('valid_from','') !='' and booking.get('valid_to','') != ''">Valid in range <em>${booking['valid_from']} to ${booking['valid_to']}</em>, </span><span py:if="'' != booking.get('requested_date','')">Requested date <em>${booking.get('requested_date','')}</em></span>
-    </p>
-    <p>Last changed by: ${user_name_map.get(booking['last_changed_by_id'], booking['last_changed_by_id'])}</p>
-    <p py:if="booking.get('hide_warn_on_suspect_booking',False)">hide_warn_on_suspect_booking</p>
-    <p>gid: ${booking['_id']}</p>
-  </div>
-  <div id="history" style="margin-top:3em;">
-    <h3 class="subtitle">History</h3>
-    <table class="data">
-      <tr>
-        <th>change op</th><th>time stamp</th><th>description</th><th>changed by</th>
-      </tr>
-      <tr py:for="h in history">
-        <td class="data info"><span class="change_op_${h.get('change_op',0)}">${change_op_map[h.get('change_op',0)]}</span></td>
-        <td class="data timestamp">${h['timestamp']}</td>
-        <td class="data info">${h['change']}</td>
-        <td class="data info">${h['changed_by']}</td>
-      </tr>
-    </table>
-  </div>
-</div>
-</section>
-</body>
+          <div class="note" hollyrosa:bid="${booking.id}" hollyrosa:bdayid="${booking['booking_day_id']}">${getRenderContent(booking)}</div>
+          <p>
+            <span py:if="booking.get('valid_from','') !='' and booking.get('valid_to','') != ''">Valid in range <em>${booking['valid_from']} to ${booking['valid_to']}</em>, </span><span py:if="'' != booking.get('requested_date','')">Requested date <em>${booking.get('requested_date','')}</em></span>
+          </p>
+          <p>Last changed by: ${user_name_map.get(booking['last_changed_by_id'], booking['last_changed_by_id'])}</p>
+          <p py:if="booking.get('hide_warn_on_suspect_booking',False)">hide_warn_on_suspect_booking</p>
+          <p>gid: ${booking['_id']}</p>
+        </div>
+        <div id="history" style="margin-top:3em;">
+          <h3 class="subtitle">History</h3>
+          <table class="data">
+            <tr>
+              <th>change op</th><th>time stamp</th><th>description</th><th>changed by</th>
+            </tr>
+            <tr py:for="h in history">
+              <td class="data info"><span class="change_op_${h.get('change_op',0)}">${change_op_map[h.get('change_op',0)]}</span></td>
+              <td class="data timestamp">${h['timestamp']}</td>
+              <td class="data info">${h['change']}</td>
+              <td class="data info">${h['changed_by']}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </section>
+  </body>
 </html>

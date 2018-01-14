@@ -25,7 +25,11 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <title>Hollyrosa - Edit user</title>
 </head>
 <body class="tundra" py:block="body" py:strip="True">
-    <h2>Edit user</h2>
-	<div>${tmpl_context.form.display(value=user)}</div>
+  <section class="section">
+    <div class="container">
+      <h2 class="title">Edit user</h2>
+      <div>${tmpl_context.form.display(value=user)}</div>
+    </div>
+  </section>
 </body>
 </html>

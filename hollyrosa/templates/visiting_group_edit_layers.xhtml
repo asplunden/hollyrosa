@@ -107,11 +107,15 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   </script>
 </head>
 <body class="tundra" py:block="body" py:strip="True">
-  <h2>Edit Program Layers for ${visiting_group['name']}</h2>
+  <section class="section">
+    <div class="container">
+      <h2 class="title">Edit Program Layers for ${visiting_group['name']}</h2>
 
-  <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_visiting_group_program_layers" method="post">
-    <div id="layer_div" style="height:400px;"><input type="hidden" id="layer_div_input" name="layer_data"/><input type="hidden" id="visiting_group_id_input" name="visiting_group_id" value="${visiting_group['_id']}"/></div>
-    <button data-dojo-type="dijit/form/Button" type="submit" name="save_button" value="Save" id="save_button">Save</button>
-  </div>
+      <div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm" encType="multipart/form-data" action="update_visiting_group_program_layers" method="post">
+        <div id="layer_div" style="height:400px;"><input type="hidden" id="layer_div_input" name="layer_data"/><input type="hidden" id="visiting_group_id_input" name="visiting_group_id" value="${visiting_group['_id']}"/></div>
+        <button data-dojo-type="dijit/form/Button" type="submit" name="save_button" value="Save" id="save_button">Save</button>
+      </div>
+    </div>
+  </section>
 </body>
 </html>

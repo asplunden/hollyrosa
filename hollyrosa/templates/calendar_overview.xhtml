@@ -65,9 +65,9 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
           <td class="data info context_menu_symbol"><h2>${booking_day.get('title','')}</h2>
             <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day['events']">$e</li></ul>
             ${literal(booking_day['note'])}</td>
-        </tr>
-      </table>
-    </div>
-  </section>
-</body>
+          </tr>
+        </table>
+      </div>
+    </section>
+  </body>
 </html>

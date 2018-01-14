@@ -21,14 +21,18 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <html py:strip="" xmlns:py="http://genshi.edgewall.org/" xmlns:xi="http://www.w3.org/2001/XInclude">
-  <py:extends href="master.xhtml" />
+<py:extends href="master.xhtml" />
 <head py:block="head" py:strip="True">
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Program ${visiting_group_program_request.name}</title>
 </head>
-<body class="tundra">
-    <h2>Program ${visiting_group_program_request.name}</h2>
-    <!-- TODO: the action should be in the form after upgrading to tw2 -->
-    <div py:replace="tmpl_context.form(visiting_group_program_request, action='update_visiting_group_program_request')">Input Form</div>
+<body class="tundra" py:block="body" py:strip="True">
+  <section class="section">
+    <div class="container">
+      <h2 class="title">Program ${visiting_group_program_request.name}</h2>
+      <!-- TODO: the action should be in the form after upgrading to tw2 -->
+      <div py:replace="tmpl_context.form(visiting_group_program_request, action='update_visiting_group_program_request')">Input Form</div>
+    </div>
+  </section>
 </body>
 </html>

@@ -203,7 +203,10 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
 </head>
 
 <body class="tundra" py:block="body" py:strip="True">
-  <h2>Programönskemål för ${visiting_group_program_request['name']}</h2>
+  <section class="section">
+    <div class="container">
+
+  <h2 class="title">Programönskemål för ${visiting_group_program_request['name']}</h2>
 
   <p>Lägertid: <b>${reFormatDate(visiting_group_program_request['from_date'])} - ${reFormatDate(visiting_group_program_request['to_date'])}</b><br/>
     Boknings status: <b>${bokn_status_map[visiting_group_program_request['boknstatus']]}</b></p>
@@ -280,5 +283,7 @@ require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/Vali
       <button py:if="visiting_group_program_request['boknstatus']==0" data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Finalize-and-send" id="submit_button">Spara och processa</button>
 
     </div>
+  </div>
+</section>
   </body>
   </html>

@@ -160,77 +160,81 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
   </script>
 </head>
 <body class="tundra" py:block="body" py:strip="True">
-  <h2 id="title">Booking Overview 2</h2>
+  <section class="section">
+    <div class="container">
+
+      <h2 class="title" id="title">Booking Overview 2</h2>
 
 
-  <!-- container div -->
-  <div style="overflow:visible; margin-bottom:10em;" py:for="live_option in ['outdoor','indoor','daytrip']" id="viewport_$live_option">
-    <h2>$live_option</h2>
-    <!-- header div row with dates and everyting-->
-    <div style="border-bottom: 1px solid #888; overflow:visible; width:800em;">
-      <div py:for="d in header_dates" style="${['color: #888;','background:#fdd;'][6==makeDate(d).weekday()]}" class="gnatt_date_block gnatt_date_header" hollyrosa:date="$d" >$d<br/>
-        <div py:for="t in header_times" class="gnatt_date_time_block gnatt_date_time_header">
-          $t
+      <!-- container div -->
+      <div style="overflow:visible; margin-bottom:10em;" py:for="live_option in ['outdoor','indoor','daytrip']" id="viewport_$live_option">
+        <h2 class="subtitle">$live_option</h2>
+        <!-- header div row with dates and everyting-->
+        <div style="border-bottom: 1px solid #888; overflow:visible; width:800em;">
+          <div py:for="d in header_dates" style="${['color: #888;','background:#fdd;'][6==makeDate(d).weekday()]}" class="gnatt_date_block gnatt_date_header" hollyrosa:date="$d" >$d<br/>
+            <div py:for="t in header_times" class="gnatt_date_time_block gnatt_date_time_header">
+              $t
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- first status groud div -->
-    <div>
+        <!-- first status groud div -->
+        <div>
 
-      <div py:for="vg in vgroups" hollyrosa:vgid="$vg.id" hollyrosa:from_date="$vg.from_date" hollyrosa:to_date="$vg.to_date"  hollyrosa:all_values_zero="${vg.all_values_zero[live_option]}" class="gnatt_vgroup_block gnatt_vodb_status_$vg.vodbstatus">$vg.boknr $vg.name [$vg.vodbstatus ${bokn_status_map[vg.vodbstatus]}] <ul class="tag_list"><li py:for="t in vg.tags">${t}</li></ul>
-        <br/><div py:for="d in vg.date_range"  class="gnatt_date_block" hollyrosa:date="$d">
-          <div py:for="t in header_times"  class="gnatt_date_time_block">
-            ${vg['live_computed_by_date'][live_option+':'+d+':'+t]}
+          <div py:for="vg in vgroups" hollyrosa:vgid="$vg.id" hollyrosa:from_date="$vg.from_date" hollyrosa:to_date="$vg.to_date"  hollyrosa:all_values_zero="${vg.all_values_zero[live_option]}" class="gnatt_vgroup_block gnatt_vodb_status_$vg.vodbstatus">$vg.boknr $vg.name [$vg.vodbstatus ${bokn_status_map[vg.vodbstatus]}] <ul class="tag_list"><li py:for="t in vg.tags">${t}</li></ul>
+            <br/><div py:for="d in vg.date_range"  class="gnatt_date_block" hollyrosa:date="$d">
+              <div py:for="t in header_times"  class="gnatt_date_time_block">
+                ${vg['live_computed_by_date'][live_option+':'+d+':'+t]}
+              </div>
+            </div>
+          </div>
+          <div py:for="sg in [s for s in summary_vgroups[live_option].values() if s.has_values ]"  hollyrosa:vgid="$sg.id" hollyrosa:from_date="$sg.from_date" hollyrosa:to_date="$sg.to_date"  hollyrosa:all_values_zero="$sg.all_values_zero" class="gnatt_vgroup_block gnatt_sgroup_block gnatt_vodb_status_$sg.vodbstatus">$sg.name [$sg.vodbstatus ${bokn_status_map[sg.vodbstatus]}]
+            <br/><div py:for="d in sg.date_range"  class="gnatt_date_block" hollyrosa:date="$d">
+              <div py:for="t in header_times"  class="gnatt_date_time_block">
+                ${sg['live_summary'].get(d+':'+t,'0')}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div py:for="sg in [s for s in summary_vgroups[live_option].values() if s.has_values ]"  hollyrosa:vgid="$sg.id" hollyrosa:from_date="$sg.from_date" hollyrosa:to_date="$sg.to_date"  hollyrosa:all_values_zero="$sg.all_values_zero" class="gnatt_vgroup_block gnatt_sgroup_block gnatt_vodb_status_$sg.vodbstatus">$sg.name [$sg.vodbstatus ${bokn_status_map[sg.vodbstatus]}]
-        <br/><div py:for="d in sg.date_range"  class="gnatt_date_block" hollyrosa:date="$d">
-          <div py:for="t in header_times"  class="gnatt_date_time_block">
-            ${sg['live_summary'].get(d+':'+t,'0')}
-          </div>
-        </div>
-      </div>
-    </div>
+      
+      <!--
+      * the edit sheet page needs to get lots of info copied from the other two views
+      * refactor JavaScript
+      * date range
+      * we will need to add island+confirmed in a special summary group. We probably also will need to add island+confirmed+preliminary
+      * remove program booking related menu options
+      * we probably dont want to mix lots of staff members with visiting groups, but we still need to get the overview count right.
+
+      * check dates on external edit visiting group
+      - both format
+      - and from less than to
+      * what happens when a group changes from and to dates?
+
+
+      * How we display groups having only zeros or prhaps no computed live sheet? I suppose such groups are 'new' or 'created'... maybe special grid since we cant compute them.
+      * automatically populate the computed sheets
+
+      Maybe we always show all zeros but mark the vgroup as having only zeros and then have a javascript that can hide them from view if requested.
+      We still have the problem with vgroups having no computed live sheet at all. Maybe a spearate list ?
+
+      Maybe vgroups with only zeros should be displayed with an colour outline and no fill?
+
+
+      House booking:
+      * activity group for bed (done)
+      * list of all beds / houses with numbers
+      * add those beds to a special schema. Which probably will be so much easier with a rudimentary schema editor. Maybe we can use Dojo DataGrid. Or I just use the offline tool.
+      * Two functions will be very needed:
+      1. move-all-following
+      2. book-from-now-until
+      3. delete-from-now-until
+
+      Maybe 2 and 3 can be achieved by a DataGrid with ceckboxes if there should be a booking. Or multi book should be overhauled and put into action.
+
+    -->
+
   </div>
-
-<!--
- * the edit sheet page needs to get lots of info copied from the other two views
- * refactor JavaScript
- * date range
- * we will need to add island+confirmed in a special summary group. We probably also will need to add island+confirmed+preliminary
- * remove program booking related menu options
- * we probably dont want to mix lots of staff members with visiting groups, but we still need to get the overview count right.
-
- * check dates on external edit visiting group
-   - both format
-   - and from less than to
- * what happens when a group changes from and to dates?
-
-
- * How we display groups having only zeros or prhaps no computed live sheet? I suppose such groups are 'new' or 'created'... maybe special grid since we cant compute them.
- * automatically populate the computed sheets
-
-   Maybe we always show all zeros but mark the vgroup as having only zeros and then have a javascript that can hide them from view if requested.
-   We still have the problem with vgroups having no computed live sheet at all. Maybe a spearate list ?
-
-   Maybe vgroups with only zeros should be displayed with an colour outline and no fill?
-
-
- House booking:
-  * activity group for bed (done)
-   * list of all beds / houses with numbers
-   * add those beds to a special schema. Which probably will be so much easier with a rudimentary schema editor. Maybe we can use Dojo DataGrid. Or I just use the offline tool.
- * Two functions will be very needed:
- 1. move-all-following
- 2. book-from-now-until
- 3. delete-from-now-until
-
- Maybe 2 and 3 can be achieved by a DataGrid with ceckboxes if there should be a booking. Or multi book should be overhauled and put into action.
-
--->
-
-
+</section>
 </body>
 </html>

@@ -23,8 +23,12 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Edit note</title>
 </head>
-<body class="tundra" py:block="body" py:strip="True">
-    <h2>Edit note</h2>
-	<div>${tmpl_context.form.display(value=note)}</div>
-</body>
+  <body class="tundra" py:block="body" py:strip="True">
+    <section class="section">
+      <div class="container">
+        <h2 class="title">Edit note</h2>
+        <div>${tmpl_context.form.display(value=note)}</div>
+      </div>
+    </section>
+  </body>
 </html>

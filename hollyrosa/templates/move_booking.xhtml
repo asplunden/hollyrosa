@@ -72,15 +72,20 @@ require(["edit_booking", "dojo/query", "dojo/dom", "dojo/on", "dojo/request/xhr"
 });
   </script>
 </head>
-<body class="tundra" py:block="body" py:strip="True">
-  <h2>Move booking ${activity['title']} for ${booking['visiting_group_name']}</h2>
-  <table>
-    <tr><td>visiting group:</td><td>${booking['visiting_group_name']}</td></tr>
-    <tr><td>activity:</td><td>${activity['title']}</td></tr>
-    <tr><td>date:</td><td>${booking_day['date']} at ${slot['time_from']} to ${slot['time_to']}</td></tr>
-    <tr><td>content:</td><td>${getRenderContentDict(booking)}</td></tr>
-  </table>
-  <h4>Change activity below</h4>
-  <div py:replace="tmpl_context.form.display(booking)">Input Form</div>
-</body>
+  <body class="tundra" py:block="body" py:strip="True">
+    <section class="section">
+      <div class="container">
+
+        <h2 class="title">Move booking ${activity['title']} for ${booking['visiting_group_name']}</h2>
+        <table>
+          <tr><td>visiting group:</td><td>${booking['visiting_group_name']}</td></tr>
+          <tr><td>activity:</td><td>${activity['title']}</td></tr>
+          <tr><td>date:</td><td>${booking_day['date']} at ${slot['time_from']} to ${slot['time_to']}</td></tr>
+          <tr><td>content:</td><td>${getRenderContentDict(booking)}</td></tr>
+        </table>
+        <h4 class="subtitle">Change activity below</h4>
+        <div py:replace="tmpl_context.form.display(booking)">Input Form</div>
+      </div>
+    </section>
+  </body>
 </html>
