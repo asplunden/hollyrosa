@@ -105,7 +105,7 @@
         <span></span>
       </button>
     </div>
-    <div class="navbar-menu is-active">
+    <div class="navbar-menu "> <!-- is-active  has to be set using some JS framework -->
       <!-- navbar start, navbar end -->
       <div class="navbar-start">
         <!-- navbar items -->
@@ -132,12 +132,10 @@
   <section class="section" py:if="flash">
     <div class="container">
       <py:if test="defined('page')">
-
       </py:if>
-
-          <div py:if="flash" py:content="literal(flash)" />
-      
-        </div>
+      <article py:if="flash" py:content="literal(flash)" class="message">
+      </article>
+    </div>
     </section>
   </py:with>
 

@@ -25,36 +25,60 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <title>Hollyrosa - Tools</title>
 </head>
 <body class="tundra" py:block="body" py:strip="True">
-  <h2>Tools planning bookings</h2>
-  <ul>
-    <li><a href="${tg.url('sanity_check_property_usage')}">Check for bookig errors and warnings</a></li>
-    <li py:if="request.identity"><a href="${tg.url('/history/show')}">Booking history</a></li>
-  </ul>
-  <h3>Tools for managing users</h3>
-  <ul>
-    <li><a href="${tg.url('/user/show')}">Manage all Active Users</a></li>
-    <li><a href="${tg.url('/user/show', params={'show_deactive':True})}">Manage all Users</a></li>
-  </ul>
-  <h3>Statistics tools</h3>
-  <ul>
-    <!-- <li><a href="${tg.url('booking_statistics')}">Booking Statistics</a></li> -->
-    <li><a href="${tg.url('visitor_statistics')}">Age Group Statistics</a></li>
-    <li><a href="${tg.url('vodb_statistics')}">VODB Statistics</a></li>
-  </ul>
-  <h3>Tools in development (alpha &amp; beta)</h3>
-  <ul>
-    <li py:if="request.identity"><a href="${tg.url('/vodb_group/vodb_booking_overview')}">VODB Booking Overview (beta)</a></li>
-  </ul>
-  <div>
-    <h3>System Info</h3>
-    <table class="data">
-      <tr><th class="data info">Parameter</th><th class="data info">Value</th></tr>
-      <tr><td class="data info">DB Name</td><td class="data info">${db_name}</td></tr>
-      <tr><td class="data info">DB Url</td><td class="data info">${db_url}</td></tr>
-      <tr py:if="debug_enabled==True"><td class="data info"  style="background: #eeee88;">Debug Enabled</td><td class="data info" style="background: #eeee88;">${debug_enabled}</td></tr>
-      <tr py:if="debug_enabled!=True"><td class="data info">Debug Enabled</td><td class="data info">${debug_enabled}</td></tr>
-      <tr><td class="data info">Serve Static</td><td class="data info">${serve_static}</td></tr>
-    </table>
+  <section class="section">
+    <div class="container">
+      <h2 class="title">Tools</h2>
+        <div class="columns">
+          <div class="column is-one-third">
+
+            <aside class="menu">
+            <p class="menu-label">
+              Bookings
+            </p>
+            <ul class="menu-list">
+              <li><a href="${tg.url('sanity_check_property_usage')}">Check for bookig errors and warnings</a></li>
+              <li py:if="request.identity"><a href="${tg.url('/history/show')}">Booking history</a></li>
+            </ul>
+            <p class="menu-label">
+              Manage Users
+            </p>
+            <ul class="menu-list">
+              <li><a href="${tg.url('/user/show')}">Manage all Active Users</a></li>
+              <li><a href="${tg.url('/user/show', params={'show_deactive':True})}">Manage all Users</a></li>
+            </ul>
+            <p class="menu-label">
+              Statistics
+            </p>
+            <ul class="menu-list">
+              <!-- <li><a href="${tg.url('booking_statistics')}">Booking Statistics</a></li> -->
+              <li><a href="${tg.url('visitor_statistics')}">Age Group Statistics</a></li>
+              <li><a href="${tg.url('vodb_statistics')}">VODB Statistics</a></li>
+            </ul>
+            <p class="menu-label">
+              Tools in development (alpha &amp; beta)
+            </p>
+            <ul class="menu-list">
+          <li py:if="request.identity"><a href="${tg.url('/vodb_group/vodb_booking_overview')}">VODB Booking Overview (beta)</a></li>
+            </ul>
+
+
+          </aside>
+        </div>
+        <div class="column auto">
+          <div class="notification">
+        <h3 class="subtitle">System Info</h3>
+        <table class="data">
+          <tr><th class="data info">Parameter</th><th class="data info">Value</th></tr>
+          <tr><td class="data info">DB Name</td><td class="data info">${db_name}</td></tr>
+          <tr><td class="data info">DB Url</td><td class="data info">${db_url}</td></tr>
+          <tr py:if="debug_enabled==True"><td class="data info"  style="background: #eeee88;">Debug Enabled</td><td class="data info" style="background: #eeee88;">${debug_enabled}</td></tr>
+          <tr py:if="debug_enabled!=True"><td class="data info">Debug Enabled</td><td class="data info">${debug_enabled}</td></tr>
+          <tr><td class="data info">Serve Static</td><td class="data info">${serve_static}</td></tr>
+        </table>
+      </div>
+      </div>
+    </div>
   </div>
+</section>
 </body>
 </html>
