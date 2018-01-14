@@ -174,7 +174,7 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
       <div id="visiting_group_menu" hollyrosa:vgid="${visiting_group.id}" class="more_menu_symbol"><h2 class="title">${visiting_group['name']} - ${visiting_group.get('subtype','')}</h2></div>
       <p class="context_menu_symbol">${reFormatDate(visiting_group['from_date'])} to ${reFormatDate(visiting_group['to_date'])}</p>
 
-      <div class="note context_menu_symbol" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul></div>
+      <div class="note context_menu_symbol" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tags"></ul></div>
       <table class="visiting_group_info_table">
         <tr><td class="legend">bok.nr:</td><td class="info">${visiting_group['boknr']}</td></tr>
         <tr><td class="legend">subtype:</td><td class="info">${visiting_group.get('subtype','')}</td></tr>
@@ -188,24 +188,42 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
   </section>
 
   <section class="section">
-    <div class="container">
+    <div class="container" id="content">
       <p>${literal(visiting_group['info'])}</p>
       <h3 class="subtitle">Notes and attachments</h3>
-      <article py:for="n in notes" >
+      <article py:for="n in notes" class="media">
+        <div class="media-content">
+            <div class="${n['type']}2 context_menu_symbol content" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i><strong>${n['timestamp']}</strong> ${n['type']} by ${n['last_changed_by']}</i><br/><br/>
 
-        <div class="${n['type']}2 context_menu_symbol" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i><b>${n['timestamp']}</b> ${n['type']} by ${n['last_changed_by']}</i><br/><br/>
-          <div py:if="'note' == n['type']">${literal(n['text'])}</div>
-          <div py:if="('attachment' == n['type'])">${n['text']}<br/><br/>
 
-            <div py:for="aname, atinfo in n.get('_attachments',{}).items()"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}"><b>${aname}</b> ${atinfo['content_type']} ${atinfo['length']}</a></div>
-          </div>
+            <div py:if="'note' == n['type']">${literal(n['text'])}</div>
+            <div py:if="('attachment' == n['type'])">${n['text']}<br/>
+
+            <div py:for="aname, atinfo in n.get('_attachments',{}).items()"><strong>${aname}</strong><br/><a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}" class="button is-primary is-small is-outlined">download ${atinfo['content_type']} ${atinfo['length']}</a></div>
+        </div>
+        </div>
         </div>
       </article>
-
-
-      <p>${visiting_group.get('vodb_contact_name','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('vodb_contact_email','')}</a><br/></p>
-      <p><pre>${visiting_group.get('vodb_contact_address','')}</pre></p> <!-- this one looks grey -->
-
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div class="content">
+        <div class="card">
+          <div class="card-content">
+            <div class="media-content">
+              <h3 class="content">Contact Info</h3>
+              <p>${visiting_group.get('vodb_contact_name','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('vodb_contact_email','')}</a><br/></p>
+              <p><pre>${visiting_group.get('vodb_contact_address','')}</pre></p> <!-- this one looks grey -->
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div class="">
       <h3 class="subtitle">Properties</h3>
       <table class="data">
         <tr>
@@ -229,12 +247,16 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
           </div>
         </div>
       </div>
-
-
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container">
+    <div class="">
 
       <h3 class="subtitle">Computed Sheets</h3>
       <h4 class="subtitle is-6">Live Sheet</h4>
-      <table class="data">
+      <table class="data table">
         <tr class="data">
           <th>Date</th><th>Time</th>
           <th>Bo ute</th>
@@ -251,7 +273,7 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
       </table>
 
       <h4 class="subtitle is-6">Eat Sheet</h4>
-      <table class="data">
+      <table class="data table">
         <tr class="data">
           <th>Date</th><th>Time</th>
           <th>Ute</th>
@@ -268,7 +290,7 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
       </table>
 
       <h4 class="subtitle is-6">Tag Sheet</h4>
-      <table class="data">
+      <table class="data table">
         <tr class="data">
           <th>Date</th><th>Time</th>
           <th py:for="tag in visiting_group['tags']">$tag</th>
@@ -280,6 +302,7 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
         </tr>
       </table>
     </div>
+  </div>
   </section>
 </body>
 </html>

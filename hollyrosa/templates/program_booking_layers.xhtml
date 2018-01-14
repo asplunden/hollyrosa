@@ -70,7 +70,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         tmp_div.innerHTML = t.date;
         total_width = total_width + domGeom.position(tmp_div, true).w;
       });
-
+      console.log('Total Width', total_width);
       // look in data and create divs for all the days
       array.forEach(layer_time_divs, function(dv) {
 
@@ -113,7 +113,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
       if (0 == calls_that_want_to_adjust_bucket_heights) {
 
         tmp = dom.byId('program_layers_grid');
-        style.set(tmp, {'width': total_width+'px'});
+        style.set(tmp, {'width': total_width+10+'px'});
 
         //...for each layer time
         array.forEach(layer_time_divs, function(layer_time_div) {
@@ -176,10 +176,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
         var tmp_div = domConstruct.create('div', {style:"background-color: "+booking['layer_colour'], class:"program_layer_slot program_layer_data", 'hollyrosa:layer_booking_id':booking['_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
         var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic; padding-left:2em;'}, tmp_div);
-        tmp_layer_title_elem.innerHTML = '(' + booking['layer_title'] + ')BR';
+        tmp_layer_title_elem.innerHTML = '(' + booking['layer_title'] + ')\u003Cbr/\u003E';
         var tmp_span = domConstruct.create('span', {class:"workflow_state_"+booking['booking_state']}, tmp_div);
         //...need to pre-render content....
-        tmp_span.innerHTML = activity_title_map[booking['activity_id']]+"BR";
+        tmp_span.innerHTML = activity_title_map[booking['activity_id']]+"\u003Cbr/\u003E";
         var tmp_span_content = domConstruct.create('span', {style:'padding-left:2em;'}, tmp_div);
         tmp_span_content.innerHTML = booking['cache_content'];
 

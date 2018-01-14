@@ -45,7 +45,7 @@ function(array, registry, Menu, MenuItem, dijitDialog, dijitForm, dijitTextBox, 
     var ul_tag_list = dom.byId(node_id);
 
     for (t in tags) {
-      domConstruct.create("span", {innerHTML: tags[t]+' <a href="javascript:;" class="hollytag">(X)</a>', 'hollyrosa:vgid':visiting_group_id, 'class':'tag is-info is-small'}, ul_tag_list);
+      domConstruct.create("span", {innerHTML: tags[t]+' &nbsp;<a href="javascript:;" class="hollytag delete"></a>', 'hollyrosa:vgid':visiting_group_id, 'class':'tag is-primary is-small'}, ul_tag_list);
     }
   }
 

@@ -18,6 +18,7 @@
     ready(function() {
 
    //...setup menu for tools
+   /*
 	var tools_menu = new Menu({
    	targetNodeIds: ["mainmenu"],
       selector: "li.mainmenu_tools_choice",
@@ -34,7 +35,7 @@
    common_menu.add_redirect_menu_item(tools_menu, tools_menu, "History", '', '${tg.url('/history/show')}');
    common_menu.add_redirect_menu_item(tools_menu, tools_menu, "Workflow", '', '${tg.url('/workflow/overview')}');
 
-   /* assembling the filter booking status menu */
+   /* assembling the filter booking status menu
    var filter_menu = new Menu({
        targetNodeIds: ["mainmenu"],
        selector: "li.mainmenu_visiting_groups_choice",
@@ -87,25 +88,55 @@
             common_menu.add_redirect_menu_item(filter_menu, vodb_state_menu, l[1], {'vodb_state':l[0]}, '${tg.url('/visiting_group/view_vodb_state')}');
             });
         });
-	});
-    });
+
+
+*/
+
+
+    /* From Bulma for handling the navbar burger */
+    // not needed since we are executing in dojo Redy function: document.addEventListener('DOMContentLoaded', function () {
+
+      // Get all "navbar-burger" elements
+      var navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+      // Check if there are any navbar burgers
+      if (navbarBurgers.length > 0) {
+
+        // Add a click event on each of them
+        navbarBurgers.forEach(function (el) {
+          el.addEventListener('click', function () {
+
+            // Get the target from the "data-target" attribute
+            var target = el.dataset.target;
+            var target = document.getElementById(target);
+
+            // Toggle the class on both the "navbar-burger" and the "navbar-menu"
+            el.classList.toggle('is-active');
+            target.classList.toggle('is-active');
+
+          }); // end add event listener
+        }); // end forEach
+      } // end if
+    //}); // end addEventListener
+  }); // end ready
+}); // end require
     </script>
 </head>
 
 <body class="tundra">
-  <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+  <nav class="navbar is-link" role="navigation" aria-label="main navigation" data-target="navMenu">
     <div class="navbar-brand">
       <a class="navbar-item" href="${tg.url('/about')}">
         <img src="https://bulma.io/images/bulma-logo.png" alt="Bulma: a modern CSS framework based on Flexbox" width="112" height="28"/>
       </a>
 
-      <button class="button navbar-burger">
+      <button class="button navbar-burger" data-target="navMenu">
         <span></span>
         <span></span>
         <span></span>
       </button>
     </div>
-    <div class="navbar-menu "> <!-- is-active  has to be set using some JS framework -->
+    <div class="navbar-menu " id="navMenu"> <!-- is-active  has to be set using some JS framework -->
       <!-- navbar start, navbar end -->
       <div class="navbar-start">
         <!-- navbar items -->
