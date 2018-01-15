@@ -70,10 +70,17 @@ class Calendar(BaseController):
     @expose('hollyrosa.templates.calendar_upcoming')
     def upcoming(self):
         """Show an overview of all booking days"""
+
         today_date_str = datetime.date.today().strftime('%Y-%m-%d')
         end_date_str = (datetime.date.today()+datetime.timedelta(5)).strftime('%Y-%m-%d')
+
+        today_date_str = '2017-06-10'
+        end_date_str = '2017-06-20'
+
         booking_days = getBookingDays(holly_couch, from_date=today_date_str,  to_date=end_date_str)
 
+        log.debug(str(booking_days))
+        print '####', booking_days
         vgroups = getVisitingGroupsInDatePeriod(holly_couch, today_date_str, end_date_str) # TODO: fix view later.  get_visiting_groups(from_date=today_date_str,  to_date=end_date_str)
 
         group_info = dict()

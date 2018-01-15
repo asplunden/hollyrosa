@@ -1889,18 +1889,18 @@ a.box:active {
 .content sub {
   font-size: 75%; }
 .content table {
-  width: 100%; }
+  width: auto; }
   .content table td,
   .content table th {
-    border: 1px solid #dbdbdb;
-    border-width: 0 0 1px;
+    border: 1px solid white;
+    border-width: 0 0 0 0;
     padding: 0.5em 0.75em;
     vertical-align: top; }
   .content table th {
     color: #363636;
     text-align: left; }
   .content table tr:hover {
-    background-color: whitesmoke; }
+    background-color: white; }
   .content table thead td,
   .content table thead th {
     border-width: 0 0 2px;
@@ -3219,7 +3219,7 @@ a.box:active {
   margin-bottom: 1.5rem; }
   .table td,
   .table th {
-    border: 0px solid #dbdbdb;
+    border: 1px solid #dbdbdb;
     border-width: 0 0 1px;
     padding: 0.5em 0.75em;
     vertical-align: top; }
@@ -3334,9 +3334,9 @@ a.box:active {
   .table.is-fullwidth {
     width: 100%; }
   .table.is-hoverable tbody tr:not(.is-selected):hover {
-    background-color: white; }
+    background-color: #ffffdd; }
   .table.is-hoverable.is-striped tbody tr:not(.is-selected):hover {
-    background-color: whitesmoke; }
+    background-color: #ffffdd; }
   .table.is-narrow td,
   .table.is-narrow th {
     padding: 0.25em 0.5em; }

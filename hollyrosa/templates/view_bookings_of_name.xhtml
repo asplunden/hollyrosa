@@ -164,9 +164,9 @@ require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem"
           </table>
         </div> <!-- end  show group info -->
 
-        <h2 id="visiting_group_menu" class="more_menu_symbol title" style="width:30em;">Program Bookings for ${name}</h2>
-        <div py:if="show_group!=1"> <!-- else show group info (tags) -->
-          <div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul></div>
+        <div py:if="show_group!=1" id="visiting_group_menu" class="more_menu_symbol"><h2 class="title">Program Bookings for ${name}</h2>
+         <!-- else show group info (tags) -->
+          <div class="tag_list"><span style="display:inline;" id="taglist" class="tags"></span></div>
         </div> <!-- end else -->
         <div id="clustered_booking_list">
 
@@ -177,7 +177,7 @@ require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem"
             </div>
 
             <div py:for="b in cb">
-              <div py:if="None != b.booking_day" class="booking_meta_info context_menu_symbol" hollyrosa:bid="${b['id']}" hollyrosa:bdayid="${b['booking_day_id']}">
+              <div py:if="None != b.booking_day" class="booking_meta_info context_menu_symbol" hollyrosa:bid="${b['id']}" hollyrosa:bdayid="${b['booking_day_id']}" style="margin-left:2em;">
                 <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day', {'booking_day_id':b.booking_day.id})}">${formatDate(b.booking_day['date'])}</a>
                   <span py:if="b.slot_id!=None">
                     <span py:if="render_time=='time'" ><b>${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b></span>

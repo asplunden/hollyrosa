@@ -7,32 +7,43 @@
 <body class="tundra" py:block="body" py:strip="True">
   <section class="section">
     <div class="container">
-      <div id="loginform">
-        <form action="${tg.url('/login_handler', params={'came_from':  came_from.encode('utf-8'), '__logins' : login_counter.encode('utf-8')})}" method="POST">
-          
-          <h2 class="title">Login</h2>
 
-          <div class="field has-addons-centered">
-            <label class="label is-medium">Username or bokn.nr:</label>
-            <div class="control">
-              <input class="input is-medium" type="text" placeholder="Text input" id="login" name="login"/>
+      <div class="tile is-ancestor">
+        <div class="tile is-4 is-vertical is-parent">
+        </div>
+        <div class="tile is-4 is-vertical is-parent">
+          <div class="tile is-child box">
+
+            <div id="loginform">
+              <form action="${tg.url('/login_handler', params={'came_from':  came_from.encode('utf-8'), '__logins' : login_counter.encode('utf-8')})}" method="POST">
+
+                <h2 class="title">Login</h2>
+
+                <div class="field has-addons-centered">
+                  <label class="label is-medium">Username or bokn.nr:</label>
+                  <div class="control">
+                    <input class="input is-medium" type="text" placeholder="Text input" id="login" name="login"/>
+                  </div>
+                </div>
+
+                <div class="field has-addons-centered">
+                  <label class="label is-medium">Password:</label>
+                  <div class="control">
+                    <input class="input is-medium" type="password" placeholder="Text input" id="password" name="password"/>
+                  </div>
+                </div>
+
+
+                <div class="field has-addons-centered">
+                  <div class="control">
+                    <input type="submit" id="submit" value="Login" class="button is-primary"/>
+                  </div>
+                </div>
+              </form>
             </div>
-          </div>
 
-          <div class="field has-addons-centered">
-            <label class="label is-medium">Password:</label>
-            <div class="control">
-              <input class="input is-medium" type="password" placeholder="Text input" id="password" name="password"/>
-            </div>
           </div>
-
-
-          <div class="field has-addons-centered">
-            <div class="control">
-              <input type="submit" id="submit" value="Login" class="button is-primary"/>
-            </div>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   </section>

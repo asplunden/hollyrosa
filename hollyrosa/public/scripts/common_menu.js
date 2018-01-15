@@ -76,6 +76,23 @@ define(["dojo/dom-attr", "dojo/_base/array", "dojo/dom-construct", "dojo/_base/w
     add_redirect_menu_item(a_menu, a_sub_menu, a_name, l_params, a_url);
   }
 
+  /**
+  * like add_vgid_redirect_menu_item but uses a POST request instead of a redirec
+  **/
+  function add_vgid_post_menu_item(a_menu, a_sub_menu, a_name, a_vgid, a_url) {
+
+    a_sub_menu.addChild(new MenuItem({
+      label: a_name,
+      onClick: function(evt) {
+
+        var ioq = {
+          visiting_group_id: a_vgid
+        };
+        make_form_and_post(a_url, ioq);
+
+      }}));
+    }
+
 
   function add_calc_sheet_redirect_menu_item(a_menu, a_sub_menu, a_name, a_vgid, a_live, change_schema, a_url) {
     console.log('add_calc_sheet_redirect_menu_item');
@@ -533,6 +550,7 @@ function add_change_booking_state_menu_item(a_menu, a_sub_menu, state_name, stat
     program_state_map:program_state_map, vodb_state_map:vodb_state_map,
     update_visiting_group_type_visible_rows:update_visiting_group_type_visible_rows,
     add_transfer_map_function_menu_item:add_transfer_map_function_menu_item,
-    add_transfer_map_function_menu_item_2:add_transfer_map_function_menu_item_2
+    add_transfer_map_function_menu_item_2:add_transfer_map_function_menu_item_2,
+    add_vgid_post_menu_item:add_vgid_post_menu_item
   };
 });

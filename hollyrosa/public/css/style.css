@@ -149,6 +149,11 @@ background:#EEEEEE none repeat scroll 0% 0%;
 font-weight:bold;
 }
 */
+
+h2 {
+	margin-bottom: 1em;
+}
+
 #flash, .notice {
 font-size:120%;
 font-weight:bolder;
@@ -280,7 +285,7 @@ background: #f00;
 div.note { /* should have been called info_note */
     background: #ffe;
     padding:1em;
-    width:40em;
+    /*width:40em; */
     border-top: 1px solid #eee;
     border-left: 1px solid #eee;
     border-bottom:1px solid #ccc;

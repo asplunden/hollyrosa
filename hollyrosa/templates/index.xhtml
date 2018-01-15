@@ -37,9 +37,34 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
       </p></em>
 
       <div class="tile is-ancestor">
-        <div class="tile is-4 is-vertical is-parent">
 
-          <div class="tile is-child notification is-light" > <!-- style="margin:8em; background: #eea" -->
+
+
+
+        <div class="tile is-6 is-vertical is-parent">
+
+          <div class="tile is-child box">
+            <div class="content">
+            <h2 class="subtitle">Visiting Groups - Program</h2>
+
+            <a href="${tg.url('visiting_group/view_all')}"><img src="${tg.url('images/group_skiss-m.png')}" alt="calendar skiss icon" style="border:0px;" width="100px;"/></a><br/>
+            <p>From the view of all visiting groups, find the visiting group you are looking for or add a new group. You may edit, show and list activities of the visiting group you are intereseted in.</p>
+            <a class="button is-outlined is-primary" href="${tg.url('visiting_group/view_all')}">List (all) visiting groups</a>
+          </div>
+          </div>
+          
+          <div class="tile is-child box">
+            <div class="content">
+            <h2 class="subtitle">Calendar Overview</h2>
+            <a href="${tg.url('calendar/overview')}"><img src="${tg.url('images/calendar_skiss-m.png')}" alt="calendar skiss icon" style="border:0px;" width="100px;"/></a><br/>
+            <p>View the calendar overview of the whole summer. From the calendar overview, you may select a day to see and work with all bookings for that day.</p>
+            <a class="button is-primary is-outlined" href="${tg.url('calendar/overview')}">calendar overview</a>
+          </div>
+          </div>
+
+        <!--
+
+          <div class="tile is-child notification is-light" >
             <div class="content">
             <h2 class="subtitle">Direkt till programönskemål</h2>
             <p>Hej!<br/>För att skicka in programönskemål via vårt webbaserade system, börja med att fylla i ert referensnummer/bokningsnummer nedan. Nummret ser ut ungefär så här: "13-122".
@@ -58,27 +83,12 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
               </form>
             </div>
           </div>
+        -->
         </div>
+
           <div class="tile is-vertical is-parent">
 
-            <div class="tile is-child box">
-              <div class="content">
-              <h2 class="subtitle">Calendar Overview</h2>
-              <a href="${tg.url('calendar/overview')}"><img src="${tg.url('images/calendar_skiss-m.png')}" alt="calendar skiss icon" style="border:0px;" width="100px;"/></a><br/>
-              <p>View the calendar overview of the whole summer. From the calendar overview, you may select a day to see and work with all bookings for that day.</p>
-              <a class="button is-primary is-outlined" href="${tg.url('calendar/overview')}">calendar overview</a>
-            </div>
-            </div>
 
-            <div class="tile is-child box">
-              <div class="content">
-              <h2 class="subtitle">Visiting Groups - Program</h2>
-
-              <a href="${tg.url('visiting_group/view_all')}"><img src="${tg.url('images/group_skiss-m.png')}" alt="calendar skiss icon" style="border:0px;" width="100px;"/></a><br/>
-              <p>From the view of all visiting groups, find the visiting group you are looking for or add a new group. You may edit, show and list activities of the visiting group you are intereseted in.</p>
-              <a class="button is-outlined is-primary" href="${tg.url('visiting_group/view_all')}">List (all) visiting groups</a>
-            </div>
-            </div>
 
             <div class="tile is-child box">
               <div class="content">
