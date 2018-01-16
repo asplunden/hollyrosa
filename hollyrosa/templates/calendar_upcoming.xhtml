@@ -36,61 +36,77 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         <div class="tile is-vertical">
           <div class="tile" py:for="booking_day in booking_days">
 
-            <div class="tile is-vertical is-parent">
+            <div class="tile is-vertical">
+
+
+              <div class="tile is-parent">
                 <div class="tile is-child">
-                  <h3 class="title is-5"><a href="${tg.url('/booking/day',params={'day_id':str(booking_day['_id'])})}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a></h3>
-                  <h2 class="title is-5">${booking_day['title']}</h2>
+                  <nav class="level">
+                    <div class="level-left">
+                      <div class="level-item">
+                        <h3 class="title"><a href="${tg.url('/booking/day',params={'booking_day_id':str(booking_day['_id'])})}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a></h3>
+                      </div>
+                    </div>
+                    <div class="level-right">
+
+
+                          <p class="level-item">
+                            <a class="" href="${url('/visiting_group/view_at_date', params={'date':booking_day['date']})}">
+                              <span>Visiting groups this day</span>
+                            </a>
+                          </p>
+                            <p class="level-item">
+                            <a class="" href="${url('/booking/fladan_day', params={'ag':'activity_group.1', 'date':booking_day['date']})}">
+                              <span>Trapper schema</span>
+                            </a>
+                          </p>
+                            <p class="level-item">
+                            <a class="" href="${url('/booking/fladan_day', params={'date':booking_day['date']})}">
+                              <span>All Day schema</span>
+                            </a>
+                          </p>
+                            <p class="level-item">
+                            <a class="button" href="${url('/booking/fladan_day', params={'ag':'activity_group.6', 'date':booking_day['date']})}">
+                              <span>Fladan schema</span>
+                            </a>
+                          </p>
+                            <p class="level-item">
+                            <a class="button is-primary" href="${tg.url('/booking/day',params={'booking_day_id':str(booking_day['_id'])})}">
+                              <span>Day Schema</span>
+                            </a>
+                          </p>
+
+
+                    </div>
+                  </nav>
+                </div> <!-- End nav box -->
+              </div>
+
+
+
+
+                <div class="tile is-child">
+
+
+
+
+
+
+
+
+
                 </div>
 
                 <div class="tile"> <!-- stack two vertical tiles horizontally -->
 
               <div class="tile is-vertical is-6"> <!-- Horizontal Tile of the main vertical tile -->
 
-                <div class="tile is-parent">
-                  <div class="tile is-child">
-                    <nav class="level">
-                      <div class="level-item has-text-centered">
-                        <div>
-
-                        </div>
-                      </div>
-                      <div class="level-item has-text-centered">
-                        <div>
-
-                          <div class="">
-
-                            <a class="button is-small is-primary" href="${tg.url('/booking/day',params={'day_id':str(booking_day['_id'])})}">
-                              <span>Day Schema</span>
-                            </a>
-
-                              <a class="button is-small is-primary" href="${url('/visiting_group/view_at_date', params={'date':booking_day['date']})}">
-                                <span>Visiting groups this day</span>
-                              </a>
-
-                              <a class="button is-small" href="${url('/booking/fladan_day', params={'ag':'activity_group.6', 'date':booking_day['date']})}">
-                                <span>Fladan schema</span>
-                              </a>
-
-                              <a class="button is-small" href="${url('/booking/fladan_day', params={'ag':'activity_group.1', 'date':booking_day['date']})}">
-                                <span>Trapper schema</span>
-                              </a>
-
-                              <a class="button is-small" href="${url('/booking/fladan_day', params={'date':booking_day['date']})}">
-                                <span>All Day schema</span>
-                              </a>
-
-                          </div>
-
-                        </div>
-                      </div>
-                    </nav>
-                  </div> <!-- End nav box -->
-                </div>
 
                 <div class="tile is-parent"> <!-- note starts here -->
                   <div class="tile is-child ">
                     <article class="media">
                       <div class="media-content note content">
+                        <h2 class="title is-5">${booking_day['title']}</h2>
                         ${literal(booking_day.get('note',''))}
                       </div>
                     </article>
@@ -108,10 +124,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
                 </div>
 
               </div> <!-- end of vertical col 1 -->
-              <div class="tile is-vertical is-6 notification">
+              <div class="tile is-vertical is-6 ">
 
                 <div class="tile is-parent">
-                  <div class="tile is-child content">
+                  <div class="tile is-child content notification">
 
                       <h3 class="subtitle">arrives:</h3>
                       <ul>
@@ -120,7 +136,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
                     </div>
                   </div>
                   <div class="tile is-parent">
-                    <div class="tile is-child content">
+                    <div class="tile is-child content notification">
 
                       <h3 class="subtitle">leaves:</h3>
                       <ul>
