@@ -290,8 +290,9 @@ div.note { /* should have been called info_note */
     border-left: 1px solid #eee;
     border-bottom:1px solid #ccc;
     border-right: 1px solid #ccc;
-    margin-top:1em;
+    /*margin-top:1em;
     margin-bottom: 1em;
+		*/
     min-height: 2em;
 }
 
@@ -385,6 +386,7 @@ td.timestamp  {
     color: #884;
     background-image:url('../images/sheep.png');
     background-repeat:no-repeat;
+		background-size: contain;
     padding-left: 2em;
     font-weight:bold;
     }
@@ -392,6 +394,7 @@ td.timestamp  {
     color: #884;
     background-image:url('../images/jarno_aircraft.png');
     background-repeat:no-repeat;
+		background-size: contain;
     padding-left: 2em;
     font-weight:bold;
     }
@@ -399,6 +402,7 @@ td.timestamp  {
     color: #448;
     background-image:url('../images/paper_to_sign.png');
     background-repeat:no-repeat;
+		background-size: contain;
     padding-left: 2em;
     font-weight:bold;
     }
@@ -407,6 +411,7 @@ td.timestamp  {
     color: #484;
     background-image:url('../images/check_mark.png');
     background-repeat:no-repeat;
+		background-size: contain;
     padding-left: 2em;
     font-weight:bold;
     }
@@ -414,6 +419,7 @@ td.timestamp  {
     color: #484;
     background-image:url('../images/cogwheel_dropin.png');
     background-repeat:no-repeat;
+		background-size: contain;
     padding-left: 2em;
     font-weight:bold;
     }
@@ -421,6 +427,7 @@ td.timestamp  {
     color: #844;
     font-weight:bold;
     background-image:url('../images/alert.png');
+		background-size: contain;
     background-repeat:no-repeat;
     padding-left: 2em;
     }
@@ -429,6 +436,7 @@ td.timestamp  {
     color: #666;
     font-weight:bold;
     background-image:url('../images/alert.png');
+		background-size: contain;
     background-repeat:no-repeat;
     padding-left: 2em;
     }

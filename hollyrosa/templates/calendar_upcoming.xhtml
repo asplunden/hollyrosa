@@ -35,115 +35,109 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
       <div class="tile is-ancestor">
         <div class="tile is-vertical">
           <div class="tile" py:for="booking_day in booking_days">
+
             <div class="tile is-vertical is-parent">
+                <div class="tile is-child">
+                  <h3 class="title is-5"><a href="${tg.url('/booking/day',params={'day_id':str(booking_day['_id'])})}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a></h3>
+                  <h2 class="title is-5">${booking_day['title']}</h2>
+                </div>
 
-                <div class="tile is-child notification box">
-                  <nav class="level">
-                    <div class="level-item has-text-centered">
-                      <div>
-                        <p class="title is-5">${booking_day['title']}</p>
-                        <p><a style="font-weight:bold;" href="${tg.url('/booking/day',params={'day_id':str(booking_day['_id'])})}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a></p>
-                      </div>
-                    </div>
-                    <div class="level-item has-text-centered">
-                      <div>
+                <div class="tile"> <!-- stack two vertical tiles horizontally -->
 
-                        <div class="">
+              <div class="tile is-vertical is-6"> <!-- Horizontal Tile of the main vertical tile -->
 
-                            <a class="button is-small" href="${url('/visiting_group/view_at_date', params={'date':booking_day['date']})}">
-                              <span>Visiting groups this day</span>
-                            </a>
+                <div class="tile is-parent">
+                  <div class="tile is-child">
+                    <nav class="level">
+                      <div class="level-item has-text-centered">
+                        <div>
 
-                            <a class="button is-small" href="${url('/booking/fladan_day', params={'ag':'activity_group.6', 'date':booking_day['date']})}">
-                              <span>Fladan schema</span>
-                            </a>
-
-                            <a class="button is-small" href="${url('/booking/fladan_day', params={'ag':'activity_group.1', 'date':booking_day['date']})}">
-                              <span>Trapper schema</span>
-                            </a>
-
-                            <a class="button is-small" href="${url('/booking/fladan_day', params={'date':booking_day['date']})}">
-                              <span>All Day schema</span>
-                            </a>
-                          
                         </div>
-
-
-
                       </div>
-                    </div>
-                  </nav>
-                  </div>
+                      <div class="level-item has-text-centered">
+                        <div>
 
-              <div class="tile">
-                <div class="tile is-parent is-6">
+                          <div class="">
+
+                            <a class="button is-small is-primary" href="${tg.url('/booking/day',params={'day_id':str(booking_day['_id'])})}">
+                              <span>Day Schema</span>
+                            </a>
+
+                              <a class="button is-small is-primary" href="${url('/visiting_group/view_at_date', params={'date':booking_day['date']})}">
+                                <span>Visiting groups this day</span>
+                              </a>
+
+                              <a class="button is-small" href="${url('/booking/fladan_day', params={'ag':'activity_group.6', 'date':booking_day['date']})}">
+                                <span>Fladan schema</span>
+                              </a>
+
+                              <a class="button is-small" href="${url('/booking/fladan_day', params={'ag':'activity_group.1', 'date':booking_day['date']})}">
+                                <span>Trapper schema</span>
+                              </a>
+
+                              <a class="button is-small" href="${url('/booking/fladan_day', params={'date':booking_day['date']})}">
+                                <span>All Day schema</span>
+                              </a>
+
+                          </div>
+
+                        </div>
+                      </div>
+                    </nav>
+                  </div> <!-- End nav box -->
+                </div>
+
+                <div class="tile is-parent"> <!-- note starts here -->
                   <div class="tile is-child ">
                     <article class="media">
-                      <div class="media-content note">
-                      ${literal(booking_day.get('note',''))}
-                    </div>
+                      <div class="media-content note content">
+                        ${literal(booking_day.get('note',''))}
+                      </div>
                     </article>
                   </div>
+                </div> <!-- note ends here -->
+
+                <div class="tile is-parent">
+                  <div class="tile is-child content">
+
+                    <h3 class="subtitle">stays:</h3>
+                    <ul>
+                      <li py:for="g in group_info[str(booking_day['date'])]['stays']" py:if="g['name'] not in ['N/A','Program I','Program II','Fladan I','Fladan II','Konf I','Konf II']"><a href="${tg.url('/visiting_group/show_visiting_group', params={'visiting_group_id':g['_id']})}">${g['name']}</a></li>
+                    </ul>
+                  </div>
                 </div>
-                <div class="tile is-parent is-6">
-                  <div class="tile is-child  box content">
+
+              </div> <!-- end of vertical col 1 -->
+              <div class="tile is-vertical is-6 notification">
+
+                <div class="tile is-parent">
+                  <div class="tile is-child content">
 
                       <h3 class="subtitle">arrives:</h3>
                       <ul>
                         <li py:for="g in group_info[str(booking_day['date'])]['arrives']"><a href="${tg.url('/visiting_group/show_visiting_group', params={'visiting_group_id':g['_id']})}">${g['name']}</a></li>
                       </ul>
+                    </div>
+                  </div>
+                  <div class="tile is-parent">
+                    <div class="tile is-child content">
 
                       <h3 class="subtitle">leaves:</h3>
                       <ul>
                         <li py:for="g in group_info[str(booking_day['date'])]['leaves']"><a href="${tg.url('/visiting_group/show_visiting_group', params={'visiting_group_id':g['_id']})}">${g['name']}</a></li>
                       </ul>
-
-                      <h3 class="subtitle">stays:</h3>
-                      <ul>
-                        <li py:for="g in group_info[str(booking_day['date'])]['stays']" py:if="g['name'] not in ['N/A','Program I','Program II','Fladan I','Fladan II','Konf I','Konf II']"><a href="${tg.url('/visiting_group/show_visiting_group', params={'visiting_group_id':g['_id']})}">${g['name']}</a></li>
-                      </ul>
                     </div>
-                </div>
-              </div>
+                  </div>
+              </div> <!-- end of horizontal tile -->
             </div>
+            <hr/>
+            </div>
+
           </div>
         </div>
       </div>
 
-      <table class="data">
-        <tr py:for="booking_day in booking_days" style="${['','background:#fdd;'][6==makeDate(booking_day['date']).weekday()]}" class="calendar_overview">
-          <td class="data info">
-            <div style="background-color:#ddd; padding-top:0.5em;padding-bottom:0.5em; font-size:150%;"><a style="font-weight:bold;" href="${tg.url('/booking/day',params={'day_id':str(booking_day['_id'])})}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a> </div>
-            <ul class="any_menu context_inline_menu">
-              <li><a href="${url('/visiting_group/view_at_date', params={'at_date':booking_day['date']})}">Visiting groups this day</a></li>
-              <li><a href="${url('/booking/fladan_day', params={'ag':'Fladan', 'day':booking_day['date']})}">Fladan schema</a></li>
-              <li><a href="${url('/booking/fladan_day', params={'ag':'Trapper', 'day':booking_day['date']})}">Trapper schema</a></li>
-              <li><a href="${url('/booking/fladan_day', params={'day':booking_day['date']})}">All Day schema</a></li>
-            </ul>
 
-            <div style="float:left;"><h1>${booking_day['title']}</h1>
-              ${literal(booking_day.get('note',''))}
-            </div>
-            <div style="padding:1em; border: 1px dashed #ccc; float:right;">
-              <h3 class="subtitle">arrives:</h3>
-              <ul>
-                <li py:for="g in group_info[str(booking_day['date'])]['arrives']"><a href="${tg.url('/visiting_group/show_visiting_group', params={'visiting_group_id':g['_id']})}">${g['name']}</a></li>
-              </ul>
-
-              <h3 class="subtitle">leaves:</h3>
-              <ul>
-                <li py:for="g in group_info[str(booking_day['date'])]['leaves']"><a href="${tg.url('/visiting_group/show_visiting_group', params={'visiting_group_id':g['_id']})}">${g['name']}</a></li>
-              </ul>
-
-              <h3 class="subtitle">stays:</h3>
-              <ul>
-                <li py:for="g in group_info[str(booking_day['date'])]['stays']" py:if="g['name'] not in ['N/A','Program I','Program II','Fladan I','Fladan II','Konf I','Konf II']"><a href="${tg.url('/visiting_group/show_visiting_group', params={'visiting_group_id':g['_id']})}">${g['name']}</a></li>
-              </ul>
-            </div>
-          </td>
-        </tr>
-
-      </table>
     </div>
   </section>
 </body>
