@@ -1,7 +1,7 @@
 <html py:extends="master.xhtml" py:strip="True">
 
 <!--
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2018 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -288,8 +288,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 
 <body class="tundra" py:block="body" py:strip="True">
-  <section class="section is-fluid">
-    <div class="container">
+  <section class="section">
+    <div class="container is-fluid">
       <div class="more_menu_symbol" id="bokn_status_menu"><h2 class="title">Viewing VODB Groups</h2></div>
       <table id="vgroup_listing">
         <tr py:for="visiting_group in visiting_groups" class="name_menu" hollyrosa:vgid="${visiting_group.id}" hollyrosa:vgtid="${visiting_group['subtype']}" hollyrosa:vgname="${visiting_group['name']}" hollyrosa:taglist_node_id="taglist_for_${hash(visiting_group.id)}" hollyrosa:has_notes="${has_notes_map.has_key(visiting_group.id)}">

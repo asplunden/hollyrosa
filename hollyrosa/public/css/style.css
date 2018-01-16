@@ -298,25 +298,27 @@ div.note { /* should have been called info_note */
 div.note2 { /* for notes found as note documents*/
     background: #fff;
     padding:1em;
-    width:40em;
+    /*width:40em; */
     border-top: 1px solid #eee;
     border-left: 1px solid #eee;
     border-bottom:1px solid #ccc;
     border-right: 1px solid #ccc;
-    margin-top:1em;
+    /*margin-top:1em;
     margin-bottom: 1em;
+		*/
 }
 
 div.attachment2 { /* for notes/attachments found as note documents*/
     background: #eef;
     padding:1em;
-    width:40em;
+    /* width:40em; */
     border-top: 1px solid #eee;
     border-left: 1px solid #eee;
     border-bottom:1px solid #ccc;
     border-right: 1px solid #ccc;
-    margin-top:1em;
+    /*margin-top:1em;
     margin-bottom: 1em;
+		*/
 }
 
 
