@@ -588,8 +588,9 @@ ul.context_dropdown_menu li:hover {
 
 
 #booking_day_hide_slot_rows_control {
-    float:right;
+    /*float:right;
     display: inline;
+		*/
 }
 
 
