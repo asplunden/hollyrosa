@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2018 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -53,19 +53,19 @@ class User(BaseController):
     def view(self, url):
         """Abort the request with a 404 HTTP status code."""
         abort(404)
-    
-    
-    @expose('hollyrosa.templates.list_users')
+
+
+    @expose('hollyrosa.templates.tools.list_users')
     @validate(validators={'show_deactive':validators.StringBool(not_empty=False)})
     @require(Any(has_level('staff'), has_level('pl'), msg='Only staff and pl may look at user listings'))
     def show(self, show_deactive=False):
         """Show an overview of all users"""
-        
+
         all_users = [h.doc for h in getAllActiveUsers(holly_couch, show_deactive=show_deactive)]
         return dict(users=all_users)
-        
 
-    @expose('hollyrosa.templates.edit_user')
+
+    @expose('hollyrosa.templates.tools.edit_user')
     @require(Any(has_level('pl'),  msg='Only PL can edit users right now'))
     def edit(self, user_id=''):
         """edit user properties"""
@@ -75,7 +75,7 @@ class User(BaseController):
         return dict(user=user_o)
 
 
-    @expose('hollyrosa.templates.edit_user')
+    @expose('hollyrosa.templates.tools.edit_user')
     @require(Any(has_level('pl'),  msg='Only PL can create users right now'))
     def new(self, user_id=''):
         """New user"""
@@ -84,14 +84,14 @@ class User(BaseController):
         user_o = dict(type='user', level=[])
         return dict(user=user_o)
 
-         
-    @expose()   
+
+    @expose()
     @validate(validators={'id':validators.UnicodeString(not_empty=False), 'user_name':validators.UnicodeString(not_empty=True), 'display_name':validators.UnicodeString(not_empty=True)})
     @require(Any(has_level('pl'),  msg='Only PL can save user properties right now'))
     def save_user(self, user_id='', display_name='', user_name=''):
         log.info("save_user()")
         ensurePostRequest(request, __name__)
-        """edit user properties""" 
+        """edit user properties"""
         if user_id != '':
             user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
         else:
@@ -100,13 +100,13 @@ class User(BaseController):
         user_o['display_name'] = display_name
         user_o['user_name'] = user_name
         user_o['level'] = []
-        
+
         holly_couch[user_id] = user_o
-        
+
         raise redirect('show')
-    
-    
-    
+
+
+
     @expose()
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False), 'level':validators.UnicodeString(not_empty=True)})
     @require(Any(has_level('pl'),  msg='Only PL can change user levels for other users'))
@@ -114,20 +114,20 @@ class User(BaseController):
         log.info("set_level()")
         ensurePostRequest(request, __name__)
         user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
-        
+
         # Rules for setting levels.
         # TODO: refactor out
         level_map = dict()
         level_map['viewer'] = ['view']
         level_map['staff'] = ['view','staff']
         level_map['pl'] = ['view','staff','pl']
-        
+
         user_o['level'] = level_map.get(level,[])
         holly_couch[user_id] = user_o
-        
+
         raise redirect(request.referrer)
-    
-    
+
+
     @expose()
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
     @require(Any(has_level('pl'),  msg='Only PL can change user levels for other users'))
@@ -135,14 +135,14 @@ class User(BaseController):
         log.info("deactivate()")
         ensurePostRequest(request, __name__)
         user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
-        
+
         # Rules for setting levels.
         user_o['active'] = False
         holly_couch[user_id] = user_o
-        
+
         raise redirect(request.referrer)
-    
-    
+
+
     @expose()
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
     @require(Any(has_level('pl'),  msg='Only PL can change user levels for other users'))
@@ -150,24 +150,24 @@ class User(BaseController):
         log.info("activate()")
         ensurePostRequest(request, __name__)
         user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
-        
+
         # Rules for setting levels.
         user_o['active'] = True
         holly_couch[user_id] = user_o
-        
+
         raise redirect(request.referrer)
-    
-        
-    @expose('hollyrosa.templates.change_password')
+
+
+    @expose('hollyrosa.templates.tools.change_password')
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
-    @require(Any(has_level('pl'),  msg='Only PL can change passwords'))    
+    @require(Any(has_level('pl'),  msg='Only PL can change passwords'))
     def change_password(self, user_id):
         tmpl_context.form = create_change_password_form
         user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
-            
+
         return dict(user=dict(user_id=user_id), user_name=user_o['user_name'])
-    
-        
+
+
     @expose()
     @validate(validators={'user_id':validators.UnicodeString(not_empty=False)})
     @require(Any(has_level('pl'), msg='Only PL can change passwords'))
@@ -176,9 +176,9 @@ class User(BaseController):
         ensurePostRequest(request, __name__)
         if not password==password2:
             raise IOError, 'passwords must agree'
- 
+
         s = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
-    
+
         # todo make salt part of development.ini
         h = hashlib.sha256('gninyd') # salt # TODO: read from AppConfig / tg.config
         h.update(password)
@@ -186,6 +186,3 @@ class User(BaseController):
         s['password'] = c
         holly_couch[user_id] = s
         raise redirect('show')
-
-
-    

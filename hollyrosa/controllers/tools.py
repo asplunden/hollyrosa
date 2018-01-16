@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2018 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -46,7 +46,7 @@ class Tools(BaseController):
         abort(404)
 
 
-    @expose('hollyrosa.templates.tools_show')
+    @expose('hollyrosa.templates.tools.tools_show')
     def show(self,  day=None):
         """Show an overview of all bookings"""
         if day == None:
@@ -67,7 +67,7 @@ class Tools(BaseController):
         return cmp(b['severity'], a['severity'])
 
 
-    @expose('hollyrosa.templates.view_sanity_check_property_usage')
+    @expose('hollyrosa.templates.tools.view_sanity_check_property_usage')
     @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
     def sanity_check_property_usage(self):
         log.info("sanity_check_property_usage()")
@@ -141,7 +141,7 @@ class Tools(BaseController):
         return dict (problems=problems,  visiting_group_map=visiting_group_map)
 
 
-    @expose('hollyrosa.templates.activity_statistics')
+    @expose('hollyrosa.templates.tools.activity_statistics')
     @require(Any(has_level('staff'), has_level('pl'), msg='Only PL or staff members can take a look at people statistics'))
     def activity_statistics(self):
         activity_statistics = getActivityStatistics(holly_couch)
@@ -163,7 +163,7 @@ class Tools(BaseController):
         return dict(statistics=result)
 
 
-    @expose('hollyrosa.templates.visitor_statistics')
+    @expose('hollyrosa.templates.tools.visitor_statistics')
     @require(Any(has_level('staff'), has_level('pl'), msg='Only PL or staff members can take a look at people statistics'))
     def visitor_statistics(self):
 
@@ -244,7 +244,7 @@ class Tools(BaseController):
 
 
 
-    @expose('hollyrosa.templates.vodb_statistics')
+    @expose('hollyrosa.templates.tools.vodb_statistics')
     @require(Any(has_level('staff'), has_level('pl'), msg='Only PL or staff members can take a look at people statistics'))
     def vodb_statistics(self):
         """
@@ -295,28 +295,6 @@ class Tools(BaseController):
 
 
         return dict(tags=['vodb:definitiv',u'vodb:preliminär',u'vodb:förfrågan', 'vodb:na'], people_by_day=all_totals)
-
-
-    @expose('hollyrosa.templates.sannah_overview')
-    @require(Any(has_level('staff'), has_level('pl'),  msg='Only PL can take a look at people statistics'))
-    def sannah(self):
-        #...get all booking days in the future
-        today = datetime.date.today().strftime('%Y-%m-%d')
-        all_booking_days = [b.doc for b in getBookingDays(holly_couch, from_date=today)]
-
-        #...get all utelunch bookings
-        utelunch_bookings = getAllUtelunchBookings(holly_couch)
-
-        #...make dict mapping booking day id (key) to bookings
-        utelunch_dict = dict()
-        for ub in utelunch_bookings:
-
-            tmp_booking_list = utelunch_dict.get(ub.key, list())
-            tmp_booking_list.append(ub.doc)
-            utelunch_dict[ub.key] = tmp_booking_list
-
-        log.info( utelunch_dict )
-        return dict(booking_days=all_booking_days, utelunches=utelunch_dict)
 
 
     @expose()
