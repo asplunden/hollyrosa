@@ -883,3 +883,31 @@ td.program_layers_printable_table {
     border-bottom: 1px solid #000;
     vertical-align:top;
 }
+
+
+
+/*** Very brutal way of overriding the tw2 formc calendar CSS since it is affected by Bulma which loads later  ***/
+
+/* The main calendar widget.  DIV containing a table. */
+/* Header part -- contains navigation buttons and day names. */
+/* Note that I had to rename to button class to .buttoncx to avoid name collision */
+.calendar .buttoncx { /* "<<", "<", ">", ">>" buttons have this class */
+  text-align: center;
+  padding: 1px;
+  border: 1px solid;
+  border-color: ButtonHighlight ButtonShadow ButtonShadow ButtonHighlight;
+  background: ButtonFace;
+
+	font-size: 80%; /* BULMA */
+}
+
+
+.calendar thead .title { /* This holds the current "month, year" */
+  font-weight: bold;
+	font-size: 1rem; /* BULMA */
+  padding: 1px;
+  border: 1px solid #000;
+  background: ActiveCaption;
+  color: CaptionText;
+  text-align: center;
+}

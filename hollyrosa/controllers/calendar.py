@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2018 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -54,28 +54,29 @@ class Calendar(BaseController):
         abort(404)
 
 
-    @expose('hollyrosa.templates.calendar_overview')
+    @expose('hollyrosa.templates.calendar.calendar_overview')
     def overview_all(self):
         """Show an overview of all booking days"""
         return dict(booking_days=[b.doc for b in getAllBookingDays(holly_couch)], makeDate=getDateObject)
 
 
-    @expose('hollyrosa.templates.calendar_overview')
+    @expose('hollyrosa.templates.calendar.calendar_overview')
     def overview(self):
         """Show an overview of all booking days"""
         today = datetime.date.today().strftime('%Y-%m-%d')
 
         return dict(booking_days=[b.doc for b in getBookingDays(holly_couch, from_date=today)], makeDate=getDateObject)
 
-    @expose('hollyrosa.templates.calendar_upcoming')
+    @require(Any(has_level('staff'), has_level('viewer'), msg='Only staff and viewers may look at the upcoming calendar'))
+    @expose('hollyrosa.templates.calendar.calendar_upcoming')
     def upcoming(self):
         """Show an overview of all booking days"""
 
         today_date_str = datetime.date.today().strftime('%Y-%m-%d')
         end_date_str = (datetime.date.today()+datetime.timedelta(5)).strftime('%Y-%m-%d')
 
-        today_date_str = '2017-06-10'
-        end_date_str = '2017-06-20'
+        #today_date_str = '2017-06-10'
+        #end_date_str = '2017-06-20'
 
         booking_days = getBookingDays(holly_couch, from_date=today_date_str,  to_date=end_date_str)
 
@@ -95,7 +96,7 @@ class Calendar(BaseController):
         return dict(booking_days=bdays, group_info=group_info, makeDate=getDateObject)
 
 
-    @expose('hollyrosa.templates.booking_day_properties')
+    @expose('hollyrosa.templates.calendar.booking_day_properties')
     @validate(validators={'booking_day_id':validators.Int(not_empty=True)})
     @require(Any(has_level('staff'), has_level('pl'), msg='Only staff members may change booking day properties'))
     def edit_booking_day(self, booking_day_id=None,  **kw):

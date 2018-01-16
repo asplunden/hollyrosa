@@ -12,7 +12,7 @@ from tg.configuration import AppConfig
 import hollyrosa
 from hollyrosa.model.booking_couch import getVisitingGroupByBoknr
 from hollyrosa import model, lib
-from hollyrosa.lib import app_globals, helpers 
+from hollyrosa.lib import app_globals, helpers
 from hollyrosa.controllers.common import DataContainer
 import hashlib
 
@@ -34,14 +34,14 @@ base_config.dispatch_path_translator = True
 base_config.prefer_toscawidgets2 = True
 
 base_config.package = hollyrosa
-base_config.custom_tw2_config['script_name'] = '/hollyrosa'
+base_config.custom_tw2_config['script_name'] = '/hollyrosa' # hollyrosa in production
 
 # Enable json in expose
 base_config.renderers.append('json')
 # Enable genshi in expose to have a lingua franca
 # for extensions and pluggable apps.
 # You can remove this if you don't plan to use it.
-base_config.renderers.append('genshi')
+#base_config.renderers.append('genshi')
 
 # Set the default renderer
 base_config.default_renderer = 'kajiki'
@@ -55,8 +55,10 @@ base_config.auth_backend = 'sqlalchemy'
 base_config.sa_auth.cookie_secret = "5e3d194a-4a6c-4969-9eda-9adfaae78bb4"
 # what is the class you want to use to search for users in the database
 base_config.sa_auth.user_class = None
+base_config['flash.template'] = """<div class="notification is-$status $status" ><strong><p>$message</p></strong></div>"""
 
 from tg.configuration.auth import TGAuthMetadata
+
 
 
 
@@ -67,7 +69,7 @@ def validate_password(user, password):
     h.update(password)
     c = h.hexdigest()
     return user['password'] == c
-    
+
 ###################
 
 # This tells to TurboGears how to retrieve the data for your user
@@ -79,24 +81,24 @@ class ApplicationAuthMetadata(TGAuthMetadata):
         authlog = logging.getLogger('auth2')
         login = identity['login']
         supplied_login_name = identity['login']
-        
+
         ##
         ##user = self.sa_auth.dbsession.query(self.sa_auth.user_class).filter_by(
         ##    user_name=login
         ##).first()
         ##
-        
+
         user = model.holly_couch.get('user.'+login)
-                  
+
         if not user:
-        	
+
             vgroup_list = getVisitingGroupByBoknr(model.holly_couch, login)
             if len(vgroup_list) > 0:
                 user = vgroup_list[0].doc
-                
+
             else:
                 login = None
-                
+
         elif not validate_password(user, identity['password']):
             login = None
 
@@ -139,7 +141,7 @@ class ApplicationAuthMetadata(TGAuthMetadata):
             if len(vgroup_list) > 0:
                 user = vgroup_list[0].doc
         return user
-	
+
     def get_groups(self, identity, userid):
         return [] ## [g.group_name for g in identity['user'].groups]
 

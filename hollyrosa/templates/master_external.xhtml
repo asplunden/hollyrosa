@@ -11,25 +11,58 @@
     <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.11.3/dijit/themes/tundra/tundra.css')}" />
 
     <script src="${tg.url('/scripts/dojo-release-1.11.3/dojo/dojo.js')}" data-dojo-config="async: true"></script>
-
     <py:block name="head"/>
+    <script>
+    require(["common_menu", "tags", "dojo/_base/array","dojo/request/xhr", "dijit/Menu","dijit/MenuItem", "dijit/PopupMenuItem", "dojo/query!css2", "dojo/io-query", "dojo/dom", "dojo/on", "dojo/ready", "dojo/_base/window", "dojo/domReady!"], function(common_menu, tags, array, xhr, Menu, MenuItem, PopupMenuItem, query, ioQuery, dom, on, ready, win) {
+
+    ready(function() {
+
+
+
+    /* From Bulma for handling the navbar burger */
+    // not needed since we are executing in dojo Redy function: document.addEventListener('DOMContentLoaded', function () {
+
+      // Get all "navbar-burger" elements
+      var navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+      // Check if there are any navbar burgers
+      if (navbarBurgers.length > 0) {
+
+        // Add a click event on each of them
+        navbarBurgers.forEach(function (el) {
+          el.addEventListener('click', function () {
+
+            // Get the target from the "data-target" attribute
+            var target = el.dataset.target;
+            var target = document.getElementById(target);
+
+            // Toggle the class on both the "navbar-burger" and the "navbar-menu"
+            el.classList.toggle('is-active');
+            target.classList.toggle('is-active');
+
+          }); // end add event listener
+        }); // end forEach
+      } // end if
+    //}); // end addEventListener
+  }); // end ready
+}); // end require
+    </script>
 </head>
 
 <body class="tundra">
-
-  <nav class="navbar is-link" role="navigation" aria-label="main navigation">
+  <nav class="navbar is-link" role="navigation" aria-label="main navigation" data-target="navMenu">
     <div class="navbar-brand">
       <a class="navbar-item" href="${tg.url('/about')}">
-        <img src="https://bulma.io/images/bulma-logo.png" alt="Bulma: a modern CSS framework based on Flexbox" width="112" height="28"/>
+        <img src="${tg.url('/images/hollyrosa_banner.png')}" alt="Hollyrosa Programme Booking System" width="112" height="28"/>
       </a>
 
-      <button class="button navbar-burger">
+      <button class="button navbar-burger" data-target="navMenu">
         <span></span>
         <span></span>
         <span></span>
       </button>
     </div>
-    <div class="navbar-menu is-active">
+    <div class="navbar-menu " id="navMenu"> <!-- is-active  has to be set using some JS framework -->
       <!-- navbar start, navbar end -->
       <div class="navbar-start">
         <!-- navbar items -->
@@ -56,30 +89,46 @@
 
   </nav>
 
-
-
-  <section class="section">
+  <py:with vars="flash=tg.flash_obj.render('flash', use_js=False)">
+  <section class="section" py:if="flash">
     <div class="container">
       <py:if test="defined('page')">
       </py:if>
-      <py:with vars="flash=tg.flash_obj.render('flash', use_js=False)">
-          <div py:if="flash" py:content="XML(flash)" />
-      </py:with>
+      <div py:if="flash" py:content="literal(flash)" id="flash">
+      </div>
     </div>
+    </section>
+  </py:with>
 
-      <py:block name="body"/>
-      <!-- End of content -->
-
-      <!-- <div class="clearingdiv"></div> -->
-
-
-  </section>
+  <py:block name="body"/>
+  <!-- End of content -->
 
   <footer class="footer">
-    <div class="foottext">
-      <p><i>Hollyrosa</i> booking system is concieved and developed by Martin Eliasson. Copyright &copy; 2010-2017 <a href="http://asplunden.org">Martin Eliasson</a>. Hollyrosa is free software released under <a href="/about.html">AGPL (see license details)</a>, version controlled using Git and hosted at <a href="http://www.github.com/asplunden/hollyrosa">GitHub</a>.</p>
+    <div class="container">
+      <div class="tile is-ancestor">
+        <div class="tile is-parent is-2">
+          <article class="tile is-child notification has-text-centered">
+            <p></p>
+          </article>
+        </div>
+        <div class="tile is-parent is-8">
+          <article class="tile is-child notification has-text-centered">
+
+            <p><strong>Hollyrosa</strong> booking system is concieved and developed by Martin Eliasson. Copyright &copy; 2010-2018 <a href="http://asplunden.org">Martin Eliasson</a>. Hollyrosa is free software released under <a href="/about.html">AGPL (see license details)</a>, version controlled using Git and hosted at <a href="http://www.github.com/asplunden/hollyrosa">GitHub</a>.</p>
+
+          </article>
+        </div>
+        <div class="tile is-parent is-2">
+          <article class="tile is-child notification has-text-centered">
+
+            <p></p>
+
+          </article>
+        </div>
+      </div>
     </div>
   </footer>
+
 
 </body>
 </html>

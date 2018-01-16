@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2018 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -1214,7 +1214,7 @@ class BookingDay(BaseController):
         new_booking['booking_state'] = 0
 
         #...Id visiting group id is empty, it should be replaced with the N/A Group
-        log.debug('save_new_booking_request:visiting_group_name=%s, visiting_group_display_name=%s, visiting_group_id=%s' % (str(visiting_group_name), str(visiting_group_display_name), str(visiting_group_id)))
+        log.debug(u'save_new_booking_request:visiting_group_name={}, visiting_group_display_name={}, visiting_group_id={}'.format(visiting_group_name, visiting_group_display_name, visiting_group_id))
         if '' == visiting_group_id:
             log.warn('save_new_booking_request: Attention, no visiting group id supplied, using N/A group.')
             visiting_group_id = self.getN_A_VisitingGroupId(holly_couch)
