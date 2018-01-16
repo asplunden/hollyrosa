@@ -471,7 +471,7 @@ class BookingDay(BaseController):
         day_schema = common_couch.getCouchDBDocument(holly_couch,  day_schema_id, 'day_schema') #holly_couch[day_schema_id]
 
         if ag != '':
-            tmp_ag = common_couch.getCouchDBDocument(holly_couch,  ag, 'activity_group')
+            tmp_ag = common_couch.getCouchDBDocument(holly_couch, ag, 'activity_group')
             ag_title = tmp_ag['title'] #holly_couch[ag]['title']
             slot_rows = [sr for sr in self.make_slot_rows__of_day_schema(day_schema,  activities_map, booking_day_o['date']) if sr.activity_group_id == ag]
         else:

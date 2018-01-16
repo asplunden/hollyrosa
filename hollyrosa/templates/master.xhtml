@@ -184,8 +184,8 @@
     <div class="container">
       <py:if test="defined('page')">
       </py:if>
-      <article py:if="flash" py:content="literal(flash)" class="message">
-      </article>
+      <div py:if="flash" py:content="literal(flash)" id="flash">
+      </div>
     </div>
     </section>
   </py:with>

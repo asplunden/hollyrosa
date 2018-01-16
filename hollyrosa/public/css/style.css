@@ -155,29 +155,44 @@ h2 {
 }
 
 #flash, .notice {
-font-size:120%;
-font-weight:bolder;
-margin:0pt auto 0.5em;
-width:680px;
+/*font-size:120%;
+font-weight:bolder;*/
+/*margin:0pt auto 0.5em;*/
+/*width:680px;*/
 }
 #flash div, .notice {
-padding:20px 15px 20px 65px;
+	padding:2rem 1.5rem 2rem 6.5rem;
 }
 #flash .ok {
-background:#d8ecd8 url('../images/ok.png') no-repeat scroll 10px center;
+/*background:#d8ecd8 url('../images/ok.png') no-repeat scroll 10px center;*/
+background-image: url('../images/ok.png');
+background-repeat: no-repeat;
+background-position: 1rem center;
 }
 #flash .warning {
-background:#fff483 url('../images/warning.png') no-repeat scroll 10px center;
+/*background:#fff483 url('../images/warning.png') no-repeat scroll 10px center;*/
+background-image: url('../images/warning.png');
+background-repeat: no-repeat;
+background-position: 1rem center;
 }
 #flash .error {
-background:#f9c5c1 url('../images/error.png') no-repeat scroll 10px center;
+background-image: url('../images/error.png');
+background-repeat: no-repeat;
+background-position: 1rem center;
+/*background:#f9c5c1 url('../images/error.png') no-repeat scroll 10px center;*/
 }
 #flash .alert,
 #flash .info {
-background:#EEEEFF url('../images/info.png') no-repeat scroll 10px center;
+/*background:#EEEEFF url('../images/info.png') no-repeat scroll 10px center;*/
+background-image: url('../images/info.png');
+background-repeat: no-repeat;
+background-position: 1rem center;
 }
 .notice {
-background:#EEEEFF url('../images/info.png') no-repeat scroll 10px center;
+/*background:#EEEEFF url('../images/info.png') no-repeat scroll 10px center;*/
+background-image: url('../images/info.png');
+background-repeat: no-repeat;
+background-position: 1rem center;
 }
 .fielderror {
 color:red;

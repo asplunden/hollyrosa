@@ -219,8 +219,8 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
             </div>
         </div>
       </div>
-      <div class="media-right">
-        <div class="media-content">
+      <div class="media-right is-hidden-mobile">
+        <div class="media-content is-hidden-mobile">
         <a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}" class="button is-primary is-outlined is-small">Download ${atinfo['content_type']} ${atinfo['length']}</a>
       </div>
       </div>
