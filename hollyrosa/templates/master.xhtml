@@ -125,58 +125,59 @@
 
 <body class="tundra">
   <nav class="navbar is-link" role="navigation" aria-label="main navigation" data-target="navMenu">
-    <div class="navbar-brand">
-      <a class="navbar-item" href="${tg.url('/about')}">
-        <img src="${tg.url('/images/hollyrosa_banner.png')}" alt="Hollyrosa Programme Booking System" width="112" height="28"/>
-      </a>
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="${tg.url('/about')}">
+          <img src="${tg.url('/images/hollyrosa_banner.png')}" alt="Hollyrosa Programme Booking System" width="112" height="28"/>
+        </a>
 
-      <button class="button navbar-burger" data-target="navMenu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-    <div class="navbar-menu " id="navMenu"> <!-- is-active  has to be set using some JS framework -->
-      <!-- navbar start, navbar end -->
-      <div class="navbar-start">
-        <!-- navbar items -->
-        <a class="navbar-item" href="${tg.url('/')}">Home</a>
-        <div py:if="request.identity" class="navbar-item has-dropdown is-hoverable" href="${tg.url('/calendar/overview')}">
-          <a class="navbar-link" href="${tg.url('/calendar/overview')}">Calendar overview</a>
-          <div class="navbar-dropdown">
-            <a class="navbar-item" href="${tg.url('/calendar/overview')}">Calendar Overview</a>
-            <a class="navbar-item" href="${tg.url('/calendar/overview_all')}">All Days</a>
-            <a class="navbar-item" href="${tg.url('/calendar/upcoming')}">Upcoming</a>
-          </div>
-        </div>
-        <a py:if="request.identity" class="navbar-item" href="${tg.url('/visiting_group/view_all')}">Visiting groups</a>
-        <a py:if="request.identity" class="navbar-item" href="${tg.url('/vodb_group/view_all')}">VODB groups</a>
-        <div py:if="request.identity" class="navbar-item has-dropdown is-hoverable" href="${tg.url('/tools/show')}">
-          <a class="navbar-link" href="${tg.url('/tools/show')}">Tools</a>
-          <div class="navbar-dropdown">
-            <a class="navbar-item" href="${tg.url('/tools/show')}">Tools</a>
-            <a class="navbar-item" href="${tg.url('/tools/sanity_check_property_usage')}">Check for bookig errors and warnings</a>
-            <a class="navbar-item" href="${tg.url('/history/show')}">Recent Booking History</a>
-            <hr class="navbar-divider"/>
-            <a class="navbar-item" href="${tg.url('/user/show')}">Manage all Active Users</a>
-            <a class="navbar-item" href="${tg.url('/user/show', params={'show_deactive':True})}">Manage All Users</a>
-            <a class="navbar-item" href="${tg.url('/user/new')}">Create New User</a>
-            <hr class="navbar-divider"/>
-            <a class="navbar-item" href="${tg.url('/tools/visitor_statistics')}">Visitor Statistics</a>
-          </div>
-        </div>
-        <a py:if="request.identity" class="navbar-item" href="${tg.url('/me/settings')}">Me</a>
-
-
-
+        <button class="button navbar-burger" data-target="navMenu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
       </div>
-      <div class="navbar-end">
-        <!-- navbar items -->
-        <a py:if="not request.identity" class="navbar-item" href="${tg.url('/login')}">Login</a>
-        <a py:if="request.identity" class="navbar-item" href="${tg.url('/logout_handler')}">Logout &nbsp;<em py:if="request.identity['user'].has_key('display_name')">${request.identity['user'].get('display_name','')}</em><em py:if="request.identity['user'].has_key('name')">${request.identity['user'].get('name','')}</em></a>
+      <div class="navbar-menu " id="navMenu"> <!-- is-active  has to be set using some JS framework -->
+        <!-- navbar start, navbar end -->
+        <div class="navbar-start">
+          <!-- navbar items -->
+          <a class="navbar-item" href="${tg.url('/')}">Home</a>
+          <div py:if="request.identity" class="navbar-item has-dropdown is-hoverable" href="${tg.url('/calendar/overview')}">
+            <a class="navbar-link" href="${tg.url('/calendar/overview')}">Calendar overview</a>
+            <div class="navbar-dropdown">
+              <a class="navbar-item" href="${tg.url('/calendar/overview')}">Calendar Overview</a>
+              <a class="navbar-item" href="${tg.url('/calendar/overview_all')}">All Days</a>
+              <a class="navbar-item" href="${tg.url('/calendar/upcoming')}">Upcoming</a>
+            </div>
+          </div>
+          <a py:if="request.identity" class="navbar-item" href="${tg.url('/visiting_group/view_all')}">Visiting groups</a>
+          <a py:if="request.identity" class="navbar-item" href="${tg.url('/vodb_group/view_all')}">VODB groups</a>
+          <div py:if="request.identity" class="navbar-item has-dropdown is-hoverable" href="${tg.url('/tools/show')}">
+            <a class="navbar-link" href="${tg.url('/tools/show')}">Tools</a>
+            <div class="navbar-dropdown">
+              <a class="navbar-item" href="${tg.url('/tools/show')}">Tools</a>
+              <a class="navbar-item" href="${tg.url('/tools/sanity_check_property_usage')}">Check for bookig errors and warnings</a>
+              <a class="navbar-item" href="${tg.url('/history/show')}">Recent Booking History</a>
+              <hr class="navbar-divider"/>
+              <a class="navbar-item" href="${tg.url('/user/show')}">Manage all Active Users</a>
+              <a class="navbar-item" href="${tg.url('/user/show', params={'show_deactive':True})}">Manage All Users</a>
+              <a class="navbar-item" href="${tg.url('/user/new')}">Create New User</a>
+              <hr class="navbar-divider"/>
+              <a class="navbar-item" href="${tg.url('/tools/visitor_statistics')}">Visitor Statistics</a>
+            </div>
+          </div>
+          <a py:if="request.identity" class="navbar-item" href="${tg.url('/me/settings')}">Me</a>
+
+
+
+        </div>
+        <div class="navbar-end">
+          <!-- navbar items -->
+          <a py:if="not request.identity" class="navbar-item" href="${tg.url('/login')}">Login</a>
+          <a py:if="request.identity" class="navbar-item" href="${tg.url('/logout_handler')}">Logout &nbsp;<em py:if="request.identity['user'].has_key('display_name')">${request.identity['user'].get('display_name','')}</em><em py:if="request.identity['user'].has_key('name')">${request.identity['user'].get('name','')}</em></a>
+        </div>
       </div>
     </div>
-
   </nav>
 
   <py:with vars="flash=tg.flash_obj.render('flash', use_js=False)">

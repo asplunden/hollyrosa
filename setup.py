@@ -20,11 +20,12 @@ setup(
         "zope.sqlalchemy >= 0.4 ",
         "repoze.who",
         #"repoze.what",
-        "tw.dynforms >= 0.9.8",
-        "tw2.tinymce",
+        "tw2.dynforms >= 2.0.1",
+        #"tw2.tinymce", Needed but disabled since the installation fails
         "couchdb >= 1.0.0",
         "webhelpers >= 1.3",
-        "bleach >= 2.0"
+        "bleach >= 2.0",
+        "kajiki >= 0.7.1"
                 ],
     setup_requires=["PasteScript >= 1.7"],
     paster_plugins=['PasteScript', 'Pylons', 'TurboGears2', 'tg.devtools'],

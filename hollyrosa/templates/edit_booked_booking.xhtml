@@ -115,7 +115,7 @@ require(["edit_booking", "dojo/query", "dojo/dom", "dojo/on", "dojo/request/xhr"
             <p>
               <span py:if="None != booking_day">${booking_day['date']} </span><span py:if="None != slot_position"><b> ${slot_position['time_from']} to ${slot_position['time_to']} </b> </span><span py:if="None != booking_day"><a py:if="booking['id'] != None " href="${tg.url('unschedule_booking', params={'booking_id':booking['id'], 'booking_day_id':booking_day['_id']})}">unschedule</a></span>
             </p>
-            <div class="content">
+            <div class="tw2forms">
             <div>${tmpl_context.form.display(value=booking)}</div>
           </div>
           </div>

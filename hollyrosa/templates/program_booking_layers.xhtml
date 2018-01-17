@@ -206,10 +206,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
             var tmp_div = domConstruct.create('div', {style:"background-color: "+layer_text['layer_colour'], class:"program_layer_text program_layer_data", 'hollyrosa:layer_text_id':layer_text['_id'], 'hollyrosa:vgid':layer_text['visiting_group_id'], 'hollyrosa:bucket_time':layer_text['bucket_time'], 'hollyrosa:bdayid':layer_text['booking_day_id']}, bucket_div); // add atribues for slot id which is matching day and time, but how do we learn about that?
             var tmp_layer_title_elem = domConstruct.create('span', {style:'font-style:italic; padding-left:2em;'}, tmp_div);
-            tmp_layer_title_elem.innerHTML = '(' + layer_text['layer_title'] +')BR';
+            tmp_layer_title_elem.innerHTML = '(' + layer_text['layer_title'] +')\u003Cbr/\u003E';
             var tmp_span = domConstruct.create('span', {style:'font-weight:bold'}, tmp_div);
             //...need to pre-render content....
-            tmp_span.innerHTML = layer_text['title']+"BR";
+            tmp_span.innerHTML = layer_text['title']+"\u003Cbr/\u003E";
             var tmp_span_content = domConstruct.create('span', {style:'padding-left:2em;'}, tmp_div);
             tmp_span_content.innerHTML = layer_text['text'];
           });
@@ -319,7 +319,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         if (confirm('Really delete layer text?')) {
           xhr("${tg.url('/program_layer/program_layer_delete_layer_text')}", {
             handleAs:"json",
-            method:"GET",
+            method:"POST",
             query: {'layer_text_id':layer_text_id}
           }).then( function(data) {
             domConstruct.destroy(node);
@@ -375,7 +375,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
       *
       **/
       function show_program_layer_view_text_dialog(node) {
-        program_layer_view_text_dialog.dat.set('content', 'DIV style="white-space: pre;">' + node.innerHTML + 'ENDDIV');
+        program_layer_view_text_dialog.dat.set('content', '\u003Cdiv style="white-space: pre;"\u003E' + node.innerHTML + '\u003C/div\u003E');
         program_layer_view_text_dialog.show();
       }
 
@@ -424,7 +424,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
     <div class="container is-fluid">
       <h2 id="visiting_group_menu" hollyrosa:vgid="${visiting_group.id}" class="context_menu_symbol title">${visiting_group['name']}</h2>
       <p class="context_menu_symbol">${reFormatDate(visiting_group['from_date'])} to ${reFormatDate(visiting_group['to_date'])}</p>
-      <div class="note" id="note" hollyrosa:vgid="${visiting_group.id}"><div class="tag_list"><ul style="display:inline;" id="taglist" class="tag_list"></ul></div>
+      <div class="note" id="note" hollyrosa:vgid="${visiting_group.id}"><span id="taglist" class="tags"></span>
       <table class="visiting_group_info_table">
         <tr><td class="legend">bok.nr:</td><td class="info">${visiting_group['boknr']}</td></tr>
         <tr><td class="legend">subtype:</td><td class="info">${visiting_group.get('subtype','')}</td></tr>
@@ -439,10 +439,12 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <section class="section">
   <div class="container is-fluid">
     <div class="content">
+      <address>
       <h3 class="subtitle">Program Contact Info</h3>
       <p>${visiting_group.get('vodb_contact_name','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('vodb_contact_email','')}</a><br/>
       </p>
       <p><pre>${visiting_group.get('vodb_contact_address','')}</pre></p>
+    </address>
     </div>
     <div class="content">
       <div id="program_layers_container"></div>
@@ -456,7 +458,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <div class="container is-fluid">
     <h3 class="subtitle">Notes and attachments</h3>
     <div py:for="n in notes" >
-      <div class="${n['type']}2" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i><b>${n['timestamp']}</b> ${n['type']} by ${n['last_changed_by']}</i><br/><br/>
+      <div class="${n['type']}2 notification" hollyrosa:nid="${n.id}" hollyrosa:vgid="${visiting_group.id}"><i><b>${n['timestamp']}</b> ${n['type']} by ${n['last_changed_by']}</i><br/><br/>
         <div py:if="'note' == n['type']">${literal(n['text'])}</div>
         <div py:if="('attachment' == n['type'])">${n['text']}<br/><br/>
 
