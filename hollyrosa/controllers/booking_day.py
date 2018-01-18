@@ -299,6 +299,7 @@ class BookingDay(BaseController):
 
 
     @expose('hollyrosa.templates.booking_day')
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view a booking day'))
     @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=False), 'day':validators.DateValidator(not_empty=False), 'subtype':validators.UnicodeString(not_empty=False)})
     def day(self, day=None, booking_day_id=None, subtype=None):
         """Show a complete booking day"""
@@ -351,6 +352,7 @@ class BookingDay(BaseController):
 
 
     @expose('hollyrosa.templates.live_day')
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view a booking day'))
     @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=False), 'day':validators.DateValidator(not_empty=False), 'subtype':validators.UnicodeString(not_empty=True)})
     def live(self, day=None, booking_day_id=None, subtype=u'room'):
         """Show a complete booking day for room or staff"""
@@ -438,6 +440,7 @@ class BookingDay(BaseController):
 
 
     @expose('hollyrosa.templates.booking_day_fladan')
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view a booking day'))
     @validate(validators={'booking_day_id':validators.UnicodeString(not_empty=False), 'date':validators.DateValidator(not_empty=False), 'ag':validators.UnicodeString(not_empty=False)})
     def fladan_day(self,  date=None,  booking_day_id=None, ag=''):
         """Show a complete booking day"""

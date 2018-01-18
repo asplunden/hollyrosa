@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2018 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -63,6 +63,7 @@ class VisitingGroupPropertyRow(object):
 
 class VisitingGroup(BaseController):
 
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view listing of visiting groups'))
     @expose('hollyrosa.templates.visiting_group_view_all')
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def view(self, url):
@@ -183,6 +184,8 @@ class VisitingGroup(BaseController):
 
 
     @expose("json")
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view listing of visiting groups'))
+
     def get_unbound_visiting_group_names(self, from_date='', to_date=''):
         v_group_map = self.makeRemainingVisitingGroupsMap([],  from_date=from_date,  to_date=to_date)
         return dict(names=v_group_map)
@@ -210,6 +213,8 @@ class VisitingGroup(BaseController):
 
     @expose("json")
     @validate(validators={'id':validators.UnicodeString})
+    @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view listing of visiting groups'))
+
     def show_visiting_group_data(self, id=None, **kw):
         log.debug('show_visiting_group_data with id "%s"' % str(id))
         properties=[]
@@ -366,6 +371,7 @@ class VisitingGroup(BaseController):
 
     @validate(validators={'id':validators.UnicodeString})
     @require(Any(has_level('pl'), msg='Only pl members may delete visiting groups'))
+
     def delete_visiting_group(self, id=None):
         ensurePostRequest(request, __name__)
         log.info("delete_visiting_group()")

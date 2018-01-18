@@ -40,8 +40,24 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 
 
+        <div class="tile is-6 is-vertical is-parent" py:if="request.identity == None">
+          <div class="tile is-child">
+            <article class="message is-warning">
+              <div class="message-header">
+                <p>Need Access to Hollyrosa?</p>
+              </div>
+              <div class="message-body">
+                <p>You will need a login to access Hollyrosa and your account needs to be active.</p>
+                <p>Accounts are usually deactivated after a time of inactivity.</p>
+                <p>The program PL, Mackan or Valdemar can typically help with login, activation and password-reset. If you don't know who they are, the system is probably not for you.</p>
+              </div>
+            </article>
+          </div>
+        </div>
 
-        <div class="tile is-6 is-vertical is-parent">
+
+
+        <div class="tile is-6 is-vertical is-parent" py:if="request.identity">
 
           <div class="tile is-child">
             <div class="content">
@@ -86,7 +102,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         -->
         </div>
 
-          <div class="tile is-vertical is-parent">
+          <div class="tile is-vertical is-parent" py:if="request.identity">
 
 
 
@@ -113,6 +129,6 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         </div>
       </div>
     </section>
-    
+
   </body>
   </html>
