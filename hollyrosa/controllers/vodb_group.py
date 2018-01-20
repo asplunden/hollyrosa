@@ -77,7 +77,7 @@ class VODBGroup(BaseController):
 
         state_map_list = '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for (k,v) in bokn_status_map.items()]     ) +']'
 
-        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=remaining_visiting_groups_map.keys(), program_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=all_tags_list, has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch), state_map_list=state_map_list, vodb_state_map=bokn_status_map)
+        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=remaining_visiting_groups_map.keys(), program_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=all_tags, has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch), state_map_list=state_map_list, vodb_state_map=bokn_status_map)
 
 
     @expose('hollyrosa.templates.vodb_group_view_all')
@@ -92,7 +92,7 @@ class VODBGroup(BaseController):
 
         state_map_list = '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for (k,v) in bokn_status_map.items()]     ) +']'
 
-        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=remaining_visiting_groups_map.keys(), program_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=all_tags_list, has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch), state_map_list=state_map_list, vodb_state_map=bokn_status_map)
+        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=remaining_visiting_groups_map.keys(), program_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=all_tags, has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch), state_map_list=state_map_list, vodb_state_map=bokn_status_map)
 
 
     @expose('hollyrosa.templates.vodb_group_view_all')
@@ -105,7 +105,7 @@ class VODBGroup(BaseController):
         state_map_list = '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for (k,v) in bokn_status_map.items()]     ) +']'
         all_tags = [t.key for t in getAllTags(holly_couch)]
         all_tags_list =  '[' + ''.join(['"'+l+'", ' for l in all_tags]  ) +']'
-        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  vodb_state_map=bokn_status_map,  state_map_list=state_map_list, program_state_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=all_tags_list, has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch))
+        return dict(visiting_groups=visiting_groups,  remaining_visiting_group_names=remaining_visiting_groups_map.keys(), bokn_status_map=bokn_status_map,  vodb_state_map=bokn_status_map,  state_map_list=state_map_list, program_state_map=bokn_status_map,  reFormatDate=reFormatDate, all_tags=all_tags, has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch))
 
 
     @expose('hollyrosa.templates.vodb_group_view_all')
@@ -119,7 +119,7 @@ class VODBGroup(BaseController):
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)
         all_tags = [t.key for t in getAllTags(holly_couch)]
         all_tags_list =  '[' + ''.join(['"'+l+'", ' for l in all_tags]  ) +']'
-        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=v_group_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=all_tags_list, has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch))
+        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=v_group_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=all_tags, has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch))
 
 
     @expose('hollyrosa.templates.vodb_group_view_all')
@@ -132,7 +132,7 @@ class VODBGroup(BaseController):
         state_map_list = '['+ ','.join( ['["'+str(k)+'","'+v+'"]'  for (k,v) in bokn_status_map.items()]     ) +']'
         all_tags = [t.key for t in getAllTags(holly_couch)]
         all_tags_list =  '[' + ''.join(['"'+l+'", ' for l in all_tags]  ) +']'
-        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=v_group_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, state_map_list=state_map_list, reFormatDate=reFormatDate, all_tags=all_tags_list, has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch))
+        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=v_group_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, state_map_list=state_map_list, reFormatDate=reFormatDate, all_tags=all_tags, has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch))
 
 
     @expose('hollyrosa.templates.vodb_group_view_all')
@@ -146,7 +146,7 @@ class VODBGroup(BaseController):
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)
         all_tags = [t.key for t in getAllTags(holly_couch)]
         all_tags_list =  '[' + ''.join(['"'+l+'", ' for l in all_tags]  ) +']'
-        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=v_group_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=all_tags_list, has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch))
+        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=v_group_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=all_tags, has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch))
 
 
     @expose('hollyrosa.templates.vodb_group_edit')

@@ -2,7 +2,7 @@
 <html py:extends="master.xhtml" py:strip="True">
 
 <!--
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2018 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -20,6 +20,7 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
+
 <head py:block="head" py:strip="True">
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <title>Hollyrosa - Viewing Visiting Groups</title>
@@ -109,24 +110,106 @@ require(["dojo/_base/array", "dojo/dom-construct", "dojo/query!css2", "dojo/dom"
   <section class="section">
     <div class="container is-fluid">
       <div class="more_menu_symbol" id="bokn_status_menu"><h2 class="title">Viewing visiting groups</h2></div>
+      <div class="tile is-ancestor">
+        <div class="tile is-vertical is-3"> <!-- this is the sidebar menu -->
+          <div class="tile is-parent">
+            <div class="tile is-child">
+              <nav class="panel">
+                <p class="panel-heading">
+                  Quick Navigation
+                </p>
 
-      <table id="vgroup_listing">
-        <tr py:for="visiting_group in visiting_groups" class="name_menu" hollyrosa:vgid="${visiting_group.id}" hollyrosa:taglist_node_id="taglist_for_${hash(visiting_group.id)}" hollyrosa:vgname="${visiting_group['name']}" hollyrosa:vgtid="${visiting_group['subtype']}" hollyrosa:has_notes="${has_notes_map.has_key(visiting_group.id)}">
-          <td class="info data context_menu_symbol">${visiting_group['name']}<a name="vgroupid_${visiting_group.id}"/></td>
-          <td class="info data context_menu_symbol">[${reFormatDate(visiting_group['from_date'])} to ${reFormatDate(visiting_group['to_date'])}]<br/><br/>${visiting_group.get('contact_person','')}<br/>${visiting_group.get('contact_person_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('contact_person_email','')}</a></td>
-          <td class="info data context_menu_symbol">
-            <div class="note"><span class="tags" id="taglist_for_${hash(visiting_group.id)}" hollyrosa:vgid="$visiting_group.id"></span>
-              <p>bok.nr: <b>${visiting_group['boknr']}</b> <br/>
-                vodb status: <b>${vodb_state_map.get(visiting_group.get('vodbstatus','-'), '')}</b><br/>
-                program status: <b>${program_state_map.get(visiting_group['boknstatus'], '')}</b><br/>
-                camping location: <b>${visiting_group['camping_location']}</b></p>${literal(visiting_group['info'])}</div>
+                <div class="panel-block">
+                  <a class="button is-outlined is-fullwidth" href="${tg.url('/visiting_group/view_today')}">
+                    Today
+                  </a>
+                  <a class="button is-outlined is-fullwidth" href="${tg.url('/visiting_group/view_all')}">
+                    All Days
+                  </a>
 
-                <div id="notes_for_${visiting_group.id}">
+                </div>
+
+                <p class="panel-heading">
+                  View Program Status
+                </p>
+                <a py:attrs="{'class': {False:'panel-block', True:'panel-block is-active'}[tg.request.params.get('program_state', '') == str(k)]}" py:for="k,v in program_state_map.items()" href="${tg.url('/visiting_group/view_program_state', params={'program_state':k})}">
+                  ${v}
+                </a>
+
+                <p class="panel-heading">
+                  View Tag
+                </p>
+
+                <a py:attrs="{'class': {False:'panel-block', True:'panel-block is-active'}[tg.request.params.get('tag', '') == tag]}" py:for="tag in all_tags" href="${tg.url('/visiting_group/view_tags', params={'tag':tag})}">
+                  <span class="">${tag}</span>
+
+                </a>
+                <!--
+                <p class="panel-heading">
+                  VODB Status
+                </p>
+                <a class="panel-block" py:for="k,v in vodb_state_map.items()" href="${tg.url('/visiting_group/view_vodb_state', params={'program_state':k})}">
+                  ${v}
+                </a>
+              -->
+              <!--
+                <p class="panel-heading">
+                  Filter
+                </p>
+                <label class="panel-block" py:for="m in visiting_group_types">
+                  <input type="checkbox"/>
+                    ${m['title']}
+                </label> -->
+              </nav>
+            </div>
+          </div>
+        </div>
+        <div class="tile is-vertical" id="vgroup_listing"> <!-- this is the sidebar menu -->
+
+          <!-- Within the vertical section for visiting groups, we also need [ [] []  ] organization -->
+          <div class="tile name_menu" py:for="visiting_group in visiting_groups"
+            hollyrosa:vgid="${visiting_group.id}"
+            hollyrosa:taglist_node_id="taglist_for_${hash(visiting_group.id)}"
+            hollyrosa:vgname="${visiting_group['name']}"
+            hollyrosa:vgtid="${visiting_group['subtype']}"
+            hollyrosa:has_notes="${has_notes_map.has_key(visiting_group.id)}"> <!-- outer container for each group -->
+
+            <div class="tile">
+
+
+            <div class="tile is-parent is-4"> <!-- tile for left info -->
+              <div class="tile is-child context_menu_symbol">
+                <a name="vgroupid_${visiting_group.id}"/>
+                <h2 class="subtitle is-5">${visiting_group['name']}</h2>
+                <p class="">${reFormatDate(visiting_group['from_date'])} to ${reFormatDate(visiting_group['to_date'])}</p>
+
+                <address>
+                  ${visiting_group.get('contact_person','')}<br/>${visiting_group.get('contact_person_phone','')}<br/><a href="mailto:${visiting_group.get('contact_person_email','')}">${visiting_group.get('contact_person_email','')}</a>
+                </address>
+              </div>
+            </div>
+
+            <div class="tile is-parent"> <!-- tile for right info -->
+              <div class="tile is-child context_menu_symbol">
+
+                <div class="note notification context_menu_symbol"><span class="tags" id="taglist_for_${hash(visiting_group.id)}" hollyrosa:vgid="$visiting_group.id"></span>
+                  <p>bok.nr: <b>${visiting_group['boknr']}</b> <br/>
+                    vodb status: <b>${vodb_state_map.get(visiting_group.get('vodbstatus','-'), '')}</b><br/>
+                    program status: <b>${program_state_map.get(visiting_group['boknstatus'], '')}</b><br/>
+                    camping location: <b>${visiting_group['camping_location']}</b></p>${literal(visiting_group['info'])}
+                </div>
+
+                <article id="notes_for_${visiting_group.id}">
                   <!-- <a py:if="has_notes_map.has_key(visiting_group.id)" id="load_notes_for_${visiting_group.id}" hollyrosa:loadnotes="${visiting_group.id -->
-                  <span py:if="has_notes_map.has_key(visiting_group.id)" id="load_notes_for_${visiting_group.id}">has notes, load using the context menu</span></div>
-                </td>
-              </tr>
-            </table>
+                  <span py:if="has_notes_map.has_key(visiting_group.id)" id="load_notes_for_${visiting_group.id}">has notes, load using the context menu</span>
+                </article>
+              </div>
+            </div>
+          </div>
+          <hr class="is-flex-touch"/>
+        </div>
+      </div>
+      </div>
             <!--
             <h2>Visiting group names used that not is in any registered group</h2>
             <p><a class="unbound_names" href="javascript:getUnboundNames();">load unbound names</a></p>

@@ -1,5 +1,5 @@
 /**
-* Copyright 2010-2017 Martin Eliasson
+* Copyright 2010-2018 Martin Eliasson
 *
 * This file is part of Hollyrosa
 *
@@ -30,7 +30,7 @@ define(["common_menu", "page/tag_and_note", "dojo/dom-attr", "dojo/_base/array",
 
     var menu = new Menu({
       targetNodeIds: ["vgroup_listing"],
-      selector: "div.name_menu",
+      selector: "tr.name_menu",
       leftClickToOpen: common_menu.load_left_click_menu(),
       onOpen: function(evt) {
         var node = menu.currentTarget;
@@ -45,30 +45,19 @@ define(["common_menu", "page/tag_and_note", "dojo/dom-attr", "dojo/_base/array",
     });
 
 
-    common_menu.add_visiting_group_menu_item(menu, menu, "New booking request...", page_config.edit_booking_url);
+    common_menu.add_visiting_group_menu_item(menu, menu, "View vodb data...", page_config.show_vodb_group_url);
+    common_menu.add_visiting_group_menu_item(menu, menu, "Edit vodb data...", page_config.edit_vodb_group_url);
+
+
+    common_menu.add_visiting_group_menu_item(menu, menu, "Edit vodb sheet...", page_config.edit_vodb_group_sheet_url);
     common_menu.add_menu_separator(menu);
-    common_menu.add_visiting_group_menu_item(menu, menu, "View...", page_config.show_visiting_group_url);
-    common_menu.add_visiting_group_menu_item(menu, menu, "Edit...", page_config.edit_visiting_group_url);
+
     common_menu.add_call_function_menu_item(menu, menu, "Add tags...",  tagAndNote.show_add_tag_dialog  );
     common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add note...", page_config.add_note_url);
     common_menu.add_visiting_group_add_note_menu_item(menu, menu, "Add attachment...", page_config.add_attachment_url);
     common_menu.add_menu_separator(menu);
-    //common_menu.add_visiting_group_list_bookings_menu_item(menu, menu, "List bookings of group...", '${tg.url('view_bookings_of_name')}');
 
     common_menu.add_visiting_group_menu_item(menu, menu, "List bookings of group...", page_config.view_bookings_of_visiting_group_id_url);
-
-    var program_layers_menu = new Menu();
-    menu.addChild(new PopupMenuItem({
-      label: "Program Layers ->",
-      popup: program_layers_menu,
-      leftClickToOpen: common_menu.load_left_click_menu()
-    }));
-
-    common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Printable ...", page_config.layers_printable_url);
-    common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Live Calendar...", page_config.layers_url);
-    common_menu.add_visiting_group_menu_item(menu, program_layers_menu, "Edit Connected Layers...", page_config.edit_layers_url);
-    common_menu.add_menu_separator(menu);
-    common_menu.add_visiting_group_menu_item(menu, menu, "Ext. Booking Request", page_config.visiting_group_program_request_edit_request);
 
     var load_notes_menu_item = new MenuItem({
       label: "Load notes",
@@ -87,23 +76,28 @@ define(["common_menu", "page/tag_and_note", "dojo/dom-attr", "dojo/_base/array",
     common_menu.add_menu_separator(menu);
     common_menu.add_visiting_group_menu_item(menu, menu, "Show history...", page_config.show_history_url);
 
+
     // assembling the filter booking status menu
     var filter_menu = new Menu({
       targetNodeIds: ["bokn_status_menu"],
       leftClickToOpen: common_menu.load_left_click_menu()
     });
 
-    common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All visiting groups", '', page_config.visiting_groups_view_all_url);
-    common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All visiting groups today", '', page_config.visiting_groups_view_today_url);
-
+    common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All vodb groups", '', page_config.vodb_groups_view_all_url);
+    common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All vodb groups today", '', page_config.vodb_groups_view_today_url);
     common_menu.add_menu_separator(filter_menu);
 
-    var bokn_status_menu = new Menu();
-    filter_menu.addChild(new PopupMenuItem({
-      label: "Select on Program status...",
-      popup: bokn_status_menu,
-      leftClickToOpen: common_menu.load_left_click_menu()
-    }));
+    common_menu.add_redirect_menu_item(filter_menu, filter_menu, "New Visiting Group", '', page_config.new_vodb_group_visiting_group_url);
+    common_menu.add_redirect_menu_item(filter_menu, filter_menu, "New Staff Member", '', page_config.new_vodb_group_staff_url);
+    common_menu.add_redirect_menu_item(filter_menu, filter_menu, "New Course", '', page_config.new_vodb_group_course_url);
+    common_menu.add_menu_separator(filter_menu);
+
+
+
+
+
+
+
 
     var vodb_state_menu = new Menu();
     filter_menu.addChild(new PopupMenuItem({
@@ -112,12 +106,21 @@ define(["common_menu", "page/tag_and_note", "dojo/dom-attr", "dojo/_base/array",
       leftClickToOpen: common_menu.load_left_click_menu()
     }));
 
+    var bokn_status_menu = new Menu();
+    filter_menu.addChild(new PopupMenuItem({
+      label: "Select on Program status...",
+      popup: bokn_status_menu,
+      leftClickToOpen: common_menu.load_left_click_menu()
+    }));
+
+
     var tag_menu = new Menu();
     filter_menu.addChild(new PopupMenuItem({
       label: "Select Tags...",
       popup: tag_menu,
       leftClickToOpen: common_menu.load_left_click_menu()
     }));
+
 
     var date_range_menu = new Menu();
     filter_menu.addChild(new PopupMenuItem({
@@ -126,8 +129,10 @@ define(["common_menu", "page/tag_and_note", "dojo/dom-attr", "dojo/_base/array",
       leftClickToOpen: common_menu.load_left_click_menu()
     }));
 
-
     common_menu.add_menu_separator(filter_menu);
+
+
+
 
     var view_vgt_menu = new Menu();
     filter_menu.addChild(new PopupMenuItem({
@@ -135,6 +140,7 @@ define(["common_menu", "page/tag_and_note", "dojo/dom-attr", "dojo/_base/array",
       popup: view_vgt_menu,
       leftClickToOpen: common_menu.load_left_click_menu()
     }));
+
 
     array.forEach(page_config.program_state_map, function(l) {
       common_menu.add_redirect_menu_item(filter_menu, bokn_status_menu, l[1], {program_state:l[0]}, page_config.view_program_state_url);
@@ -148,8 +154,8 @@ define(["common_menu", "page/tag_and_note", "dojo/dom-attr", "dojo/_base/array",
     array.forEach(tag_and_note_config.all_tags, function(l) {
       common_menu.add_redirect_menu_item(filter_menu, tag_menu, l, {tag:l}, tag_and_note_config.view_tags_url);
     });
-    /* assembling the filter tag menu */
 
+    /* assembling the filter tag menu */
 
     var vgtgroups = page_config.visiting_group_type_list;
     var vgt_status = common_menu.load_ag_checkbox_status();

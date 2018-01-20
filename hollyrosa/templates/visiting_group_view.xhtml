@@ -1,7 +1,7 @@
 <html py:extends="master.xhtml" py:strip="True">
 
 <!--
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2018 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -179,12 +179,15 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
             </div>
           </div>
 
-          <div class="level-item has-text-centered">
+          <div class="level-item">
             <div>
               <p class="heading">Camping Location</p>
               <p class="title is-5">${visiting_group['camping_location']}</p>
             </div>
           </div>
+
+
+
         </nav>
 
         <div class="note context_menu_symbol media is-info" id="note" hollyrosa:vgid="${visiting_group['_id']}">
@@ -193,9 +196,6 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
             <table class="visiting_group_info_table">
               <tr><td class="legend">bok.nr:</td><td class="info">${visiting_group['boknr']}</td></tr>
               <tr><td class="legend">subtype:</td><td class="info">${visiting_group.get('subtype','')}</td></tr>
-              <tr><td class="legend">password:</td><td class="info">${visiting_group.get('password','')}</td></tr>
-
-              <tr><td class="legend">vodb status:</td><td class="info">${vodb_state_map.get(visiting_group.get('vodbstatus','-'))}</td></tr>
               <tr><td class="legend">program status:</td><td class="info">${program_state_map.get(visiting_group['boknstatus'],'')}</td></tr>
               <tr><td class="legend">camping location:</td><td class="info">${visiting_group['camping_location']}</td></tr>
             </table>
@@ -209,22 +209,31 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
   <section class="section">
     <div class="container" id="content">
       <h3 class="title is-5">Notes and attachments</h3>
-      <article py:for="n in notes" class="media">
+        <div class="buttons">
+          <a class="button is-primary is-outlined is-small" href="${tg.url('/note/add_note', params={'target_id':visiting_group['_id']})}">Add Note</a>
+          <a class="button is-primary is-outlined is-small" href="${tg.url('/note/add_attachment', params={'target_id':visiting_group['_id']})}">Add Attachment</a>
+        </div>
+
+      <div py:for="n in notes" class="media ${n['type']}2" hollyrosa:vgid="${visiting_group['_id']}" hollyrosa:nid="${n['_id']}">
         <div class="media-content">
-          <div class="${n['type']}2 context_menu_symbol content" hollyrosa:nid="${n['_id']}" hollyrosa:vgid="${visiting_group['_id']}"><i><strong>${n['timestamp']}</strong> ${n['type']} by ${n['last_changed_by']}</i><br/>
+          <div class="context_menu_symbol content" hollyrosa:nid="${n['_id']}" hollyrosa:vgid="${visiting_group['_id']}"><i><strong>${n['timestamp']}</strong> ${n['type']} by ${n['last_changed_by']}</i><br/>
             <div py:if="'note' == n['type']">${literal(n['text'])}</div>
             <div py:if="('attachment' == n['type'])">${n['text']}<br/>
 
-              <div py:for="aname, atinfo in n.get('_attachments',{}).items()"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}"><strong>${aname}</strong></a><br/></div>
+              <div py:for="aname, atinfo in n.get('_attachments',{}).items()"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}"><strong>${aname}</strong></a> <i>${atinfo['content_type']} ${atinfo['length']}</i><br/></div>
             </div>
         </div>
       </div>
       <div class="media-right is-hidden-mobile">
-        <div class="media-content is-hidden-mobile">
-        <a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}" class="button is-primary is-outlined is-small">Download ${atinfo['content_type']} ${atinfo['length']}</a>
+        <div class="media-content is-hidden-mobile buttons" py:if="'attachment' == n['type']">
+          <a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}" class="button is-primary is-outlined is-small">Download</a>
+          <a href="${tg.url('/note/edit_attachment', params={'note_id':n['_id'],'doc_id':aname})}" class="button is-primary is-outlined is-small">Edit</a>
+        </div>
+        <div class="media-content is-hidden-mobile buttons" py:if="'note' == n['type']">
+          <a href="${tg.url('/note/edit_note', params={'note_id':n['_id']})}" class="button is-primary is-outlined is-small">Edit</a>
+        </div>
       </div>
-      </div>
-      </article>
+    </div>
     </div>
   </section>
   <section class="section">

@@ -7,8 +7,9 @@
 
     <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/bulma.css')}" />
     <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/style.css')}" />
-    <link rel="stylesheet" type="text/css" media="print" href="${tg.url('/css/print.css')}" />
     <link rel="stylesheet" type="text/css" href="${tg.url('/scripts/dojo-release-1.11.3/dijit/themes/tundra/tundra.css')}" />
+    <link rel="stylesheet" type="text/css" media="print" href="${tg.url('/css/print.css')}" />
+    <link rel="icon" type="image/icon" href="${tg.url('/images/favicon.ico')}" />
 
     <script src="${tg.url('/scripts/dojo-release-1.11.3/dojo/dojo.js')}" data-dojo-config="async: true"></script>
     <py:block name="head"/>
@@ -17,80 +18,6 @@
 
     ready(function() {
 
-   //...setup menu for tools
-   /*
-	var tools_menu = new Menu({
-   	targetNodeIds: ["mainmenu"],
-      selector: "li.mainmenu_tools_choice",
-      leftClickToOpen: common_menu.load_left_click_menu()
-      });
-
-
-   common_menu.add_redirect_menu_item(tools_menu, tools_menu, "Sanity check property usage", '', '${tg.url('/tools/sanity_check_property_usage')}');
-   common_menu.add_menu_separator(tools_menu);
-   common_menu.add_redirect_menu_item(tools_menu, tools_menu, "Age group statistics", '', '${tg.url('/tools/visitor_statistics')}');
-   common_menu.add_redirect_menu_item(tools_menu, tools_menu, "VODB booking overview", '', '${tg.url('/vodb_group/vodb_booking_overview')}');
-   common_menu.add_menu_separator(tools_menu);
-   common_menu.add_redirect_menu_item(tools_menu, tools_menu, "List all users", '', '${tg.url('/user/show')}');
-   common_menu.add_redirect_menu_item(tools_menu, tools_menu, "History", '', '${tg.url('/history/show')}');
-   common_menu.add_redirect_menu_item(tools_menu, tools_menu, "Workflow", '', '${tg.url('/workflow/overview')}');
-
-   /* assembling the filter booking status menu
-   var filter_menu = new Menu({
-       targetNodeIds: ["mainmenu"],
-       selector: "li.mainmenu_visiting_groups_choice",
-       leftClickToOpen: common_menu.load_left_click_menu()
-       });
-
-    common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All visiting groups", '', '${tg.url('/visiting_group/view_all')}');
-    common_menu.add_redirect_menu_item(filter_menu, filter_menu, "All visiting groups today", '', '${tg.url('/visiting_group/view_today')}');
-
-   var bokn_status_menu = new Menu();
-   filter_menu.addChild(new PopupMenuItem({
-   	label: "Program status...",
-      popup: bokn_status_menu,
-      leftClickToOpen: common_menu.load_left_click_menu()
-   }));
-
-   var vodb_state_menu = new Menu();
-   filter_menu.addChild(new PopupMenuItem({
-   	label: "VODB status...",
-      popup: vodb_state_menu,
-      leftClickToOpen: common_menu.load_left_click_menu()
-   }));
-
-   var tag_menu = new Menu();
-   filter_menu.addChild(new PopupMenuItem({
-   	label: "Tags...",
-      popup: tag_menu,
-      leftClickToOpen: common_menu.load_left_click_menu()
-   }));
-
-   var date_range_menu = new Menu();
-   filter_menu.addChild(new PopupMenuItem({
-   	label: "Date range...",
-      popup: date_range_menu,
-      leftClickToOpen: common_menu.load_left_click_menu()
-   }));
-
-
-    xhr("${tg.url('/visiting_group/get_all_tags_and_vodb_state_maps')}", {
-    handleAs: "json",
-    method: "GET"}).then(function(data){
-        var all_tags = data.all_tags;
-        array.forEach(all_tags, function(l) {
-            common_menu.add_redirect_menu_item(filter_menu, tag_menu, l, {tag:l}, '${tg.url('/visiting_group/view_tags')}');
-            });
-        array.forEach(data.bokn_status_map, function(l) {
-            common_menu.add_redirect_menu_item(filter_menu, bokn_status_menu, l[1], {program_state:l[0]}, '${tg.url('/visiting_group/view_program_state')}');
-            });
-        array.forEach(data.vodb_status_map, function(l) {
-            common_menu.add_redirect_menu_item(filter_menu, vodb_state_menu, l[1], {'vodb_state':l[0]}, '${tg.url('/visiting_group/view_vodb_state')}');
-            });
-        });
-
-
-*/
 
 
     /* From Bulma for handling the navbar burger */
@@ -128,7 +55,7 @@
     <div class="container">
       <div class="navbar-brand">
         <a class="navbar-item" href="${tg.url('/about')}">
-          <img src="${tg.url('/images/hollyrosa_banner.png')}" alt="Hollyrosa Programme Booking System" width="112" height="28"/>
+          <img src="${tg.url('/images/hollyrosa_banner.png')}" alt="Hollyrosa Programme Booking System" width="126" height="32"/>
         </a>
 
         <button class="button navbar-burger" data-target="navMenu">
@@ -143,15 +70,22 @@
           <!-- navbar items -->
           <a class="navbar-item" href="${tg.url('/')}">Home</a>
           <div py:if="request.identity" class="navbar-item has-dropdown is-hoverable" href="${tg.url('/calendar/overview')}">
-            <a class="navbar-link" href="${tg.url('/calendar/overview')}">Calendar overview</a>
+            <a class="navbar-link" href="${tg.url('/calendar/overview')}">Calendar</a>
             <div class="navbar-dropdown">
-              <a class="navbar-item" href="${tg.url('/calendar/overview')}">Calendar Overview</a>
+              <a class="navbar-item" href="${tg.url('/calendar/overview')}">Comming Days</a>
               <a class="navbar-item" href="${tg.url('/calendar/overview_all')}">All Days</a>
-              <a class="navbar-item" href="${tg.url('/calendar/upcoming')}">Upcoming</a>
+              <a class="navbar-item" href="${tg.url('/calendar/upcoming')}">Upcoming Summary</a>
             </div>
           </div>
-          <a py:if="request.identity" class="navbar-item" href="${tg.url('/visiting_group/view_all')}">Visiting groups</a>
-          <a py:if="request.identity" class="navbar-item" href="${tg.url('/vodb_group/view_all')}">VODB groups</a>
+          <div py:if="request.identity" class="navbar-item has-dropdown is-hoverable" href="${tg.url('/visiting_group/view_all')}">
+            <a class="navbar-link" href="${tg.url('/visiting_group/view_all')}">Groups</a>
+            <div class="navbar-dropdown">
+              <a py:if="request.identity" class="navbar-item" href="${tg.url('/visiting_group/view_all')}">Visiting Groups</a>
+              <a py:if="request.identity" class="navbar-item" href="${tg.url('/vodb_group/view_all')}">VODB Groups</a>
+              <hr class="navbar-divider"/>
+              <a py:if="request.identity" class="navbar-item" href="${tg.url('/vodb_group/edit_group_data', params={'subtype':'program'})}">Create New Visiting Group</a>
+            </div>
+          </div>
           <div py:if="request.identity" class="navbar-item has-dropdown is-hoverable" href="${tg.url('/tools/show')}">
             <a class="navbar-link" href="${tg.url('/tools/show')}">Tools</a>
             <div class="navbar-dropdown">
@@ -166,7 +100,6 @@
               <a class="navbar-item" href="${tg.url('/tools/visitor_statistics')}">Visitor Statistics</a>
             </div>
           </div>
-          <a py:if="request.identity" class="navbar-item" href="${tg.url('/me/settings')}">Me</a>
 
 
 
