@@ -100,7 +100,7 @@
               <a class="navbar-item" href="${tg.url('/tools/visitor_statistics')}">Visitor Statistics</a>
             </div>
           </div>
-
+          <a py:if="request.identity" class="navbar-item" href="${tg.url('/me/settings')}">Me</a>
 
 
         </div>
