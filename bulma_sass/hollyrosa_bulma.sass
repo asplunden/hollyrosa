@@ -1,0 +1,87 @@
+// 1. Import the initial variables
+@import "../sass/utilities/initial-variables";
+@import "../sass/utilities/functions";
+
+// 2. Set your own initial variables
+// Update blue
+
+// Add pink and its invert
+//$pink: #ffb3b3;
+//$pink-invert: #fff;
+// Add a serif family
+//$family-serif: "Merriweather", "Georgia", serif;
+
+$hollyrosa: #286571; // dark geen-blue
+$hollyrosa-invert: #fff;
+$hollyrosa-light: lighten($hollyrosa, 20%); // 286571 link color
+
+$hollyrosa-blue: #eeeeff;
+$hollyrosa-yellow: #ffffee;
+$hollyrosa-red: #ffeeee;
+$hollyrosa-green: #eeffee;
+
+$blue:   #906; // not blue any more darken(#1568a8, 0%);
+$green:  desaturate(darken($hollyrosa-green, 10%), 40%);
+$red:    desaturate(darken($hollyrosa-red, 10%), 40%);
+$yellow: desaturate(darken($hollyrosa-yellow, 10%), 40%);
+
+// 3. Set the derived variables
+// Use the new pink as the primary color
+$primary: $blue;
+$primary-invert: $white;
+// Use the existing orange as the danger color
+
+$info: $hollyrosa-light; //desaturate(darken(#81c4d5, 10%), 20%);
+$link: $hollyrosa;
+$link-invert: $hollyrosa-invert;
+
+$pre-background: 'transparent';
+
+$danger: $orange;
+// Use the new serif family
+//$family-primary: $family-serif;
+
+//$table-cell-border:
+$table-row-hover-background-color: #ffffdd;
+$table-striped-row-even-hover-background-color: #ffffdd;
+
+
+$tw2forms-table-row-hover-background-color: $white; // needed because tw2 uses tables for layout
+$tw2forms-table-cell-border: 1px solid $white;
+$tw2forms-table-cell-border-width: 0 0 0 0;
+
+//$navbar-height: 2.5rem;
+
+
+// 4. Setup your Custom Colors
+
+
+// colors for Flash messages
+$ok: $green;
+$ok-invert: #000;
+
+$error: $red;
+$error-invert: #000;
+
+$alert: $orange;
+$alert-invert: #000;
+$notice: $blue;
+$notice-invert: #fff;
+
+// 5. Add new color variables to the color map.
+@import "../sass/utilities/derived-variables.sass";
+$addColors: (
+  "ok": ($ok, $ok-invert),
+  "error": ($error, $error-invert),
+  "alert": ($alert, $alert-invert),
+  "notice": ($notice, $notice-invert),
+);
+$colors: map-merge($colors, $addColors);
+
+
+
+
+
+// 6. Import the rest of Bulma
+@import "../bulma";
+@import "extensions/_all"
