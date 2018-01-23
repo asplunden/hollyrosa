@@ -1,7 +1,7 @@
 <html py:extends="master.xhtml" py:strip="True">
 
 <!--
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2018 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -48,7 +48,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
           <td py:for="layer_day in layer_days" class="program_layers_printable_table" style="width:${width_ratio}%">
             <div py:for="booking in bookings.get(layer_day['booking_day_id'] +':'+ tmp_layer_time['symbol'] ,[])" class="program_layer_slot" hollyrosa:layer_booking_id="${booking['_id']}" style="background-color: ${booking['layer_colour']}">
               <span style="font-style:italic; padding-left:2em;">${booking['layer_title']}</span><br/>
-              <span class="workflow_state_${booking['booking_state']}">${activity_title_map[booking['activity_id']]}</span><br/>
+              <span class="workflow_state_with_image" style="padding-left: 2em;"><img src="${tg.url('/images/state/visiting_group_state_{}.png'.format(booking['booking_state']))}" class="fladan_day_printout_img"/>${activity_title_map[booking['activity_id']]}</span><br/>
               <span style="padding-left:2em;">${booking['cache_content']}</span>
             </div>
           </td>

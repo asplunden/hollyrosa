@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html py:extends="master.xhtml" py:strip="True">
 <!--
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2018 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -148,7 +148,7 @@ require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem"
                 <li><a href="${tg.url('/note/edit_note', {'_id':n.id})}">edit</a></li>
                 <li><a href="${tg.url('/note/add_note', {'target_id':visiting_group.id})}">add note</a></li>
                 <li><a href="${tg.url('/note/delete_note', {'_id':n.id})}">delete</a></li>
-              </ul>${HTML(n.text)}
+              </ul>${literal(n.text)}
             </div>
           </div>
           <p>${visiting_group.contact_person}<br/>$visiting_group.contact_person_phone<br/><a href="mailto:$visiting_group.contact_person_email">$visiting_group.contact_person_email</a><br/>
@@ -178,7 +178,7 @@ require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem"
 
             <div py:for="b in cb">
               <div py:if="None != b.booking_day" class="booking_meta_info context_menu_symbol" hollyrosa:bid="${b['id']}" hollyrosa:bdayid="${b['booking_day_id']}" style="margin-left:2em;">
-                <span class="workflow_state_${b.booking_state}"><a href="${tg.url('/booking/day', {'booking_day_id':b.booking_day.id})}">${formatDate(b.booking_day['date'])}</a>
+                <span class="workflow_state_with_image"><img src="${tg.url('/images/state/visiting_group_state_{}.png'.format(b.booking_state))}" class="fladan_day_printout_img"/><a href="${tg.url('/booking/day', {'booking_day_id':b.booking_day.id})}">${formatDate(b.booking_day['date'])}</a>
                   <span py:if="b.slot_id!=None">
                     <span py:if="render_time=='time'" ><b>${b.slot.time_from}</b> to <b py:if="b.slot_id !=None">${b.slot.time_to}</b></span>
                     <span py:if="render_time=='title'" ><b>${b.slot.title}</b></span>

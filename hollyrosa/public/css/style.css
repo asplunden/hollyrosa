@@ -1,5 +1,5 @@
 /**
- * Copyright 2010-2017 Martin Eliasson
+ * Copyright 2010-2018 Martin Eliasson
  *
  * This file is part of Hollyrosa
  *
@@ -396,65 +396,71 @@ td.timestamp  {
 
 
 /*** Workflow state CSS ***/
+.workflow_state_with_image {
+	background-size: contain;
+
+	font-weight:bold;
+}
 
 .workflow_state_0  {
     color: #884;
-    background-image:url('../images/sheep.png');
+    background-image:url('../images/state/visiting_group_state_0.png');
     background-repeat:no-repeat;
 		background-size: contain;
-    padding-left: 2em;
-    font-weight:bold;
-    }
+		padding-left: 2em;
+		font-weight:bold;
+		}
 .workflow_state_5  { /* workflow state 5 is standby which is lower than booked.*/
     color: #884;
-    background-image:url('../images/jarno_aircraft.png');
+    background-image:url('../images/state/visiting_group_state_5.png');
     background-repeat:no-repeat;
 		background-size: contain;
-    padding-left: 2em;
-    font-weight:bold;
-    }
+		padding-left: 2em;
+		font-weight:bold;
+		}
 .workflow_state_10  {
     color: #448;
-    background-image:url('../images/paper_to_sign.png');
+    background-image:url('../images/state/visiting_group_state_10.png');
     background-repeat:no-repeat;
 		background-size: contain;
-    padding-left: 2em;
-    font-weight:bold;
-    }
+		padding-left: 2em;
+		font-weight:bold;
+		}
 
 .workflow_state_20  {
     color: #484;
-    background-image:url('../images/check_mark.png');
+    background-image:url('../images/state/visiting_group_state_20.png');
     background-repeat:no-repeat;
 		background-size: contain;
-    padding-left: 2em;
-    font-weight:bold;
-    }
+		padding-left: 2em;
+		font-weight:bold;
+		}
 .workflow_state_30  { /* workflow state 30 is drop-in */
     color: #484;
-    background-image:url('../images/cogwheel_dropin.png');
+    background-image:url('../images/state/visiting_group_state_30.png');
     background-repeat:no-repeat;
 		background-size: contain;
-    padding-left: 2em;
-    font-weight:bold;
-    }
+		padding-left: 2em;
+		font-weight:bold;
+		}
 .workflow_state_-10  {
     color: #844;
     font-weight:bold;
-    background-image:url('../images/alert.png');
+    background-image:url('../images/state/visiting_group_state_-10.png');
 		background-size: contain;
-    background-repeat:no-repeat;
-    padding-left: 2em;
-    }
+		padding-left: 2em;
+		font-weight:bold;
+		}
 
 .workflow_state_unscheduled  {
     color: #666;
     font-weight:bold;
-    background-image:url('../images/alert.png');
-		background-size: contain;
-    background-repeat:no-repeat;
-    padding-left: 2em;
-    }
+    background-image:url('../images/state/visiting_group_state_unscheduled.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+		padding-left: 2em;
+		font-weight:bold;
+		}
 
 
 /*** GENERAL MENU ****/
@@ -651,8 +657,8 @@ a.ag_anchor {
 
 /* fix fladan day printout */
 img.fladan_day_printout_img {
-    visibility: hidden;
-    display:none;
+    padding-right: .5em;
+		height:inherit;
     }
 
 /* booking day uncheduled bookings */
