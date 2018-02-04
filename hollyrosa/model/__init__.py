@@ -45,30 +45,37 @@ couch_server = None
 holly_couch = None
 
 
-        
+
 def init_model(engine):
     """Call me before using any of the tables or classes in the model."""
     #DBSession.configure(bind=engine)
     pass
-    
+
 def getDB():
     return holly_couch
-    
-    
+
+
 def initDB():
     db_url = tg.config.get('couch.db_url', 'http://localhost:5989')
     db_name = tg.config.get('couch.database', 'hollyrosa1')
+    db_login = tg.config.get('couch.login', '')
+    db_password = tg.config.get('couch.password', '')
 
     global couch_server
     global holly_couch
-    
+
     couch_server = couchdb.Server(url=db_url)
+
+    #...if login is set, set credentials 
+    if len(db_login) > 0:
+        couch_server.resource.credentials = (db_login, db_password)
+
     try:
         holly_couch = couch_server[db_name]
     except couchdb.ResourceNotFound, e:
         holly_couch = couch_server.create(db_name)
-    
-    
+
+
 # Import your model modules here.
 ###from hollyrosa.model.auth import User, Group, Permission
 ##from hollyrosa.model.booking import DaySchema, BookingDay, SlotRow, Booking, VisitingGroup, BookingHistory, Activity, ActivityGroup, SlotRowPosition,  SlotRowPositionState
@@ -76,7 +83,7 @@ def initDB():
 import booking_couch
 from booking_couch import genUID
 
-# TODO: refactor 
+# TODO: refactor
 ##holly_couch = booking_couch.holly_couch
 
 
