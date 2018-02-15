@@ -1,9 +1,10 @@
 ## Synopsis
 
-Hollyrosa is a special developed program booking system for a scout centre called Vässarö. It's tailore made for Vässarö, the culture and the ways we do things. For example, all program
-are free for groups at the island, so the system has no support whatsover for billing which otherwise is quite common.
+Hollyrosa is a special developed program booking system for a scout centre called Vässarö, located on an island in Sweden. It's tailore made for Vässarö, the culture and the ways we do things. Many centers use or look for activity booking systems, however, scouting simply isn't a set of activities ona patch of grass. I have therfore decided to design and build a *program booking system*, a system that help us make a better scout program for both visiting groups and staff. We believe being a staff member is/could be part of the scout program and this has guided design decisions in this system. 
 
-The system is built on Turbogears2 and is a little bit odd in that it uses CouchDB 1.x as backend. 
+Some design decisions are just mad becuase the way we do things at Vässarö, For example, all program are free for groups at the island, so the system has no support at this time for billing which otherwise is quite common.
+
+The system is built on Turbogears2 and is a little bit odd in that it uses CouchDB 1.x as backend, it does however alow master-master replication which in our case is a critical requirement.
 
 ## Motivation
 
@@ -12,12 +13,14 @@ fact that it makes progeram booking distributed and so our young staff can handl
 
 ## Installation
 
-Basically, you install it as a Turbogears2 app. You will also need to use the hollyrosa_viewtool to upload views to your CouchDB database.
+You will need a running couchdb 1 instance. I would recommend that you run couchdb1 in a docker container mapping the data folder to the host machine somewhere.
+
+You can install the system as a Turbogears2 app and in production you may run it using Apache+mod_wsgi. You will also need to use the hollyrosa_viewtool to upload views to your CouchDB database. 
 
 
 ## License
 
-Hollyrosa is Copyright 2010-2017 Martin Eliasson
+Hollyrosa is Copyright 2010-2018 Martin Eliasson
 
 Hollyrosa is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
