@@ -59,7 +59,7 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
 
           <!-- <p>GPS: ${activity.gps_lat} - ${activity.gps_long} Add google map</p> -->
           <em><span py:if="True==activity['equipment_needed']">Equipment needed</span> <span py:if="True==activity['education_needed']">Education needed</span> <span py:if="True==activity['certificate_needed']">Certificate needed</span> </em>
-          <p style="margin-top:5em;">Speical booking info note below, it is included in booking confirmations if the group has booked one or more if this activity. </p>
+          <p style="margin-top:5em;">Special booking info note below, it is included in booking confirmations if the group has booked one or more if this activity. </p>
 
           <!-- TODO: this below is kind of a widget -->
           <div py:for="n in notes" >
