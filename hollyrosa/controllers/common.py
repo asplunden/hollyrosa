@@ -57,6 +57,7 @@ vodb_status_map[50] ='island'
 
 # these are the available languages for activities and other info
 languages_map = {'se-SV': 'Swedish', 'us-EN': 'English', 'de-DE': 'Deutsch'}
+default_language ='se-SV'
 
 bokn_status_options = list()
 for k, v in bokn_status_map.items():

@@ -61,7 +61,7 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
           <p>Available languages:
             <ul>
               <li py:for="language_code in activity.get('language_versions', {}).keys()">
-                <a href="${tg.url('view_activity', params={'activity_id': activity.id, 'language': language_code})}" py:attrs="['', {'style': 'font-weight: bold'}][language==language_code]">${language_code}</a>
+                <a href="${tg.url('view_activity', params={'activity_id': activity.id, 'language': language_code})}" py:attrs="['', {'style': 'font-weight: bold'}][language==language_code]">${languages_map.get(language_code, '')}</a>
               </li>
             </ul>
           </p>
@@ -70,11 +70,22 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
           <p style="margin-top:5em;">Special booking info note below, it is included in booking confirmations if the group has booked one or more if this activity. </p>
 
           <!-- TODO: this below is kind of a widget -->
-          <div py:for="n in notes" >
-            <div class="${n['type']}2 context_menu_symbol" hollyrosa:nid="${n['_id']}" hollyrosa:vgid="${activity['_id']}"><i><b>${n['timestamp']}</b> ${n['type']} by ${n['last_changed_by']}</i><br/><br/>
-              <div py:if="'note' == n['type']">${literal(n['text'])}</div>
-              <div py:if="('attachment' == n['type'])">${n['text']}<br/><br/>
-                <div py:for="at in n.get('_attachments',[])"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n['id'],'doc_id':at})}"><b>${at}</b> ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>
+          <div py:for="n in notes" class="media ${n['type']}2">
+            <div class="media-content">
+              <div class="content" hollyrosa:nid="${n['_id']}" hollyrosa:vgid="${activity['_id']}"><i><b>${n['timestamp']}</b> ${n['type']} by ${n['last_changed_by']}</i><br/><br/>
+                <div py:if="'note' == n['type']">${literal(n['text'])}</div>
+                <div py:if="('attachment' == n['type'])">${n['text']}<br/><br/>
+                  <div py:for="at in n.get('_attachments',[])"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n['id'],'doc_id':at})}"><b>${at}</b> ${n._attachments[at]['content_type']} ${n._attachments[at]['length']}</a></div>
+                </div>
+              </div>
+            </div>
+            <div class="media-right is-hidden-mobile">
+              <div class="media-content is-hidden-mobile buttons" py:if="'attachment' == n['type']">
+                <a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}" class="button is-primary is-outlined is-small">Download</a>
+                <a href="${tg.url('/note/edit_attachment', params={'note_id':n['_id'],'doc_id':aname})}" class="button is-primary is-outlined is-small">Edit</a>
+              </div>
+              <div class="media-content is-hidden-mobile buttons" py:if="'note' == n['type']">
+                <a href="${tg.url('/note/edit_note', params={'note_id':n['_id'], 'language': language})}" class="button is-primary is-outlined is-small">Edit</a>
               </div>
             </div>
           </div>

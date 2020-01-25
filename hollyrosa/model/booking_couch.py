@@ -21,7 +21,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 from uuid import uuid4
 import datetime
-from hollyrosa.controllers.common import DataContainer
+from hollyrosa.controllers.common import DataContainer, default_language
 
 
 
@@ -340,6 +340,12 @@ def getAllSchemas(holly_couch):
 
 
 def getNotesForTarget(holly_couch, target_id):
+    """
+    Get all notes which have target_id set to target_id
+
+    :param: holly_couch hollyrosa couchdb instance
+    :param: target_id the target_id, typically a visiting_group_id or an activity_id
+    """
     return holly_couch.view("notes/notes_by_target_datesorted", include_docs=True, startkey=[target_id, None], endkey=[target_id, "9999-99-99 99:99"])
 
 def getBookingInfoNotesOfUsedActivities(holly_couch, keys):

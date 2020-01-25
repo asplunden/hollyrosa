@@ -32,7 +32,7 @@ import bleach
 
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
-from hollyrosa.controllers.common import has_level, getLoggedInUserId, cleanHtml, languages_map
+from hollyrosa.controllers.common import has_level, getLoggedInUserId, cleanHtml, languages_map, default_language
 from hollyrosa.widgets.edit_activity_form import create_edit_activity_form
 
 from hollyrosa.model.booking_couch import genUID
@@ -43,8 +43,6 @@ from hollyrosa.controllers import common_couch
 from formencode import validators
 
 __all__ = ['activity']
-
-default_language='se-SV'
 
 def ensurePostRequest(request, name=''):
     """
@@ -89,7 +87,14 @@ class Activity(BaseController):
 
         activity_booking_info_id = activity.get('booking_info_id','')
         if activity_booking_info_id != '':
+            log.debug(language)
             notes = [n.doc for n in getNotesForTarget(holly_couch, activity_id)]
+
+            # only show note with corresponding language
+            if language != None:
+                notes = [note for note in notes if 'language' in note and note['language'] == language]
+            else:
+                notes = [note for note in notes if 'language' not in note or note['language'] == default_language]
         else:
             notes = list()
 
@@ -138,7 +143,6 @@ class Activity(BaseController):
 
         activity['language'] = language
 
-        log.debug(activity)
         return dict(activity=activity)
 
 

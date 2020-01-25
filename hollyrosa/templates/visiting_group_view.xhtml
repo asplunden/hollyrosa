@@ -185,9 +185,6 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
               <p class="title is-5">${visiting_group['camping_location']}</p>
             </div>
           </div>
-
-
-
         </nav>
 
         <div class="note context_menu_symbol media is-info" id="note" hollyrosa:vgid="${visiting_group['_id']}">
@@ -223,18 +220,18 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
 
               <div py:for="aname, atinfo in n.get('_attachments',{}).items()"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}"><strong>${aname}</strong></a> <i>${atinfo['content_type']} ${atinfo['length']}</i><br/></div>
             </div>
+          </div>
+        </div>
+        <div class="media-right is-hidden-mobile">
+          <div class="media-content is-hidden-mobile buttons" py:if="'attachment' == n['type']">
+            <a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}" class="button is-primary is-outlined is-small">Download</a>
+            <a href="${tg.url('/note/edit_attachment', params={'note_id':n['_id'],'doc_id':aname})}" class="button is-primary is-outlined is-small">Edit</a>
+          </div>
+          <div class="media-content is-hidden-mobile buttons" py:if="'note' == n['type']">
+            <a href="${tg.url('/note/edit_note', params={'note_id':n['_id']})}" class="button is-primary is-outlined is-small">Edit</a>
+          </div>
         </div>
       </div>
-      <div class="media-right is-hidden-mobile">
-        <div class="media-content is-hidden-mobile buttons" py:if="'attachment' == n['type']">
-          <a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}" class="button is-primary is-outlined is-small">Download</a>
-          <a href="${tg.url('/note/edit_attachment', params={'note_id':n['_id'],'doc_id':aname})}" class="button is-primary is-outlined is-small">Edit</a>
-        </div>
-        <div class="media-content is-hidden-mobile buttons" py:if="'note' == n['type']">
-          <a href="${tg.url('/note/edit_note', params={'note_id':n['_id']})}" class="button is-primary is-outlined is-small">Edit</a>
-        </div>
-      </div>
-    </div>
     </div>
   </section>
   <section class="section">
