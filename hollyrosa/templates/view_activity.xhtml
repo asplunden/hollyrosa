@@ -23,7 +23,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <head py:block="head" py:strip="True">
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
   <link rel="alternate" media="print" href="${activity['print_on_demand_link']}" />
-  <title>Hollyrosa - ${activity['title']}</title>
+  <title>Hollyrosa - ${title}</title>
   <script>
 require(["common_menu", "page/view_activity", "dojo/ready"],
   function(common_menu, page, ready) {
@@ -35,7 +35,8 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
         external_link_url:'${activity['external_link']}',
         edit_special_info_note_url: '${tg.url('/note/edit_note')}',
         printOnDemand: function() {console.log('xx'); window.print(); return false;},
-        activity_id: '${activity.id}'
+        activity_id: '${activity.id}',
+        language: '${language}'
       };
       page.setup(page_config);
     });
@@ -47,16 +48,23 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
     <section class="section">
       <div class="container">
 
-        <div class="more_menu_symbol" id="view_activity_menu" hollyrosa:activity_id="${activity.id}" hollyrosa:note_id="${activity.get('booking_info_id','')}"><h2 class="title">Kort beskrivning av ${activity['title']}</h2></div>
+        <div class="more_menu_symbol" id="view_activity_menu" hollyrosa:activity_id="${activity.id}" hollyrosa:language="${language}" hollyrosa:note_id="${activity.get('booking_info_id','')}">
+          <h2 class="title">Kort beskrivning av ${title}</h2></div>
         <div class="content">
           <h3 class="subtitle">Activity Group: ${activity_group['title']}</h3>
 
-          <div class="note">Description: ${literal(activity['description'])}</div>
+          <div class="note">Description: ${literal(description)}</div>
           <p>Capacity: ${activity['capacity']}</p>
           <p>Guides per slot: ${activity['guides_per_slot']}</p>
           <p>Guides per day: ${activity['guides_per_day']}</p>
           <p>Background color: <span style="background-color: ${activity['bg_color']}; width:4em;padding:0.2em; border: 1px solid gray;">&nbsp;${activity['bg_color']}&nbsp;</span></p>
-
+          <p>Available languages:
+            <ul>
+              <li py:for="language_code in activity.get('language_versions', {}).keys()">
+                <a href="${tg.url('view_activity', params={'activity_id': activity.id, 'language': language_code})}" py:attrs="['', {'style': 'font-weight: bold'}][language==language_code]">${language_code}</a>
+              </li>
+            </ul>
+          </p>
           <!-- <p>GPS: ${activity.gps_lat} - ${activity.gps_long} Add google map</p> -->
           <em><span py:if="True==activity['equipment_needed']">Equipment needed</span> <span py:if="True==activity['education_needed']">Education needed</span> <span py:if="True==activity['certificate_needed']">Certificate needed</span> </em>
           <p style="margin-top:5em;">Special booking info note below, it is included in booking confirmations if the group has booked one or more if this activity. </p>

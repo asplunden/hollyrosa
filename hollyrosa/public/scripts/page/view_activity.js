@@ -28,7 +28,7 @@ define(["common_menu", "dojo/dom", "dojo/dom-attr", "dojo/_base/array", "dojo/do
         leftClickToOpen: common_menu.load_left_click_menu()
       });
 
-      common_menu.add_transfer_map_function_menu_item(view_activity_menu, view_activity_menu, "Edit activity...", page_config.edit_activity_url, ['activity_id']);
+      common_menu.add_transfer_map_function_menu_item(view_activity_menu, view_activity_menu, "Edit activity...", page_config.edit_activity_url, ['activity_id', 'language']);
       common_menu.add_transfer_map_function_menu_item(view_activity_menu, view_activity_menu, "Edit special booking info note...", page_config.edit_special_info_note_url, ['note_id']);
       common_menu.add_menu_separator(view_activity_menu);
       common_menu.add_transfer_map_function_menu_item(view_activity_menu, view_activity_menu, "Open internal link", page_config.internal_link_url, []);
