@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2020 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -25,10 +25,10 @@ import types
 def getCouchDBDocument(holly_couch, id, doc_type=None, doc_subtype=None):
     """retrieve a document from couch db and do some sanity checkin on id, type and subtype of document"""
     if ((type(id) != types.StringType) and (type(id) != types.UnicodeType)):
-        raise ValueError,  "the type of the document id must be string or unicode, but the given type was %s" % type(id) 
-        
+        raise ValueError,  "the type of the document id must be string or unicode, but the given type was %s" % type(id)
+
     l_doc = holly_couch[id]
-    
+
     if None != doc_type:
         if not l_doc.has_key('type'):
             raise KeyError, "Document found in holly_couch but it lacks the require type field. Doc id: %s" % id
@@ -40,14 +40,14 @@ def getCouchDBDocument(holly_couch, id, doc_type=None, doc_subtype=None):
             raise KeyError,  "Document found in holly_couch, but there is a document subtype missmatch for document with id %s, the supplied document type was %s but in document it is %s" % (id, doc_subtype,  l_doc['subtype'])
 
     return l_doc
-    
-    
+
+
 def checkDocumentIdPrefix(id,  prefix):
     pass
-    
-    
+
+
 def getBookingDay(holly_couch, booking_day_id):
-    #return holly_couch[booking_day_id] 
+    #return holly_couch[booking_day_id]
     return getCouchDBDocument(holly_couch,  booking_day_id,  doc_type='booking_day')
 
 
@@ -93,27 +93,27 @@ def getVisitingGroup(holly_couch,  visiting_group_id):
 
 def getSlot(holly_couch,  slot_id):
     return getCouchDBDocument(holly_couch,  slot_id,  doc_type='slot')
-    
+
 
 def getSlotState(holly_couch,  slot_state_id):
     return getCouchDBDocument(holly_couch,  slot_state_id,  doc_type='slot_state')
-   
-   
+
+
 def getNote(holly_couch,  note_id):
     return getCouchDBDocument(holly_couch,  note_id,  doc_type='note')
-    
-    
+
+
 def getAttachment(holly_couch,  attachment_id):
     return getCouchDBDocument(holly_couch,  attachment_id,  doc_type='attachment')
-    
+
 def getLayerText(holly_couch,  layer_text_id):
     return getCouchDBDocument(holly_couch,  layer_text_id,  doc_type='program_layer_text',  doc_subtype='layer_text')
 
 
 def createEmptyProgramBooking(valid_from='',  valid_to='',  requested_date='',  subtype='program'):
     return dict(type='booking', subtype=subtype,  valid_from=valid_from,  valid_to=valid_to,  requested_date=requested_date, booking_day_id="", slot_id="")
-    
-    
+
+
 def makeHouseBooking():
     pass
 
@@ -129,4 +129,3 @@ def makeCourseVODBGroup():
 
 def makeVisitingVODBGroup():
     pass
-    

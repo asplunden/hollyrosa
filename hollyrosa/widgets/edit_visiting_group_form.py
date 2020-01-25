@@ -1,5 +1,5 @@
 """
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2020 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -28,7 +28,16 @@ from tg import lurl
 from tw2.tinymce import TinyMCEWidget
 from formencode.validators import DateConverter
 
+from hollyrosa.controllers.common import languages_map
 
+
+def _getPreferredLanguageOptions():
+        """
+        return a list of all supported languages for activity pages etc.
+
+        if there ever is a need lookup from database, see how edit_activity_form does it
+        """
+        return languages_map.items()
 
 
 class EditVisitingGroupForm(twd.CustomisedTableForm):
@@ -50,6 +59,7 @@ class EditVisitingGroupForm(twd.CustomisedTableForm):
         boknr = twf.TextField()
         password = twf.TextField()
         camping_location = twf.TextField()
+        language = twf.SingleSelectField(validator=twc.Required, options=twc.Deferred(_getPreferredLanguageOptions))
 
         class visiting_group_properties(twd.GrowingGridLayout):
             extra_reps = 1
@@ -59,7 +69,7 @@ class EditVisitingGroupForm(twd.CustomisedTableForm):
             unit = twf.TextField(size=8)
             description = twf.TextField()
             from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d') # required=True
-            to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d') # required=True 
+            to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d') # required=True
 
     action = lurl('save_visiting_group_properties')
 

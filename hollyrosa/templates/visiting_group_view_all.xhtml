@@ -2,7 +2,7 @@
 <html py:extends="master.xhtml" py:strip="True">
 
 <!--
-Copyright 2010-2018 Martin Eliasson
+Copyright 2010-2020 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -193,10 +193,11 @@ require(["dojo/_base/array", "dojo/dom-construct", "dojo/query!css2", "dojo/dom"
               <div class="tile is-child context_menu_symbol">
 
                 <div class="note notification context_menu_symbol"><span class="tags" id="taglist_for_${hash(visiting_group.id)}" hollyrosa:vgid="$visiting_group.id"></span>
-                  <p>bok.nr: <b>${visiting_group['boknr']}</b> <br/>
+                  <p>bok.nr: <b>${visiting_group['boknr']}</b><br/>
                     vodb status: <b>${vodb_state_map.get(visiting_group.get('vodbstatus','-'), '')}</b><br/>
                     program status: <b>${program_state_map.get(visiting_group['boknstatus'], '')}</b><br/>
-                    camping location: <b>${visiting_group['camping_location']}</b></p>${literal(visiting_group['info'])}
+                    camping location: <b>${visiting_group['camping_location']}</b><br/>
+                    language: <b>${languages_map.get(visiting_group.get('language', ''), '')}</b></p>${literal(visiting_group['info'])}
                 </div>
 
                 <article id="notes_for_${visiting_group.id}">

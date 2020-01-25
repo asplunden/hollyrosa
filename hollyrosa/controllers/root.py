@@ -2,7 +2,7 @@
 """
 Main Controller
 
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2020 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -41,50 +41,50 @@ log = logging.getLogger()
 class RootController(BaseController):
     """
     The root controller for the hollyrosa application.
-    
+
     All the other controllers and WSGI applications should be mounted on this
     controller. For example::
-    
+
         panel = ControlPanelController()
         another_app = AnotherWSGIApplication()
-    
+
     Keep in mind that WSGI applications shouldn't be mounted directly: They
     must be wrapped around with :class:`tg.controllers.WSGIAppController`.
-    
+
     """
     ##secc = SecureController()
-    
+
     error = ErrorController()
-    
+
     activity = activity.Activity()
-    
+
     booking = booking_day.BookingDay()
 
     calendar = calendar.Calendar()
-    
+
     visiting_group = visiting_group.VisitingGroup()
-    
+
     history = booking_history.History()
-    
+
     workflow = workflow.Workflow()
-    
+
     tools = tools.Tools()
-    
+
     note = note.Note()
 
     tag = tag.Tag()
-    
+
     user = user.User()
-    
+
     me = me.Me()
-    
+
     vodb_group = vodb_group.VODBGroup()
-    
+
     visiting_group_program_request = visiting_group_program_request.VisitingGroupProgramRequest()
-    
+
     program_layer = program_layer.ProgramLayer()
-    
-    
+
+
     @expose('hollyrosa.templates.index')
     def index(self):
         """Handle the front-page."""
@@ -133,19 +133,19 @@ class RootController(BaseController):
         """
         Redirect the user to the initially requested page on successful
         authentication or redirect her back to the login page if login failed.
-        
+
         """
         if not request.identity:
             login_counter = request.environ.get('repoze.who.logins', 0) + 1
             redirect('/login', params=dict(came_from=came_from, __logins=login_counter))
         userid = request.identity['repoze.who.userid']
-        
+
         #...make a note here of last login
         # TODO: getter in holly couch
         user_o = model.holly_couch.get('user.'+userid)
         user_o['last_login'] = str(datetime.datetime.now())
         user_o['active'] = True
-        model.holly_couch['user.'+userid] = user_o        
+        model.holly_couch['user.'+userid] = user_o
 
         flash(_('Welcome back, %s!') % userid)
 
@@ -158,7 +158,7 @@ class RootController(BaseController):
         """
         Redirect the user to the initially requested page on logout and say
         goodbye as well.
-        
+
         """
         flash(_('We hope to see you soon!'))
         return HTTPFound(location=came_from)
