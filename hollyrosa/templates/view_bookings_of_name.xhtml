@@ -171,7 +171,7 @@ require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem"
         <div id="clustered_booking_list">
 
           <div py:for="cb in clustered_bookings">
-            <h3 class="subtitle"><a href="${tg.url('/activity/view_activity', {'activity_id':cb[0].activity['_id']})}">${cb[0].activity['title']}</a></h3>
+            <h3 class="subtitle"><a href="${tg.url('/activity/view_activity', {'activity_id':cb[0].activity['_id']})}">${getActivityTitle(visiting_group, cb[0].activity)}</a></h3>
             <div style="margin-left:2em;" class="cluster_meta_info context_menu_symbol" hollyrosa:bid="${cb[0].id}">
               <div class="note"> ${getRenderContent(cb[0])}</div>
             </div>
@@ -206,7 +206,7 @@ require(["common_menu", "tags", "dojo/_base/array","dijit/Menu","dijit/MenuItem"
       <div class="container">
         <article py:if="len(booking_info_notes)" style="border: 1px dashed red; padding:1em;margin:2em;" class=""> <!-- message is-warning -->
           <div class=""> <!-- message-header -->
-            <h2 class="subtitle">Att tänka på</h2>
+            <h2 class="subtitle">${to_think_about_title}</h2>
           </div>
           <div class=""> <!-- message-body -->
             <div py:for="n in booking_info_notes" style="padding:2em;">${literal(n.get('text','missing text for note %s' % n['_id']))}</div>

@@ -30,7 +30,7 @@ from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
 from hollyrosa.model.booking_couch import getAllActivities, getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus, getNotesForTarget, getBookingInfoNotesOfUsedActivities
 from hollyrosa.model.booking_couch import getBookingDays, getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap, getVisitingGroupsByVodbState,  dateRange,  getActivityTitleMap,  getAllProgramLayerBucketTexts,  getProgramLayerBucketTextByDayAndTime, getVisitingGroupTypes
-from hollyrosa.controllers.common import sanitizeDate, languages_map
+from hollyrosa.controllers.common import sanitizeDate, languages_map, default_language
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
@@ -422,12 +422,14 @@ class VisitingGroup(BaseController):
             booking_day_slot_map[tmp_schema_id] = tmp_slot_map
         return booking_day_slot_map[tmp_schema_id]
 
-
-#    def hide_cache_content_in_booking(self,  booking):
-#        tmp = booking['cache_content']
-#        i = tmp.find('//')
-#        if i > 0:
-#            booking['cache_content'] = booking['cache_content'][:i]
+    def getToThinkAboutTitle(self, visiting_group):
+        """
+        Creates translated title for the page. It's not much that's need translation right now.
+        """
+        if not visiting_group:
+            return u"Att tänka på"
+        trans = {"se-SV": u"Att tänka på", "us-EN":u"Important Info", "de-DE": "Wichtig Information"}
+        return trans[visiting_group.get("language", default_language)]
 
 
     @expose('hollyrosa.templates.view_bookings_of_name')
@@ -437,6 +439,7 @@ class VisitingGroup(BaseController):
 
         bookings = [b.doc for b in getBookingsOfVisitingGroup(holly_couch, '<- MATCHES NO GROUP ->', visiting_group_id)]
         visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+
         return self.view_bookings_of_visiting_group(visiting_group, visiting_group_id, visiting_group['name'], bookings, hide_comment=hide_comment, show_group=show_group, render_time=render_time)
 
 
@@ -460,6 +463,16 @@ class VisitingGroup(BaseController):
 
         return self.view_bookings_of_visiting_group(first_visiting_group, visiting_group_id, name, bookings, hide_comment=hide_comment, show_group=show_group, render_time=render_time)
 
+    def getActivityTitle(self, visiting_group, activity):
+        """
+        To be used in templates, returns the language matched activity title
+        """
+        language = visiting_group.get('language', default_language)
+
+        if 'language_versions' in activity:
+            if language in activity['language_versions']:
+                return activity['language_versions'][language]['title']
+        return activity['title']
 
     def view_bookings_of_visiting_group(self, visiting_group, visiting_group_id, name, bookings, hide_comment=0, show_group=0, render_time=''):
         #...now group all bookings in a dict mapping activity_id:content
@@ -477,14 +490,10 @@ class VisitingGroup(BaseController):
         for x in getAllActivities(holly_couch):
             activities[x.key[1]] = x.doc
 
-
-        for b in bookings: # TODO: There will be quite a few multiples if we search on both id and name!
+        # TODO: There will be quite a few multiples if we search on both id and name!
+        for b in bookings:
             if hide_comment==1:
                 hide_cache_content_in_booking(b)
-                #tmp = b['cache_content']
-                #i = tmp.find('//')
-                #if i > 0:
-                #    b['cache_content'] = b['cache_content'][:i]
 
             key = str(b['activity_id'])+':'+b['content']
             if None == b.get('booking_day_id',  None):
@@ -508,7 +517,7 @@ class VisitingGroup(BaseController):
                     tmp_slot_map = self.getSlotMapOfBookingDay(booking_day_slot_map,  tmp_booking_day)
                     slot_o = tmp_slot_map[slot_id]
 
-            b2 = DataContainer(booking_state=b['booking_state'],  cache_content=b['cache_content'],  content=b['content'] ,  activity=activities[b['activity_id']],  id=b['_id'],  booking_day=tmp_booking_day ,  slot_id=slot_id ,  slot=slot_o,  booking_day_id=booking_day_id,  valid_from=b.get('valid_from',''),  valid_to=b.get('valid_to',''),  requested_date=b.get('requested_date',''))
+            b2 = DataContainer(booking_state=b['booking_state'], cache_content=b['cache_content'], content=b['content'], activity=activities[b['activity_id']], id=b['_id'], booking_day=tmp_booking_day, slot_id=slot_id, slot=slot_o, booking_day_id=booking_day_id, valid_from=b.get('valid_from',''), valid_to=b.get('valid_to',''), requested_date=b.get('requested_date',''))
             if clustered_bookings.has_key(key):
                 bl = clustered_bookings[key]
                 bl.append(b2)
@@ -523,10 +532,39 @@ class VisitingGroup(BaseController):
             bl.sort(self.fn_cmp_booking_timestamps)
 
         if True: #show_group==1:
-            booking_info_notes = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())]
+            # filter the booking info notes on language.
+            # if visiting group has no language, use default language
+            # if there is a specific language, filter the notes on that language
+            visiting_group_language = visiting_group.get('language', default_language)
+
+            # build a map from id of activity -> list of note languages and use the map to find best language match
+            booking_info_notes = dict()
+            for note in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys()):
+                log.debug(note.key)
+                note_by_lang = booking_info_notes.get(note.key, dict())
+                note_by_lang[note.doc.get('language', 'default_language')] = note.doc
+                booking_info_notes[note.key] = note_by_lang
+
+            booking_info_notes_with_matched_language = []
+            for activity_id, note_by_lang in booking_info_notes.items():
+
+                # best match: the specifed language exists
+                if visiting_group_language in note_by_lang:
+                    language_matched_note = note_by_lang[visiting_group_language]
+
+                # second best option: a note which has no language meaning default language
+                elif visiting_group_language == default_language:
+                    language_matched_note = note_by_lang['default_language']
+
+                # if no other options, just take the first available
+                else:
+                    language_matched_note = note_by_lang.values()[0]
+
+                booking_info_notes_with_matched_language.append(language_matched_note)
+
         else:
             booking_info_notes = []
-        return dict(clustered_bookings=clustered_bookings_list,  name=name,  workflow_map=workflow_map, visiting_group_id=visiting_group_id,  getRenderContent=getRenderContent,  formatDate=reFormatDate, booking_info_notes=booking_info_notes, render_time=render_time, visiting_group=visiting_group, bokn_status_map=bokn_status_map, notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)], show_group=show_group)
+        return dict(clustered_bookings=clustered_bookings_list, name=name, workflow_map=workflow_map, visiting_group_id=visiting_group_id, getRenderContent=getRenderContent, formatDate=reFormatDate, booking_info_notes=booking_info_notes_with_matched_language, render_time=render_time, visiting_group=visiting_group, bokn_status_map=bokn_status_map, notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)], show_group=show_group, to_think_about_title=self.getToThinkAboutTitle(visiting_group), getActivityTitle=self.getActivityTitle)
 
 
     @expose() ##content_type=CUSTOM_CONTENT_TYPE)
