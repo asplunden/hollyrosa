@@ -2,7 +2,7 @@
 """
 hollyrosa_tool.py
 
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2020 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -93,16 +93,16 @@ if False:
     new_ds = copy.deepcopy(ds)
 
     holly_couch['summer_schema.2017'] = ds
-    
+
     ds = holly_couch['school_schema.2016']
     new_ds = copy.deepcopy(ds)
     holly_couch['school_schema.2017'] = ds
-    
+
     ds = holly_couch['60dn_schema.2013']
     new_ds = copy.deepcopy(ds)
     holly_couch['60dn_schema.2017'] = ds
-    
-    
+
+
 if True:
     pos = 3500
     school_dates_spring = dateRange('2018-05-01', '2018-06-09', format='%Y-%m-%d')

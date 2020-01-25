@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2017 Martin Eliasson
+Copyright 2010-2020 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -30,7 +30,7 @@ import datetime
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId
 
-from hollyrosa.model.booking_couch import genUID 
+from hollyrosa.model.booking_couch import genUID
 from hollyrosa.controllers.booking_history import remember_tag_change
 from formencode import validators
 
@@ -40,9 +40,9 @@ __all__ = ['me']
 class Me(BaseController):
     def view(self, url):
         """Abort the request with a 404 HTTP status code."""
-        abort(404)    
-        
-    
+        abort(404)
+
+
     @expose('hollyrosa.templates.me')
     @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only logged in users may view me properties'))
     def settings(self):
