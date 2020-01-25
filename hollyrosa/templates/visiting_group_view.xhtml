@@ -198,6 +198,7 @@ require(["dojo/ready", "tags", "common_menu", "dijit/Menu", "dijit/PopupMenuItem
               <tr><td class="legend">subtype:</td><td class="info">${visiting_group.get('subtype','')}</td></tr>
               <tr><td class="legend">program status:</td><td class="info">${program_state_map.get(visiting_group['boknstatus'],'')}</td></tr>
               <tr><td class="legend">camping location:</td><td class="info">${visiting_group['camping_location']}</td></tr>
+              <tr><td class="legend">prefered language:</td><td class="info">${languages_map.get(visiting_group.get('language', ''), '')}</td></tr>
             </table>
             <div class="content">
               <p>${literal(visiting_group['info'])}</p>

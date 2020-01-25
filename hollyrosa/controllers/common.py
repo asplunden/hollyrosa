@@ -55,6 +55,9 @@ vodb_status_map[10] ='preliminary'
 vodb_status_map[20] ='confirmed'
 vodb_status_map[50] ='island'
 
+# these are the available languages for activities and other info
+languages_map = {'se-SV': 'Swedish', 'us-EN': 'English', 'de-DE': 'Deutsch'}
+
 bokn_status_options = list()
 for k, v in bokn_status_map.items():
     bokn_status_options.append((k, v))
@@ -272,7 +275,7 @@ def makeVisitingGroupObjectOfVGDictionary(a_visiting_group):
                                    contact_person=a_visiting_group.get('contact_person', ''),  contact_person_email=a_visiting_group.get('contact_person_email', ''),  contact_person_phone=a_visiting_group.get('contact_person_phone', ''),
                                    boknr=a_visiting_group['boknr'], password=a_visiting_group.get('password',''), boknstatus=a_visiting_group['boknstatus'],  camping_location=a_visiting_group['camping_location'],
                                    from_date=getSanitizeDate(a_visiting_group['from_date'],'2017-01-01')[1], to_date=getSanitizeDate(a_visiting_group['to_date'], '2017-12-30')[1],
-                                   subtype=a_visiting_group['subtype'])
+                                   subtype=a_visiting_group['subtype'], language=a_visiting_group.get('language', 'se-SV'))
 
 
     return visiting_group

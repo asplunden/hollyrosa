@@ -30,7 +30,7 @@ from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, holly_couch
 from hollyrosa.model.booking_couch import getAllActivities, getAllVisitingGroups,  getVisitingGroupsAtDate,  getVisitingGroupsInDatePeriod,  getBookingsOfVisitingGroup,  getSchemaSlotActivityMap,  getVisitingGroupsByBoknstatus, getNotesForTarget, getBookingInfoNotesOfUsedActivities
 from hollyrosa.model.booking_couch import getBookingDays, getAllVisitingGroupsNameAmongBookings, getAllTags, getDocumentsByTag, getVisitingGroupOfVisitingGroupName, getTargetNumberOfNotesMap, getVisitingGroupsByVodbState,  dateRange,  getActivityTitleMap,  getAllProgramLayerBucketTexts,  getProgramLayerBucketTextByDayAndTime, getVisitingGroupTypes
-from hollyrosa.controllers.common import sanitizeDate
+from hollyrosa.controllers.common import sanitizeDate, languages_map
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
@@ -112,7 +112,7 @@ class VisitingGroup(BaseController):
         visiting_groups = [v.doc for v in getAllVisitingGroups(holly_couch)]
         remaining_visiting_groups_map = dict() #self.makeRemainingVisitingGroupsMap(visiting_groups)
         has_notes_map = getTargetNumberOfNotesMap(holly_couch)
-        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=remaining_visiting_groups_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch))
+        return dict(visiting_groups=visiting_groups, remaining_visiting_group_names=remaining_visiting_groups_map.keys(), program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, all_tags=[t.key for t in getAllTags(holly_couch)], has_notes_map=has_notes_map, visiting_group_types=getVisitingGroupTypes(holly_couch), languages_map=languages_map)
 
     def fnSortBySecondItem(self,  a,  b):
         return cmp(a[0],  b[0])
@@ -214,7 +214,6 @@ class VisitingGroup(BaseController):
     @expose("json")
     @validate(validators={'id':validators.UnicodeString})
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view listing of visiting groups'))
-
     def show_visiting_group_data(self, id=None, **kw):
         log.debug('show_visiting_group_data with id "%s"' % str(id))
         properties=[]
@@ -253,7 +252,7 @@ class VisitingGroup(BaseController):
             # TODO: there is no composite view any more showing both bookings and visiting group data
             bookings = []
             notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)]
-        return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent, program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, notes=notes)
+        return dict(visiting_group=visiting_group, bookings=bookings, workflow_map=workflow_map,  getRenderContent=getRenderContent, program_state_map=bokn_status_map, vodb_state_map=bokn_status_map, reFormatDate=reFormatDate, notes=notes, languages_map=languages_map)
 
 
     @expose('hollyrosa.templates.edit_visiting_group')
@@ -276,7 +275,7 @@ class VisitingGroup(BaseController):
             if subtype =='course':
                 properties_template = course_visiting_group_properties_template
 
-            visiting_group = dict(name='',  id=None, _id=None,   info='',  visiting_group_properties=properties_template,  subtype=subtype,  contact_person='',  contact_person_email='',  contact_person_phone='',  boknr='')
+            visiting_group = dict(name='',  id=None, _id=None,   info='',  visiting_group_properties=properties_template,  subtype=subtype,  contact_person='',  contact_person_email='',  contact_person_phone='',  boknr='', language='se-SV')
 
         else:
             log.info('looking up existing visiting group %s' % str(visiting_group_id))
@@ -291,7 +290,7 @@ class VisitingGroup(BaseController):
     @expose()
     @validate(create_edit_visiting_group_form, error_handler=edit_visiting_group)
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may change visiting group properties'))
-    def save_visiting_group_properties(self,  visiting_group_id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr='', password='',  subtype=''):
+    def save_visiting_group_properties(self,  visiting_group_id=None,  name='', info='',  from_date=None,  to_date=None,  contact_person='', contact_person_email='',  contact_person_phone='',  visiting_group_properties=None, camping_location='', boknr='', password='',  subtype='', language=''):
         log.info('save_visiting_group_properties')
 
         ensurePostRequest(request, __name__)
@@ -342,6 +341,7 @@ class VisitingGroup(BaseController):
         visiting_group_c['contact_person'] = contact_person
         visiting_group_c['contact_person_email'] = contact_person_email
         visiting_group_c['contact_person_phone'] = contact_person_phone
+        visiting_group_c['language'] = language
 
         # TODO: boknr maybe shouldnt be changeble if program or vodb state has passed by preliminary (10) ?
 
