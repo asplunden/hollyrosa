@@ -4,7 +4,6 @@
 from hollyrosa.config.app_cfg import base_config
 from hollyrosa.config.environment import load_environment
 
-
 __all__ = ['make_app']
 
 # Use base_config to setup the necessary PasteDeploy application factory.
@@ -35,6 +34,4 @@ def make_app(global_conf, full_stack=True, **app_conf):
     app = make_base_app(global_conf, full_stack=True, **app_conf)
 
     # Wrap your base TurboGears 2 application with custom middleware here
-    ##from hollyrosa import model
-    ##model.initDB()
     return app

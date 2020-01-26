@@ -27,17 +27,18 @@ from tw2.tinymce import TinyMCEWidget
 
 class EditVisitingGroupForm(twf.Form):
     class child(twf.TableLayout):
-        recid = twf.HiddenField(validator=twc.Required) #### TODO: former id was _id but no longer allowed name
+        recid = twf.HiddenField(validator=twc.Required)  #### TODO: former id was _id but no longer allowed name
         title = twf.TextField(validator=twc.Required)
-        note = TinyMCEWidget(mce_options = dict(theme='advanced',  
-                                                                      theme_advanced_toolbar_align ="left",  
-                                                                      theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat", 
-                                                                      theme_advanced_buttons2 = "",
-                                                                      theme_advanced_buttons3 = ""
-))
-        num_program_crew_members = twf.TextField(validator=twc.IntValidator) 
-        num_fladan_crew_members = twf.TextField(validator=twc.IntValidator) 
-        
+        note = TinyMCEWidget(mce_options=dict(theme='advanced',
+                                              theme_advanced_toolbar_align="left",
+                                              theme_advanced_buttons1="formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat",
+                                              theme_advanced_buttons2="",
+                                              theme_advanced_buttons3=""
+                                              ))
+        num_program_crew_members = twf.TextField(validator=twc.IntValidator)
+        num_fladan_crew_members = twf.TextField(validator=twc.IntValidator)
+
     action = lurl('save_booking_day_properties')
+
 
 create_edit_booking_day_form = EditVisitingGroupForm()

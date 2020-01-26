@@ -6,18 +6,13 @@ This file complements development/deployment.ini.
 
 """
 
+import hashlib
 import logging
 
-from tg.configuration import AppConfig
 import hollyrosa
-from hollyrosa.model.booking_couch import getVisitingGroupByBoknr
 from hollyrosa import model
-from hollyrosa import lib
-from hollyrosa.lib import app_globals, helpers
-from hollyrosa.controllers.common import DataContainer
-import hashlib
-
-
+from hollyrosa.model.booking_couch import getVisitingGroupByBoknr
+from tg.configuration import AppConfig
 
 base_config = AppConfig()
 base_config.renderers = ['kajiki']
@@ -35,43 +30,37 @@ base_config.dispatch_path_translator = True
 base_config.prefer_toscawidgets2 = True
 
 base_config.package = hollyrosa
-base_config.custom_tw2_config['script_name'] = '/hollyrosa' # hollyrosa in production
+base_config.custom_tw2_config['script_name'] = '/hollyrosa'  # hollyrosa in production
 
 # Enable json in expose
 base_config.renderers.append('json')
 # Enable genshi in expose to have a lingua franca
 # for extensions and pluggable apps.
 # You can remove this if you don't plan to use it.
-#base_config.renderers.append('genshi')
+# base_config.renderers.append('genshi')
 
 # Set the default renderer
 base_config.default_renderer = 'kajiki'
 # Configure the base SQLALchemy Setup
 base_config.use_sqlalchemy = False
-base_config.model = None ## authtest.model
-base_config.DBSession = None ## authtest.model.DBSession
+base_config.model = None
+base_config.DBSession = None
 # Configure the authentication backend
 base_config.auth_backend = 'sqlalchemy'
 # YOU MUST CHANGE THIS VALUE IN PRODUCTION TO SECURE YOUR APP
 base_config.sa_auth.cookie_secret = "5e3d194a-4a6c-4969-9eda-9adfaae78bb4"
 # what is the class you want to use to search for users in the database
 base_config.sa_auth.user_class = None
-base_config['flash.template'] = """<div class="notification is-$status $status" ><strong><p>$message</p></strong></div>"""
+base_config[
+    'flash.template'] = """<div class="notification is-$status $status" ><strong><p>$message</p></strong></div>"""
 
 from tg.configuration.auth import TGAuthMetadata
 
-
-
-
-############
-
 def validate_password(user, password):
-    h = hashlib.sha256('gninyd') # salt
+    h = hashlib.sha256('gninyd')  # salt
     h.update(password)
     c = h.hexdigest()
     return user['password'] == c
-
-###################
 
 # This tells to TurboGears how to retrieve the data for your user
 class ApplicationAuthMetadata(TGAuthMetadata):
@@ -83,13 +72,7 @@ class ApplicationAuthMetadata(TGAuthMetadata):
         login = identity['login']
         supplied_login_name = identity['login']
 
-        ##
-        ##user = self.sa_auth.dbsession.query(self.sa_auth.user_class).filter_by(
-        ##    user_name=login
-        ##).first()
-        ##
-
-        user = model.getHollyCouch().get('user.'+login)
+        user = model.getHollyCouch().get('user.' + login)
 
         if not user:
 
@@ -130,10 +113,7 @@ class ApplicationAuthMetadata(TGAuthMetadata):
         return login
 
     def get_user(self, identity, userid):
-        ##return self.sa_auth.dbsession.query(self.sa_auth.user_class).filter_by(
-        ##    user_name=userid
-        ##).first()
-        user = model.getHollyCouch().get('user.'+userid)
+        user = model.getHollyCouch().get('user.' + userid)
         if user:
             identity['user_level'] = user['level']
             identity['user_active'] = user['active']
@@ -144,12 +124,13 @@ class ApplicationAuthMetadata(TGAuthMetadata):
         return user
 
     def get_groups(self, identity, userid):
-        return [] ## [g.group_name for g in identity['user'].groups]
+        return []  ## [g.group_name for g in identity['user'].groups]
 
     def get_permissions(self, identity, userid):
-        return [] #] [p.permission_name for p in identity['user'].permissions]
+        return []  # ] [p.permission_name for p in identity['user'].permissions]
 
-base_config.sa_auth.dbsession = None ##model.DBSession
+
+base_config.sa_auth.dbsession = None
 
 base_config.sa_auth.authmetadata = ApplicationAuthMetadata(base_config.sa_auth)
 

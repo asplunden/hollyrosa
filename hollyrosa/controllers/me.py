@@ -19,20 +19,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-
-from tg import expose, flash, require, url, request, redirect,  validate
-from tg.predicates import Any, is_user, has_permission
+from hollyrosa.controllers.common import has_level
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import getHollyCouch
-
-import datetime
-
-#...this can later be moved to the VisitingGroup module whenever it is broken out
-from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId
-
-from hollyrosa.model.booking_couch import genUID
-from hollyrosa.controllers.booking_history import remember_tag_change
-from formencode import validators
+from tg import expose, require, abort
+from tg.predicates import Any
 
 __all__ = ['me']
 
@@ -42,8 +32,8 @@ class Me(BaseController):
         """Abort the request with a 404 HTTP status code."""
         abort(404)
 
-
     @expose('hollyrosa.templates.me')
-    @require(Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only logged in users may view me properties'))
+    @require(
+        Any(has_level('staff'), has_level('pl'), has_level('view'), msg='Only logged in users may view me properties'))
     def settings(self):
         return dict()

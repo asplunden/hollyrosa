@@ -32,24 +32,24 @@ from hollyrosa.controllers.common import languages_map
 
 
 def _getPreferredLanguageOptions():
-        """
-        return a list of all supported languages for activity pages etc.
+    """
+    return a list of all supported languages for activity pages etc.
 
-        if there ever is a need lookup from database, see how edit_activity_form does it
-        """
-        return languages_map.items()
+    if there ever is a need lookup from database, see how edit_activity_form does it
+    """
+    return languages_map.items()
 
 
 class EditVisitingGroupForm(twd.CustomisedTableForm):
     class child(twf.TableLayout):
         visiting_group_id = twf.HiddenField(validator=twc.Required)
         subtype = twf.HiddenField(validator=twc.Required)
-        name = twf.TextField(validator=twc.StringLengthValidator(min=1),  css_class="edit_name",  size=40)
-        info = TinyMCEWidget(mce_options = dict(theme='advanced',
-                                                                   theme_advanced_toolbar_align ="left",
-                                                                   theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat",
-                                                                   theme_advanced_buttons2 = "",
-                                                                   theme_advanced_buttons3 = ""))
+        name = twf.TextField(validator=twc.StringLengthValidator(min=1), css_class="edit_name", size=40)
+        info = TinyMCEWidget(mce_options=dict(theme='advanced',
+                                              theme_advanced_toolbar_align="left",
+                                              theme_advanced_buttons1="formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat",
+                                              theme_advanced_buttons2="",
+                                              theme_advanced_buttons3=""))
 
         from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', required=True)
         to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', required=True)
@@ -68,9 +68,10 @@ class EditVisitingGroupForm(twd.CustomisedTableForm):
             value = twf.TextField(size=4)
             unit = twf.TextField(size=8)
             description = twf.TextField()
-            from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d') # required=True
-            to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d') # required=True
+            from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')  # required=True
+            to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')  # required=True
 
     action = lurl('save_visiting_group_properties')
+
 
 create_edit_visiting_group_form = EditVisitingGroupForm()

@@ -26,6 +26,7 @@ from tg import lurl
 from tw2.tinymce import TinyMCEWidget, MarkupConverter
 from formencode.validators import DateConverter
 
+
 class EditVodbGroupForm(twd.CustomisedTableForm):
     class child(twf.TableLayout):
         vodb_group_id = twf.HiddenField()
@@ -33,12 +34,12 @@ class EditVodbGroupForm(twd.CustomisedTableForm):
         name = twf.TextField(validator=twc.StringLengthValidator(min=4), css_class="edit_name", size=40)
         boknr = twf.TextField()
 
-        info = TinyMCEWidget(mce_options = dict(theme='advanced',
-                                                                   theme_advanced_toolbar_align ="left",
-                                                                   theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat",
-                                                                   theme_advanced_buttons2 = "",
-                                                                   theme_advanced_buttons3 = ""
-))
+        info = TinyMCEWidget(mce_options=dict(theme='advanced',
+                                              theme_advanced_toolbar_align="left",
+                                              theme_advanced_buttons1="formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat",
+                                              theme_advanced_buttons2="",
+                                              theme_advanced_buttons3=""
+                                              ))
         from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', required=True)
         to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', required=True)
         vodb_contact_name = twf.TextField()
@@ -58,4 +59,6 @@ class EditVodbGroupForm(twd.CustomisedTableForm):
             to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')
 
     action = lurl('save_vodb_group_properties')
+
+
 create_edit_vodb_group_form = EditVodbGroupForm()

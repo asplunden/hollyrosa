@@ -24,31 +24,29 @@ import tw2.forms as twf
 from formencode.validators import DateConverter
 
 
-class EditBookLiveSlotForm(twf.Form):    
-    class child(twf.TableLayout):    
+class EditBookLiveSlotForm(twf.Form):
+    class child(twf.TableLayout):
         booking_id = twf.HiddenField(validator=twc.Required)
         booking_day_id = twf.HiddenField(validator=twc.Required)
         subtype = twf.HiddenField(validator=twc.Required)
         activity_id = twf.HiddenField(validator=twc.Required)
         return_to_day_id = twf.HiddenField(validator=twc.Required)
         visiting_group_name = twf.TextField(validator=twc.StringLengthValidator(min=1), css_class="edit_name", size=40)
-        visiting_group_display_name = twf.HiddenField(validator=twc.StringLengthValidator(min=1))        
+        visiting_group_display_name = twf.HiddenField(validator=twc.StringLengthValidator(min=1))
         visiting_group_id = twf.HiddenField(validator=twc.Required)
         booking_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', label='Start Date')
-        
+
         slot_id = twf.SingleSelectField(validator=twc.Required, options=[], label="Start Time")
-        
+
         booking_end_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', label="End Date")
-        
-        booking_end_slot_id = twf.SingleSelectField(validator=twc.Required, options=[], prompt_text=None, label="End Time")
-        
+
+        booking_end_slot_id = twf.SingleSelectField(validator=twc.Required, options=[], prompt_text=None,
+                                                    label="End Time")
+
         booking_content = twf.TextArea(twc.Required, css_class="edit_booking_content", rows=5, cols=30)
         block_after_book = twf.CheckBox()
 
-	action = lurl('why_this_link_dont_work_i_dont_know') #save_booked_live_booking_properties')
+        action = lurl('why_this_link_dont_work_i_dont_know')  # save_booked_live_booking_properties')
 
-
-            
 
 create_edit_book_live_slot_form = EditBookLiveSlotForm()
-

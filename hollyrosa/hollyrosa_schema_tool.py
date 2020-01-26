@@ -20,21 +20,22 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import copy, datetime, logging, argparse
+import argparse
+import datetime
+import logging
+
 import couchdb
 
 
 def dateRange(from_date, to_date, format='%a %b %d %Y'):
     one_day = datetime.timedelta(1)
     formated_dates = list()
-    tmp_date = datetime.datetime.strptime(from_date,'%Y-%m-%d')
-    tmp_to_date = datetime.datetime.strptime(to_date,'%Y-%m-%d')
+    tmp_date = datetime.datetime.strptime(from_date, '%Y-%m-%d')
+    tmp_to_date = datetime.datetime.strptime(to_date, '%Y-%m-%d')
     while tmp_date <= tmp_to_date:
         formated_dates.append(tmp_date.strftime(format))
         tmp_date = tmp_date + one_day
     return formated_dates
-
-
 
 
 parser = argparse.ArgumentParser()
@@ -45,7 +46,7 @@ parser.add_argument("--password", help="login password", default=None)
 parser.add_argument("-v", "--verbose", help="turn on verbose logging", action="store_true")
 args = parser.parse_args()
 
-#...init logging'
+# ...init logging'
 log = logging.getLogger("hollyrosa_view_tool")
 
 if args.verbose:
@@ -53,8 +54,7 @@ if args.verbose:
 else:
     logging.basicConfig(level=logging.WARN)
 
-
-#...read from ini file
+# ...read from ini file
 db_url = args.couch
 db_name = args.database
 db_username = args.username
@@ -70,9 +70,6 @@ try:
 except couchdb.ResourceNotFound, e:
     holly_couch = couch_server.create(db_name)
 
-
-
-
 if True:
     for b in holly_couch.view('booking_day/all_booking_days', include_docs=True):
         doc = holly_couch[b.doc['_id']]
@@ -81,7 +78,6 @@ if True:
 
 if True:
     for b in holly_couch.view('booking_day/all_booking_days', include_docs=True):
-
         doc = holly_couch[b.doc['_id']]
         doc['staff_schema_id'] = 'funk_schema.2015'
         holly_couch[b.doc['_id']] = doc
