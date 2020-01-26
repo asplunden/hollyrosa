@@ -6,3 +6,4 @@ tw.dynforms >= 0.9.8
 couchdb >= 1.0.0
 webhelpers >= 1.3
 bleach >= 2.0
+webob >= 1.7
