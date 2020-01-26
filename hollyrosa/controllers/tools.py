@@ -23,7 +23,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 from tg import expose, flash, require, url, request, redirect, validate, abort, config
 from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import genUID, holly_couch
+from hollyrosa.model import genUID, getHollyCouch
 
 import datetime, StringIO, time, logging
 
@@ -52,7 +52,7 @@ class Tools(BaseController):
         if day == None:
             day = datetime.datetime.today().date().strftime("%Y-%m-%d")
 
-        activity_groups = [h.value for h in getAllActivityGroups(holly_couch)]
+        activity_groups = [h.value for h in getAllActivityGroups(getHollyCouch())]
         return dict(show_day=day, activity_groups=activity_groups, db_name=config['couch.database'], db_url=config['couch.db_url'], debug_enabled=config['debug'], serve_static=config['serve_static'])
 
 
@@ -73,17 +73,17 @@ class Tools(BaseController):
         log.info("sanity_check_property_usage()")
         ##ensurePostRequest(request, __name__)
         #...iterate through all bookings, we are only interested in scheduled bookings
-        bookings = getAllScheduledBookings(holly_couch, limit=1000000)
+        bookings = getAllScheduledBookings(getHollyCouch(), limit=1000000)
         booking_days_map = dict()
-        for bd in getAllBookingDays(holly_couch):
+        for bd in getAllBookingDays(getHollyCouch()):
             booking_days_map[bd.doc['_id']] = bd.doc
 
         visiting_group_map = dict()
-        for vg in getAllVisitingGroups(holly_couch):
+        for vg in getAllVisitingGroups(getHollyCouch()):
             visiting_group_map[vg.key[1]] = vg.doc
 
         #activity_map = dict()
-        activity_title_map = getActivityTitleMap(holly_couch)
+        activity_title_map = getActivityTitleMap(getHollyCouch())
 
         problems = list()
         for tmp_bx in bookings:
@@ -92,7 +92,7 @@ class Tools(BaseController):
             tmp_b_day = booking_days_map[tmp_b_day_id]
 
         #    if not activity_map.has_key(tmp_b_day['day_schema_id']):
-        #        activity_map[tmp_b_day['day_schema_id']] = getSchemaSlotActivityMap(holly_couch, tmp_b_day['day_schema_id'])
+        #        activity_map[tmp_b_day['day_schema_id']] = getSchemaSlotActivityMap(getHollyCouch(), tmp_b_day['day_schema_id'])
 
         #    tmp_activity_map = activity_map[tmp_b_day['day_schema_id']]
 
@@ -144,7 +144,7 @@ class Tools(BaseController):
     @expose('hollyrosa.templates.tools.activity_statistics')
     @require(Any(has_level('staff'), has_level('pl'), msg='Only PL or staff members can take a look at people statistics'))
     def activity_statistics(self):
-        activity_statistics = getActivityStatistics(holly_couch)
+        activity_statistics = getActivityStatistics(getHollyCouch())
 
         #...return activity, activity_group, bookings
         result = list()
@@ -153,9 +153,9 @@ class Tools(BaseController):
             tmp_value = tmp_activity_stat.value
 
             tmp_activity_id = tmp_key[0]
-            tmp_activity = holly_couch[tmp_activity_id]
+            tmp_activity = getHollyCouch()[tmp_activity_id]
             tmp_activity_name = tmp_activity['title']
-            activity_group_name = holly_couch[tmp_activity['activity_group_id']]['title']
+            activity_group_name = getHollyCouch()[tmp_activity['activity_group_id']]['title']
             totals = tmp_value
             row = dict(activity=tmp_activity_name, activity_group=activity_group_name, totals=totals)
             result.append(row)
@@ -184,8 +184,8 @@ class Tools(BaseController):
         #
         #
 
-        statistics_totals = getAgeGroupStatistics(holly_couch, group_level=1)
-        statistics = getAgeGroupStatistics(holly_couch)
+        statistics_totals = getAgeGroupStatistics(getHollyCouch(), group_level=1)
+        statistics = getAgeGroupStatistics(getHollyCouch())
 
         property_names = dict()
         totals = dict() # totals = list()
@@ -250,8 +250,8 @@ class Tools(BaseController):
         """
         This method is intended to show the number of participants in different workflow state (preliminary, etc)
         """
-        statistics_totals = getTagStatistics(holly_couch, group_level=1)
-        statistics = getTagStatistics(holly_couch, group_level=2)
+        statistics_totals = getTagStatistics(getHollyCouch(), group_level=1)
+        statistics = getTagStatistics(getHollyCouch(), group_level=2)
 
         #...find all tags that is used and perhaps filter out unwanted ones.
 
@@ -305,7 +305,7 @@ class Tools(BaseController):
         ew_id = genUID(type='living_schema')
         schema = dict(type='day_schema',  subtype='room',  title='room schema 2013',  activity_group_ids=["activity_groups_ids", "roomgroup.fyrbyn", "roomgroup.vaderstracken", "roomgroup.vindarnashus","roomgroup.tunet",
         "roomgroup.skrakvik","roomgroup.tc","roomgroup.alphyddorna","roomgroup.gokboet","roomgroup.kojan"])
-        all_activities = getAllActivities(holly_couch)
+        all_activities = getAllActivities(getHollyCouch())
 
         #...create some living, map to all activities in ag groups house
         i=0
@@ -325,7 +325,7 @@ class Tools(BaseController):
                     tmp_schema[tmp_act['id']] = [tmp_id,  tmp_fm,  tmp_em]
 
         schema['schema'] = tmp_schema
-        holly_couch[ew_id] = schema
+        getHollyCouch()[ew_id] = schema
 
 
         raise redirect(request.referer)

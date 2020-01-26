@@ -31,7 +31,7 @@ from hollyrosa.lib.base import BaseController
 from hollyrosa.controllers.error import ErrorController
 from hollyrosa.controllers import booking_day, calendar, booking_history, workflow, visiting_group, tools, note, tag, user, me, visiting_group_program_request, vodb_group, program_layer, activity
 
-from hollyrosa import model
+from hollyrosa.model import getHollyCouch
 
 __all__ = ['RootController']
 
@@ -142,10 +142,11 @@ class RootController(BaseController):
 
         #...make a note here of last login
         # TODO: getter in holly couch
-        user_o = model.holly_couch.get('user.'+userid)
+        user_o = getHollyCouch().get('user.'+userid)
         user_o['last_login'] = str(datetime.datetime.now())
         user_o['active'] = True
-        model.holly_couch['user.'+userid] = user_o
+
+        getHollyCouch()['user.'+userid] = user_o
 
         flash(_('Welcome back, %s!') % userid)
 

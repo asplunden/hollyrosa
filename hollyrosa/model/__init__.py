@@ -3,8 +3,10 @@
 
 #from zope.sqlalchemy import ZopeTransactionExtension
 #from sqlalchemy.orm import scoped_session, sessionmaker
+import threading
 import couchdb
 import tg
+
 
 #from sqlalchemy import MetaData
 ###from sqlalchemy.ext.declarative import declarative_base
@@ -40,55 +42,41 @@ import tg
 #
 ######
 
-
-couch_server = None
-holly_couch = None
-
-
-
 def init_model(engine):
     """Call me before using any of the tables or classes in the model."""
-    #DBSession.configure(bind=engine)
     pass
 
-def getDB():
-    return holly_couch
+def getHollyCouch(): # TODO this is like our session object we can import everywhere...
+    """
+    Always use this to get access to threadlocal couchdb, should give improved performance and thread safety if needed over holly implementation
+    """
+    threadLocal = threading.local()
+    l_holly_couch_db = getattr(threadLocal, 'holly_couch_db', None)
+    if l_holly_couch_db is None:
+        l_holly_couch_db = _initDB_ng()
+        threadLocal.holly_couch_db = l_holly_couch_db
+    return l_holly_couch_db
 
 
-def initDB():
+def _initDB_ng():
+    """
+    initialize a database connection
+    """
     db_url = tg.config.get('couch.db_url', 'http://localhost:5989')
     db_name = tg.config.get('couch.database', 'hollyrosa1')
-    db_login = tg.config.get('couch.login', '')
-    db_password = tg.config.get('couch.password', '')
 
-    global couch_server
-    global holly_couch
+    #db_login = tg.config.get('couch.login', '')
+    #db_password = tg.config.get('couch.password', '')
 
-    couch_server = couchdb.Server(url=db_url)
-
-    #...if login is set, set credentials 
-    if len(db_login) > 0:
-        couch_server.resource.credentials = (db_login, db_password)
+    threadLocal = threading.local()
+    threadLocal.couch_server = couchdb.Server(url=db_url)
+    #if len(db_login) > 0:
+    #    threadLocal.couch_server.resource.credentials = (db_login, db_password)
 
     try:
-        holly_couch = couch_server[db_name]
+        threadLocal.holly_rosa_db = threadLocal.couch_server[db_name]
     except couchdb.ResourceNotFound, e:
-        holly_couch = couch_server.create(db_name)
+        threadLocal.holly_rosa_db = couch_server.create(db_name)
+    return threadLocal.holly_rosa_db
 
-
-# Import your model modules here.
-###from hollyrosa.model.auth import User, Group, Permission
-##from hollyrosa.model.booking import DaySchema, BookingDay, SlotRow, Booking, VisitingGroup, BookingHistory, Activity, ActivityGroup, SlotRowPosition,  SlotRowPositionState
-
-import booking_couch
 from booking_couch import genUID
-
-# TODO: refactor
-##holly_couch = booking_couch.holly_couch
-
-
-#getAllVisitingGroupsNameAmongBookings = booking_couch.getAllVisitingGroupsNameAmongBookings
-#getSlotAndActivityIdOfBooking = booking_couch.getSlotAndActivityIdOfBooking
-#getBookingDayOfDate = booking_couch.getBookingDayOfDate
-#getAllBookingDays = booking_couch.getAllBookingDays
-#getBookingDays = booking_couch.getBookingDays

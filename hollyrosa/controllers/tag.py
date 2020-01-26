@@ -25,13 +25,13 @@ import datetime, logging
 from tg import expose, flash, require, url, request, redirect, validate, abort
 from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import holly_couch
+from hollyrosa.model import getHollyCouch
 
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
 from hollyrosa.controllers.common import has_level, getLoggedInUserId, ensurePostRequest
 
-from hollyrosa.model.booking_couch import genUID 
+from hollyrosa.model.booking_couch import genUID
 from hollyrosa.controllers.booking_history import remember_tag_change
 from hollyrosa.controllers import common_couch
 from formencode import validators
@@ -45,23 +45,23 @@ log = logging.getLogger()
 class Tag(BaseController):
     def view(self, url):
         """Abort the request with a 404 HTTP status code."""
-        abort(404)    
-        
+        abort(404)
+
     @expose("json")
-    @validate(validators={'id':validators.UnicodeString})        
+    @validate(validators={'id':validators.UnicodeString})
     def get_tags(self, id):
-        vgroup = common_couch.getVisitingGroup(holly_couch,  id)
+        vgroup = common_couch.getVisitingGroup(getHollyCouch(),  id)
         tags = vgroup.get('tags',[])
         return dict(tags=tags)
-    
-        
+
+
     @expose("json")
     @require(Any(has_level('staff'), has_level('pl'), msg='Only PL and staff members may change tags'))
-    @validate(validators={'id':validators.UnicodeString, 'tags':validators.UnicodeString})        
+    @validate(validators={'id':validators.UnicodeString, 'tags':validators.UnicodeString})
     def add_tags(self, id, tags):
         log.info("add_tags()")
         ensurePostRequest(request, __name__)
-        vgroup = common_couch.getVisitingGroup(holly_couch,  id)
+        vgroup = common_couch.getVisitingGroup(getHollyCouch(),  id)
         old_tags = vgroup.get('tags',[])
         remember_old_tags = [t for t in old_tags]
         new_tags = [t.strip() for t in tags.split(',')]
@@ -69,23 +69,23 @@ class Tag(BaseController):
             if t not in old_tags:
                 old_tags.append(t)
         vgroup['tags'] = old_tags
-        holly_couch[id] = vgroup
-        remember_tag_change(holly_couch, old_tags=remember_old_tags, new_tags=old_tags, visiting_group_id=id, visiting_group_name=vgroup['name'], changed_by=getLoggedInUserId(request))
-        
+        getHollyCouch()[id] = vgroup
+        remember_tag_change(getHollyCouch(), old_tags=remember_old_tags, new_tags=old_tags, visiting_group_id=id, visiting_group_name=vgroup['name'], changed_by=getLoggedInUserId(request))
+
         return dict(tags=old_tags)
-    
-    
+
+
     @expose("json")
     @require(Any(has_level('staff'), has_level('pl'), msg='Only PL and staff members may change tags'))
-    @validate(validators={'id':validators.UnicodeString, 'tag':validators.UnicodeString})        
+    @validate(validators={'id':validators.UnicodeString, 'tag':validators.UnicodeString})
     def delete_tag(self, id, tag):
         log.info("delete_tag()")
         ensurePostRequest(request, __name__)
-        vgroup = common_couch.getVisitingGroup(holly_couch,  id)
+        vgroup = common_couch.getVisitingGroup(getHollyCouch(),  id)
         old_tags = vgroup.get('tags',[])
         new_tags = [t for t in old_tags if t.strip() != tag.strip()]
         vgroup['tags'] = new_tags
-        holly_couch[id] = vgroup
-        remember_tag_change(holly_couch, old_tags=old_tags, new_tags=new_tags, visiting_group_id=id, visiting_group_name=vgroup['name'], changed_by=getLoggedInUserId(request))
+        getHollyCouch()[id] = vgroup
+        remember_tag_change(getHollyCouch(), old_tags=old_tags, new_tags=new_tags, visiting_group_id=id, visiting_group_name=vgroup['name'], changed_by=getLoggedInUserId(request))
 
         return dict(tags=new_tags)

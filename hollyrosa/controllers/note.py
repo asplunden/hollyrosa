@@ -23,7 +23,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 from tg import expose, flash, require, url, request, redirect,  validate, abort
 from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import holly_couch,  genUID
+from hollyrosa.model import getHollyCouch, genUID
 from hollyrosa.controllers import common_couch
 
 from formencode import validators
@@ -77,7 +77,7 @@ class Note(BaseController):
         if note_id == '':
             note_o = DataContainer(text='', target_id=visiting_group_id, note_id='')
         else:
-            note_o = common_couch.getNote(holly_couch,  note_id)
+            note_o = common_couch.getNote(getHollyCouch(),  note_id)
         return dict(note=note_o)
 
 
@@ -89,13 +89,13 @@ class Note(BaseController):
         if attachment_id == '':
             attachment_o = dict(text='', target_id=visiting_group_id, note_id='')
         else:
-            attachment_o = common_couch.getAttachment(holly_couch,  attachment_id)
+            attachment_o = common_couch.getAttachment(getHollyCouch(),  attachment_id)
         return dict(attachment=attachment_o)
 
     @expose("json")
     @require(Any(is_user('user.erspl'), has_level('staff'), has_level('view'), msg='Only staff members and viewers may view visiting group properties'))
     def get_notes_for_visiting_group(self, id):
-        notes = [n.doc for n in getNotesForTarget(holly_couch, id)]
+        notes = [n.doc for n in getNotesForTarget(getHollyCouch(), id)]
         return dict(notes=notes, id=id)
 
 
@@ -110,7 +110,7 @@ class Note(BaseController):
             note_change='new'
             note_o['timestamp'] = timestamp
         else:
-            note_o = common_couch.getNote(holly_couch, note_id)
+            note_o = common_couch.getNote(getHollyCouch(), note_id)
             history = note_o['history']
             if history == None:
                 history = list()
@@ -122,9 +122,9 @@ class Note(BaseController):
 
         note_o['last_changed_by'] = getLoggedInUserId(request)
         note_o['text'] = cleanHtml(text)
-        holly_couch[note_o['note_id']] = note_o
+        getHollyCouch()[note_o['note_id']] = note_o
 
-        remember_note_change(holly_couch, target_id=target_id, note_id=note_o['note_id'], changed_by=getLoggedInUserId(request), note_change=note_change)
+        remember_note_change(getHollyCouch(), target_id=target_id, note_id=note_o['note_id'], changed_by=getLoggedInUserId(request), note_change=note_change)
 
         # TODO: where do we go from here?
         redirect_to = '/'
@@ -144,7 +144,7 @@ class Note(BaseController):
             attachment_change='new'
             attachment_o['timestamp'] = timestamp
         else:
-            attachment_o = common_couch.getAttachment(holly_couch,  _id)
+            attachment_o = common_couch.getAttachment(getHollyCouch(),  _id)
             history = attachment_o['history']
             if history == None:
                 history = list()
@@ -155,15 +155,15 @@ class Note(BaseController):
 
         attachment_o['last_changed_by'] = getLoggedInUserId(request)
         attachment_o['text'] = cleanHtml(text)
-        holly_couch[attachment_o['_id']] = attachment_o
+        getHollyCouch()[attachment_o['_id']] = attachment_o
 
         file = request.POST['attachment']
 
         if file != '':
-            holly_couch.put_attachment(attachment_o, attachment.file, filename=attachment.filename)
+            getHollyCouch().put_attachment(attachment_o, attachment.file, filename=attachment.filename)
 
         # TODO FIX BELOW
-        #remember_attachment_change(holly_couch, target_id=target_id, attachment_id=attachment_o['_id'], changed_by=getLoggedInUserId(request), attachment_change=attachment_change)
+        #remember_attachment_change(getHollyCouch(), target_id=target_id, attachment_id=attachment_o['_id'], changed_by=getLoggedInUserId(request), attachment_change=attachment_change)
 
         # TODO: where do we go from here?
         redirect_to = '/'
@@ -180,21 +180,21 @@ class Note(BaseController):
         log.debug(u'Trying to download attachment="%s" filename="%s"' % (attachment_id, doc_id))
         headers = ('Content-Disposition', ('attachment;filename=%s' % doc_id).replace(u' ',u'_').replace(u'å',u'a').replace(u'ö',u'o').encode('ascii', 'replace'))
         response.headerlist.append(headers)
-        return holly_couch.get_attachment(attachment_id, doc_id).read()
+        return getHollyCouch().get_attachment(attachment_id, doc_id).read()
 
     @expose()
     @validate(validators={"note_id":validators.UnicodeString(), "visiting_group_id":validators.UnicodeString()})
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may delete notes and attachments'))
     def delete_note(self, note_id, visiting_group_id):
         log.debug(u'Trying to delete note with id="%s" visting_group_id="%s"' % (note_id, visiting_group_id))
-        note_o = common_couch.getCouchDBDocument(holly_couch, note_id, doc_type=None)
+        note_o = common_couch.getCouchDBDocument(getHollyCouch(), note_id, doc_type=None)
         if note_o['target_id'] != visiting_group_id:
             abort(403) # TODO: NOT ALLOWED TO DO THIS, FORBIDDEN.
         if note_o['type'] == 'attachment':
             note_o['attachment_state'] = -100
         elif note_o['type'] == 'note':
             note_o['note_state'] = -100
-        holly_couch[note_id] = note_o
+        getHollyCouch()[note_id] = note_o
 
         # TODO: add to history
         raise redirect(request.referrer)

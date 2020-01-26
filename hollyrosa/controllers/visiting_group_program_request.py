@@ -22,11 +22,11 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 from tg import expose, flash, require, url, request, redirect,  validate
 from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import holly_couch
+from hollyrosa.model import getHollyCouch
 
 from tg import tmpl_context
 
-import datetime,logging, json, time
+import datetime, logging, json, time
 
 log = logging.getLogger()
 
@@ -150,7 +150,7 @@ class VisitingGroupProgramRequest(BaseController):
     def login_vgroup(self, boknr=''):
 
         #lookup vgroup of boknr
-        vgroup_list = getVisitingGroupByBoknr(holly_couch, boknr)
+        vgroup_list = getVisitingGroupByBoknr(getHollyCouch(), boknr)
         if len(vgroup_list) == 0:
             flash(u"Det finns ingen grupp i systemet än med det bokningsnummer du angav.",'warning')
             raise redirect('/')
@@ -162,7 +162,7 @@ class VisitingGroupProgramRequest(BaseController):
     @expose('hollyrosa.templates.visiting_group_program_request_edit2')
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få ändra i dina programönskemål'))
     def edit_request(self, visiting_group_id=''):
-        visiting_group_o = holly_couch[str(visiting_group_id)]
+        visiting_group_o = getHollyCouch()[str(visiting_group_id)]
         visiting_group_o.program_request_info = visiting_group_o.get('program_request_info','message to program!')
         visiting_group_o.program_request_have_skippers = visiting_group_o.get('program_request_have_skippers',0)
         visiting_group_o.program_request_miniscout = visiting_group_o.get('program_request_miniscout',0)
@@ -213,7 +213,7 @@ class VisitingGroupProgramRequest(BaseController):
         validation_error_messages = ValidationErrorMessages()
 
         visiting_group_id = str(vgroup_id)
-        visiting_group_o = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        visiting_group_o = common_couch.getVisitingGroup(getHollyCouch(), visiting_group_id)
 
         may_change_request_data = (0  == visiting_group_o['boknstatus'])
         visiting_group_o['contact_person'] = contact_person
@@ -313,7 +313,7 @@ class VisitingGroupProgramRequest(BaseController):
 
             visiting_group_o['validation_error_messages'] = validation_error_messages
             visiting_group_o['validation_error_explanations'] = validation_error_messages.explanations
-            holly_couch[visiting_group_o['_id']] = visiting_group_o
+            getHollyCouch()[visiting_group_o['_id']] = visiting_group_o
 
         # TODO: We should have a two step process: first construct all bookings (make a list) and if it all is successfull and no validation errors, thats when we actually write them to the db.
 
@@ -343,12 +343,12 @@ class VisitingGroupProgramRequest(BaseController):
                         # TODO: what if there is no requested activity?
                         # TODO: how do users choose not to which anything after they have made a request? I think we actually will need a NULL request and this is where we among other things check the null request.
 
-                        booking_day_o = getBookingDayOfDate(holly_couch, requested_date)
-                        log.debug(booking_day_o)
+                        booking_day_o = getBookingDayOfDate(getHollyCouch(), requested_date)
+
                         day_schema_id = booking_day_o['day_schema_id']
 
                         #...TODO day shema will probably always be the same so just query once per schema
-                        schema_o = common_couch.getDaySchema(holly_couch,  day_schema_id)
+                        schema_o = common_couch.getDaySchema(getHollyCouch(),  day_schema_id)
 
                         #...given fm/em/evening, look up the matching slot_id. Probably the schema will be needed (and maybe index 0,1,2,3...)
                         tmp_activity_row = schema_o['schema'][requested_activity_id]
@@ -367,7 +367,7 @@ class VisitingGroupProgramRequest(BaseController):
 
                         time_selection_translator = dict(EVENING=u'kväll')
                         if validation_error_messages.hasErrors():
-                            holly_couch[visiting_group_o['_id']] = visiting_group_o
+                            getHollyCouch()[visiting_group_o['_id']] = visiting_group_o
                             raise redirect(request.referrer)
 
                         for tmp_slot_info in tmp_activity_row[1:]:
@@ -385,30 +385,30 @@ class VisitingGroupProgramRequest(BaseController):
                                 new_booking['visiting_group_name'] = visiting_group_o['name']
                                 new_booking['last_changed_by_id'] = getLoggedInUserId(request)
 
-                                activity_o = common_couch.getActivity(holly_couch, requested_activity_id)
+                                activity_o = common_couch.getActivity(getHollyCouch(), requested_activity_id)
 
                                 # TODO: the line below gts the properties wrong
                                 content = u'%s (önskar %s %d/%d %s) %s' % ( ' '.join(['$$%s'%a for a in request_for_age_groups ]) ,activity_selection_map.get(requested_activity_id, activity_o['title']), int(time.strftime("%d", requested_date_o)),  int(time.strftime("%m", requested_date_o)), time_selection_translator.get(requested_time, requested_time), tmp_request['note'] )
 
                                 new_booking['content'] = content
-                                new_booking['cache_content'] = computeCacheContent(holly_couch[visiting_group_id], content)
+                                new_booking['cache_content'] = computeCacheContent(getHollyCouch()[visiting_group_id], content)
                                 new_booking['activity_id'] = requested_activity_id
 
 
                                 new_booking['booking_state'] = activity_o['default_booking_state']
 
-                                slot_map  = getSchemaSlotActivityMap(holly_couch, booking_day_o, subtype='program')
+                                slot_map  = getSchemaSlotActivityMap(getHollyCouch(), booking_day_o, subtype='program')
                                 slot = slot_map[match_slot_id]
                                 new_uid = genUID(type='booking')
 
                                 #...here we create the booking
-                                holly_couch[new_uid] = new_booking
+                                getHollyCouch()[new_uid] = new_booking
 
                                 #...remember the created booking
 
-                                remember_new_booking_request(holly_couch, booking=new_booking, changed_by=getLoggedInUserId(request))
+                                remember_new_booking_request(getHollyCouch(), booking=new_booking, changed_by=getLoggedInUserId(request))
                                 break
 
                 visiting_group_o['boknstatus'] = 5 # TODO: use constant
-                holly_couch[visiting_group_o['_id']] = visiting_group_o
+                getHollyCouch()[visiting_group_o['_id']] = visiting_group_o
         raise redirect(request.referrer)
