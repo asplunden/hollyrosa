@@ -25,6 +25,8 @@ import bleach
 from tg import abort
 from tg.predicates import Predicate
 
+import webob # for better HTTP exceptions
+
 from hollyrosa.model import booking
 
 
@@ -211,7 +213,8 @@ def ensurePostRequest(request, name=''):
     The purpose of this little method is to ensure that the controller was called with appropriate HTTP verb.
     """
     if not request.method == 'POST':
-        abort(405)
+        raise webob.exc.HTTPMethodNotAllowed(comment='The method %s you tried to reached through TG2 object dispatch is only accepting POST requests. Most probable there is some old code still calling GET.' % str(name))
+
 
 
 def computeCacheContent(visiting_group, content):
