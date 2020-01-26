@@ -413,3 +413,17 @@ def getProgramLayerBucketTextByDayAndTime(holly_couch,  visiting_group_id,  book
 
 def getVisitingGroupTypes(holly_couch):
     return [dict(title="program", id="program"), dict(title="staff", id="staff"), dict(title="course", id="course")]
+
+
+def getAllEmailAddresses(holly_couch):
+    return holly_couch.view('email_address/all_email_addresses', include_docs=True)
+
+
+def getEmailAddressStateByEmail(holly_couch, email_address_id, limit=1):
+    """
+    The hard part is trying to get to the very latest state. We rely on data being sorted and second key being the timestamp (unixtime)
+    """
+    return holly_couch.view('email_address/email_address_by_state', include_docs=True, descending=True, endkey=[email_address_id, 0.0, 0], startkey=[email_address_id, 99999999999999999999999, 1000], limit=limit)
+
+def getEmailAddressByEmail(holly_couch, email_address):
+    return holly_couch.view('email_address/all_email_addresses', key=email_address, include_docs=True)

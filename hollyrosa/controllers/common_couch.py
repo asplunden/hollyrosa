@@ -137,3 +137,20 @@ def makeCourseVODBGroup():
 
 def makeVisitingVODBGroup():
     pass
+
+#...email addresses
+
+def getEmailAddress(holly_couch, email_address_id):
+    return getCouchDBDocument(holly_couch, email_address_id, doc_type='email_address')
+
+def getEamilAddressState(holly_couch, email_address_state_id):
+    return getCouchDBDocument(holly_couch, email_address_state, doc_type='email_address_state')
+
+def createEmailAddress(email_address, subtype='email_address', global_state=10):
+    return dict(type='email_address', subtype=subtype, email_address=email_address, global_state=global_state)
+
+def createEmailAddressState(email_address_id, timestamp, secret_token='', state=10, user_id='', subtype='email_address_state', comment=''):
+    return dict(type='email_address_state', email_address_id=email_address_id, secret_token=secret_token, timestamp=timestamp, state=state, user_id=user_id, subtype=subtype, comment=comment)
+
+def createEmailAddressWrongEmailReport(email_address, timestamp, subtype='wrong', comment='', state=0, user_id=''):
+    return dict(type='email_address_report', email_address=email_address, timestamp=timestamp, state=state, user_id=user_id, subtype=subtype, comment=comment)

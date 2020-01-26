@@ -1,0 +1,45 @@
+<html py:extends="master.xhtml" py:strip="True">
+<!--
+Copyright 2010-2018 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<head py:block="head" py:strip="True">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa  - Email Confirmation</title>
+</head>
+<body class="tundra" py:block="body" py:strip="True">
+  <section class="section">
+    <div class="container">
+
+      <h1 class="title">Email Address Confirmation</h1>
+      <div class="content" py:if="confirmed">
+        <p>Your email address has been confirmed and can now be used in Hollyrosa. Very Welcome</p>
+      </div>
+      <div class="content" py:if="trouble">
+        <p>
+        There was a problem in the system confirming or rejecting your email address.<p><p>Perhaps your confirmation token is old. You will need to request a new email address confirmation token in order to confirm your email address.</p>
+        <p>If you tried to reject an email address and got this answer, you don't need t odo anything more. The email address cannot be used within Hollyrosa unless successfully confirmed.</p>
+      </div>
+      <div class="content" py:if="rejected">
+        Your email address has been rejected and will not be activated in Hollyrosa. If this was a misstake, you must contact Hollyrosa admins to re-request confirmtion.
+      </div>
+    </div>
+  </section>
+  </body>
+  </html>

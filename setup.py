@@ -25,7 +25,8 @@ setup(
         "couchdb >= 1.0.0",
         "webhelpers >= 1.3",
         "bleach >= 2.0",
-        "kajiki >= 0.7.1"
+        "kajiki >= 0.7.1",
+	"marrow.mailer <= 4.1"
                 ],
     setup_requires=["PasteScript >= 1.7"],
     paster_plugins=['PasteScript', 'Pylons', 'TurboGears2', 'tg.devtools'],

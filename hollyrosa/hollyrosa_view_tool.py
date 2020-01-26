@@ -44,7 +44,8 @@ if args.verbose:
 else:
     logging.basicConfig(level=logging.WARN)
 
-# ...read from ini file
+# read from ini file
+
 db_url = args.couch
 db_name = args.database
 db_username = args.username
@@ -52,7 +53,7 @@ db_password = args.password
 
 couch_server = couchdb.Server(url=db_url)
 
-if db_username != None:
+if db_username is not None:
     couch_server.resource.credentials = (db_username, db_password)
 
 try:
@@ -60,9 +61,10 @@ try:
 except couchdb.ResourceNotFound, e:
     holly_couch = couch_server.create(db_name)
 
+
 design_view_names = ['all_activities', 'booking_day', 'day_schema', 'history', 'notes', 'statistics', 'tag_statistics',
                      'tags', 'user', 'visiting_groups', 'vodb_overview', 'workflow', 'booking_day_live',
-                     'program_layer']
+                     'program_layer', 'email_address']
 save_from = True
 upload_to = False
 

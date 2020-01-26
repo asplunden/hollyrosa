@@ -3,9 +3,10 @@
 
 #from zope.sqlalchemy import ZopeTransactionExtension
 #from sqlalchemy.orm import scoped_session, sessionmaker
-import threading
+import threading, atexit
 import couchdb
 import tg
+from marrow.mailer import Mailer
 
 
 #from sqlalchemy import MetaData
@@ -42,6 +43,7 @@ import tg
 #
 ######
 
+
 def init_model(engine):
     """Call me before using any of the tables or classes in the model."""
     pass
@@ -54,6 +56,7 @@ def getHollyCouch(): # TODO this is like our session object we can import everyw
     l_holly_couch_db = getattr(threadLocal, 'holly_couch_db', None)
     if l_holly_couch_db is None:
         l_holly_couch_db = _initDB_ng()
+
         threadLocal.holly_couch_db = l_holly_couch_db
     return l_holly_couch_db
 
@@ -80,3 +83,25 @@ def _initDB_ng():
     return threadLocal.holly_rosa_db
 
 from booking_couch import genUID
+
+def getMailer(): # TODO this is like our session object we can import everywhere...
+    """
+    Always use this to get access to threadlocal mailer, should give improved performance and thread safety if needed over holly implementation
+    """
+    threadLocal = threading.local()
+    l_mailer = getattr(threadLocal, 'mailer', None)
+    if l_mailer is None:
+        l_mailer = initMailer()
+        threadLocal.mailer = l_mailer
+    return l_mailer
+
+
+def initMailer():
+    threadLocal = threading.local()
+    threadLocal.mailer = Mailer(dict(
+            transport = dict(
+                    use = 'maildir',
+                    directory = 'mdata/maildir')))
+    threadLocal.mailer.start()
+    atexit.register(lambda: threadLocal.mailer.stop())
+    return threadLocal.mailer

@@ -1,0 +1,49 @@
+<html py:extends="master.xhtml" py:strip="True">
+<!--
+Copyright 2010-2018 Martin Eliasson
+
+This file is part of Hollyrosa
+
+Hollyrosa is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Hollyrosa is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<head py:block="head" py:strip="True">
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+  <title>Hollyrosa - Manage Email Addresses</title>
+  <script src="${tg.url('/scripts/build.js')}"></script>
+</head>
+
+<body class="tundra" py:block="body" py:strip="True">
+  <section class="section">
+    <div class="container">
+      <h2 class="title">Hollyrosa - Manage Email Addresses</h2>
+      <article class="message is-info">
+        <div class="message-header">
+          <p>Email Address Management is in Beta State</p>
+          <button class="delete" aria-label="delete"></button>
+        </div>
+        <div class="message-body">
+          <p>Just to be very clear, <strong>The Email Address Management</strong> and the whole email address handling system is in beta state so take care and report all errors to Martin.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div id="app"></div>
+    </div>
+  </section>
+  </body>
+  </html>

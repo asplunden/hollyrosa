@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Main Controller
-
 Copyright 2010-2020 Martin Eliasson
 
 This file is part of Hollyrosa
@@ -22,15 +20,15 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 import datetime
 import logging
 
-from hollyrosa.controllers import booking_day, calendar, booking_history, workflow, visiting_group, tools, note, tag, \
-    user, me, visiting_group_program_request, vodb_group, program_layer, activity
+from hollyrosa.controllers import booking_day, calendar, booking_history, workflow, visiting_group, tools, note, tag
+from hollyrosa.controllers import user, me, visiting_group_program_request, vodb_group, program_layer, activity, \
+    email_address
 from hollyrosa.controllers.error import ErrorController
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import getHollyCouch
-from tg import expose, flash, require, lurl, request, redirect
-from tg import predicates
+from tg import expose, flash, lurl, request, redirect
 from tg.exceptions import HTTPFound
-from tg.i18n import ugettext as _, lazy_ugettext as l_
+from tg.i18n import ugettext as _
 
 __all__ = ['RootController']
 
@@ -51,6 +49,7 @@ class RootController(BaseController):
     must be wrapped around with :class:`tg.controllers.WSGIAppController`.
 
     """
+
     error = ErrorController()
 
     activity = activity.Activity()
@@ -81,6 +80,8 @@ class RootController(BaseController):
 
     program_layer = program_layer.ProgramLayer()
 
+    email_address = email_address.EmailAddress()
+
     @expose('hollyrosa.templates.index')
     def index(self):
         """Handle the front-page."""
@@ -90,23 +91,6 @@ class RootController(BaseController):
     def about(self):
         """Handle the 'about' page."""
         return dict(page='about')
-
-    @expose('hollyrosa.templates.authentication')
-    def auth(self):
-        """Display some information about auth* on this application."""
-        return dict(page='auth')
-
-    @expose('hollyrosa.templates.index')
-    @require(predicates.has_permission('manage', msg=l_('Only for managers')))
-    def manage_permission_only(self, **kw):
-        """Illustrate how a page for managers only works."""
-        return dict(page='managers stuff')
-
-    @expose('hollyrosa.templates.index')
-    @require(predicates.is_user('editor', msg=l_('Only for the editor')))
-    def editor_user_only(self, **kw):
-        """Illustrate how a page exclusive for the editor works."""
-        return dict(page='editor stuff')
 
     @expose('hollyrosa.templates.login')
     def login(self, came_from=lurl('/'), failure=None, logins=0, login=''):
