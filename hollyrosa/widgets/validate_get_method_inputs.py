@@ -21,13 +21,15 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 forms used for validating input, but where there is no reasonable user feedback"""
 
 from tw.api import WidgetsList
-from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea,  HiddenField
+from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea, HiddenField
 
-#...for form validation
-from tw.forms.validators import Int, NotEmpty, DateConverter,  UnicodeString
+# ...for form validation
+from tw.forms.validators import Int, NotEmpty, DateConverter, UnicodeString
 
-class ValidateScheduleBooking(TableForm):    
+
+class ValidateScheduleBooking(TableForm):
     show_errors = True
+
     class fields(WidgetsList):
         return_to_day_id = HiddenField(validator=UnicodeString)
         booking_id = HiddenField(validator=UnicodeString)
@@ -37,12 +39,13 @@ class ValidateScheduleBooking(TableForm):
 
 class ValidateUnscheduleBooking(TableForm):
     show_errors = True
+
     class fields(WidgetsList):
         return_to_day_id = HiddenField(validator=UnicodeString)
         booking_id = HiddenField(validator=UnicodeString)
         slot_row_position_id = HiddenField(validator=UnicodeString)
-        
-        
+
+
 class ValidateCreateNewBookingRequest(TableForm):
     show_errors = True
     id = HiddenField(validator=UnicodeString)
@@ -54,9 +57,9 @@ class ValidateCreateNewBookingRequest(TableForm):
     activity_id = HiddenField(validator=UnicodeString)
     activity_name = TextField(validator=UnicodeString(min=1))
     requested_date = CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')
-    valid_from = CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')  
+    valid_from = CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')
     valid_to = CalendarDatePicker(validator=DateConverter(month_style="iso"), date_format='%Y-%m-%d')
-    
+
 
 class ValidateBookSlotForm(TableForm):
     id = HiddenField(validator=UnicodeString)
@@ -65,7 +68,7 @@ class ValidateBookSlotForm(TableForm):
     visiting_group_display_name = HiddenField(validator=UnicodeString(min=1))
     visiting_group_id = HiddenField(validator=UnicodeString)
     content = TextArea(validator=UnicodeString)
-       
+
 
 create_validate_schedule_booking = ValidateScheduleBooking("create_validate_schedule_booking")
 create_validate_unschedule_booking = ValidateUnscheduleBooking("create_validate_unschedule_booking")

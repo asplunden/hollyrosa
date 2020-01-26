@@ -22,6 +22,7 @@ from tg import lurl
 import tw2.core as twc
 import tw2.forms as twf
 
+
 class EditBookSlotForm(twf.Form):
     class child(twf.TableLayout):
         id = twf.HiddenField(validator=twc.Required)
@@ -33,9 +34,11 @@ class EditBookSlotForm(twf.Form):
         visiting_group_display_name = twf.HiddenField(validator=twc.Required)
         visiting_group_id = twf.HiddenField(validator=twc.Required)
         # TODO: set height and width
-        content = twf.TextArea(validator=twc.Required, css_class="edit_booking_content", rows=5, cols=35, id="booking_content")
+        content = twf.TextArea(validator=twc.Required, css_class="edit_booking_content", rows=5, cols=35,
+                               id="booking_content")
         block_after_book = twf.CheckBox()
-        
+
     action = lurl('save_booked_booking_properties')
-        
+
+
 create_edit_book_slot_form = EditBookSlotForm()

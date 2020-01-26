@@ -22,6 +22,7 @@ import tw2.forms as twf
 
 from tg import lurl
 
+
 class EditAttachmentForm(twf.Form):
     class child(twf.TableLayout):
         # attachment_id was previously recid but should it be note id?
@@ -32,5 +33,6 @@ class EditAttachmentForm(twf.Form):
         attachment = twf.FileField()
 
     action = lurl('save_attachment')
+
 
 create_edit_attachment_form = EditAttachmentForm()

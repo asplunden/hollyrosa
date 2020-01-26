@@ -18,23 +18,21 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-
-
 from tg import lurl
 
-#from tw.api import WidgetsList
+# from tw.api import WidgetsList
 import tw2.core as twc
 import tw2.forms as twf
 
+
 class MoveBookingForm(twf.Form):
-    
     class child(twf.TableLayout):
         id = twf.HiddenField()
         return_to_day_id = twf.HiddenField()
         activity_id = twf.HiddenField()
         activity_name = twf.SingleSelectField(options=[])
-    
+
     action = lurl('save_move_booking')
 
-create_move_booking_form = MoveBookingForm()
 
+create_move_booking_form = MoveBookingForm()

@@ -29,7 +29,7 @@ class TemplateController(BaseController):
                 abort(404)
     
     """
-    
+
     def view(self, url):
         """Abort the request with a 404 HTTP status code."""
         abort(404)

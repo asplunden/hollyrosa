@@ -28,6 +28,8 @@ class EditUserForm(twf.Form):
         user_id = twf.HiddenField(validator=twc.Required)
         user_name = twf.TextField(validator=twc.StringLengthValidator(min=4))
         display_name = twf.TextField(validator=twc.StringLengthValidator(min=4))
-        
+
     action = lurl('save_user')
+
+
 create_edit_user_form = EditUserForm()

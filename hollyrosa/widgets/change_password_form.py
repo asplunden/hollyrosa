@@ -24,15 +24,15 @@ import tw2.forms as twf
 
 
 class ChangePasswordForm(twf.Form):
-    
-    #show_errors = True
+    # show_errors = True
     # TODO: add validator for equal passwords
 
     class child(twf.TableLayout):
         user_id = twf.HiddenField(validator=twc.StringLengthValidator(min=4))
         password = twf.PasswordField(validator=twc.Required)
         password2 = twf.PasswordField(validator=twc.Required)
-        
+
     action = lurl('update_password')
-    
-create_change_password_form = ChangePasswordForm() #"change_password_form")
+
+
+create_change_password_form = ChangePasswordForm()  # "change_password_form")

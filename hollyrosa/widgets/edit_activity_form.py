@@ -26,7 +26,7 @@ from tg import lurl
 import tw2.core as twc
 import tw2.forms as twf
 
-#...for form validation
+# ...for form validation
 from tw2.tinymce import MarkupConverter
 from tw2.tinymce import TinyMCEWidget
 
@@ -35,38 +35,37 @@ from hollyrosa.model.booking_couch import getAllActivityGroups
 
 
 def _getActivityGroupOptions():
-        """
-        return a list of all available activity groups
-        """
-        activity_groups = list()
-        for x in getAllActivityGroups(getHollyCouch()):
-            activity_groups.append((x.value['_id'], x.value['title']))
-        return activity_groups
+    """
+    return a list of all available activity groups
+    """
+    activity_groups = list()
+    for x in getAllActivityGroups(getHollyCouch()):
+        activity_groups.append((x.value['_id'], x.value['title']))
+    return activity_groups
 
 
 class EditActivityForm(twf.Form):
-
     class child(twf.TableLayout):
-
         id = twf.HiddenField()
         title = twf.TextField(validator=twc.Required, css_class="edit_name")
-        description = TinyMCEWidget(mce_options = dict(theme='advanced',
-                                                                   theme_advanced_toolbar_align ="left",
-                                                                   theme_advanced_buttons1 = "formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat",
-                                                                   theme_advanced_buttons2 = "",
-                                                                   theme_advanced_buttons3 = ""
-                                                                   ))
+        description = TinyMCEWidget(mce_options=dict(theme='advanced',
+                                                     theme_advanced_toolbar_align="left",
+                                                     theme_advanced_buttons1="formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat",
+                                                     theme_advanced_buttons2="",
+                                                     theme_advanced_buttons3=""
+                                                     ))
         tags = twf.TextField()
         external_link = twf.UrlField()
         internal_link = twf.UrlField()
         print_on_demand_link = twf.UrlField()
         capacity = twf.NumberField(validator=twc.IntValidator)
         default_booking_state = twf.HiddenField()
-        activity_group_id = twf.SingleSelectField(validator=twc.Required, options=twc.Deferred(_getActivityGroupOptions))
-        gps_lat  = twf.TextField()
+        activity_group_id = twf.SingleSelectField(validator=twc.Required,
+                                                  options=twc.Deferred(_getActivityGroupOptions))
+        gps_lat = twf.TextField()
         gps_long = twf.TextField()
         equipment_needed = twf.CheckBox()
-        education_needed  = twf.CheckBox()
+        education_needed = twf.CheckBox()
         certificate_needed = twf.CheckBox()
         bg_color = twf.ColorField(validator=twc.Required)
         guides_per_slot = twf.NumberField(validator=twc.IntValidator)
