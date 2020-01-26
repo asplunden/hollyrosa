@@ -26,7 +26,7 @@ from tg import expose, flash, require, url, request, response,  redirect,  valid
 from formencode import validators
 from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import genUID, holly_couch
+from hollyrosa.model import genUID, getHollyCouch
 from hollyrosa.controllers import common_couch
 
 
@@ -46,7 +46,7 @@ class ProgramLayer(BaseController):
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
     @require(Any(has_level('staff'), has_level('pl'), msg='Only PL and staff members may change layers configuration'))
     def edit_layers(self, visiting_group_id):
-        vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        vgroup = common_couch.getVisitingGroup(getHollyCouch(),  visiting_group_id)
         vgroup_layers = vgroup.get('layers',  list())
 
         #...make map of layers from list of layers, keyed on id
@@ -55,7 +55,7 @@ class ProgramLayer(BaseController):
             vgroup_layers_map[tmp_vgroup_layer['layer_id']] = tmp_vgroup_layer
 
         #...get all visiting group that possibly could be mapped
-        vgroups_in_daterange = getVisitingGroupsInDatePeriod(holly_couch,  vgroup['from_date'],  vgroup['to_date'])
+        vgroups_in_daterange = getVisitingGroupsInDatePeriod(getHollyCouch(),  vgroup['from_date'],  vgroup['to_date'])
 
         #...build data struct for dojo spreadsheet / grid
         grid_items= list()
@@ -78,7 +78,7 @@ class ProgramLayer(BaseController):
     def update_visiting_group_program_layers(self, visiting_group_id,  save_button=None,  layer_data=''):
         log.info("update_visiting_group_program_layers")
         ensurePostRequest(request, __name__)
-        vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        vgroup = common_couch.getVisitingGroup(getHollyCouch(),  visiting_group_id)
         vgroup_layers = vgroup.get('layers',  list())
 
         layer_json = json.loads(layer_data)
@@ -89,7 +89,7 @@ class ProgramLayer(BaseController):
                 layer_to_save.append(dict(layer_id=tmp_layer_data['layer_id'],  colour=tmp_layer_data['colour'],  name=tmp_layer_data['name']))
 
         vgroup['layers'] = layer_to_save
-        holly_couch[vgroup['_id']] = vgroup
+        getHollyCouch()[vgroup['_id']] = vgroup
         raise redirect(request.referer)
 
 
@@ -97,14 +97,14 @@ class ProgramLayer(BaseController):
     @validate(validators={"visiting_group_id":validators.UnicodeString()})
     @require(Any(has_level('pl'), has_level('staff'), has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def layers(self, visiting_group_id):
-        vgroup = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
-        notes = [n.doc for n in getNotesForTarget(holly_couch, visiting_group_id)]
+        vgroup = common_couch.getVisitingGroup(getHollyCouch(),  visiting_group_id)
+        notes = [n.doc for n in getNotesForTarget(getHollyCouch(), visiting_group_id)]
         return dict(visiting_group=vgroup,  notes=notes,  tags=[],  reFormatDate=reFormatDate,  program_state_map=bokn_status_map)
 
 
     def get_program_layer_bookings(self,  visiting_group,  layer_title,  layer_colour):
         bookings = []
-        for tmp in getBookingsOfVisitingGroup(holly_couch, visiting_group['name'], '<- MATCHES NO GROUP ->'):
+        for tmp in getBookingsOfVisitingGroup(getHollyCouch(), visiting_group['name'], '<- MATCHES NO GROUP ->'):
             tmp_doc = tmp.doc
             tmp_doc['layer_title'] = layer_title
             tmp_doc['layer_colour'] = layer_colour
@@ -116,7 +116,7 @@ class ProgramLayer(BaseController):
     @validate(validators={"visiting_group_id":validators.UnicodeString(),  "hide_comment":validators.Int()})
     @require(Any(has_level('pl'), has_level('staff'),  has_level('view'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def layers_printable(self, visiting_group_id,  hide_comment=1):
-        visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        visiting_group = common_couch.getVisitingGroup(getHollyCouch(),  visiting_group_id)
 
         date_range = dateRange(visiting_group['from_date'], visiting_group['to_date'])
         number_of_days = len(date_range)
@@ -140,11 +140,11 @@ class ProgramLayer(BaseController):
         #...code repeat for making used_activities
         activities = dict()
         used_activities_keys = dict()
-        for x in getAllActivities(holly_couch):
+        for x in getAllActivities(getHollyCouch()):
             activities[x.key[1]] = x.doc
 
         for tmp_layer in layers:
-            tmp_visiting_group = common_couch.getVisitingGroup(holly_couch,  tmp_layer['layer_id'])
+            tmp_visiting_group = common_couch.getVisitingGroup(getHollyCouch(),  tmp_layer['layer_id'])
             bookings_list = self.get_program_layer_bookings(tmp_visiting_group,  tmp_visiting_group['name'],  tmp_layer['colour'])
 
             for tmp_booking in bookings_list:
@@ -169,7 +169,7 @@ class ProgramLayer(BaseController):
         result['width_ratio'] = width_ratio
 
         result['unscheduled_bookings'] = unscheduled_bookings
-        result['booking_info_notes'] = [n.doc for n in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys())]
+        result['booking_info_notes'] = [n.doc for n in getBookingInfoNotesOfUsedActivities(getHollyCouch(), used_activities_keys.keys())]
         return result
 
 
@@ -202,15 +202,12 @@ class ProgramLayer(BaseController):
 
 
     def program_layer_get_days_helper(self, visiting_group_id ):
-        visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
-
-        ####date_range = dateRange(visiting_group['from_date'], visiting_group['to_date'])
+        visiting_group = common_couch.getVisitingGroup(getHollyCouch(),  visiting_group_id)
 
         #...create temporary mapping title-> id, in the future, this should be based on time rather on the title (which can be dangerous)
         time_id_mapping = self.getTimeIdMapping()
 
-
-        booking_days = [bd.doc for bd in getBookingDays(holly_couch,  visiting_group['from_date'], visiting_group['to_date'])]
+        booking_days = [bd.doc for bd in getBookingDays(getHollyCouch(),  visiting_group['from_date'], visiting_group['to_date'])]
         schema_id_map = dict()
         for b in booking_days:
             schema_id_map[b['day_schema_id']] = b
@@ -221,8 +218,7 @@ class ProgramLayer(BaseController):
         first_booking_day=booking_days[0]
 
         schema_id = first_booking_day['day_schema_id']
-
-        schema_doc = holly_couch[schema_id]
+        schema_doc = getHollyCouch()[schema_id]
         schema = schema_doc['schema']
 
         #...if we assume the same layout for every slot row, we can get first row in schema and use it as template
@@ -254,7 +250,7 @@ class ProgramLayer(BaseController):
         #   so iterate through all schema rows and look at time,
         slot_id_time_map = {}
         for tmp_schema_id in schema_id_map.keys():
-            tmp_schema_doc = holly_couch[tmp_schema_id]
+            tmp_schema_doc = getHollyCouch()[tmp_schema_id]
             tmp_schema = tmp_schema_doc['schema']
 
             for tmp_activity_id, tmp_activity_row in tmp_schema.items():
@@ -263,7 +259,7 @@ class ProgramLayer(BaseController):
                     slot_id_time_map[tmp_slot['slot_id']] = time_id_mapping[tmp_time]
 
         # TODO return activity title map
-        activity_title_map = getActivityTitleMap(holly_couch)
+        activity_title_map = getActivityTitleMap(getHollyCouch())
 
         return dict(layer_time=layer_times,  layer_days=layer_days,  slot_id_time_map=slot_id_time_map,  visiting_group_id=visiting_group_id,  activity_title_map=activity_title_map,  program_layers=program_layers)
 
@@ -272,7 +268,7 @@ class ProgramLayer(BaseController):
     @validate(validators={"visiting_group_id":validators.UnicodeString(),  "layer_title":validators.UnicodeString(),  "layer_colour":validators.UnicodeString()})
     @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def program_layer_get_bookings(self, visiting_group_id,  layer_title='',  layer_colour='#fff' ):
-        visiting_group = common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        visiting_group = common_couch.getVisitingGroup(getHollyCouch(),  visiting_group_id)
         bookings = self.get_program_layer_bookings(visiting_group,  layer_title,  layer_colour)
 
         processed_bookings = list()
@@ -281,7 +277,7 @@ class ProgramLayer(BaseController):
             processed_bookings.append(b)
 
         bucket_texts = []
-        for tmp in getAllProgramLayerBucketTexts(holly_couch,  visiting_group_id):
+        for tmp in getAllProgramLayerBucketTexts(getHollyCouch(),  visiting_group_id):
             tmp_doc = tmp.doc
             tmp_doc['layer_title']=visiting_group['name']
             tmp_doc['layer_colour'] = '#fff'# layer_colour
@@ -302,7 +298,7 @@ class ProgramLayer(BaseController):
         if is_new:
             layer_text = DataContainer(text='',  title='', program_layer_text_id='',  state=0)
         else:
-            layer_text = common_couch.getLayerText(holly_couch, layer_text_id)
+            layer_text = common_couch.getLayerText(getHollyCouch(), layer_text_id)
 
         return dict(layer_text=layer_text)
 
@@ -326,17 +322,16 @@ class ProgramLayer(BaseController):
             layer_text['text'] = text
             layer_text['title'] = title
             layer_text['visiting_group_id'] = visiting_group_id
-            holly_couch[id] = layer_text
+            getHollyCouch()[id] = layer_text
         else:
-            layer_text = common_couch.getLayerText(holly_couch, layer_text_id)
-
+            layer_text = common_couch.getLayerText(getHollyCouch(), layer_text_id)
 
             layer_text['text'] = text
             layer_text['title'] = title
-            holly_couch[layer_text['_id']] = layer_text
+            getHollyCouch()[layer_text['_id']] = layer_text
             # TODO call it bucket text or layer text ?
 
-        visiting_group =  common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        visiting_group =  common_couch.getVisitingGroup(getHollyCouch(), visiting_group_id)
         layer_text['layer_title']=visiting_group['name']
         layer_text['layer_colour'] = "#fff"
         return dict(layer_text=layer_text)
@@ -347,7 +342,7 @@ class ProgramLayer(BaseController):
     @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def program_layer_new_layer_text(self,  visiting_group_id='',  booking_day_id='',  bucket_time=''):
         layer_text = dict(type='program_layer_text',  subtype='layer_text',  status=0, booking_day_id=booking_day_id, bucket_time=bucket_time,  text='',  title='' ,  visiting_group_id=visiting_group_id)
-        visiting_group =  common_couch.getVisitingGroup(holly_couch,  visiting_group_id)
+        visiting_group =  common_couch.getVisitingGroup(getHollyCouch(),  visiting_group_id)
         layer_text['layer_title']=visiting_group['name']
         layer_text['layer_colour'] = "#fff"
         return dict(layer_text=layer_text)
@@ -357,8 +352,8 @@ class ProgramLayer(BaseController):
     @validate(validators={"layer_text_id":validators.UnicodeString()})
     @require(Any(has_level('pl'), has_level('staff'),  has_level('vgroup'), msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
     def program_layer_get_layer_text(self,  layer_text_id=''):
-        layer_text = common_couch.getLayerText(holly_couch, layer_text_id)
-        visiting_group =  common_couch.getVisitingGroup(holly_couch,  layer_text['visiting_group_id'])
+        layer_text = common_couch.getLayerText(getHollyCouch(), layer_text_id)
+        visiting_group =  common_couch.getVisitingGroup(getHollyCouch(),  layer_text['visiting_group_id'])
 
         layer_text['layer_title']=visiting_group['name']
         layer_text['layer_colour'] = "#fff"
@@ -372,7 +367,7 @@ class ProgramLayer(BaseController):
     def program_layer_delete_layer_text(self, layer_text_id):
         log.info("program_layer_delete_layer_text()")
         ensurePostRequest(request, __name__)
-        layer_text = common_couch.getLayerText(holly_couch, layer_text_id)
+        layer_text = common_couch.getLayerText(getHollyCouch(), layer_text_id)
         layer_text['state'] = -100
-        holly_couch[layer_text_id] = layer_text
+        getHollyCouch()[layer_text_id] = layer_text
         return dict()

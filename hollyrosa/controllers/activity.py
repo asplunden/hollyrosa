@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 from tg import expose, flash, require, url, request, redirect, validate, abort, tmpl_context
 from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import holly_couch
+from hollyrosa.model import getHollyCouch
 
 import bleach
 
@@ -64,8 +64,8 @@ class Activity(BaseController):
 
         _language = language if language != None else default_language
 
-        activity = common_couch.getActivity(holly_couch, activity_id)
-        activity_group = common_couch.getActivityGroup(holly_couch, activity['activity_group_id'])
+        activity = common_couch.getActivity(getHollyCouch(), activity_id)
+        activity_group = common_couch.getActivityGroup(getHollyCouch(), activity['activity_group_id'])
 
         #...replace missing fields with empty string
         for tmp_field in ['print_on_demand_link','external_link','internal_link','guides_per_slot','guides_per_day','equipment_needed','education_needed']:
@@ -87,8 +87,7 @@ class Activity(BaseController):
 
         activity_booking_info_id = activity.get('booking_info_id','')
         if activity_booking_info_id != '':
-            log.debug(language)
-            notes = [n.doc for n in getNotesForTarget(holly_couch, activity_id)]
+            notes = [n.doc for n in getNotesForTarget(getHollyCouch(), activity_id)]
 
             # only show note with corresponding language
             if language != None:
@@ -121,7 +120,7 @@ class Activity(BaseController):
         #    activity = dict(id=None,  title=u'', description=u'', activity_group_id='', language_versions=language_versions)
         else:
             try:
-                activity = common_couch.getActivity(holly_couch, activity_id)
+                activity = common_couch.getActivity(getHollyCouch(), activity_id)
                 activity['id'] = activity_id
 
                 # if we found the activity and language is given and language is not default language,
@@ -158,7 +157,7 @@ class Activity(BaseController):
             id = genUID(type='activity')
 
         else:
-            activity = common_couch.getActivity(holly_couch,  id)
+            activity = common_couch.getActivity(getHollyCouch(),  id)
 
         # if language is None or language is default language, save to title and description, otherwise save to the language_versions
         if language == None or language == default_language:
@@ -188,5 +187,5 @@ class Activity(BaseController):
         activity['guides_per_slot'] = guides_per_slot
         activity['guides_per_day'] = guides_per_day
 
-        holly_couch[id] = activity
+        getHollyCouch()[id] = activity
         raise redirect('/activity/view_activity',  activity_id=id, language=language)

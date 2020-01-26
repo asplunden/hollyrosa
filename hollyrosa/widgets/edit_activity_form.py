@@ -30,7 +30,7 @@ import tw2.forms as twf
 from tw2.tinymce import MarkupConverter
 from tw2.tinymce import TinyMCEWidget
 
-from hollyrosa.model import holly_couch
+from hollyrosa.model import getHollyCouch
 from hollyrosa.model.booking_couch import getAllActivityGroups
 
 
@@ -39,7 +39,7 @@ def _getActivityGroupOptions():
         return a list of all available activity groups
         """
         activity_groups = list()
-        for x in getAllActivityGroups(holly_couch):
+        for x in getAllActivityGroups(getHollyCouch()):
             activity_groups.append((x.value['_id'], x.value['title']))
         return activity_groups
 
@@ -72,7 +72,6 @@ class EditActivityForm(twf.Form):
         guides_per_slot = twf.NumberField(validator=twc.IntValidator)
         guides_per_day = twf.NumberField(validator=twc.IntValidator)
         language = twf.HiddenField(validator=twc.Required)
-
 
     action = lurl('save_activity_properties')
 

@@ -23,7 +23,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 from tg import expose, flash, require, url, request, redirect,  validate
 from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import holly_couch
+from hollyrosa.model import getHollyCouch
 
 import datetime
 

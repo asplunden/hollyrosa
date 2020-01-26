@@ -11,7 +11,8 @@ import logging
 from tg.configuration import AppConfig
 import hollyrosa
 from hollyrosa.model.booking_couch import getVisitingGroupByBoknr
-from hollyrosa import model, lib
+from hollyrosa import model
+from hollyrosa import lib
 from hollyrosa.lib import app_globals, helpers
 from hollyrosa.controllers.common import DataContainer
 import hashlib
@@ -88,11 +89,11 @@ class ApplicationAuthMetadata(TGAuthMetadata):
         ##).first()
         ##
 
-        user = model.holly_couch.get('user.'+login)
+        user = model.getHollyCouch().get('user.'+login)
 
         if not user:
 
-            vgroup_list = getVisitingGroupByBoknr(model.holly_couch, login)
+            vgroup_list = getVisitingGroupByBoknr(model.getHollyCouch(), login)
             if len(vgroup_list) > 0:
                 user = vgroup_list[0].doc
 
@@ -132,12 +133,12 @@ class ApplicationAuthMetadata(TGAuthMetadata):
         ##return self.sa_auth.dbsession.query(self.sa_auth.user_class).filter_by(
         ##    user_name=userid
         ##).first()
-        user = model.holly_couch.get('user.'+userid)
+        user = model.getHollyCouch().get('user.'+userid)
         if user:
             identity['user_level'] = user['level']
             identity['user_active'] = user['active']
         else:
-            vgroup_list = getVisitingGroupByBoknr(model.holly_couch, userid)
+            vgroup_list = getVisitingGroupByBoknr(model.getHollyCouch(), userid)
             if len(vgroup_list) > 0:
                 user = vgroup_list[0].doc
         return user

@@ -26,7 +26,7 @@ from tg import expose, flash, require, url, request, redirect, validate, abort
 from formencode import validators
 from tg.predicates import Any, is_user, has_permission
 from hollyrosa.lib.base import BaseController
-from hollyrosa.model import genUID, holly_couch
+from hollyrosa.model import genUID, getHollyCouch
 
 
 #...this can later be moved to the VisitingGroup module whenever it is broken out
@@ -61,7 +61,7 @@ class User(BaseController):
     def show(self, show_deactive=False):
         """Show an overview of all users"""
 
-        all_users = [h.doc for h in getAllActiveUsers(holly_couch, show_deactive=show_deactive)]
+        all_users = [h.doc for h in getAllActiveUsers(getHollyCouch(), show_deactive=show_deactive)]
         return dict(users=all_users)
 
 
@@ -70,7 +70,7 @@ class User(BaseController):
     def edit(self, user_id=''):
         """edit user properties"""
         tmpl_context.form = create_edit_user_form
-        user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
+        user_o = getCouchDBDocument(getHollyCouch(), user_id, doc_type='user') #, doc_subtype=None)
         user_o['user_id'] = user_o['_id']
         return dict(user=user_o)
 
@@ -93,7 +93,7 @@ class User(BaseController):
         ensurePostRequest(request, __name__)
         """edit user properties"""
         if user_id != '':
-            user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
+            user_o = getCouchDBDocument(getHollyCouch(), user_id, doc_type='user') #, doc_subtype=None)
         else:
             user_o = dict(type='user', active=True)
             user_id = 'user.'+user_name
@@ -101,7 +101,7 @@ class User(BaseController):
         user_o['user_name'] = user_name
         user_o['level'] = []
 
-        holly_couch[user_id] = user_o
+        getHollyCouch()[user_id] = user_o
 
         raise redirect('show')
 
@@ -113,7 +113,7 @@ class User(BaseController):
     def set_level(self, user_id='', level=''):
         log.info("set_level()")
         ensurePostRequest(request, __name__)
-        user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
+        user_o = getCouchDBDocument(getHollyCouch(), user_id, doc_type='user') #, doc_subtype=None)
 
         # Rules for setting levels.
         # TODO: refactor out
@@ -123,7 +123,7 @@ class User(BaseController):
         level_map['pl'] = ['view','staff','pl']
 
         user_o['level'] = level_map.get(level,[])
-        holly_couch[user_id] = user_o
+        getHollyCouch()[user_id] = user_o
 
         raise redirect(request.referrer)
 
@@ -134,11 +134,11 @@ class User(BaseController):
     def deactivate(self, user_id=''):
         log.info("deactivate()")
         ensurePostRequest(request, __name__)
-        user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
+        user_o = getCouchDBDocument(getHollyCouch(), user_id, doc_type='user') #, doc_subtype=None)
 
         # Rules for setting levels.
         user_o['active'] = False
-        holly_couch[user_id] = user_o
+        getHollyCouch()[user_id] = user_o
 
         raise redirect(request.referrer)
 
@@ -149,11 +149,11 @@ class User(BaseController):
     def activate(self, user_id=''):
         log.info("activate()")
         ensurePostRequest(request, __name__)
-        user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
+        user_o = getCouchDBDocument(getHollyCouch(), user_id, doc_type='user') #, doc_subtype=None)
 
         # Rules for setting levels.
         user_o['active'] = True
-        holly_couch[user_id] = user_o
+        getHollyCouch()[user_id] = user_o
 
         raise redirect(request.referrer)
 
@@ -163,7 +163,7 @@ class User(BaseController):
     @require(Any(has_level('pl'),  msg='Only PL can change passwords'))
     def change_password(self, user_id):
         tmpl_context.form = create_change_password_form
-        user_o = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
+        user_o = getCouchDBDocument(getHollyCouch(), user_id, doc_type='user') #, doc_subtype=None)
 
         return dict(user=dict(user_id=user_id), user_name=user_o['user_name'])
 
@@ -177,12 +177,12 @@ class User(BaseController):
         if not password==password2:
             raise IOError, 'passwords must agree'
 
-        s = getCouchDBDocument(holly_couch, user_id, doc_type='user') #, doc_subtype=None)
+        s = getCouchDBDocument(getHollyCouch(), user_id, doc_type='user') #, doc_subtype=None)
 
         # todo make salt part of development.ini
         h = hashlib.sha256('gninyd') # salt # TODO: read from AppConfig / tg.config
         h.update(password)
         c = h.hexdigest()
         s['password'] = c
-        holly_couch[user_id] = s
+        getHollyCouch()[user_id] = s
         raise redirect('show')
