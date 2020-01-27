@@ -127,11 +127,15 @@ class Note(BaseController):
         remember_note_change(getHollyCouch(), target_id=target_id, note_id=note_o['note_id'],
                              changed_by=getLoggedInUserId(request), note_change=note_change)
 
-        # TODO: where do we go from here?
-        redirect_to = '/'
         if 'visiting_group' in note_o['target_id']:
             redirect_to = '/visiting_group/show_visiting_group?visiting_group_id=' + note_o['target_id']
-        raise redirect(redirect_to)
+            raise redirect(redirect_to)
+        elif 'activity' in note_o['target_id']:
+            redirect_to = '/activity/view_activity?activity_id=' + note_o['target_id']
+            raise redirect(redirect_to)
+        else:
+            # TODO: where do we go from here ?
+            raise redirect('/') #redirect(request.referrer)
 
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), has_level('view'),
