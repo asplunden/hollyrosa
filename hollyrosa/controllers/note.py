@@ -137,7 +137,7 @@ class Note(BaseController):
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), has_level('view'),
                  msg='Only staff members and viewers may view visiting group properties'))
     def save_attachment(self, target_id, text, attachment, _id='', **kwargs):
-        log.info("save_attachment()")
+        log.debug("save_attachment()")
         ensurePostRequest(request, __name__)
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         if _id == '':
@@ -156,7 +156,7 @@ class Note(BaseController):
             # attachment_change = 'changed'
 
         attachment_o['last_changed_by'] = getLoggedInUserId(request)
-        attachment_o['text'] = cleanHtml(text)
+        attachment_o['text'] = cleanHtml(text if text is not None else '')
         getHollyCouch()[attachment_o['_id']] = attachment_o
 
         file = request.POST['attachment']

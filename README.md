@@ -17,6 +17,20 @@ You will need a running couchdb 1 instance. I would recommend that you run couch
 
 You can install the system as a Turbogears2 app and in production you may run it using Apache+mod_wsgi. You will also need to use the hollyrosa_viewtool to upload views to your CouchDB database. 
 
+### TinyMCE 4 Source
+
+TinyMCE v4 is not included with this codebase, it must be downloaded separately.
+
+Download from http://download.tiny.cloud/tinymce/community/tinymce_4.9.7.zip and unzip into the public folder.
+
+Another option is to change the links in the TinyMCE4Widget to point to the CDNs for tinymce.
+
+```
+cd <path to public>
+wget http://download.tiny.cloud/tinymce/community/tinymce_4.9.7.zip
+unzip tinymce_4.9.7.zip
+rm tinymce_4.9.7.zip
+```
 
 ## License
 

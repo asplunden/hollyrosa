@@ -26,9 +26,7 @@ from tg import lurl
 import tw2.core as twc
 import tw2.forms as twf
 
-# ...for form validation
-from tw2.tinymce import MarkupConverter
-from tw2.tinymce import TinyMCEWidget
+from tinymce_4_widget import TinyMCE4Widget
 
 from hollyrosa.model import getHollyCouch
 from hollyrosa.model.booking_couch import getAllActivityGroups
@@ -47,13 +45,9 @@ def _getActivityGroupOptions():
 class EditActivityForm(twf.Form):
     class child(twf.TableLayout):
         id = twf.HiddenField()
+        language = twf.HiddenField(validator=twc.Required)
         title = twf.TextField(validator=twc.Required, css_class="edit_name")
-        description = TinyMCEWidget(mce_options=dict(theme='advanced',
-                                                     theme_advanced_toolbar_align="left",
-                                                     theme_advanced_buttons1="formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat",
-                                                     theme_advanced_buttons2="",
-                                                     theme_advanced_buttons3=""
-                                                     ))
+        description = TinyMCE4Widget()
         tags = twf.TextField()
         external_link = twf.UrlField()
         internal_link = twf.UrlField()
@@ -70,7 +64,6 @@ class EditActivityForm(twf.Form):
         bg_color = twf.ColorField(validator=twc.Required)
         guides_per_slot = twf.NumberField(validator=twc.IntValidator)
         guides_per_day = twf.NumberField(validator=twc.IntValidator)
-        language = twf.HiddenField(validator=twc.Required)
 
     action = lurl('save_activity_properties')
 

@@ -17,18 +17,13 @@ You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-# http://wiki.moxiecode.com/index.php/TinyMCE:Control_reference
-
-from tw.api import WidgetsList
-from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea, HiddenField, CheckBox
-
-from hollyrosa.widgets.visiting_group_program_request_widget import VisitingGroupProgramRequestWidget
 from hollyrosa.widgets.div_widget import DivWidget
-
+from hollyrosa.widgets.visiting_group_program_request_widget import VisitingGroupProgramRequestWidget
+from tw.api import WidgetsList
+from tw.forms import TableForm, TextField, HiddenField
 # ...for form validation
-from tw.forms.validators import Int, NotEmpty, DateConverter, UnicodeString, Email
-from tw.tinymce import TinyMCE, MarkupConverter
-
+from tw.forms.validators import UnicodeString
+from tinymce_4_widget import TinyMCE4Widget
 
 class EditVisitingGroupProgramRequestForm(TableForm):
     show_errors = True
@@ -36,12 +31,7 @@ class EditVisitingGroupProgramRequestForm(TableForm):
     class fields(WidgetsList):
         id = HiddenField(validator=UnicodeString())
         agegroup_store = HiddenField(validator=UnicodeString())
-        info = TinyMCE(mce_options=dict(theme='advanced',
-                                        theme_advanced_toolbar_align="left",
-                                        theme_advanced_buttons1="formatselect,fontselect, bold,italic,underline,strikethrough,bullist,numlist,outdent,indent,forecolor,backcolor,separator,cut,copy,paste,separator, undo,separator,link,unlink,removeformat",
-                                        theme_advanced_buttons2="",
-                                        theme_advanced_buttons3=""
-                                        ))
+        info = TinyMCE4Widget()
         contact_person = TextField(validator=UnicodeString())
         contact_person_email = TextField(validator=UnicodeString())
         contact_person_phone = TextField(validator=UnicodeString())
