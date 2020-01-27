@@ -252,7 +252,7 @@ class VODBGroup(BaseController):
 
         # ...fill in data
         visiting_group_o['name'] = name
-        visiting_group_o['info'] = cleanHtml(info)
+        visiting_group_o['info'] = cleanHtml(info if info is not None else '')
         visiting_group_o['from_date'] = sanitizeDate(from_date)[1]  # TODO better error handling
         visiting_group_o['to_date'] = sanitizeDate(to_date)[1]  # TODO better error handling
         visiting_group_o['vodb_contact_name'] = vodb_contact_name

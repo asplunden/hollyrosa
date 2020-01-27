@@ -21,10 +21,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 forms used for validating input, but where there is no reasonable user feedback"""
 
 from tw.api import WidgetsList
-from tw.forms import TableForm, CalendarDatePicker, SingleSelectField, TextField, TextArea, HiddenField
+from tw.forms import TableForm, CalendarDatePicker, TextField, TextArea, HiddenField
 
 # ...for form validation
-from tw.forms.validators import Int, NotEmpty, DateConverter, UnicodeString
+from tw.forms.validators import DateConverter, UnicodeString
 
 
 class ValidateScheduleBooking(TableForm):

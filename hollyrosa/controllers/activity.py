@@ -24,8 +24,7 @@ import logging
 
 from formencode import validators
 from hollyrosa.controllers import common_couch
-# ...this can later be moved to the VisitingGroup module whenever it is broken out
-from hollyrosa.controllers.common import has_level, cleanHtml, languages_map, default_language
+from hollyrosa.controllers.common import has_level, cleanHtml, languages_map, default_language, ensurePostRequest
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import getHollyCouch
 from hollyrosa.model.booking_couch import genUID, getNotesForTarget
@@ -38,38 +37,59 @@ log = logging.getLogger(__name__)
 __all__ = ['activity']
 
 
-def ensurePostRequest(request, name=''):
-    """
-    The purpose of this little method is to ensure that the controller was called with appropriate HTTP verb.
-    """
-    if not request.method == 'POST':
-        abort(405)
-
-
 class Activity(BaseController):
+    """
+    Activity is used to view and edit activities.
+
+    The added language versions feature where an activity can optionally be translated to more than one language is
+    a little involved. To be backwards compatible, the optional translations are in a separate language_versions dict
+    in an activity. Further, the default language is store in the already existing title and description attributes.
+
+    Some activities have a special note attached which is used in the program listings page. For this to work with
+    the new language versions, there have to be two more additions:
+
+    1) notes must have an optional language attribute so all notes whos target_id is the activity is filtered using
+    the activitys language taking default language into account.
+
+    2) for the program listing to work, in an activity there have to be a dict language_booking_info_ids that for each
+    language including the default one contaios the id of the relevant note. The old attribute booking_info_id and the
+    new language_booking_info_ids MUST NOT EXIST AT THE SAME TIME
+    """
+
     def view(self, url):
-        """Abort the request with a 404 HTTP status code."""
+        """
+        Accessing the path / must result in abort the request with a 404 HTTP status code.
+        """
         abort(404)
 
     @expose('hollyrosa.templates.view_activity')
-    @validate(validators={'activity_id': validators.UnicodeString(not_empty=True)})
-    def view_activity(self, activity_id=None, language=None):
+    @validate(validators={'activity_id': validators.UnicodeString(not_empty=True),
+                          'language': validators.UnicodeString(not_empty=False)})
+    def view_activity(self,
+                      activity_id=None,
+                      language=None):
+        """
+        Viewing of a specific activity.
 
-        _language = language if language is not None else default_language
+        :param activity_id: the id of the activity
+        :param language: the language version or None or '' for the default language version
+        """
+        is_language_specified = language is not None and language != ''
+        l_language = language if is_language_specified else default_language
 
         activity = common_couch.getActivity(getHollyCouch(), activity_id)
         activity_group = common_couch.getActivityGroup(getHollyCouch(), activity['activity_group_id'])
 
         # ...replace missing fields with empty string
-        for tmp_field in ['print_on_demand_link', 'external_link', 'internal_link', 'guides_per_slot', 'guides_per_day',
+        for attr_name in ['print_on_demand_link', 'external_link', 'internal_link', 'guides_per_slot', 'guides_per_day',
                           'equipment_needed', 'education_needed']:
-            if not activity.has_key(tmp_field):
-                activity[tmp_field] = u''
+            if attr_name not in activity:
+                activity[attr_name] = u''
 
-        if not 'language_versions' in activity:
+        if 'language_versions' not in activity:
             activity['language_versions'] = {}
 
-        if (language is not None) and (language in activity['language_versions']):
+        if is_language_specified and (language in activity['language_versions']):
             title = activity['language_versions'][language].get('title', '')
             description = activity['language_versions'][language].get('description', '')
         else:
@@ -80,35 +100,49 @@ class Activity(BaseController):
             activity['language_versions'][default_language] = {}
 
         activity_booking_info_id = activity.get('booking_info_id', '')
-        if activity_booking_info_id != '':
+        if activity_booking_info_id != '' or 'language_booking_info_ids' in activity:
             notes = [n.doc for n in getNotesForTarget(getHollyCouch(), activity_id)]
 
             # only show note with corresponding language
-            if language is not None:
-                notes = [note for note in notes if 'language' in note and note['language'] == language]
+            if is_language_specified:
+                notes = [note for note in notes if ('language' in note and note['language'] == language) or (
+                            language == default_language and 'language' not in note)]
             else:
                 notes = [note for note in notes if 'language' not in note or note['language'] == default_language]
         else:
             notes = list()
 
-        return dict(activity=activity, title=title, description=description, activity_group=activity_group, notes=notes,
-                    languages_map=languages_map, default_language=default_language, language=_language)
+        return dict(activity=activity,
+                    title=title,
+                    description=description,
+                    activity_group=activity_group,
+                    notes=notes,
+                    languages_map=languages_map,
+                    default_language=default_language,
+                    language=l_language)
 
     @expose('hollyrosa.templates.edit_activity')
     @validate(
-        validators={'activity_id': validators.UnicodeString(not_empty=True), 'language': validators.UnicodeString()})
+        validators={'activity_id': validators.UnicodeString(not_empty=True),
+                    'language': validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'),
                  msg='Only staff members may change activity information'))
     def edit_activity(self, activity_id=None, language=None, **kw):
         """
         When editing the non-default language, we want to edit other title and description than the underlying data
-        We must take care of this when saving
+        We must take care of this when saving.
+
+        Only staff or pl may edit activities.
         """
+
+        # use this form widget
         tmpl_context.form = create_edit_activity_form
 
+        is_language_specified = language is not None and language != ''
+
         if activity_id is None:
-            if language is not None and language != default_language:
-                language_versions = {language: dict(description="", title="")}
+            if is_language_specified and language != default_language:
+                language_versions = {language: dict(description='', title='')}
 
             activity = dict(id=None, title=u'', description=u'', activity_group_id='',
                             language_versions=language_versions)
@@ -119,12 +153,12 @@ class Activity(BaseController):
 
                 # if we found the activity and language is given and language is not default language,
                 # change the title and description fields so we edit the choosen language
-                if language != None and language != default_language:
-                    activity['title'] = activity.get('language_versions', {}).get(language, {}).get('title',
-                                                                                                    activity['title'])
-                    activity['description'] = activity.get('language_versions', {}).get(language, {}).get('description',
-                                                                                                          activity[
-                                                                                                              'description'])
+                if is_language_specified and language != default_language:
+                    activity['title'] = \
+                        activity.get('language_versions', {}).get(language, {}).get('title', activity['title'])
+                    activity['description'] = \
+                        activity.get('language_versions', {}).get(language, {}).get('description',
+                                                                                    activity['description'])
 
             except:
                 # If we are creating a new activity, we always create one with nu language_versions
@@ -132,14 +166,18 @@ class Activity(BaseController):
                 activity = dict(id=activity_id, title=u'', description=u'', default_booking_state=0,
                                 activity_group_id='', language_versions={}, language=default_language)
 
-        # ...what about sanitizing colors like #fff to #ffffff
-        if activity['bg_color'][0] == '#' and len(activity['bg_color']) == 4:
-            a = activity['bg_color'][1]
-            b = activity['bg_color'][2]
-            c = activity['bg_color'][3]
-            activity['bg_color'] = u"%c%c%c%c%c%c%c" % ('#', a, a, b, b, c, c)
+        # sanitizing colors like #fff to #ffffff
+        if 'bg_color' in activity:
+            if activity['bg_color'][0] == '#' and len(activity['bg_color']) == 4:
+                a = activity['bg_color'][1]
+                b = activity['bg_color'][2]
+                c = activity['bg_color'][3]
+                activity['bg_color'] = u"%c%c%c%c%c%c%c" % ('#', a, a, b, b, c, c)
+        else:
+            activity['bg_color'] = u'#ffffff'
 
-        activity['language'] = language
+        # set language property in the data returned from the view. This does not mean we save it
+        activity['language'] = language if is_language_specified else default_language
 
         return dict(activity=activity)
 
@@ -147,25 +185,68 @@ class Activity(BaseController):
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'),
                  msg='Only staff members may change activity properties'))
-    def save_activity_properties(self, id=None, title=None, external_link='', internal_link='', print_on_demand_link='',
-                                 description='', tags='', capacity=0, default_booking_state=0, activity_group_id=1,
-                                 gps_lat=0, gps_long=0, equipment_needed=False, education_needed=False,
-                                 certificate_needed=False, bg_color='', guides_per_slot=0, guides_per_day=0,
+    def save_activity_properties(self, id=None,
+                                 title=None,
+                                 description='',
+                                 external_link='',
+                                 internal_link='',
+                                 print_on_demand_link='',
+                                 tags='',
+                                 capacity=0,
+                                 default_booking_state=0,
+                                 activity_group_id=1,
+                                 gps_lat=0, gps_long=0,
+                                 equipment_needed=False,
+                                 education_needed=False,
+                                 certificate_needed=False,
+                                 bg_color='',
+                                 guides_per_slot=0,
+                                 guides_per_day=0,
                                  language=None):
+        """
+        Save the activity. Must be a post-request.
+
+        :param id:
+        :param title:
+        :param external_link:
+        :param internal_link:
+        :param print_on_demand_link:
+        :param description:
+        :param tags:
+        :param capacity:
+        :param default_booking_state:
+        :param activity_group_id:
+        :param gps_lat:
+        :param gps_long:
+        :param equipment_needed:
+        :param education_needed:
+        :param certificate_needed:
+        :param bg_color:
+        :param guides_per_slot:
+        :param guides_per_day:
+        :param language:
+        :return:
+        """
         ensurePostRequest(request, name=__name__)
 
-        is_new = None == id or '' == id
+        is_new = id is None or id == ''
+
         if is_new:
-            activity = dict(
-                type='activity')  # TODO: need to set subtype on activity or is it handled by group belonging?
+
+            # TODO: need to set subtype on activity or is it handled by group belonging?
+            activity = dict(type='activity')
             id = genUID(type='activity')
 
         else:
+            # load the activity, later update properties and save
             activity = common_couch.getActivity(getHollyCouch(), id)
 
         # if language is None or language is default language, save to title and description, otherwise save
         # to the language_versions
-        if language is None or language == default_language:
+
+        is_language_specified = language is not None and language != ''
+
+        if not is_language_specified or language == default_language:
             activity['title'] = title
             activity['description'] = cleanHtml(description)
         else:
@@ -181,10 +262,10 @@ class Activity(BaseController):
         activity['print_on_demand_link'] = print_on_demand_link
         activity['tags'] = tags
         activity['capacity'] = capacity
-        #        #activity.default_booking_state=default_booking_state
+        # activity.default_booking_state=default_booking_state
         activity['activity_group_id'] = activity_group_id
-        #        activity.gps_lat = gps_lat
-        #       activity.gps_long = gps_long
+        # activity.gps_lat = gps_lat
+        # activity.gps_long = gps_long
         activity['equipment_needed'] = equipment_needed
         activity['education_needed'] = education_needed
         activity['certificate_needed'] = certificate_needed
@@ -192,5 +273,7 @@ class Activity(BaseController):
         activity['guides_per_slot'] = guides_per_slot
         activity['guides_per_day'] = guides_per_day
 
+        # save the activity
         getHollyCouch()[id] = activity
+        log.debug('before redirect')
         raise redirect('/activity/view_activity', activity_id=id, language=language)

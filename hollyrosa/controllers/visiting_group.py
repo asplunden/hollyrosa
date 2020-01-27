@@ -316,9 +316,17 @@ class VisitingGroup(BaseController):
             if subtype == 'course':
                 properties_template = course_visiting_group_properties_template
 
-            visiting_group = dict(name='', id=None, _id=None, info='', visiting_group_properties=properties_template,
-                                  subtype=subtype, contact_person='', contact_person_email='', contact_person_phone='',
-                                  boknr='', language='se-SV')
+            visiting_group = dict(name='',
+                                  id=None,
+                                  _id=None,
+                                  info='',
+                                  visiting_group_properties=properties_template,
+                                  subtype=subtype,
+                                  contact_person='',
+                                  contact_person_email='',
+                                  contact_person_phone='',
+                                  boknr='',
+                                  language='se-SV')
 
         else:
             log.info('looking up existing visiting group %s' % str(visiting_group_id))
@@ -332,10 +340,21 @@ class VisitingGroup(BaseController):
     @expose()
     @validate(create_edit_visiting_group_form, error_handler=edit_visiting_group)
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may change visiting group properties'))
-    def save_visiting_group_properties(self, visiting_group_id=None, name='', info='', from_date=None, to_date=None,
-                                       contact_person='', contact_person_email='', contact_person_phone='',
-                                       visiting_group_properties=None, camping_location='', boknr='', password='',
-                                       subtype='', language=''):
+    def save_visiting_group_properties(self,
+                                       visiting_group_id=None,
+                                       name='',
+                                       info='',
+                                       from_date=None,
+                                       to_date=None,
+                                       contact_person='',
+                                       contact_person_email='',
+                                       contact_person_phone='',
+                                       visiting_group_properties=None,
+                                       camping_location='',
+                                       boknr='',
+                                       password='',
+                                       subtype='',
+                                       language=''):
         log.info('save_visiting_group_properties')
 
         ensurePostRequest(request, __name__)
@@ -364,7 +383,7 @@ class VisitingGroup(BaseController):
             visiting_group_c = getHollyCouch()[id_c]
 
         visiting_group_c['name'] = name
-        visiting_group_c['info'] = cleanHtml(info)
+        visiting_group_c['info'] = cleanHtml(info if info is not None else '')
 
         ok, ok_from_date = sanitizeDate(from_date)
         if not ok:
@@ -632,7 +651,6 @@ class VisitingGroup(BaseController):
         response.headerlist.append(('Content-Disposition', 'attachment;filename=%s' % doc_id))
 
         return getHollyCouch().get_attachment(visiting_group_id, doc_id).read()
-
 
     @expose('hollyrosa.templates.edit_visiting_group_vodb_data')
     @validate(validators={"id": validators.UnicodeString()})

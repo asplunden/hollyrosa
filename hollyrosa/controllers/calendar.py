@@ -113,7 +113,7 @@ class Calendar(BaseController):
                                     num_fladan_crew_members=0):
         ensurePostRequest(request, __name__)
         booking_day_c = common_couch.getBookingDay(getHollyCouch(), recid)
-        booking_day_c['note'] = cleanHtml(note)
+        booking_day_c['note'] = cleanHtml(note if note is not None else '')
         booking_day_c['title'] = title
         booking_day_c['num_program_crew_members'] = num_program_crew_members
         booking_day_c['num_fladan_crew_members'] = num_fladan_crew_members
