@@ -24,6 +24,7 @@ import logging
 import tw2.core as twc
 from hollyrosa.controllers.common import cleanHtml
 from tw2.forms import TextArea
+from tg import url
 
 log = logging.getLogger(__name__)
 
@@ -33,8 +34,8 @@ __all__ = ['TinyMCE4Widget']
 # separately. Download from: http://download.tiny.cloud/tinymce/community/tinymce_4.9.7.zip , copy to public folder,
 # unzip there and delete the zip file.
 
-tinymce_dir = twc.DirLink(link="/scripts/tinymce/js/tinymce", filename='', modname='')
-tinymce_js = twc.JSLink(link='/scripts/tinymce/js/tinymce/tinymce.min.js',
+tinymce_dir = twc.DirLink(link=url('/scripts/tinymce/js/tinymce'), filename='', modname='')
+tinymce_js = twc.JSLink(link=url('/scripts/tinymce/js/tinymce/tinymce.min.js'),
                         init=twc.js_function('tinymce.init'), filename='', modname='')
 
 
