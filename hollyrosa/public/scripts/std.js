@@ -31,7 +31,7 @@ function set_visible_ag_rows(acg_id, v) {
 
 function navigation_calendar_is_disabled(x) {
   var test_date = dojo.date.locale.format(x, {datePattern: "yyyy-MM-dd", selector: "date"});
-  return test_date < "2018-05-01" || test_date > "2018-10-31";
+  return test_date < "2020-05-01" || test_date > "2020-10-31";
 }
 
 
