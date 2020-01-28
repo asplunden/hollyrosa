@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright 2010-2018 Martin Eliasson
+Copyright 2010-2020 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -20,7 +20,6 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import datetime
-import time
 import types
 
 from formencode import validators
@@ -31,7 +30,7 @@ from hollyrosa.lib.base import BaseController
 from hollyrosa.model import getHollyCouch
 from hollyrosa.model.booking_couch import getAllHistory, getAllHistoryForVisitingGroup, getAllHistoryForUser, genUID
 from tg import expose, require, request, validate
-from tg.predicates import Any, has_permission
+from tg.predicates import Any
 
 __all__ = ['History']
 
