@@ -24,14 +24,14 @@ import logging
 
 from formencode import validators
 from hollyrosa.controllers import common_couch
-from hollyrosa.controllers.common import bokn_status_map, DataContainer, \
+from hollyrosa.controllers.common import bokn_status_map, default_language, DataContainer, \
     has_level, reFormatDate, hide_cache_content_in_booking, ensurePostRequest
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import genUID, getHollyCouch
 from hollyrosa.model.booking_couch import dateRange
 from hollyrosa.model.booking_couch import getVisitingGroupsInDatePeriod, getAllProgramLayerBucketTexts, \
-    getBookingsOfVisitingGroup, getAllActivities, getBookingDays, getActivityTitleMap, \
-    getBookingInfoNotesOfUsedActivities, getNotesForTarget
+    get_bookings_of_visiting_group, getAllActivities, getBookingDays, getActivityTitleMap, \
+    get_booking_info_notes_with_matched_language, getNotesForTarget
 from tg import expose, require, request, redirect, validate
 from tg.predicates import Any
 
@@ -101,12 +101,15 @@ class ProgramLayer(BaseController):
     def layers(self, visiting_group_id):
         vgroup = common_couch.getVisitingGroup(getHollyCouch(), visiting_group_id)
         notes = [n.doc for n in getNotesForTarget(getHollyCouch(), visiting_group_id)]
-        return dict(visiting_group=vgroup, notes=notes, tags=[], reFormatDate=reFormatDate,
+        return dict(visiting_group=vgroup,
+                    notes=notes,
+                    tags=[],
+                    reFormatDate=reFormatDate,
                     program_state_map=bokn_status_map)
 
     def get_program_layer_bookings(self, visiting_group, layer_title, layer_colour):
         bookings = []
-        for tmp in getBookingsOfVisitingGroup(getHollyCouch(), visiting_group['name'], '<- MATCHES NO GROUP ->'):
+        for tmp in get_bookings_of_visiting_group(getHollyCouch(), visiting_group['name'], '<- MATCHES NO GROUP ->'):
             tmp_doc = tmp.doc
             tmp_doc['layer_title'] = layer_title
             tmp_doc['layer_colour'] = layer_colour
@@ -174,8 +177,10 @@ class ProgramLayer(BaseController):
         result['width_ratio'] = width_ratio
 
         result['unscheduled_bookings'] = unscheduled_bookings
-        result['booking_info_notes'] = [n.doc for n in getBookingInfoNotesOfUsedActivities(getHollyCouch(),
-                                                                                           used_activities_keys.keys())]
+        visiting_group_language = visiting_group.get('language', default_language)
+        result['booking_info_notes'] = get_booking_info_notes_with_matched_language(getHollyCouch(),
+                                                                                    used_activities_keys,
+                                                                                    visiting_group_language)
         return result
 
     @expose("json")

@@ -422,8 +422,8 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <body class="tundra" py:block="body" py:strip="True">
   <section class="section">
     <div class="container">
-      <h2 id="visiting_group_menu" hollyrosa:vgid="${visiting_group.id}" class="context_menu_symbol title">${visiting_group['name']}</h2>
-      <p class="context_menu_symbol">${reFormatDate(visiting_group['from_date'])} to ${reFormatDate(visiting_group['to_date'])}</p>
+      <div id="visiting_group_menu" class="more_menu_symbol" hollyrosa:vgid="${visiting_group['_id']}"><h2 class="title">${visiting_group['name']}</h2></div>
+      <p class="title is-5">${reFormatDate(visiting_group['from_date'])} to ${reFormatDate(visiting_group['to_date'])}</p>
 
 
       <nav class="level box">
@@ -453,17 +453,17 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
       <div class="note media" id="note" hollyrosa:vgid="${visiting_group.id}">
         <div class="media-content">
-        <span id="taglist" class="tags"></span>
-      <table class="visiting_group_info_table">
-        <tr><td class="legend">bok.nr:</td><td class="info">${visiting_group['boknr']}</td></tr>
-        <tr><td class="legend">subtype:</td><td class="info">${visiting_group.get('subtype','')}</td></tr>
+          <span id="taglist" class="tags"></span>
+            <table class="visiting_group_info_table">
+              <tr><td class="legend">bok.nr:</td><td class="info">${visiting_group['boknr']}</td></tr>
+              <tr><td class="legend">subtype:</td><td class="info">${visiting_group.get('subtype','')}</td></tr>
 
-        <tr><td class="legend">program status:</td><td class="info">${program_state_map.get(visiting_group['boknstatus'],'')}</td></tr>
-        <tr><td class="legend">camping location:</td><td class="info">${visiting_group['camping_location']}</td></tr>
-      </table>
-      <p>${literal(visiting_group['info'])}</p>
-    </div>
-    </div>
+              <tr><td class="legend">program status:</td><td class="info">${program_state_map.get(visiting_group['boknstatus'],'')}</td></tr>
+              <tr><td class="legend">camping location:</td><td class="info">${visiting_group['camping_location']}</td></tr>
+            </table>
+           <p>${literal(visiting_group['info'])}</p>
+        </div>
+      </div>
   </div>
 </section>
 <section>
@@ -486,23 +486,30 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 <section class="section">
   <div class="container" id="content">
     <h3 class="title is-5">Notes and attachments</h3>
-    <article py:for="n in notes" class="media">
+    <div py:for="n in notes" class="media ${n['type']}2">
       <div class="media-content">
-        <div class="${n['type']}2 context_menu_symbol content" hollyrosa:nid="${n['_id']}" hollyrosa:vgid="${visiting_group['_id']}"><i><strong>${n['timestamp']}</strong> ${n['type']} by ${n['last_changed_by']}</i><br/>
+        <div class="context_menu_symbol content" hollyrosa:nid="${n['_id']}" hollyrosa:vgid="${visiting_group['_id']}"><i><strong>${n['timestamp']}</strong> ${n['type']} by ${n['last_changed_by']}</i><br/>
           <div py:if="'note' == n['type']">${literal(n['text'])}</div>
           <div py:if="('attachment' == n['type'])">${n['text']}<br/>
 
-            <div py:for="aname, atinfo in n.get('_attachments',{}).items()"><a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}"><strong>${aname}</strong></a><br/></div>
+            <div py:for="aname, atinfo in n.get('_attachments',{}).items()">
+              <a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}"><strong>${aname}</strong></a><br/>
+            </div>
           </div>
+        </div>
+      </div>
+      <div class="media-right is-hidden-mobile">
+        <div class="media-content is-hidden-mobile buttons" py:if="'attachment' == n['type']" py:for="aname, atinfo in n.get('_attachments',{}).items()">
+
+          <a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}" class="button is-primary is-outlined is-small">Download</a>
+          <a href="${tg.url('/note/edit_attachment', params={'note_id':n['_id'],'doc_id':aname})}" class="button is-primary is-outlined is-small">Edit</a>
+        </div>
+        <div class="media-content is-hidden-mobile buttons" py:if="'note' == n['type']">
+          <a href="${tg.url('/note/edit_note', params={'note_id':n['_id']})}" class="button is-primary is-outlined is-small">Edit</a>
+        </div>
       </div>
     </div>
-    <div class="media-right is-hidden-mobile">
-      <div class="media-content is-hidden-mobile">
-      <a href="${tg.url('/note/download_attachment', params={'attachment_id':n['_id'],'doc_id':aname})}" class="button is-primary is-outlined is-small">Download ${atinfo['content_type']} ${atinfo['length']}</a>
     </div>
-    </div>
-    </article>
-  </div>
 </section>
 
 <section class="section">
@@ -525,8 +532,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
         <th>Property = Value Unit</th><th>Description</th><th>From date</th><th>To date</th>
       </tr>
       <tr py:for="prop in visiting_group['visiting_group_properties'].values()">
-
-        <td class="info">${'$'+prop['property']} = ${prop['value']} ${prop['unit']}</td><td class="info">${prop['description']}</td><td class="info">${prop['from_date']}</td><td class="info">${prop['to_date']}</td>
+        <td class="info">${'$'+prop['property']} = ${prop['value']} ${prop['unit']}</td>
+        <td class="info">${prop['description']}</td>
+        <td class="info">${prop['from_date']}</td>
+        <td class="info">${prop['to_date']}</td>
       </tr>
     </table>
   </div>

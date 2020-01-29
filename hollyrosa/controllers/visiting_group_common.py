@@ -23,7 +23,7 @@ import types
 
 from hollyrosa.controllers.booking_history import remember_booking_vgroup_properties_change
 from hollyrosa.controllers.common import computeCacheContent, sanitizeDate
-from hollyrosa.model.booking_couch import getBookingsOfVisitingGroup
+from hollyrosa.model.booking_couch import get_bookings_of_visiting_group
 
 program_visiting_group_properties_template = [
     dict(property='sma', value='0', unit=u'småbarn', description=u'antal deltagare 0 till 8 år'),
@@ -57,7 +57,7 @@ def updateBookingsCacheContentAfterPropertyChange(a_holly_couch, a_visiting_grou
 
     l_visiting_group_name = a_visiting_group['name']
     l_visiting_group_id = a_visiting_group['_id']
-    bookings = getBookingsOfVisitingGroup(a_holly_couch, a_visiting_group.id, None)
+    bookings = get_bookings_of_visiting_group(a_holly_couch, a_visiting_group.id, None)
     for tmp in bookings:
         tmp_booking = tmp.doc
 
