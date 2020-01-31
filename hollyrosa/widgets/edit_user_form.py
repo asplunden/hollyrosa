@@ -26,8 +26,8 @@ import tw2.forms as twf
 class EditUserForm(twf.Form):
     class child(twf.TableLayout):
         user_id = twf.HiddenField(validator=twc.Required)
-        user_name = twf.TextField(validator=twc.StringLengthValidator(min=4))
-        display_name = twf.TextField(validator=twc.StringLengthValidator(min=4))
+        user_name = twf.TextField(validator=twc.StringLengthValidator(min=4), css_class="input is-small")
+        display_name = twf.TextField(validator=twc.StringLengthValidator(min=4), css_class="input is-small")
 
     action = lurl('save_user')
 

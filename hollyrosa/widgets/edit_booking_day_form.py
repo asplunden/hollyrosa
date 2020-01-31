@@ -28,10 +28,10 @@ from tinymce_4_widget import TinyMCE4Widget
 class EditVisitingGroupForm(twf.Form):
     class child(twf.TableLayout):
         recid = twf.HiddenField(validator=twc.Required)  #### TODO: former id was _id but no longer allowed name
-        title = twf.TextField(validator=twc.Required)
+        title = twf.TextField(validator=twc.Required, css_class="input is-medium")
         note = TinyMCE4Widget()
-        num_program_crew_members = twf.TextField(validator=twc.IntValidator)
-        num_fladan_crew_members = twf.TextField(validator=twc.IntValidator)
+        num_program_crew_members = twf.TextField(validator=twc.IntValidator, css_class="input is-small")
+        num_fladan_crew_members = twf.TextField(validator=twc.IntValidator, css_class="input is-small")
 
     action = lurl('save_booking_day_properties')
 

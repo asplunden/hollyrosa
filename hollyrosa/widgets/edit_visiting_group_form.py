@@ -24,6 +24,7 @@ import tw2.dynforms as twd
 from tg import lurl
 
 from tinymce_4_widget import TinyMCE4Widget
+from single_select_widget import SingleSelectWidget
 
 from hollyrosa.controllers.common import languages_map
 
@@ -41,27 +42,27 @@ class EditVisitingGroupForm(twd.CustomisedTableForm):
     class child(twf.TableLayout):
         visiting_group_id = twf.HiddenField(validator=twc.Required)
         subtype = twf.HiddenField(validator=twc.Required)
-        name = twf.TextField(validator=twc.StringLengthValidator(min=1), css_class="edit_name", size=40)
+        name = twf.TextField(validator=twc.StringLengthValidator(min=1), css_class="edit_name input is-medium", size=40)
         info = TinyMCE4Widget()
-        from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', required=True)
-        to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', required=True)
-        contact_person = twf.TextField(label_text="contact person:")
-        contact_person_email = twf.TextField(validator=twc.EmailValidator)
-        contact_person_phone = twf.TextField()
-        boknr = twf.TextField()
-        password = twf.TextField()
-        camping_location = twf.TextField()
-        language = twf.SingleSelectField(validator=twc.Required, options=twc.Deferred(_getPreferredLanguageOptions))
+        from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', css_class="input is-small", required=True)
+        to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', css_class="input is-small", required=True)
+        contact_person = twf.TextField(label_text="contact person:", css_class="input is-small")
+        contact_person_email = twf.TextField(validator=twc.EmailValidator, css_class="input is-small")
+        contact_person_phone = twf.TextField(css_class="input is-small")
+        boknr = twf.TextField(css_class="input is-small")
+        password = twf.TextField(css_class="input is-small")
+        camping_location = twf.TextField(css_class="input is-small")
+        language = SingleSelectWidget(validator=twc.Required, options=twc.Deferred(_getPreferredLanguageOptions))
 
         class visiting_group_properties(twd.GrowingGridLayout):
             extra_reps = 1
             property_id = twf.HiddenField()
-            property = twf.TextField(size=10)
-            value = twf.TextField(size=4)
-            unit = twf.TextField(size=8)
-            description = twf.TextField()
-            from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')  # required=True
-            to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')  # required=True
+            property = twf.TextField(size=10, css_class="input is-small")
+            value = twf.TextField(size=4, css_class="input is-small")
+            unit = twf.TextField(size=8, css_class="input is-small")
+            description = twf.TextField(css_class="input is-small")
+            from_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', css_class="input is-small")  # required=True
+            to_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', css_class="input is-small")  # required=True
 
     action = lurl('save_visiting_group_properties')
 
