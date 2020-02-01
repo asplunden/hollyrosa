@@ -30,7 +30,7 @@ from tinymce_4_widget import TinyMCE4Widget
 
 from hollyrosa.model import getHollyCouch
 from hollyrosa.model.booking_couch import getAllActivityGroups
-
+from single_select_widget import SingleSelectWidget
 
 def _getActivityGroupOptions():
     """
@@ -46,24 +46,24 @@ class EditActivityForm(twf.Form):
     class child(twf.TableLayout):
         id = twf.HiddenField()
         language = twf.HiddenField(validator=twc.Required)
-        title = twf.TextField(validator=twc.Required, css_class="edit_name")
+        title = twf.TextField(validator=twc.Required, css_class="edit_name input is-medium")
         description = TinyMCE4Widget()
-        tags = twf.TextField()
-        external_link = twf.UrlField()
-        internal_link = twf.UrlField()
-        print_on_demand_link = twf.UrlField()
-        capacity = twf.NumberField(validator=twc.IntValidator)
+        tags = twf.TextField(css_class="input is-small")
+        external_link = twf.UrlField(css_class="input is-small")
+        internal_link = twf.UrlField(css_class="input is-small")
+        print_on_demand_link = twf.UrlField(css_class="input is-small")
+        capacity = twf.NumberField(validator=twc.IntValidator, css_class="input is-small")
         default_booking_state = twf.HiddenField()
-        activity_group_id = twf.SingleSelectField(validator=twc.Required,
+        activity_group_id = SingleSelectWidget(validator=twc.Required,
                                                   options=twc.Deferred(_getActivityGroupOptions))
-        gps_lat = twf.TextField()
-        gps_long = twf.TextField()
-        equipment_needed = twf.CheckBox()
-        education_needed = twf.CheckBox()
-        certificate_needed = twf.CheckBox()
-        bg_color = twf.ColorField(validator=twc.Required)
-        guides_per_slot = twf.NumberField(validator=twc.IntValidator)
-        guides_per_day = twf.NumberField(validator=twc.IntValidator)
+        gps_lat = twf.TextField(css_class="input is-small")
+        gps_long = twf.TextField(css_class="input is-small")
+        equipment_needed = twf.CheckBox(css_class="checkbox is-small")
+        education_needed = twf.CheckBox(css_class="checkbox is-small")
+        certificate_needed = twf.CheckBox(css_class="checkbox is-small")
+        bg_color = twf.ColorField(validator=twc.Required, css_class="input is-small")
+        guides_per_slot = twf.NumberField(validator=twc.IntValidator, css_class="input is-small")
+        guides_per_day = twf.NumberField(validator=twc.IntValidator, css_class="input is-small")
 
     action = lurl('save_activity_properties')
 
