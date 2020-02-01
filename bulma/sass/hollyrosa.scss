@@ -1,0 +1,68 @@
+// 1. Import the initial variables
+@import "../sass/utilities/initial-variables";
+@import "../sass/utilities/functions";
+
+// 2. Set your own initial variables
+
+$hollyrosa: #286571; // dark geen-blue
+$hollyrosa-invert: #fff;
+$hollyrosa-light: lighten($hollyrosa, 20%); // 286571 link color
+
+$hollyrosa-blue: #eeeeff;
+$hollyrosa-yellow: #ffffee;
+$hollyrosa-red: #ffeeee;
+$hollyrosa-green: #eeffee;
+
+$blue:   darken(#1568A8, 0%); // To consider: #906;
+$green:  desaturate(darken($hollyrosa-green, 10%), 40%);
+$red:    desaturate(darken($hollyrosa-red, 10%), 40%);
+$yellow: desaturate(darken($hollyrosa-yellow, 10%), 40%);
+
+// 3. Set the derived variables
+$primary: $blue;
+$primary-invert: $white;
+
+$info: $hollyrosa-light;
+$link: $hollyrosa;
+$link-invert: $hollyrosa-invert;
+
+$pre-background: 'transparent';
+
+// Use the existing orange as the danger color
+$danger: $orange;
+
+$table-row-hover-background-color: #ffffdd;
+$table-striped-row-even-hover-background-color: #ffffdd;
+
+$tw2forms-table-row-hover-background-color: $white; // needed because tw2 uses tables for layout
+$tw2forms-table-cell-border: 1px solid $white;
+$tw2forms-table-cell-border-width: 0 0 0 0;
+
+// 4. Setup your Custom Colors
+
+// Colors for TurboGears Flash messages
+$ok: $green;
+$ok-invert: #000;
+
+$error: $red;
+$error-invert: #000;
+
+$alert: $orange;
+$alert-invert: #000;
+
+$notice: $blue;
+$notice-invert: #fff;
+
+// 5. Add new color variables to the color map.
+@import "../sass/utilities/derived-variables.sass";
+$addColors: (
+  "ok": ($ok, $ok-invert),
+  "error": ($error, $error-invert),
+  "alert": ($alert, $alert-invert),
+  "notice": ($notice, $notice-invert),
+);
+$colors: map-merge($colors, $addColors);
+
+// 6. Import the rest of Bulma
+@import "../bulma";
+@import "extensions/_all"
