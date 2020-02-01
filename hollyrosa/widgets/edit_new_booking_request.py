@@ -28,15 +28,15 @@ class EditNewBookingRequestForm(twf.Form):
     class child(twf.TableLayout):
         id = twf.HiddenField()
         return_to_day_id = twf.HiddenField()
-        visiting_group_name = twf.TextField(validator=twc.StringLengthValidator(min=1))
+        visiting_group_name = twf.TextField(validator=twc.StringLengthValidator(min=1), css_class="input is-medium")
         visiting_group_display_name = twf.HiddenField()
         visiting_group_id = twf.HiddenField()
-        booking_content = twf.TextArea(rows=5, cols=30)
+        booking_content = twf.TextArea(rows=5, cols=30, css_class="textarea")
         activity_id = twf.HiddenField()
-        activity_name = twf.TextField(twc.Required, rows=30, cols=5)
-        requested_date = twf.CalendarDatePicker(date_format='%Y-%m-%d')
-        valid_from = twf.CalendarDatePicker(date_format='%Y-%m-%d')
-        valid_to = twf.CalendarDatePicker(date_format='%Y-%m-%d')
+        activity_name = twf.TextField(twc.Required, rows=30, cols=5, css_class="input is-small")
+        requested_date = twf.CalendarDatePicker(date_format='%Y-%m-%d', css_class="input is-small")
+        valid_from = twf.CalendarDatePicker(date_format='%Y-%m-%d', css_class="input is-small")
+        valid_to = twf.CalendarDatePicker(date_format='%Y-%m-%d', css_class="input is-small")
 
     action = lurl('save_new_booking_request')
 
