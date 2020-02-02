@@ -52,8 +52,19 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
           <h2 class="title">Kort beskrivning av ${title}</h2></div>
         <div class="content">
           <h3 class="subtitle">Activity Group: ${activity_group['title']}</h3>
+          <p>Description:</p>
+          <div class="media note">
+            <div class="media-content">
+              ${literal(description)}
+            </div>
 
-          <div class="note">Description: ${literal(description)}</div>
+            <div class="media-right is-hidden-mobile">
+              <div class="media-content is-hidden-mobile buttons">
+                <a href="${tg.url('/activity/edit_activity', params={'activity_id':activity['_id']})}" class="button is-primary is-outlined is-small">Edit</a>
+              </div>
+            </div>
+          </div>
+
           <p>Capacity: ${activity['capacity']}</p>
           <p>Guides per slot: ${activity['guides_per_slot']}</p>
           <p>Guides per day: ${activity['guides_per_day']}</p>

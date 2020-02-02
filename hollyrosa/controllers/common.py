@@ -338,7 +338,7 @@ def cleanHtml(htmltxt):
     """
     bleach_allowed_tags = [u'a', u'abbr', u'acronym', u'b', u'blockquote', u'code', u'em', u'i', u'li', u'ol',
                            u'strong', u'ul', u'p', u'h1', u'h2', u'h3', u'h4', u'h5', u'h6', u'pre', u'address',
-                           u'span']
+                           u'span', u'img']
     bleach_allowed_attrs = {u'a': [u'href', u'title'], u'acronym': [u'title'], u'abbr': [u'title'], u'span': [u'style'],
-                            u'p': [u'style']}
+                            u'p': [u'style'], u'img': [u'src', u'alt', u'height', u'width']}
     return bleach.clean(htmltxt, tags=bleach_allowed_tags, attributes=bleach_allowed_attrs)

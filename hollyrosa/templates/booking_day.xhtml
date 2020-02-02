@@ -125,11 +125,18 @@ require(["common_menu","page/booking_day", "dojo/_base/array", "dijit/Menu","dij
       <div class="tile is-parent is-9">
         <div class="tile is-child">
 
-          <article class="media">
-            <div class="note media-content" id="main_note" style="min-height:10em;"><h2 class="title is-4">${booking_day.get('title','')}</h2>
-              <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day.events">$e</li></ul>
-                ${literal(booking_day['note'])}
-              <br/>
+          <article>
+            <div class="media note">
+              <div class="media-content" id="main_note" style="min-height:10em;"><h2 class="title is-4">${booking_day.get('title','')}</h2>
+                <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day.events">$e</li></ul>
+                  ${literal(booking_day['note'])}
+                <br/>
+              </div>
+              <div class="media-right is-hidden-mobile">
+                <div class="media-content is-hidden-mobile buttons">
+                  <a href="${tg.url('/calendar/edit_booking_day', params={'booking_day_id':booking_day['_id']})}" class="button is-primary is-outlined is-small">Edit</a>
+                </div>
+              </div>
             </div>
           </article>
         </div>
