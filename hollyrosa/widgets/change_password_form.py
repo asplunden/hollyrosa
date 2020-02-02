@@ -29,10 +29,9 @@ class ChangePasswordForm(twf.Form):
 
     class child(twf.TableLayout):
         user_id = twf.HiddenField(validator=twc.StringLengthValidator(min=4))
-        password = twf.PasswordField(validator=twc.Required)
-        password2 = twf.PasswordField(validator=twc.Required)
+        password = twf.PasswordField(validator=twc.Required, css_class="input is-small")
+        password2 = twf.PasswordField(validator=twc.Required, css_class="input is-small")
 
     action = lurl('update_password')
 
-
-create_change_password_form = ChangePasswordForm()  # "change_password_form")
+create_change_password_form = ChangePasswordForm()
