@@ -639,7 +639,7 @@ class BookingDay(BaseController):
             return_to_day_id = booking_day_id
         raise redirect('day?booking_day_id=' + return_to_day_id + make_booking_day_activity_anchor(b['activity_id']))
 
-    @expose('hollyrosa.templates.edit_booked_booking')
+    @expose('hollyrosa.templates.booking_edit_booked')
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may book a slot'))
     @validate(validators={'booking_day_id': validators.UnicodeString(not_empty=True),
                           'slot_id': validators.UnicodeString(not_empty=True),
@@ -675,7 +675,7 @@ class BookingDay(BaseController):
                 end_slot_id_options.append((slot['slot_id'], slot['title']))
         return end_slot_id_options
 
-    @expose('hollyrosa.templates.edit_booked_live_booking')
+    @expose('hollyrosa.templates.booking.edit_booked_live')
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may book a slot'))
     @validate(validators={'booking_day_id': validators.UnicodeString(not_empty=True),
                           'slot_id': validators.UnicodeString(not_empty=True),
@@ -738,7 +738,7 @@ class BookingDay(BaseController):
                     edit_this_visiting_group=0, slot_position=slot, start_slot_id_options=start_slot_id_options,
                     end_slot_id_options=end_slot_id_options, visiting_group_options=visiting_group_options)
 
-    @expose('hollyrosa.templates.booking_view')
+    @expose('hollyrosa.templates.booking.view')
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'),
                  msg='Only staff members may change booked booking properties'))
     @validate(validators={'booking_id': validators.UnicodeString(not_empty=True),
@@ -788,7 +788,7 @@ class BookingDay(BaseController):
     def getSchemaIdOfBooking(self, a_booking):
         return self.getSchemaSubNameOfSubtype(a_booking['subtype'])
 
-    @expose('hollyrosa.templates.edit_booked_booking')
+    @expose('hollyrosa.templates.booking.edit_booked')
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'),
                  msg='Only staff members may change booked booking properties'))
     @validate(validators={'id': validators.UnicodeString(not_empty=True),
@@ -1045,7 +1045,7 @@ class BookingDay(BaseController):
 
         return tmp_activity_id
 
-    @expose('hollyrosa.templates.request_new_booking')
+    @expose('hollyrosa.templates.booking.request_new')
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change a booking'))
     @validate(validators={'return_to_day_id': validators.UnicodeString(not_empty=False),
                           'booking_id': validators.UnicodeString(not_empty=True),
@@ -1138,7 +1138,7 @@ class BookingDay(BaseController):
                     edit_this_visiting_group=edit_this_visiting_group, activity_entries=activity_entries,
                     visiting_group_options=visiting_group_options)
 
-    @expose('hollyrosa.templates.move_booking')
+    @expose('hollyrosa.templates.booking.move')
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may change a booking'))
     @validate(validators={'return_to_day_id': validators.UnicodeString(not_empty=False),
                           'booking_id': validators.UnicodeString(not_empty=False)})
@@ -1277,9 +1277,9 @@ class BookingDay(BaseController):
             raise ValueError, "failed to obtain the N/A visiting group from DB"
         return visiting_group_id
 
+    @expose()
     @require(Any(is_user('root'), has_level('view'), has_level('staff'), has_level('pl'),
                  msg='Only viewers, staff and PL can submitt a new booking request'))
-    @expose()
     @validate(validators={'booking_content': validators.UnicodeString, "activity_id": validators.UnicodeString,
                           "activity_name": validators.UnicodeString, "visiting_group_name": validators.UnicodeString,
                           "visiting_group_display_name": validators.UnicodeString,
