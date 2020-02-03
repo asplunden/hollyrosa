@@ -26,11 +26,11 @@ from tg import lurl
 import tw2.core as twc
 import tw2.forms as twf
 
-from tinymce_4_widget import TinyMCE4Widget
+from hollyrosa.widgets.tinymce_4_widget import TinyMCE4Widget
 
 from hollyrosa.model import getHollyCouch
 from hollyrosa.model.booking_couch import getAllActivityGroups
-from single_select_widget import SingleSelectWidget
+from hollyrosa.widgets.single_select_widget import SingleSelectWidget
 
 def _getActivityGroupOptions():
     """
@@ -65,7 +65,7 @@ class EditActivityForm(twf.Form):
         guides_per_slot = twf.NumberField(validator=twc.IntValidator, css_class="input is-small")
         guides_per_day = twf.NumberField(validator=twc.IntValidator, css_class="input is-small")
 
-    action = lurl('save_activity_properties')
+    action = lurl('save')
 
 
 create_edit_activity_form = EditActivityForm()

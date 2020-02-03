@@ -29,7 +29,7 @@ class EditAttachmentForm(twf.Form):
         attachment_id = twf.HiddenField(validator=twc.Required)
         target_id = twf.HiddenField(validator=twc.Required)
 
-        text = twf.TextField(validator=twc.Required)
+        text = twf.TextField(validator=twc.Required, css_class="input is-small")
         attachment = twf.FileField()
 
     action = lurl('save_attachment')

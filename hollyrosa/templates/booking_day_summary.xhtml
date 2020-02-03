@@ -33,7 +33,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
       <table>
         <tr><th>Activity</th><th>Bookings</th><th>ALL</th><th>Spar</th><th>Uppt</th><th>Aven</th><th>Utm</th><th>Rov</th><th>Led</th><th>Rest</th></tr>
         <tr py:for="slot_row in slot_rows" class="tr_booking_day_overview_slot_row" style="background: ${slot_row.activity.bg_color};">
-          <td class="td_booking_day_overview_activity"><a href="${tg.url('view_activity', activity_id=slot_row.activity.id)}">${slot_row.activity.title}</a></td>
+          <td class="td_booking_day_overview_activity"><a href="${tg.url('view', activity_id=slot_row.activity.id)}">${slot_row.activity.title}</a></td>
           <td class="td_booking_day_overview_slots">${len(bookings.get(slot_row.activity.id, (list(), 0))[0])}</td>
           <td class="td_booking_day_overview_slots">${bookings.get(slot_row.activity.id, (list(), {}))[1].get('ALL',0)}</td>
           <td class="td_booking_day_overview_slots">${bookings.get(slot_row.activity.id, (list(), {}))[1].get('spar',0)}</td>

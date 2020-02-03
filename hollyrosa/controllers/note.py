@@ -26,14 +26,14 @@ from formencode import validators
 from hollyrosa.controllers import common_couch
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import getHollyCouch
-from tg import expose, require, redirect, validate, abort
+from tg import expose, require, redirect, validate, abort, url
 from tg.predicates import Any, is_user
 
 # ...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
 
-from hollyrosa.widgets.edit_note_form import create_edit_note_form
-from hollyrosa.widgets.edit_attachment_form import create_edit_attachment_form
+from hollyrosa.widgets.forms.edit_note_form import create_edit_note_form
+from hollyrosa.widgets.forms.edit_attachment_form import create_edit_attachment_form
 
 from hollyrosa.controllers.common import has_level, DataContainer, getLoggedInUserId, ensurePostRequest, cleanHtml
 
@@ -52,7 +52,7 @@ class Note(BaseController):
         """Abort the request with a 404 HTTP status code."""
         abort(404)
 
-    @expose('hollyrosa.templates.edit_note')
+    @expose('hollyrosa.templates.note.edit_note')
     @require(Any(has_level('staff'), has_level('pl'), has_level('view'),
                  msg='Only staff members and viewers may view visiting group properties'))
     def add_note(self, target_id):
@@ -60,7 +60,7 @@ class Note(BaseController):
         note_o = dict(text='', target_id=target_id, note_id='')
         return dict(note=note_o)
 
-    @expose('hollyrosa.templates.edit_attachment')
+    @expose('hollyrosa.templates.note.edit_attachment')
     @require(Any(has_level('staff'), has_level('pl'), has_level('view'),
                  msg='Only staff members and viewers may view visiting group properties'))
     def add_attachment(self, target_id):
@@ -68,7 +68,7 @@ class Note(BaseController):
         attachment_o = dict(text='', target_id=target_id, attachment_id='')
         return dict(attachment=attachment_o)
 
-    @expose('hollyrosa.templates.edit_note')
+    @expose('hollyrosa.templates.note.edit_note')
     @require(Any(has_level('staff'), has_level('pl'), has_level('view'),
                  msg='Only staff members and viewers may view visiting group properties'))
     def edit_note(self, note_id=None, visiting_group_id=None):
@@ -79,7 +79,7 @@ class Note(BaseController):
             note_o = common_couch.getNote(getHollyCouch(), note_id)
         return dict(note=note_o)
 
-    @expose('hollyrosa.templates.edit_attachment')
+    @expose('hollyrosa.templates.note.edit_attachment')
     @require(Any(has_level('staff'), has_level('pl'), has_level('view'),
                  msg='Only staff members and viewers may view visiting group properties'))
     def edit_attachment(self, note_id=None, visiting_group_id=None):
@@ -128,14 +128,14 @@ class Note(BaseController):
                              changed_by=getLoggedInUserId(request), note_change=note_change)
 
         if 'visiting_group' in note_o['target_id']:
-            redirect_to = '/visiting_group/show_visiting_group?visiting_group_id=' + note_o['target_id']
+            redirect_to = url('/visiting_group/show_visiting_group', params=dict(visiting_group_id=note_o['target_id']))
             raise redirect(redirect_to)
         elif 'activity' in note_o['target_id']:
-            redirect_to = '/activity/view_activity?activity_id=' + note_o['target_id']
+            redirect_to = url('/activity/view', params=dict(activity_id=note_o['target_id']))
             raise redirect(redirect_to)
         else:
             # TODO: where do we go from here ?
-            raise redirect('/') #redirect(request.referrer)
+            raise redirect('/')  # redirect(request.referrer)
 
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), has_level('view'),
@@ -172,9 +172,10 @@ class Note(BaseController):
         #  '_id'], changed_by=getLoggedInUserId(request), attachment_change=attachment_change)
 
         # TODO: where do we go from here?
-        redirect_to = '/'
+        redirect_to = url('/')
         if 'visiting_group' in attachment_o['target_id']:
-            redirect_to = '/visiting_group/show_visiting_group?visiting_group_id=' + attachment_o['target_id']
+            redirect_to = url('/visiting_group/show_visiting_group',
+                              params=dict(visiting_group_id=attachment_o['target_id']))
         raise redirect(redirect_to)
 
     @expose()
