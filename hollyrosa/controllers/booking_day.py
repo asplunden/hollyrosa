@@ -47,12 +47,10 @@ from formencode import validators
 
 # ...this can later be moved to the VisitingGroup module whenever it is broken out
 
-
-from hollyrosa.widgets.edit_new_booking_request import create_edit_new_booking_request_form
-
-from hollyrosa.widgets.edit_book_slot_form import create_edit_book_slot_form
-from hollyrosa.widgets.edit_book_live_slot_form import create_edit_book_live_slot_form
-from hollyrosa.widgets.move_booking_form import create_move_booking_form
+from hollyrosa.widgets.forms.edit_new_booking_request import create_edit_new_booking_request_form
+from hollyrosa.widgets.forms.edit_book_slot_form import create_edit_book_slot_form
+from hollyrosa.widgets.forms.edit_book_live_slot_form import create_edit_book_live_slot_form
+from hollyrosa.widgets.forms.move_booking_form import create_move_booking_form
 
 from hollyrosa.controllers.booking_history import remember_schedule_booking, \
     remember_unschedule_booking, remember_book_slot, remember_booking_properties_change, remember_new_booking_request, \

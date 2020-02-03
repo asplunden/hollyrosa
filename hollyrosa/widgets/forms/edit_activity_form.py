@@ -26,11 +26,11 @@ from tg import lurl
 import tw2.core as twc
 import tw2.forms as twf
 
-from hollyrosa.widgets.tinymce_4_widget import TinyMCE4Widget
-
 from hollyrosa.model import getHollyCouch
 from hollyrosa.model.booking_couch import getAllActivityGroups
-from hollyrosa.widgets.single_select_widget import SingleSelectWidget
+from hollyrosa.widgets.components.single_select_widget import SingleSelectWidget
+from hollyrosa.widgets.components.tinymce_4_widget import TinyMCE4Widget
+
 
 def _getActivityGroupOptions():
     """
@@ -55,7 +55,7 @@ class EditActivityForm(twf.Form):
         capacity = twf.NumberField(validator=twc.IntValidator, css_class="input is-small")
         default_booking_state = twf.HiddenField()
         activity_group_id = SingleSelectWidget(validator=twc.Required,
-                                                  options=twc.Deferred(_getActivityGroupOptions))
+                                               options=twc.Deferred(_getActivityGroupOptions))
         gps_lat = twf.TextField(css_class="input is-small")
         gps_long = twf.TextField(css_class="input is-small")
         equipment_needed = twf.CheckBox(css_class="checkbox is-small")

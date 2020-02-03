@@ -23,7 +23,7 @@ from tw.api import WidgetsList
 from tw.forms import TableForm, TextField, HiddenField
 # ...for form validation
 from tw.forms.validators import UnicodeString
-from tinymce_4_widget import TinyMCE4Widget
+from hollyrosa.widgets.components.tinymce_4_widget import TinyMCE4Widget
 
 class EditVisitingGroupProgramRequestForm(TableForm):
     show_errors = True

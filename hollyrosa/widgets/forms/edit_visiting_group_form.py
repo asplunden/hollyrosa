@@ -23,8 +23,8 @@ import tw2.dynforms as twd
 
 from tg import lurl
 
-from tinymce_4_widget import TinyMCE4Widget
-from single_select_widget import SingleSelectWidget
+from hollyrosa.widgets.components.tinymce_4_widget import TinyMCE4Widget
+from hollyrosa.widgets.components.single_select_widget import SingleSelectWidget
 
 from hollyrosa.controllers.common import languages_map
 

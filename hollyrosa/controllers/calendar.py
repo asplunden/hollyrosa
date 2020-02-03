@@ -32,7 +32,7 @@ from hollyrosa.model.booking_couch import getBookingDays, getAllBookingDays, get
 
 from formencode import validators
 
-from hollyrosa.widgets.edit_booking_day_form import create_edit_booking_day_form
+from hollyrosa.widgets.forms.edit_booking_day_form import create_edit_booking_day_form
 
 from hollyrosa.controllers.common import has_level, ensurePostRequest, getDateObject, cleanHtml
 from hollyrosa.controllers import common_couch

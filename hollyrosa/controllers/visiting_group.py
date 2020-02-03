@@ -39,7 +39,7 @@ from hollyrosa.controllers.common import sanitizeDate, languages_map, default_la
 # ...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
 
-from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
+from hollyrosa.widgets.forms.edit_visiting_group_form import create_edit_visiting_group_form
 
 from hollyrosa.controllers.common import workflow_map, bokn_status_map, DataContainer, \
     getRenderContent, has_level, reFormatDate, getLoggedInUserId, \
