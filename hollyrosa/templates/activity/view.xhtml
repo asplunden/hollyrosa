@@ -30,7 +30,7 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
     ready(function() {
 
       var page_config = {
-        edit_activity_url: '${tg.url('edit_activity')}',
+        edit_activity_url: '${tg.url('edit')}',
         internal_link_url: '${activity['internal_link']}',
         external_link_url:'${activity['external_link']}',
         edit_special_info_note_url: '${tg.url('/note/edit_note')}',
@@ -60,7 +60,7 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
 
             <div class="media-right is-hidden-mobile">
               <div class="media-content is-hidden-mobile buttons">
-                <a href="${tg.url('/activity/edit_activity', params={'activity_id':activity['_id']})}" class="button is-primary is-outlined is-small">Edit</a>
+                <a href="${tg.url('/activity/edit', params={'activity_id':activity['_id']})}" class="button is-primary is-outlined is-small">Edit</a>
               </div>
             </div>
           </div>
@@ -72,7 +72,7 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
           <p>Available languages:
             <ul>
               <li py:for="language_code in activity.get('language_versions', {}).keys()">
-                <a href="${tg.url('view_activity', params={'activity_id': activity.id, 'language': language_code})}" py:attrs="['', {'style': 'font-weight: bold'}][language==language_code]">${languages_map.get(language_code, '')}</a>
+                <a href="${tg.url('view', params={'activity_id': activity.id, 'language': language_code})}" py:attrs="['', {'style': 'font-weight: bold'}][language==language_code]">${languages_map.get(language_code, '')}</a>
               </li>
             </ul>
           </p>

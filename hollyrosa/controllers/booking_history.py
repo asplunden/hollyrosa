@@ -320,25 +320,22 @@ class History(BaseController):
         """Abort the request with a 404 HTTP status code."""
         abort(404)
 
-    def fnCmpTimestamp(self, a, b):
+    def fn_cmp_timestamp(self, a, b):
         return cmp(b.key, a.key)
 
-    def getBookingHistory(self, holly_couch, limit=30):
+    def get_booking_history(self, holly_couch, limit=30):
         booking_history = getAllHistory(holly_couch, limit=limit)
-        all = [h.doc for h in booking_history]
-        return all
+        return [h.doc for h in booking_history]
 
-    def getBookingHistoryForVisitingGroup(self, holly_couch, visiting_group_id, limit=1000):
+    def get_booking_history_for_visiting_group(self, holly_couch, visiting_group_id, limit=1000):
         booking_history = getAllHistoryForVisitingGroup(holly_couch, visiting_group_id, limit=limit)
-        all = [h.doc for h in booking_history]
-        return all
+        return [h.doc for h in booking_history]
 
-    def getBookingHistoryForUser(self, holly_couch, user_id, limit=250):
+    def get_booking_history_for_user(self, holly_couch, user_id, limit=250):
         booking_history = getAllHistoryForUser(holly_couch, user_id, limit=limit)
-        all = [h.doc for h in booking_history]
-        return all
+        return [h.doc for h in booking_history]
 
-    @expose('hollyrosa.templates.history_show')
+    @expose('hollyrosa.templates.history.view')
     @validate(validators={'visiting_group_id': validators.UnicodeString(not_empty=False),
                           'user_id': validators.UnicodeString(not_empty=False)})
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'),
@@ -346,15 +343,15 @@ class History(BaseController):
     def show(self, visiting_group_id='', user_id=''):
         for_group_name = ''
         if visiting_group_id != '':
-            history = self.getBookingHistoryForVisitingGroup(getHollyCouch(), visiting_group_id)
+            history = self.get_booking_history_for_visiting_group(getHollyCouch(), visiting_group_id)
             vgroup = getHollyCouch()[visiting_group_id]
             for_group_name = vgroup['name']
         elif user_id != '':
             user_o = getCouchDBDocument(getHollyCouch(), user_id, doc_type='user')  # , doc_subtype=None)
-            history = self.getBookingHistoryForUser(getHollyCouch(), user_o['display_name'])
+            history = self.get_booking_history_for_user(getHollyCouch(), user_o['display_name'])
 
             for_group_name = 'for user ' + user_o['display_name']
 
         else:
-            history = self.getBookingHistory(getHollyCouch(), limit=250)
+            history = self.get_booking_history(getHollyCouch(), limit=250)
         return dict(history=history, change_op_map=change_op_map, for_group_name=for_group_name)

@@ -28,8 +28,8 @@ from hollyrosa.controllers.common_couch import getCouchDBDocument
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import getHollyCouch
 from hollyrosa.model.booking_couch import getAllActiveUsers
-from hollyrosa.widgets.change_password_form import create_change_password_form
-from hollyrosa.widgets.edit_user_form import create_edit_user_form
+from hollyrosa.widgets.forms.change_password_form import create_change_password_form
+from hollyrosa.widgets.forms.edit_user_form import create_edit_user_form
 from tg import expose, require, request, redirect, validate, abort
 # ...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context

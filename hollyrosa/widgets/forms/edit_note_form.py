@@ -19,7 +19,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 from tg import lurl
 import tw2.core as twc
 import tw2.forms as twf
-from tinymce_4_widget import TinyMCE4Widget
+from hollyrosa.widgets.components.tinymce_4_widget import TinyMCE4Widget
 
 
 class EditNoteForm(twf.Form):

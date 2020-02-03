@@ -39,7 +39,7 @@ from hollyrosa.controllers.common import sanitizeDate, languages_map, default_la
 # ...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
 
-from hollyrosa.widgets.edit_visiting_group_form import create_edit_visiting_group_form
+from hollyrosa.widgets.forms.edit_visiting_group_form import create_edit_visiting_group_form
 
 from hollyrosa.controllers.common import workflow_map, bokn_status_map, DataContainer, \
     getRenderContent, has_level, reFormatDate, getLoggedInUserId, \
@@ -223,7 +223,8 @@ class VisitingGroup(BaseController):
 
             # build a map from id of activity -> list of note languages and use the map to find best language match
             booking_info_notes_with_matched_language = \
-                get_booking_info_notes_with_matched_language(getHollyCouch(), used_activities_keys, visiting_group_language)
+                get_booking_info_notes_with_matched_language(getHollyCouch(), used_activities_keys,
+                                                             visiting_group_language)
 
         else:
             booking_info_notes = []
@@ -242,11 +243,9 @@ class VisitingGroup(BaseController):
                     to_think_about_title=self.get_to_think_about_title(visiting_group),
                     getActivityTitle=self.get_activity_title)
 
-
-
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'),
                  msg='Only staff members and viewers may view listing of visiting groups'))
-    @expose('hollyrosa.templates.visiting_group_view_all')
+    @expose('hollyrosa.templates.visiting_group.view_all')
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'),
                  msg='Only staff members and viewers may view visiting group properties'))
     def view(self, url):
@@ -266,7 +265,7 @@ class VisitingGroup(BaseController):
                     activity_groups=activity_groups,
                     languages_map=languages_map)
 
-    @expose('hollyrosa.templates.visiting_group_view_all')
+    @expose('hollyrosa.templates.visiting_group.view_all')
     @validate(validators={'from_date': validators.DateValidator(not_empty=False),
                           'to_date': validators.DateValidator(not_empty=False)})
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'),
@@ -286,7 +285,7 @@ class VisitingGroup(BaseController):
                     visiting_group_types=getVisitingGroupTypes(getHollyCouch()),
                     languages_map=languages_map)
 
-    @expose('hollyrosa.templates.visiting_group_view_all')
+    @expose('hollyrosa.templates.visiting_group.view_all')
     @require(Any(has_level('pl'), has_level('staff'),
                  msg='Only staff members and viewers may view visiting group properties'))
     def view_tags(self, tag):
@@ -305,7 +304,7 @@ class VisitingGroup(BaseController):
                     visiting_group_types=getVisitingGroupTypes(getHollyCouch()),
                     languages_map=languages_map)
 
-    @expose('hollyrosa.templates.visiting_group_view_all')
+    @expose('hollyrosa.templates.visiting_group.view_all')
     @require(Any(has_level('pl'), has_level('staff'),
                  msg='Only staff members and viewers may view visiting group properties'))
     def view_all(self):
@@ -345,7 +344,7 @@ class VisitingGroup(BaseController):
                         bokn_status_map=bokn_status_map_list,
                         vodb_status_map=vodb_status_map_list)
 
-    @expose('hollyrosa.templates.visiting_group_view_all')
+    @expose('hollyrosa.templates.visiting_group.view_all')
     @validate(validators={'program_state': validators.Int(not_empty=True)})
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'),
                  msg='Only staff members and viewers may view visiting group properties'))
@@ -364,7 +363,7 @@ class VisitingGroup(BaseController):
                     visiting_group_types=getVisitingGroupTypes(getHollyCouch()),
                     languages_map=languages_map)
 
-    @expose('hollyrosa.templates.visiting_group_view_all')
+    @expose('hollyrosa.templates.visiting_group.view_all')
     @validate(validators={'vodb_state': validators.Int(not_empty=True)})
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'),
                  msg='Only staff members and viewers may view visiting group properties'))
@@ -383,7 +382,7 @@ class VisitingGroup(BaseController):
                     visiting_group_types=getVisitingGroupTypes(getHollyCouch()),
                     languages_map=languages_map)
 
-    @expose('hollyrosa.templates.visiting_group_view_all')
+    @expose('hollyrosa.templates.visiting_group.view_all')
     @validate(validators={'period': validators.String(not_empty=False)})
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'),
                  msg='Only staff members and viewers may view visiting group properties'))
@@ -425,7 +424,7 @@ class VisitingGroup(BaseController):
         v_group_map = self.make_remaining_visiting_groups_map([], from_date=from_date, to_date=to_date)
         return dict(names=v_group_map)
 
-    @expose('hollyrosa.templates.visiting_group_view_all')
+    @expose('hollyrosa.templates.visiting_group.view_all')
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'),
                  msg='Only staff members and viewers may view visiting group and their properties properties'))
     def view_today(self):
@@ -444,7 +443,7 @@ class VisitingGroup(BaseController):
                     visiting_group_types=getVisitingGroupTypes(getHollyCouch()),
                     languages_map=languages_map)
 
-    @expose('hollyrosa.templates.visiting_group_view_all')
+    @expose('hollyrosa.templates.visiting_group.view_all')
     @validate(validators={'date': validators.DateValidator(not_empty=False)})
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'),
                  msg='Only staff members and viewers may view visiting group and their properties properties'))
@@ -486,7 +485,7 @@ class VisitingGroup(BaseController):
         return dict(visiting_group=visiting_group,
                     properties=properties)
 
-    @expose('hollyrosa.templates.visiting_group_view')
+    @expose('hollyrosa.templates.visiting_group.view')
     @validate(validators={'visiting_group_id': validators.UnicodeString})
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'),
                  msg='Only staff members and viewers may view visiting group properties'))
@@ -516,7 +515,7 @@ class VisitingGroup(BaseController):
                     notes=notes,
                     languages_map=languages_map)
 
-    @expose('hollyrosa.templates.edit_visiting_group')
+    @expose('hollyrosa.templates.visiting_group.edit')
     @validate(validators={'visiting_group_id': validators.UnicodeString, 'subtype': validators.UnicodeString})
     @require(Any(has_level('pl'), has_level('staff'), msg='Only staff members may change visiting group properties'))
     def edit_visiting_group(self, visiting_group_id=None, subtype='', **kw):
@@ -579,7 +578,7 @@ class VisitingGroup(BaseController):
         log.info('save_visiting_group_properties')
 
         ensurePostRequest(request, __name__)
-        is_new = ((None == visiting_group_id) or (visiting_group_id == ''))
+        is_new = ((visiting_group_id is None) or (visiting_group_id == ''))
 
         # this is a hack so we can direct the id of the visiting group for special groups
 
@@ -592,7 +591,7 @@ class VisitingGroup(BaseController):
 
         if is_new:
             # TODO: make sure subtype is in one of
-            if not subtype in ['program', 'course', 'staff']:
+            if subtype not in ['program', 'course', 'staff']:
                 flash('error with subtype')
                 raise redirect(request.referrer)
 
@@ -666,8 +665,6 @@ class VisitingGroup(BaseController):
 
         raise redirect('/visiting_group/view_all')
 
-
-
     @expose('hollyrosa.templates.view_bookings_of_name')
     @validate(validators={"visiting_group_id": validators.UnicodeString(),
                           "render_time": validators.UnicodeString(),
@@ -714,8 +711,6 @@ class VisitingGroup(BaseController):
                                                     hide_comment=hide_comment,
                                                     show_group=show_group,
                                                     render_time=render_time)
-
-
 
     @expose()
     @validate(validators={"visiting_group_id": validators.UnicodeString(), "doc_id": validators.UnicodeString()})

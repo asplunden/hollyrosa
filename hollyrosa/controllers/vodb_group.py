@@ -25,7 +25,7 @@ import logging
 
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import getHollyCouch
-from hollyrosa.widgets.edit_vodb_group_form import create_edit_vodb_group_form
+from hollyrosa.widgets.forms.edit_vodb_group_form import create_edit_vodb_group_form
 from tg import expose, flash, require, request, redirect, validate
 from tg import tmpl_context
 from tg.predicates import Any

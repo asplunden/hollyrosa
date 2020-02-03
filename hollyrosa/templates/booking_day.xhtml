@@ -184,7 +184,7 @@ require(["common_menu","page/booking_day", "dojo/_base/array", "dijit/Menu","dij
           </div>
 
           <div py:for="slot_row in slot_rows" hollyrosa:acgid="${slot_row.activity_group_id}"  class="booking_day_overview_slot_row" style="background: ${slot_row.bg_color};">
-            <div class="booking_day_overview_activity"><a href="${tg.url('/activity/view_activity', params={'activity_id':slot_row.activity_id})}">${slot_row.title}</a><a name="activity_row_id_${slot_row.activity_id}" class="ag_anchor">&nbsp;</a><span py:if="0 != slot_row.capacity">[${str(slot_row.capacity)}]</span></div>
+            <div class="booking_day_overview_activity"><a href="${tg.url('/activity/view', params={'activity_id':slot_row.activity_id})}">${slot_row.title}</a><a name="activity_row_id_${slot_row.activity_id}" class="ag_anchor">&nbsp;</a><span py:if="0 != slot_row.capacity">[${str(slot_row.capacity)}]</span></div>
             <div py:for="slot_position in slot_row.slot_row_position" hollyrosa:w="$slot_position.time_from - $slot_position.time_to" class="booking_day_overview_slots ${['','slot_row_position_blocked'][blockings_map.has_key(slot_position.id)]}">
 
               <!-- we may have several slot bookings-->

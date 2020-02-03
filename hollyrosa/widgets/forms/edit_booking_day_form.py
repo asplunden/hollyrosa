@@ -1,5 +1,5 @@
 """
-Copyright 2010-2020 Martin Eliasson
+Copyright 2010-2016 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -15,24 +15,25 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
+
 """
+from tg import lurl
 
 import tw2.core as twc
 import tw2.forms as twf
 
-from tg import lurl
+from hollyrosa.widgets.components.tinymce_4_widget import TinyMCE4Widget
 
 
-class EditAttachmentForm(twf.Form):
+class EditVisitingGroupForm(twf.Form):
     class child(twf.TableLayout):
-        # attachment_id was previously recid but should it be note id?
-        attachment_id = twf.HiddenField(validator=twc.Required)
-        target_id = twf.HiddenField(validator=twc.Required)
+        recid = twf.HiddenField(validator=twc.Required)  #### TODO: former id was _id but no longer allowed name
+        title = twf.TextField(validator=twc.Required, css_class="input is-medium")
+        note = TinyMCE4Widget()
+        num_program_crew_members = twf.TextField(validator=twc.IntValidator, css_class="input is-small")
+        num_fladan_crew_members = twf.TextField(validator=twc.IntValidator, css_class="input is-small")
 
-        text = twf.TextField(validator=twc.Required)
-        attachment = twf.FileField()
-
-    action = lurl('save_attachment')
+    action = lurl('save_booking_day_properties')
 
 
-create_edit_attachment_form = EditAttachmentForm()
+create_edit_booking_day_form = EditVisitingGroupForm()

@@ -28,7 +28,7 @@ from hollyrosa.controllers.common import has_level, cleanHtml, languages_map, de
 from hollyrosa.lib.base import BaseController
 from hollyrosa.model import getHollyCouch
 from hollyrosa.model.booking_couch import genUID, getNotesForTarget
-from hollyrosa.widgets.edit_activity_form import create_edit_activity_form
+from hollyrosa.widgets.forms.edit_activity_form import create_edit_activity_form
 from tg import expose, require, request, redirect, validate, abort, tmpl_context
 from tg.predicates import Any, is_user
 
@@ -62,12 +62,12 @@ class Activity(BaseController):
         """
         abort(404)
 
-    @expose('hollyrosa.templates.view_activity')
+    @expose('hollyrosa.templates.activity.view')
     @validate(validators={'activity_id': validators.UnicodeString(not_empty=True),
                           'language': validators.UnicodeString(not_empty=False)})
-    def view_activity(self,
-                      activity_id=None,
-                      language=None):
+    def view(self,
+             activity_id=None,
+             language=None):
         """
         Viewing of a specific activity.
 
@@ -106,7 +106,7 @@ class Activity(BaseController):
             # only show note with corresponding language
             if is_language_specified:
                 notes = [note for note in notes if ('language' in note and note['language'] == language) or (
-                            language == default_language and 'language' not in note)]
+                        language == default_language and 'language' not in note)]
             else:
                 notes = [note for note in notes if 'language' not in note or note['language'] == default_language]
         else:
@@ -121,13 +121,13 @@ class Activity(BaseController):
                     default_language=default_language,
                     language=l_language)
 
-    @expose('hollyrosa.templates.edit_activity')
+    @expose('hollyrosa.templates.activity.edit')
     @validate(
         validators={'activity_id': validators.UnicodeString(not_empty=True),
                     'language': validators.UnicodeString(not_empty=False)})
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'),
                  msg='Only staff members may change activity information'))
-    def edit_activity(self, activity_id=None, language=None, **kw):
+    def edit(self, activity_id=None, language=None, **kw):
         """
         When editing the non-default language, we want to edit other title and description than the underlying data
         We must take care of this when saving.
@@ -181,28 +181,28 @@ class Activity(BaseController):
 
         return dict(activity=activity)
 
-    @validate(form=create_edit_activity_form, error_handler=edit_activity)
+    @validate(form=create_edit_activity_form, error_handler=edit)
     @expose()
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'),
                  msg='Only staff members may change activity properties'))
-    def save_activity_properties(self, id=None,
-                                 title=None,
-                                 description='',
-                                 external_link='',
-                                 internal_link='',
-                                 print_on_demand_link='',
-                                 tags='',
-                                 capacity=0,
-                                 default_booking_state=0,
-                                 activity_group_id=1,
-                                 gps_lat=0, gps_long=0,
-                                 equipment_needed=False,
-                                 education_needed=False,
-                                 certificate_needed=False,
-                                 bg_color='',
-                                 guides_per_slot=0,
-                                 guides_per_day=0,
-                                 language=None):
+    def save(self, id=None,
+             title=None,
+             description='',
+             external_link='',
+             internal_link='',
+             print_on_demand_link='',
+             tags='',
+             capacity=0,
+             default_booking_state=0,
+             activity_group_id=1,
+             gps_lat=0, gps_long=0,
+             equipment_needed=False,
+             education_needed=False,
+             certificate_needed=False,
+             bg_color='',
+             guides_per_slot=0,
+             guides_per_day=0,
+             language=None):
         """
         Save the activity. Must be a post-request.
 
@@ -275,5 +275,4 @@ class Activity(BaseController):
 
         # save the activity
         getHollyCouch()[id] = activity
-        log.debug('before redirect')
-        raise redirect('/activity/view_activity', activity_id=id, language=language)
+        raise redirect('/activity/view', activity_id=id, language=language)

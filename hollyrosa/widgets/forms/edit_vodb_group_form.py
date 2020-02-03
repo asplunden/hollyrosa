@@ -23,7 +23,7 @@ import tw2.dynforms as twd
 
 from tg import lurl
 
-from tinymce_4_widget import TinyMCE4Widget
+from hollyrosa.widgets.components.tinymce_4_widget import TinyMCE4Widget
 
 
 class EditVodbGroupForm(twd.CustomisedTableForm):
