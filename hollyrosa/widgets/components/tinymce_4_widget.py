@@ -72,7 +72,7 @@ class TinyMCE4Widget(TextArea):
                 "forecolor backcolor | cut copy paste | undo | link unlink removeformat | image",
         menubar="edit view format insert",
         plugins=[
-            'advlist autolink link image lists charmap print preview hr anchor spellchecker',
+            'advlist autolink autoresize link image lists charmap print preview hr anchor spellchecker',
             'searchreplace visualblocks visualchars code fullscreen insertdatetime media nonbreaking',
             'table contextmenu directionality emoticons paste textcolor'
         ],

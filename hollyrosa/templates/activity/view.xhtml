@@ -60,11 +60,17 @@ require(["common_menu", "page/view_activity", "dojo/ready"],
 
             <div class="media-right is-hidden-mobile">
               <div class="media-content is-hidden-mobile buttons">
-                <a href="${tg.url('/activity/edit', params={'activity_id':activity['_id']})}" class="button is-primary is-outlined is-small">Edit</a>
+                <a href="${tg.url('/activity/edit', params={'activity_id':activity['_id'], 'language': language})}" class="button is-primary is-outlined is-small">Edit</a>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
 
+    <section class="section">
+      <div class="container">
+        <div class="content">
           <p>Capacity: ${activity['capacity']}</p>
           <p>Guides per slot: ${activity['guides_per_slot']}</p>
           <p>Guides per day: ${activity['guides_per_day']}</p>

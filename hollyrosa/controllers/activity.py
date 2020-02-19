@@ -248,12 +248,12 @@ class Activity(BaseController):
 
         if not is_language_specified or language == default_language:
             activity['title'] = title
-            activity['description'] = cleanHtml(description)
+            activity['description'] = cleanHtml('' if description is None else description)
         else:
             language_versions = activity.get('language_versions', {})
             language_edited = language_versions.get(language, {})
             language_edited['title'] = title
-            language_edited['description'] = cleanHtml(description)
+            language_edited['description'] = cleanHtml('' if description is None else description)
             language_versions[language] = language_edited
             activity['language_versions'] = language_versions
 
