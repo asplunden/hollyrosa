@@ -639,7 +639,7 @@ class BookingDay(BaseController):
             return_to_day_id = booking_day_id
         raise redirect('day?booking_day_id=' + return_to_day_id + make_booking_day_activity_anchor(b['activity_id']))
 
-    @expose('hollyrosa.templates.booking_edit_booked')
+    @expose('hollyrosa.templates.booking.edit_booked')
     @require(Any(is_user('root'), has_level('staff'), has_level('pl'), msg='Only staff members may book a slot'))
     @validate(validators={'booking_day_id': validators.UnicodeString(not_empty=True),
                           'slot_id': validators.UnicodeString(not_empty=True),

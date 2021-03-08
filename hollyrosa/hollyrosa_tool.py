@@ -100,16 +100,31 @@ if False:
     new_ds = copy.deepcopy(ds)
     holly_couch['60dn_schema.2017'] = ds
 
+if False: # True
+    pos = 4112
+    school_dates_spring = dateRange('2019-04-29', '2019-06-09', format='%Y-%m-%d')
+    summer_dates = dateRange('2019-06-10', '2019-08-18', format='%Y-%m-%d')
+    sixtydn_dates = [] #dateRange('2013-0', '2013-08-18', format='%Y-%m-%d')
+    school_dates_autumn = dateRange('2019-08-19', '2019-10-31', format='%Y-%m-%d')
+
+    worklist = [(school_dates_spring,  'school_schema.2019'), (summer_dates, 'summer_schema.2019'), (sixtydn_dates, '60dn_schema.2017'), (school_dates_autumn, 'school_schema.2019')]
+    
+    for days, day_schema_id in worklist:
+        for d in days:
+            bd_c = dict(type='booking_day', date=d, note='', title='', num_program_crew_members=0,
+                        num_fladan_crew_members=0, day_schema_id=day_schema_id, zorder=pos,
+                        staff_schema_id='funk_schema.2015', room_schema_id='room_schema.2013')
+            holly_couch['booking_day.' + str(pos)] = bd_c
+            pos += 1
+
 if True:
-    pos = 3500
-    school_dates_spring = dateRange('2018-05-01', '2018-06-09', format='%Y-%m-%d')
-    summer_dates = dateRange('2018-06-10', '2018-08-12', format='%Y-%m-%d')
-    sixtydn_dates = []  # dateRange('2013-0', '2013-08-18', format='%Y-%m-%d')
-    school_dates_autumn = dateRange('2018-08-13', '2018-10-31', format='%Y-%m-%d')
+    pos = 4400
+    school_dates_spring = dateRange('2021-05-01', '2021-06-12', format='%Y-%m-%d')
+    summer_dates = dateRange('2021-06-13', '2021-08-23', format='%Y-%m-%d')
+    school_dates_autumn = dateRange('2021-08-24', '2021-10-31', format='%Y-%m-%d')
 
-    worklist = [(school_dates_spring, 'school_schema.2018'), (summer_dates, 'summer_schema.2018'),
-                (sixtydn_dates, '60dn_schema.2017'), (school_dates_autumn, 'school_schema.2018')]
-
+    worklist = [(school_dates_spring,  'school_schema.2019'), (summer_dates, 'summer_schema.2019'), (school_dates_autumn, 'school_schema.2019')]
+    
     for days, day_schema_id in worklist:
         for d in days:
             bd_c = dict(type='booking_day', date=d, note='', title='', num_program_crew_members=0,
