@@ -75,8 +75,8 @@ def _initDB_ng():
 
     try:
         threadLocal.holly_rosa_db = threadLocal.couch_server[db_name]
-    except couchdb.ResourceNotFound, e:
+    except couchdb.ResourceNotFound as e:
         threadLocal.holly_rosa_db = couch_server.create(db_name)
     return threadLocal.holly_rosa_db
 
-from booking_couch import genUID
+from hollyrosa.model.booking_couch import genUID

@@ -42,7 +42,7 @@ log = logging.getLogger()
 
 class ProgramLayer(BaseController):
 
-    @expose('hollyrosa.templates.visiting_group_edit_layers')
+    @expose('hollyrosa.templates.visiting_group.edit_layers')
     @validate(validators={"visiting_group_id": validators.UnicodeString()})
     @require(Any(has_level('staff'), has_level('pl'), msg='Only PL and staff members may change layers configuration'))
     def edit_layers(self, visiting_group_id):
@@ -94,7 +94,7 @@ class ProgramLayer(BaseController):
         getHollyCouch()[vgroup['_id']] = vgroup
         raise redirect(request.referer)
 
-    @expose('hollyrosa.templates.program_booking_layers')
+    @expose('hollyrosa.templates.visiting_group.program_booking_layers')
     @validate(validators={"visiting_group_id": validators.UnicodeString()})
     @require(Any(has_level('pl'), has_level('staff'), has_level('vgroup'),
                  msg=u'Du måste vara inloggad för att få tillgång till program lagren'))
@@ -162,7 +162,7 @@ class ProgramLayer(BaseController):
                     hide_cache_content_in_booking(tmp_booking)
 
                     tmp_id = tmp_booking['booking_day_id'] + ':' + tmp_time_id
-                    if not bookings.has_key(tmp_id):
+                    if tmp_id not in bookings:
                         bookings[tmp_id] = list()
                     bookings[tmp_id].append(tmp_booking)
                 else:
@@ -229,7 +229,7 @@ class ProgramLayer(BaseController):
         schema = schema_doc['schema']
 
         # ...if we assume the same layout for every slot row, we can get first row in schema and use it as template
-        any_slot_row_in_schema = schema[schema.keys()[0]][
+        any_slot_row_in_schema = schema[list(schema.keys())[0]][
                                  1:]  # skip first part, now we have four time-slots that can be used
 
         # ...it would be best if we now could clean out the slot_id from the mapping

@@ -57,9 +57,6 @@ class Tools(BaseController):
             severity = 0
         return severity
 
-    def fn_sort_problems_by_severity(self, a, b):
-        return cmp(b['severity'], a['severity'])
-
     @expose('hollyrosa.templates.tools.view_sanity_check_property_usage')
     @require(Any(has_level('staff'), has_level('pl'),
                  msg='Only PL or staff members can change booking state, and only PL can approve/disapprove'))
@@ -90,7 +87,7 @@ class Tools(BaseController):
                     tmp_content = activity_title_map[tmp_b['activity_id']] + ' ' + tmp_b['content']
                     tmp_b_visiting_group = visiting_group_map[tmp_b['visiting_group_id']]
 
-                    if not tmp_b_visiting_group.has_key('from_date'):
+                    if 'from_date' not in tmp_b_visiting_group:
                         problems.append(dict(booking=tmp_b,
                                              msg='visiting group %s has no from_date' % tmp_b_visiting_group[
                                                  'visiting_group_name'], severity=100))
@@ -143,7 +140,7 @@ class Tools(BaseController):
                                                          severity=self.get_severity(tmp_b_visiting_group, 1)))
 
                                 break  # there can be more than one match in checks
-        problems.sort(self.fn_sort_problems_by_severity)
+        problems.sort(key=lambda x: x['severity'], reverse=True)
         return dict(problems=problems, visiting_group_map=visiting_group_map)
 
     @expose('hollyrosa.templates.tools.activity_statistics')
@@ -314,7 +311,7 @@ class Tools(BaseController):
         z = 0
         tmp_schema = dict()
         for tmp_act in list(all_activities):
-            if tmp_act.has_key('activity_group_id') or True:
+            if 'activity_group_id' in tmp_act or True:
                 if tmp_act.doc['activity_group_id'][:9] == 'roomgroup':
                     z += 1
                     tmp_id = dict(zorder=z, id=tmp_act['id'])

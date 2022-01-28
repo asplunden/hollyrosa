@@ -172,7 +172,7 @@ class DataContainer(object):
         try:
             return self.__getattribute__(key)
         except AttributeError:
-            raise KeyError, 'key "%s" not found' % key
+            raise KeyError('key "%s" not found' % key)
 
 
 class DummyIdentity(object):
@@ -183,7 +183,7 @@ class DummyIdentity(object):
         try:
             return self.__getattribute__(key)
         except AttributeError:
-            raise KeyError, 'key "%s" not found' % key
+            raise KeyError('key "%s" not found' % key)
 
     def has_key(self, key):
         return self.__hasattr__(key)
@@ -194,7 +194,7 @@ dummy_identity = DummyIdentity()
 
 def getLoggedInDisplayName(request):
     user = request.identity.get('user', None)
-    if user.has_key('display_name'):
+    if 'display_name' in user:
         return user['display_name']
     else:
         return user.get('name', 'Unknown')
@@ -259,7 +259,7 @@ class has_level(Predicate):
 
     def evaluate(self, environ, credentials):
 
-        if not environ.has_key('repoze.who.identity'):
+        if 'repoze.who.identity' not in environ:
             self.unmet(level=self.level)
 
         if self.level not in environ['repoze.who.identity']['user_level']:

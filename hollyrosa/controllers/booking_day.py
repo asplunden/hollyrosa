@@ -29,6 +29,7 @@ http://turbogears.org/2.0/docs/main/Auth/Authorization.html#module-repoze.what.p
 import datetime
 import json
 import logging
+import functools
 
 from tg import expose, flash, require, url, request, redirect, validate, override_template, abort, tmpl_context
 import webob
@@ -143,7 +144,7 @@ class BookingDay(BaseController):
         return tmp
 
     def fn_cmp_slot_row(self, a, b):
-        return cmp(a.zorder, b.zorder)
+        return a.zorder - b.zorder #cmp(a.zorder, b.zorder)
 
     def getActivitiesMap(self, activities):
         """given a view from couchdb of activities, make a map/dict"""
@@ -178,7 +179,7 @@ class BookingDay(BaseController):
 
             slot_rows.append(tmp_row)
 
-        slot_rows.sort(self.fn_cmp_slot_row)
+        slot_rows.sort(key=functools.cmp_to_key(self.fn_cmp_slot_row))
         return slot_rows
 
     def getNonDeletedBookingsForBookingDay(self, holly_couch, day_id):
@@ -264,7 +265,7 @@ class BookingDay(BaseController):
             a_id = b['activity_id']
 
             # ...TODO note that it is possible an unscheduled booking doesent belong to room or live (might be program)
-            if activity_map.has_key(a_id):
+            if a_id in activity_map:
                 a = activity_map[a_id]
 
                 # TODO: remove DataContainer here (will break templates)
@@ -694,7 +695,7 @@ class BookingDay(BaseController):
         log.debug("values: " + str(validation_status.values))
 
         if subtype not in ['program', 'room', 'staff']:
-            raise ValueError, 'subtype %s not among valid choices' % subtype
+            raise ValueError('subtype %s not among valid choices' % subtype)
 
         # ...find booking day and booking row
         booking_day = common_couch.getBookingDay(getHollyCouch(), booking_day_id)
@@ -756,7 +757,7 @@ class BookingDay(BaseController):
         booking_day = None
         slot_position = None
 
-        if booking_o.has_key('booking_day_id'):
+        if 'booking_day_id' in booking_o:
             booking_day_id = booking_o['booking_day_id']
             if '' != booking_day_id:
                 booking_day = common_couch.getBookingDay(getHollyCouch(), booking_day_id)
@@ -770,7 +771,7 @@ class BookingDay(BaseController):
         user_name_map = getUserNameMap(getHollyCouch())
 
         end_slot = None
-        if booking_o.has_key('booking_end_slot_id'):
+        if 'booking_end_slot_id' in booking_o:
             end_slot = slot_map[booking_o['booking_end_slot_id']]
 
         return dict(booking_day=booking_day, slot_position=slot_position, booking=booking_o, workflow_map=workflow_map,
@@ -1122,7 +1123,7 @@ class BookingDay(BaseController):
         log.debug(str(booking_o))
 
         if return_to_day_id is not None and return_to_day_id != '':
-            if not booking_o.has_key('requested_date'):
+            if 'requested_date' not in booking_o:
 
                 requested_date_ok, tmp_requested_date = getSanitizeDate(booking_day_o['date'], None)
                 if requested_date_ok:
@@ -1274,7 +1275,7 @@ class BookingDay(BaseController):
         if len(visiting_group_s) == 1:
             visiting_group_id = visiting_group_s[0]['_id']
         else:
-            raise ValueError, "failed to obtain the N/A visiting group from DB"
+            raise ValueError("failed to obtain the N/A visiting group from DB")
         return visiting_group_id
 
     @expose()
@@ -1553,11 +1554,11 @@ class BookingDay(BaseController):
             # if None == tmp_slot_row_position.id:
             #    raise IOError,  "None not expected"
             if None == tmp_booking.id:
-                raise IOError, "None not expected"
+                raise IOError("None not expected")
 
             if None != tmp_booking['booking_day_id']:
 
-                if not bookings[tmp_booking['booking_day_id']].has_key(tmp_booking['slot_id']):
+                if tmp_booking['slot_id'] not in bookings[tmp_booking['booking_day_id']]:
                     bookings[tmp_booking['booking_day_id']][tmp_booking['slot_id']] = []
                 bookings[tmp_booking['booking_day_id']][tmp_booking['slot_id']].append(tmp_booking)
 

@@ -172,7 +172,7 @@ require(["dojo/_base/array", "dojo/dom-construct", "dojo/query!css2", "dojo/dom"
             hollyrosa:taglist_node_id="taglist_for_${hash(visiting_group.id)}"
             hollyrosa:vgname="${visiting_group['name']}"
             hollyrosa:vgtid="${visiting_group['subtype']}"
-            hollyrosa:has_notes="${has_notes_map.has_key(visiting_group.id)}"> <!-- outer container for each group -->
+            hollyrosa:has_notes="${visiting_group.id in has_notes_map}"> <!-- outer container for each group -->
 
             <div class="tile">
 
@@ -201,8 +201,8 @@ require(["dojo/_base/array", "dojo/dom-construct", "dojo/query!css2", "dojo/dom"
                 </div>
 
                 <article id="notes_for_${visiting_group.id}">
-                  <!-- <a py:if="has_notes_map.has_key(visiting_group.id)" id="load_notes_for_${visiting_group.id}" hollyrosa:loadnotes="${visiting_group.id -->
-                  <span py:if="has_notes_map.has_key(visiting_group.id)" id="load_notes_for_${visiting_group.id}">has notes, load using the context menu</span>
+                  <!-- <a py:if="visiting_group.id in has_notes_map" id="load_notes_for_${visiting_group.id}" hollyrosa:loadnotes="${visiting_group.id -->
+                  <span py:if="visiting_group.id in has_notes_map" id="load_notes_for_${visiting_group.id}">has notes, load using the context menu</span>
                 </article>
               </div>
             </div>

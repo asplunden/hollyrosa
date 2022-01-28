@@ -55,7 +55,7 @@ def remember_booking_change(holly_couch, booking_id=None, booking_day_id=None, v
 
     bh = dict(type='booking_history')
 
-    if type(change_op) == types.StringType:
+    if type(change_op) == str:
         change_op = change_op_lookup[change_op]
     bh['change_op'] = change_op
     bh['booking_content'] = booking_content

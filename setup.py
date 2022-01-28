@@ -16,8 +16,8 @@ setup(
     url='http://github.com/asplunden/hollyrosa',
     install_requires=[
         "TurboGears2 >= 2.3.11",
-        # can be removed iif use_toscawidgets = False
-        "toscawidgets >= 0.9.7.1",
+        # can be removed if use_toscawidgets = False
+        "tw2.forms",
         "zope.sqlalchemy >= 0.4 ",
         "repoze.who",
         "tw2.dynforms >= 2.0.1",
@@ -26,6 +26,8 @@ setup(
         "bleach >= 2.0",
         "kajiki >= 0.7.1",
         "webob >= 1.7.0",
+        "Paste",
+        "formencode"
     ],
     setup_requires=["PasteScript >= 1.7"],
     paster_plugins=['PasteScript', 'Pylons', 'TurboGears2', 'tg.devtools'],

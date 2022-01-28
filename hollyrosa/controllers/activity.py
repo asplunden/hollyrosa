@@ -275,4 +275,4 @@ class Activity(BaseController):
 
         # save the activity
         getHollyCouch()[id] = activity
-        raise redirect('/activity/view', activity_id=id, language=language)
+        raise redirect('view', params={'activity_id': id, 'language': language}, scheme='https')

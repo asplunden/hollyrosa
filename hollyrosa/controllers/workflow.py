@@ -19,7 +19,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from booking_history import remember_workflow_state_change
+from hollyrosa.controllers.booking_history import remember_workflow_state_change
 from formencode import validators
 from hollyrosa.controllers.activity import ensurePostRequest
 from hollyrosa.controllers.common import ensurePostRequest

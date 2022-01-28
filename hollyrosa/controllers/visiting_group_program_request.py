@@ -124,7 +124,7 @@ validation_error_explanations = {
 
 def hasValidationErrors(vgroup):
     """This function is to be used from visiting group program request """
-    if vgroup.has_key('validation_error_messages'):
+    if 'validation_error_messages' in vgroup:
         if len(vgroup['validation_error_messages']) != 0:
             return True
     return False
@@ -162,7 +162,7 @@ class VisitingGroupProgramRequest(BaseController):
             raise redirect('edit_request', visiting_group_id=vgroup_list[0]['id'])
         return dict()
 
-    @expose('hollyrosa.templates.visiting_group_program_request_edit2')
+    @expose('hollyrosa.templates.visiting_group.edit_program_request')
     @require(Any(has_level('pl'), has_level('staff'), has_level('view'), has_level('vgroup'),
                  msg=u'Du måste vara inloggad för att få ändra i dina programönskemål'))
     def edit_request(self, visiting_group_id=''):

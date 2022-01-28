@@ -57,8 +57,8 @@ base_config[
 from tg.configuration.auth import TGAuthMetadata
 
 def validate_password(user, password):
-    h = hashlib.sha256('gninyd')  # salt
-    h.update(password)
+    h = hashlib.sha256('gninyd'.encode('utf-8'))  # salt
+    h.update(password.encode('utf-8'))
     c = h.hexdigest()
     return user['password'] == c
 
