@@ -392,13 +392,13 @@ class VisitingGroup(BaseController):
 
         # TODO: refactor so we only show visiting groups in time span given by daterange document.
         if period == '1an':
-            from_date = '2021-06-13'
-            to_date = '2021-07-18'
+            from_date = '2022-06-12'
+            to_date = '2022-07-17'
 
             visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(getHollyCouch(), from_date, to_date)]
         elif period == '2an':
-            from_date = '2021-07-19'
-            to_date = '2021-08-23'
+            from_date = '2022-07-17'
+            to_date = '2022-08-21'
             visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(getHollyCouch(), from_date, to_date)]
 
         else:

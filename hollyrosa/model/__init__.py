@@ -65,13 +65,13 @@ def _initDB_ng():
     db_url = tg.config.get('couch.db_url', 'http://localhost:5989')
     db_name = tg.config.get('couch.database', 'hollyrosa1')
 
-    #db_login = tg.config.get('couch.login', '')
-    #db_password = tg.config.get('couch.password', '')
+    db_login = tg.config.get('couch.login', '')
+    db_password = tg.config.get('couch.password', '')
 
     threadLocal = threading.local()
     threadLocal.couch_server = couchdb.Server(url=db_url)
-    #if len(db_login) > 0:
-    #    threadLocal.couch_server.resource.credentials = (db_login, db_password)
+    if len(db_login) > 0:
+        threadLocal.couch_server.resource.credentials = (db_login, db_password)
 
     try:
         threadLocal.holly_rosa_db = threadLocal.couch_server[db_name]

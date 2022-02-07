@@ -57,7 +57,7 @@ if db_username != None:
 
 try:
     holly_couch = couch_server[db_name]
-except couchdb.ResourceNotFound, e:
+except couchdb.ResourceNotFound as e:
     holly_couch = couch_server.create(db_name)
 
 design_view_names = ['all_activities', 'booking_day', 'day_schema', 'history', 'notes', 'statistics', 'tag_statistics',
@@ -69,11 +69,11 @@ upload_to = False
 if args.save_views:
     for tmp_name in design_view_names:
         tmp_dv = '_design/%s' % tmp_name
-        print 'looking for ', tmp_dv
+        print('looking for ' + tmp_dv)
         dv_doc = holly_couch[tmp_dv]
-        print dv_doc
+        print(dv_doc)
         view_dict = dv_doc['views']
-        file_name = 'design_views/%s.viewfunc' % tmp_name
+        file_name = ('design_views/%s.viewfunc' % tmp_name)
         f = open(file_name, 'w')
         f.write(json.dumps(view_dict))
         f.close()
@@ -81,7 +81,7 @@ if args.save_views:
 if args.load_views:
     for tmp_name in design_view_names:
         tmp_dv = '_design/%s' % tmp_name
-        print 'looking for ', tmp_dv
+        print ('looking for ' + tmp_dv)
 
         try:
             dv_doc = holly_couch[tmp_dv]
