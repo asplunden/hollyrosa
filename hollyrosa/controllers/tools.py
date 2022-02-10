@@ -43,6 +43,7 @@ class Tools(BaseController):
         abort(404)
 
     @expose('hollyrosa.templates.tools.tools_show')
+    @require(Any(has_level('staff'), has_level('pl'), msg='Only PL or staff members may view the tools page'))
     def show(self, day=None):
         """Show an overview of all bookings"""
         if day is None:
