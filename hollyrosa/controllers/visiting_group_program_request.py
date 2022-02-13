@@ -237,6 +237,7 @@ class VisitingGroupProgramRequest(BaseController):
             visiting_group_o['program_request'] = program_request_input
 
             # ...iterate through age_group_data, items is a list of dicts...
+            log.debug(age_group_input)
             age_group_data = json.loads(age_group_input)
             age_group_data_items = age_group_data['items']
 
@@ -318,7 +319,7 @@ class VisitingGroupProgramRequest(BaseController):
                         # ...we need to add an entry in the dict, first we need to know the lowest key number
                         lowest_key_number = 0
                         for tmp_key in visiting_group_o['visiting_group_properties'].keys():
-                            if tmp_key > lowest_key_number:
+                            if int(tmp_key) > lowest_key_number:
                                 lowest_key_number = int(tmp_key)
                         lowest_key_number += 1
 

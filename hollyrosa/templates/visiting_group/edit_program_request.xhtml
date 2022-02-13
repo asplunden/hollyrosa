@@ -32,8 +32,10 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
   <!-- BEGIN DOJO MODULE -->
   <script>
 
-require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on','dojo/ready', 'dojo/domReady!'],
-function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, ready ){
+require(['dojo/parser', 'dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojox/grid/cells/dijit', 'dojo/date/stamp', 'dojo/date/locale', 'dojo/dom','dojo/on', 'dijit/registry', 'dojo/ready', 'dojo/domReady!'],
+function(parser, lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, registry, ready ){
+
+  parser.parse();
 
   // TODO: fix date functions
   function formatDate(datum) {
@@ -133,12 +135,14 @@ function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, read
   function on_save_grid_to_input() {
     age_group_store.save(saveCompleteCallback, saveFailedCallback);
     program_request_store.save(saveCompleteCallback, saveFailedCallback);
-    dom.byId('program_request_info').value = dijit.byId('program_request_info_editor').value;
+    console.log(registry);
+    const data = registry.byId('program_request_info_editor').value;
+    dom.byId('program_request_info').value = data; /* registry.byId('program_request_info_editor').value; */
   };
 
 
   function on_validate() {
-    var myForm = dijit.byId('myForm');
+    var myForm = registry.byId('myForm');
     if(myForm.validate()){
       /* do some more advanced form data validation
       * all requested dates should be within the range of the visiting group
@@ -153,7 +157,7 @@ function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, read
 
 
   function on_validate_finalize() {
-    var myForm = dijit.byId('myForm');
+    var myForm = registry.byId('myForm');
     if(myForm.validate()){
       var result = confirm('Form is valid and ready to be sent for processing, pressing OK will submit yuur requests and thereafter you cannot change your request data except for contact info and request text');
 
@@ -167,8 +171,8 @@ function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, read
 
 
   function on_ready(){
-    var submit_button = dijit.byId('submit_button');
-    var save_button = dijit.byId('save_button');
+    var submit_button = dom.byId('submit_button');
+    var save_button = dom.byId('save_button');
 
 
     if (submit_button) {
@@ -179,6 +183,8 @@ function(lang, DataGrid, ItemFileWriteStore, cells, stamp, locale, dom, on, read
       });
 
       on( submit_button , 'click', on_validate_finalize);
+    } else {
+      console.error('could not register callback on submit button');
     }
 
     if (save_button) {
