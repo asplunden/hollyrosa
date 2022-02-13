@@ -24,24 +24,24 @@ import types
 
 def getCouchDBDocument(holly_couch, id, doc_type=None, doc_subtype=None):
     """retrieve a document from couch db and do some sanity checkin on id, type and subtype of document"""
-    if (type(id) != types.StringType) and (type(id) != types.UnicodeType):
-        raise ValueError, "the type of the document id must be string or unicode, but the given type was %s" % type(id)
+    if (type(id) != str):
+        raise ValueError("the type of the document id must be unicode, but the given type was %s" % type(id))
 
     l_doc = holly_couch[id]
 
     if doc_type is not None:
-        if not l_doc.has_key('type'):
-            raise KeyError, "Document found in holly_couch but it lacks the require type field. Doc id: %s" % id
+        if 'type' not in l_doc:
+            raise KeyError("Document found in holly_couch but it lacks the require type field. Doc id: %s" % id)
         if l_doc['type'] != doc_type:
-            raise KeyError, "Document found in holly_couch, but there is a document type missmatch for document with " \
+            raise KeyError("Document found in holly_couch, but there is a document type missmatch for document with " \
                             "id %s, the supplied document type was %s but in document it is %s" % (
-                                id, doc_type, l_doc['type'])
+                                id, doc_type, l_doc['type']))
 
     if doc_subtype is not None:
         if l_doc['subtype'] != doc_subtype:
-            raise KeyError, "Document found in holly_couch, but there is a document subtype missmatch for document " \
+            raise KeyError("Document found in holly_couch, but there is a document subtype missmatch for document " \
                             "with id %s, the supplied document type was %s but in document it is %s" % (
-                                id, doc_subtype, l_doc['subtype'])
+                                id, doc_subtype, l_doc['subtype']))
 
     return l_doc
 

@@ -197,9 +197,9 @@ class VODBGroup(BaseController):
         else:
             visiting_group_c = common_couch.getVisitingGroup(getHollyCouch(), visiting_group_id)
             for k in ['vodb_contact_name', 'vodb_contact_email', 'vodb_contact_phone', 'vodb_contact_address']:
-                if not visiting_group_c.has_key(k):
+                if k not in visiting_group_c:
                     visiting_group_c[k] = ''
-            if not visiting_group_c.has_key('subtype'):
+            if 'subtype' not in visiting_group_c:
                 visiting_group_c['subtype'] = 'program'
             visiting_group = makeVODBGroupObjectOfVGDictionary(visiting_group_c)
 
@@ -282,7 +282,7 @@ class VODBGroup(BaseController):
 
         getHollyCouch()[vgroup_id] = visiting_group_o
 
-        if visiting_group_o.has_key('_id'):
+        if '_id' in visiting_group_o:
             raise redirect('/vodb_group/view_vodb_group?visiting_group_id=' + visiting_group_o['_id'])
         raise redirect('/vodb_group/view_all')
 
@@ -351,7 +351,7 @@ class VODBGroup(BaseController):
 
         for tmp_row in data['items']:
             composite_key = tmp_row['rid']
-            if row_lookup.has_key(composite_key):
+            if composite_key in row_lookup:
                 del row_lookup[composite_key]
 
         for row_left in row_lookup.values():
@@ -371,10 +371,10 @@ class VODBGroup(BaseController):
         tmpl_context.form = create_edit_vodb_group_form
 
         # ...augument old data
-        if not visiting_group_o.has_key('vodb_status'):
+        if 'vodb_status' not in visiting_group_o:
             visiting_group_o['vodb_status'] = 0
         for k in ['vodb_contact_name', 'vodb_contact_email', 'vodb_contact_phone', 'vodb_contact_address']:
-            if not visiting_group_o.has_key(k):
+            if k not in visiting_group_o:
                 visiting_group_o[k] = ''
 
         # ...sanitizing data, basically, removing data outside date range and adding data where it doesent exist
@@ -563,7 +563,7 @@ class VODBGroup(BaseController):
         for row in list(overview_live_o) + list(overview_eat_o):
             tmp_status = row.key[2]
             tmp_id = row.id
-            if not used_vgroup_ids[tmp_status].has_key(tmp_id):
+            if tmp_id not in used_vgroup_ids[tmp_status]:
                 used_vgroup_ids[tmp_status][tmp_id] = getHollyCouch()[tmp_id]
 
             overview_value_map['%s:%s:%s:%s' % (row.id, row.key[0], row.key[1], row.key[3])] = row.value
@@ -586,7 +586,7 @@ class VODBGroup(BaseController):
             tmp_status = row.key[2]
             tmp_id = 'sum.%d' % tmp_status
             log.debug('tmp_id=' + str(tmp_id))
-            if not used_vgroup_ids[tmp_status].has_key(tmp_id):
+            if tmp_id not in used_vgroup_ids[tmp_status]:
                 tmp_o = DataContainer()
                 tmp_o.id = tmp_id
                 tmp_o.name = 'summa for %d' % tmp_status

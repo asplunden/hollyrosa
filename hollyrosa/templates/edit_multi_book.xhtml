@@ -249,9 +249,9 @@ require(["edit_booking", "dojo/dom", "dojo/dom-geometry", "dojo/dom-attr", "dojo
           <div class="booking_day_overview_slot_row" style="background: ${activities_map[slot_row['activity_id']]['bg_color']};">
             <div class="booking_day_overview_activity"><a href="${tg.url('/booking/day', params={'day_id':tmp_day.id})}">${tmp_day['date']}</a></div>
 
-            <div py:for="slot_position in slot_row.slot_row_position" hollyrosa:w="$slot_position.time_from - $slot_position.time_to" class="booking_day_overview_slots ${['','slot_row_position_blocked'][blockings_map.has_key(str(tmp_day.id)+':'+str(slot_position.id))]}" hollyrosa:bj="${tmp_day.id}:${slot_position.id}">
+            <div py:for="slot_position in slot_row.slot_row_position" hollyrosa:w="$slot_position.time_from - $slot_position.time_to" class="booking_day_overview_slots ${['','slot_row_position_blocked'][(str(tmp_day.id)+':'+str(slot_position.id)) in blockings_map]}" hollyrosa:bj="${tmp_day.id}:${slot_position.id}">
               <!-- we may have several slot bookings-->
-              <div py:if="bookings[tmp_day.id].has_key(slot_position.id)" hollyrosa:bk="${tmp_day.id}:${slot_position.id}">
+              <div py:if="slot_position.id in bookings[tmp_day.id]" hollyrosa:bk="${tmp_day.id}:${slot_position.id}">
                 <div py:for="b in bookings[tmp_day.id][slot_position.id]" style="border-bottom:1px dashed #ccc;" id="booking_id_$b.id">
                   <span class="workflow_state_${b['booking_state']}"><a href="${tg.url('/visiting_group/view_bookings_of_name', params={'name':b['visiting_group_name']})}">${b['visiting_group_name']}</a></span><br/><a href="${tg.url('view_booked_booking', params={'id':b.id})}" style="padding-left:2em;">${getRenderContent(b)}</a>
                   <ul class="any_menu context_inline_menu">
@@ -262,11 +262,11 @@ require(["edit_booking", "dojo/dom", "dojo/dom-geometry", "dojo/dom-attr", "dojo
                   </ul>
                 </div>
               </div>
-              <div py:if="not bookings[tmp_day.id].has_key(slot_position.id)" hollyrosa:bk="${tmp_day.id}:${slot_position.id}" />
+              <div py:if="slot_position.id not in bookings[tmp_day.id]" hollyrosa:bk="${tmp_day.id}:${slot_position.id}" />
 
-              <div py:if="blockings_map.has_key(str(tmp_day.id)+':'+str(slot_position.id))">&nbsp;</div>
+              <div py:if="(str(tmp_day.id)+':'+str(slot_position.id)) in blockings_map">&nbsp;</div>
               <ul id="minimenu_${slot_position.id}" class="context_inline_menu any_menu">
-                <li py:if="not blockings_map.has_key(str(tmp_day.id)+':'+str(slot_position.id))"><a hollyrosa:action="book" hollyrosa:bday_id="${tmp_day.id}" hollyrosa:spid="${slot_position.id}" hollyrosa:activity_id="${booking['activity_id']}" hollyrosa:vgroup_id="${booking['visiting_group_id']}" >book</a></li>
+                <li py:if="(str(tmp_day.id)+':'+str(slot_position.id)) not in blockings_map"><a hollyrosa:action="book" hollyrosa:bday_id="${tmp_day.id}" hollyrosa:spid="${slot_position.id}" hollyrosa:activity_id="${booking['activity_id']}" hollyrosa:vgroup_id="${booking['visiting_group_id']}" >book</a></li>
               </ul>
             </div>
           </div>

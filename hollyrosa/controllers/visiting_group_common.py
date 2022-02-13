@@ -51,7 +51,7 @@ def updateBookingsCacheContentAfterPropertyChange(a_holly_couch, a_visiting_grou
     """after propertes have been changed, the bookings needs to have their cache content updated"""
     # TODO: if cachecontent changes, should we change booking status or somehow mark it?
 
-    is_new_group = not a_visiting_group.has_key('_id')
+    is_new_group = '_id' not in a_visiting_group
     if is_new_group:
         return
 
@@ -86,8 +86,8 @@ def populatePropertiesAndRemoveUnusedProperties(a_visiting_group, a_visiting_gro
     # ...remove non-used params
     unused_params = {}
     used_param_ids = []
-    if a_visiting_group.has_key('visiting_group_properties'):
-        used_param_ids = a_visiting_group['visiting_group_properties'].keys()
+    if 'visiting_group_properties' in a_visiting_group:
+        used_param_ids = list(a_visiting_group['visiting_group_properties'].keys())
 
     for param in a_visiting_group_properties:
         is_new_param = False
@@ -153,7 +153,7 @@ def visitingGroupPropertyVODBSheetSubstitutionHelper(rows, headers, properties):
 
 
 def visitingGroupPropertyVODBSheetSubstitution(a_visiting_group, a_options, a_visiting_group_properties, a_sheet_name):
-    if a_visiting_group.has_key(a_sheet_name):
+    if a_sheet_name in a_visiting_group:
         vodb_sheet = a_visiting_group[a_sheet_name]
         vodb_sheet_copy = copy.deepcopy(vodb_sheet)
         vodb_computed = vodb_sheet_copy['items']
@@ -175,6 +175,6 @@ def computeAllUsedVisitingGroupsTagsForTagSheet(tags, rows):
     for tmp_row in rows:
         for tmp_key in tmp_row.keys():
             if (tmp_key != 'date') and (tmp_key != 'time'):
-                if not all_current_vgroup_tags.has_key(tmp_key):
+                if tmp_key not in all_current_vgroup_tags:
                     all_current_vgroup_tags[tmp_key] = 1
     return all_current_vgroup_tags

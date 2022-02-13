@@ -158,7 +158,7 @@ class User(BaseController):
         log.info("update_password()")
         ensurePostRequest(request, __name__)
         if not password == password2:
-            raise IOError, 'passwords must agree'
+            raise IOError('passwords must agree')
 
         s = getCouchDBDocument(getHollyCouch(), user_id, doc_type='user')  # , doc_subtype=None)
 

@@ -71,7 +71,7 @@ if db_username != None:
 
 try:
     holly_couch = couch_server[db_name]
-except couchdb.ResourceNotFound, e:
+except couchdb.ResourceNotFound as e:
     holly_couch = couch_server.create(db_name)
 
 if args.clear_erasable:
@@ -118,10 +118,10 @@ if False: # True
             pos += 1
 
 if True:
-    pos = 4400
-    school_dates_spring = dateRange('2021-05-01', '2021-06-12', format='%Y-%m-%d')
-    summer_dates = dateRange('2021-06-13', '2021-08-23', format='%Y-%m-%d')
-    school_dates_autumn = dateRange('2021-08-24', '2021-10-31', format='%Y-%m-%d')
+    pos = 4600
+    school_dates_spring = dateRange('2022-05-01', '2022-06-11', format='%Y-%m-%d')
+    summer_dates = dateRange('2022-06-12', '2022-08-21', format='%Y-%m-%d')
+    school_dates_autumn = dateRange('2022-08-22', '2022-10-31', format='%Y-%m-%d')
 
     worklist = [(school_dates_spring,  'school_schema.2019'), (summer_dates, 'summer_schema.2019'), (school_dates_autumn, 'school_schema.2019')]
     

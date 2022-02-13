@@ -21,6 +21,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
 import logging
+import functools
 
 from tg import expose, flash, require, request, redirect, validate, response
 from formencode import validators
@@ -120,7 +121,7 @@ class VisitingGroup(BaseController):
 
         tmp_schema_id = tmp_booking_day['day_schema_id']
 
-        if not booking_day_slot_map.has_key(tmp_schema_id):
+        if tmp_schema_id not in booking_day_slot_map:
             tmp_slot_map = getSchemaSlotActivityMap(getHollyCouch(), tmp_booking_day, subtype=subtype)
             booking_day_slot_map[tmp_schema_id] = tmp_slot_map
         return booking_day_slot_map[tmp_schema_id]
@@ -181,7 +182,7 @@ class VisitingGroup(BaseController):
             used_activities_keys[b['activity_id']] = 1
             used_activities_keys[activities[b['activity_id']]['activity_group_id']] = 1
 
-            if b.has_key('booking_day_id'):
+            if 'ooking_day_id' in b:
                 booking_day_id = b['booking_day_id']
                 if '' != booking_day_id:
                     tmp_booking_day = booking_day_map[booking_day_id]
@@ -210,10 +211,10 @@ class VisitingGroup(BaseController):
                 bl.append(b2)
                 clustered_bookings[key] = bl
 
-        clustered_bookings_list = clustered_bookings.values()
-        clustered_bookings_list.sort(self.fn_cmp_booking_date_list)
+        clustered_bookings_list = list(clustered_bookings.values())
+        clustered_bookings_list.sort(key=functools.cmp_to_key(self.fn_cmp_booking_date_list))
         for bl in clustered_bookings_list:
-            bl.sort(self.fn_cmp_booking_timestamps)
+            bl.sort(key=functools.cmp_to_key(self.fn_cmp_booking_timestamps))
 
         if True:  # show_group==1:
             # filter the booking info notes on language.
@@ -311,6 +312,7 @@ class VisitingGroup(BaseController):
         visiting_groups = [v.doc for v in getAllVisitingGroups(getHollyCouch())]
         remaining_visiting_groups_map = dict()
         has_notes_map = getTargetNumberOfNotesMap(getHollyCouch())
+        log.debug('view_all')
         return dict(visiting_groups=visiting_groups,
                     remaining_visiting_group_names=remaining_visiting_groups_map.keys(),
                     bokn_status_map=bokn_status_map,
@@ -390,13 +392,13 @@ class VisitingGroup(BaseController):
 
         # TODO: refactor so we only show visiting groups in time span given by daterange document.
         if period == '1an':
-            from_date = '2021-06-13'
-            to_date = '2021-07-18'
+            from_date = '2022-06-12'
+            to_date = '2022-07-17'
 
             visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(getHollyCouch(), from_date, to_date)]
         elif period == '2an':
-            from_date = '2021-07-19'
-            to_date = '2021-08-23'
+            from_date = '2022-07-17'
+            to_date = '2022-08-21'
             visiting_groups = [v.doc for v in getVisitingGroupsInDatePeriod(getHollyCouch(), from_date, to_date)]
 
         else:
@@ -550,7 +552,7 @@ class VisitingGroup(BaseController):
         else:
             log.info('looking up existing visiting group %s' % str(visiting_group_id))
             visiting_group_c = common_couch.getVisitingGroup(getHollyCouch(), visiting_group_id)
-            if not visiting_group_c.has_key('subtype'):
+            if 'subtype' not in visiting_group_c:
                 visiting_group_c['subtype'] = 'program'
             visiting_group = makeVisitingGroupObjectOfVGDictionary(visiting_group_c)
 
@@ -650,7 +652,7 @@ class VisitingGroup(BaseController):
 
         getHollyCouch()[id_c] = visiting_group_c
 
-        if visiting_group_c.has_key('visiting_group_id'):
+        if 'visiting_group_id' in  visiting_group_c:
             raise redirect(
                 '/visiting_group/show_visiting_group?visiting_group_id=' + visiting_group_c['visiting_group_id'])
         raise redirect('/visiting_group/view_all')

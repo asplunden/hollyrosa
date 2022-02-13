@@ -64,7 +64,7 @@ require(["common_menu", "dojo/_base/array","dijit/Menu","dijit/MenuItem", "dijit
         <h3 class="subtitle">${booking['visiting_group_name']}</h3>
         <div id="booking_info">
           <p py:if="booking['slot_id'] != '' and booking['slot_id'] != None and booking_day != None">
-            <a href="${tg.url('day', params={'day_id':booking_day.id})}">${formatDate(booking_day['date'])}</a> <b py:if="booking['slot_id'] !=None"> ${slot_position['time_from']}</b><b py:if="(booking['slot_id'] !=None) and (end_slot==None)"> to ${slot_position['time_to']} </b>  <b py:if="booking['slot_id'] ==None">booking has no slot row position </b> <span py:if="booking.has_key('booking_end_date')">Booking ends  <a href="${tg.url('day', params={'day':booking['booking_end_date']})}">${booking['booking_end_date']}</a> at <b>${end_slot['time_to']}</b></span>
+            <a href="${tg.url('day', params={'day_id':booking_day.id})}">${formatDate(booking_day['date'])}</a> <b py:if="booking['slot_id'] !=None"> ${slot_position['time_from']}</b><b py:if="(booking['slot_id'] !=None) and (end_slot==None)"> to ${slot_position['time_to']} </b>  <b py:if="booking['slot_id'] ==None">booking has no slot row position </b> <span py:if="'booking_end_date' in booking">Booking ends  <a href="${tg.url('day', params={'day':booking['booking_end_date']})}">${booking['booking_end_date']}</a> at <b>${end_slot['time_to']}</b></span>
             <p py:if="None !=booking_day"><span class="workflow_state_${str(booking['booking_state'])}">${workflow_map[booking['booking_state']]}</span></p>
           </p>
           <p py:if="'' == booking.get('slot_id','')">

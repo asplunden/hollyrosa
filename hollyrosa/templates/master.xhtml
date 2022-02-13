@@ -107,7 +107,7 @@
         <div class="navbar-end">
           <!-- navbar items -->
           <a py:if="not request.identity" class="navbar-item" href="${tg.url('/login')}">Login</a>
-          <a py:if="request.identity" class="navbar-item" href="${tg.url('/logout_handler')}">Logout &nbsp;<em py:if="request.identity['user'].has_key('display_name')">${request.identity['user'].get('display_name','')}</em><em py:if="request.identity['user'].has_key('name')">${request.identity['user'].get('name','')}</em></a>
+          <a py:if="request.identity" class="navbar-item" href="${tg.url('/logout_handler')}">Logout &nbsp;<em py:if="'display_name' in request.identity['user']">${request.identity['user'].get('display_name','')}</em><em py:if="'name' in request.identity['user']">${request.identity['user'].get('name','')}</em></a>
         </div>
       </div>
     </div>

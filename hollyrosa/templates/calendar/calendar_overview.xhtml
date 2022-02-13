@@ -63,7 +63,7 @@ along with Hollyrosa.  If not, see <http://www.gnu.org/licenses/>.
           <td class="data info context_menu_symbol"><a href="${tg.url('/booking/day', params={'booking_day_id':str(booking_day['_id'])})}">${makeDate(booking_day['date']).strftime('%A %d %b')}</a><br/>
           </td>
           <td class="data info context_menu_symbol"><h2>${booking_day.get('title','')}</h2>
-            <ul py:if="booking_day.has_key('events')" ><li py:for="e in booking_day['events']">$e</li></ul>
+            <ul py:if="'events' in booking_day" ><li py:for="e in booking_day['events']">$e</li></ul>
             ${literal(booking_day['note'])}</td>
           </tr>
         </table>

@@ -94,7 +94,7 @@ class Calendar(BaseController):
     @require(Any(has_level('staff'), has_level('pl'), msg='Only staff members may change booking day properties'))
     def edit_booking_day(self, booking_day_id=None, **kw):
         booking_day = common_couch.getBookingDay(getHollyCouch(), booking_day_id)
-        if not booking_day.has_key('title'):
+        if 'title' not in booking_day:
             booking_day['title'] = ''
         booking_day['recid'] = booking_day['_id']
         tmpl_context.form = create_edit_booking_day_form

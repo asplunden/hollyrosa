@@ -136,7 +136,7 @@ require(["dojo/_base/array", "dojo/dom-construct", "dojo/query!css2", "dojo/dom"
     <div class="container is-fluid">
       <div class="more_menu_symbol" id="bokn_status_menu"><h2 class="title">Viewing VODB Groups</h2></div>
       <table id="vgroup_listing">
-        <tr py:for="visiting_group in visiting_groups" class="name_menu" hollyrosa:vgid="${visiting_group.id}" hollyrosa:vgtid="${visiting_group['subtype']}" hollyrosa:vgname="${visiting_group['name']}" hollyrosa:taglist_node_id="taglist_for_${hash(visiting_group.id)}" hollyrosa:has_notes="${has_notes_map.has_key(visiting_group.id)}">
+        <tr py:for="visiting_group in visiting_groups" class="name_menu" hollyrosa:vgid="${visiting_group.id}" hollyrosa:vgtid="${visiting_group['subtype']}" hollyrosa:vgname="${visiting_group['name']}" hollyrosa:taglist_node_id="taglist_for_${hash(visiting_group.id)}" hollyrosa:has_notes="${visiting_group.id in has_notes_map}">
           <td class="info data context_menu_symbol">${visiting_group['name']}<a name="vgroupid_${visiting_group.id}"/><br/>[${reFormatDate(visiting_group['from_date'])} to ${reFormatDate(visiting_group['to_date'])}]<br/><br/>${visiting_group.get('vodb_contact_person','')}<br/>${visiting_group.get('vodb_contact_phone','')}<br/><a href="mailto:${visiting_group.get('vodb_contact_email','')}">${visiting_group.get('vodb_contact_email','')}</a></td>
           <td class="info data">
             <div class="note context_menu_symbol"><span class="tags" id="taglist_for_${hash(visiting_group.id)}" hollyrosa:vgid="$visiting_group.id"></span>
@@ -145,7 +145,7 @@ require(["dojo/_base/array", "dojo/dom-construct", "dojo/query!css2", "dojo/dom"
                 program status: <b>${program_state_map.get(visiting_group['boknstatus'], '')}</b><br/>
                 camping location: <b>${visiting_group['camping_location']}</b></p>${literal(visiting_group['info'])}</div>
 
-                <div id="notes_for_${visiting_group.id}"> <span py:if="has_notes_map.has_key(visiting_group.id)" id="load_notes_for_${visiting_group.id}">has notes, load using the context menu</span></div>
+                <div id="notes_for_${visiting_group.id}"> <span py:if="visiting_group.id in has_notes_map" id="load_notes_for_${visiting_group.id}">has notes, load using the context menu</span></div>
               </td>
             </tr>
           </table>

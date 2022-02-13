@@ -118,7 +118,7 @@ def getVisitingGroupsInDatePeriod(holly_couch, from_date, to_date, subtype='prog
     check = dict()
     r = list()
     for v in holly_couch.view("visiting_groups/all_visiting_groups_by_date", keys=formated_dates, include_docs=True):
-        if not check.has_key(v.doc['_id']):
+        if v.doc['_id'] not in check:
             if v.doc.get('subtype', 'program') == 'program':
                 r.append(v)
         check[v.doc['_id']] = 1
@@ -383,7 +383,7 @@ def get_booking_info_notes_with_matched_language(holly_couch, used_activities_ke
     """
     booking_info_notes_with_matched_language = []
     booking_info_notes = dict()
-    for note in getBookingInfoNotesOfUsedActivities(holly_couch, used_activities_keys.keys()):
+    for note in getBookingInfoNotesOfUsedActivities(holly_couch, list(used_activities_keys.keys())):
         note_by_lang = booking_info_notes.get(note.key, dict())
         note_by_lang[note.doc.get('language', 'default_language')] = note.doc
         booking_info_notes[note.key] = note_by_lang
