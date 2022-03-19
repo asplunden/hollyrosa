@@ -47,7 +47,8 @@ You can install the system as a Turbogears2 app and in production you may run it
 You will also need to use the hollyrosa_viewtool to upload views to your CouchDB database. 
 
 
-## Installation of TG2.3.11
+## Installation of TG2.3.11 using python 2
+For Python 3, the installation is quite similar but not yet documented.
 
 Step 1: Create virtualenv and activate:
 
@@ -89,15 +90,114 @@ rm tinymce_4.9.7.zip
 
 ## Preparations
 
-You will need to setup the couchdb and configuring before proceeding.
+You will need to setup the couchdb 2 and configuring before proceeding. 
 
 TBD.
 
 # Deployment
+There are many ways to deploy Hollyrosa using WSGI, below are a few hints
 
-## Apache Deployment using WSGI
+## Apache Deployment using mod_wsgi
 
 TBD
+
+## Nginx Deployment using WSGI and uWSGI
+
+Nginx has straightforward support for uwsgi. Connecting to the uwsgi server may look like the example below.
+In order to offload static file serving from uwsgi, the three folders in the public folder of hollyrosa may be served directly by nginx.
+
+´´´
+location /hollyrosa/ {
+        uwsgi_pass unix:/run/uwsgi/hollyrosa.socket;                
+        include uwsgi_params;
+        }
+
+´´´
+
+
+### Deploying Hollyrosa with uWSGI and Systemd
+The files below is adapted from uwsgi docs and creates a wsgi app that is managed by systemd. 
+The service is started if it is not running when a connection is made to the socket.
+
+
+The socket file below must be activated (the service itself is not ment to be directly activated)
+´´´
+systemctl enable uwsgi.service
+´´´
+
+
+/etc/systemd/system/wsgi-app@.socket 
+
+´´´
+[Unit]
+Description=Socket for uWSGI app %i
+
+[Socket]
+ListenStream=/run/uwsgi/%i.socket
+SocketUser=www-%i
+SocketGroup=www-data
+SocketMode=0660
+
+[Install]
+WantedBy=sockets.target
+´´´
+
+/etc/systemd/system/wsgi-app@.service
+
+´´´
+[Unit]
+Description=%i uWSGI app
+After=syslog.target
+
+[Service]
+ExecStart=/usr/bin/uwsgi \
+        --ini /etc/uwsgi/apps-available/%i.ini 
+        --socket /run/uwsgi/%i.socket
+User=www-%i
+Group=www-data
+Restart=on-failure
+KillSignal=SIGQUIT
+Type=notify
+StandardError=syslog
+NotifyAccess=all
+´´´
+
+/etc/uwsgi/apps-available/hollyrosa.ini
+
+´´´
+[uwsgi]
+master = True
+cheap = True
+idle = 600
+die-on-idle = True
+manage-script-name = True
+
+plugin = python3
+chdir = <PATH TO VIRTUALENV>/hollyrosa
+wsgi-file = <PATH TO VIRTUALENV>/hollyrosa/app.wsgi
+processes = 4
+threads = 2
+stats = 127.0.0.1:9191
+virtualenv = <PATH TO VIRTUALENV>
+
+uid = www-hollyrosa
+gid = www-data
+
+´´´
+
+<PATH TO VIRTUALENV>/hollyrosa/app.wsgi:
+´´´
+APP_CONFIG = "<PATH TO VIRTUALENV>/hollyrosa/production.ini"
+
+#Setup logging
+import logging.config
+logging.config.fileConfig(APP_CONFIG)
+
+#Load the application
+from paste.deploy import loadapp
+application = loadapp('config:%s' % APP_CONFIG)
+´´´
+
 
 # Tools
 
