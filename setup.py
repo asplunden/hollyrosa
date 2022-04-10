@@ -27,7 +27,8 @@ setup(
         "kajiki >= 0.7.1",
         "webob >= 1.7.0",
         "Paste",
-        "formencode"
+        "formencode",
+        "argon2-cffi"
     ],
     setup_requires=["PasteScript >= 1.7"],
     paster_plugins=['PasteScript', 'Pylons', 'TurboGears2', 'tg.devtools'],
