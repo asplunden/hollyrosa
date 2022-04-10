@@ -13,6 +13,8 @@ import hollyrosa
 from hollyrosa import model
 from hollyrosa.model.booking_couch import getVisitingGroupByBoknr
 from tg.configuration import AppConfig
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 
 base_config = AppConfig()
 base_config.renderers = ['kajiki']
@@ -57,10 +59,20 @@ base_config[
 from tg.configuration.auth import TGAuthMetadata
 
 def validate_password(user, password):
-    h = hashlib.sha256('gninyd'.encode('utf-8'))  # salt
-    h.update(password.encode('utf-8'))
-    c = h.hexdigest()
-    return user['password'] == c
+    password_hasher = PasswordHasher()
+
+    if 'argon2_hash' in user:
+        try:
+            password_hasher.verify(user['argon2_hash'], password)
+            return True
+        except VerifyMismatchError:
+            return False
+
+    else:
+        h = hashlib.sha256('gninyd'.encode('utf-8'))  # salt
+        h.update(password.encode('utf-8'))
+        c = h.hexdigest()
+        return user['password'] == c
 
 # This tells to TurboGears how to retrieve the data for your user
 class ApplicationAuthMetadata(TGAuthMetadata):

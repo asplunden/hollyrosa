@@ -34,6 +34,7 @@ from tg import expose, require, request, redirect, validate, abort
 # ...this can later be moved to the VisitingGroup module whenever it is broken out
 from tg import tmpl_context
 from tg.predicates import Any
+from argon2 import PasswordHasher
 
 log = logging.getLogger(__name__)
 __all__ = ['User']
@@ -163,9 +164,13 @@ class User(BaseController):
         s = getCouchDBDocument(getHollyCouch(), user_id, doc_type='user')  # , doc_subtype=None)
 
         # todo make salt part of development.ini
-        h = hashlib.sha256('gninyd')  # salt # TODO: read from AppConfig / tg.config
-        h.update(password)
+        h = hashlib.sha256('gninyd'.encode('utf-8'))  # salt # TODO: read from AppConfig / tg.config
+        h.update(password.encode('utf-8'))
         c = h.hexdigest()
         s['password'] = c
+
+        # set argon2 password
+        password_hasher = PasswordHasher()
+        s['argon2_hash'] = password_hasher.hash(password)
         getHollyCouch()[user_id] = s
         raise redirect('show')
