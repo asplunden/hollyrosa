@@ -95,8 +95,13 @@ class VisitingGroup(BaseController):
 
         elif b[0].booking_day is None:
             return 1
-
-        return cmp(a[0].booking_day['date'], b[0].booking_day['date'])
+        else:
+            if a[0].booking_day['date'] > b[0].booking_day['date']:
+                return 1
+            elif a[0].booking_day['date'] < b[0].booking_day['date']:
+                return -1
+            else:
+                return 0
 
     def fn_cmp_booking_timestamps(self, a, b):
         if a.booking_day is None:
@@ -113,7 +118,12 @@ class VisitingGroup(BaseController):
         elif a.booking_day['date'] < b.booking_day['date']:
             return -1
         else:
-            return cmp(a.slot['time_from'], b.slot['time_from'])
+            if a.slot['time_from'] > b.slot['time_from']:
+                return 1
+            elif a.slot['time_from'] < b.slot['time_from']:
+                return -1
+            else:
+                return 0
 
     def get_slot_map_of_booking_day(self, booking_day_slot_map, tmp_booking_day, subtype='program'):
 
@@ -182,7 +192,7 @@ class VisitingGroup(BaseController):
             used_activities_keys[b['activity_id']] = 1
             used_activities_keys[activities[b['activity_id']]['activity_group_id']] = 1
 
-            if 'ooking_day_id' in b:
+            if 'booking_day_id' in b:
                 booking_day_id = b['booking_day_id']
                 if '' != booking_day_id:
                     tmp_booking_day = booking_day_map[booking_day_id]
