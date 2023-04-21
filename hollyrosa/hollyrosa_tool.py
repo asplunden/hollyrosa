@@ -2,7 +2,7 @@
 """
 hollyrosa_tool.py
 
-Copyright 2010-2020 Martin Eliasson
+Copyright 2010-2023 Martin Eliasson
 
 This file is part of Hollyrosa
 
@@ -118,10 +118,10 @@ if False: # True
             pos += 1
 
 if True:
-    pos = 4600
-    school_dates_spring = dateRange('2022-05-01', '2022-06-11', format='%Y-%m-%d')
-    summer_dates = dateRange('2022-06-12', '2022-08-21', format='%Y-%m-%d')
-    school_dates_autumn = dateRange('2022-08-22', '2022-10-31', format='%Y-%m-%d')
+    pos = 4800
+    school_dates_spring = dateRange('2023-05-01', '2023-06-10', format='%Y-%m-%d')
+    summer_dates = dateRange('2023-06-11', '2023-08-20', format='%Y-%m-%d')
+    school_dates_autumn = dateRange('2023-08-21', '2023-10-31', format='%Y-%m-%d')
 
     worklist = [(school_dates_spring,  'school_schema.2019'), (summer_dates, 'summer_schema.2019'), (school_dates_autumn, 'school_schema.2019')]
     

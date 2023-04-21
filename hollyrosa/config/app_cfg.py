@@ -32,7 +32,7 @@ base_config.dispatch_path_translator = True
 base_config.prefer_toscawidgets2 = True
 
 base_config.package = hollyrosa
-base_config.custom_tw2_config['script_name'] = '/hollyrosa'  # hollyrosa in production
+base_config.custom_tw2_config['script_name'] = '/hollyrosa'  # hollyrosa in production, hollyrosa_test otherwise
 
 # Enable json in expose
 base_config.renderers.append('json')
